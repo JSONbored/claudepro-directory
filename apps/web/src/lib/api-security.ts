@@ -9,8 +9,8 @@ const ALLOWED_ORIGIN_PATTERNS = [
   /^https:\/\/heyclau\.de$/i,
   /^https:\/\/dev\.heyclau\.de$/i,
   /^https:\/\/[a-z0-9-]+\.zeronode\.workers\.dev$/i,
-  /^http:\/\/localhost:(3000|8787)$/i,
-  /^http:\/\/127\.0\.0\.1:(3000|8787)$/i
+  /^http:\/\/localhost:\d+$/i,
+  /^http:\/\/127\.0\.0\.1:\d+$/i,
 ];
 
 export function getClientIp(request: Request) {
@@ -27,12 +27,55 @@ export function isAllowedOrigin(request: Request) {
   return ALLOWED_ORIGIN_PATTERNS.some((pattern) => pattern.test(origin));
 }
 
-export function hasBodyWithinLimit(request: Request, maxBytes: number) {
+export class BodyTooLargeError extends Error {
+  constructor() {
+    super("Request body exceeded configured byte limit");
+    this.name = "BodyTooLargeError";
+  }
+}
+
+function parseContentLength(request: Request) {
   const header = request.headers.get("content-length");
-  if (!header) return true;
+  if (!header) return null;
   const parsed = Number(header);
-  if (!Number.isFinite(parsed) || parsed < 0) return false;
-  return parsed <= maxBytes;
+  if (!Number.isFinite(parsed) || parsed < 0) return Number.POSITIVE_INFINITY;
+  return parsed;
+}
+
+export async function readRequestTextWithinLimit(
+  request: Request,
+  maxBytes: number,
+) {
+  const declaredLength = parseContentLength(request);
+  if (declaredLength !== null && declaredLength > maxBytes) {
+    throw new BodyTooLargeError();
+  }
+
+  if (!request.body) return "";
+
+  const reader = request.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let receivedBytes = 0;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    receivedBytes += value.byteLength;
+    if (receivedBytes > maxBytes) {
+      await reader.cancel();
+      throw new BodyTooLargeError();
+    }
+    chunks.push(value);
+  }
+
+  const buffer = new Uint8Array(receivedBytes);
+  let offset = 0;
+  for (const chunk of chunks) {
+    buffer.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+
+  return new TextDecoder().decode(buffer);
 }
 
 export function hasJsonContentType(request: Request) {

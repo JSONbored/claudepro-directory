@@ -1,0 +1,459 @@
+{
+  "schemaVersion": 1,
+  "key": "skills:rest-api-client-harness",
+  "entry": {
+    "category": "skills",
+    "slug": "rest-api-client-harness",
+    "title": "REST API Client Harness Skill",
+    "description": "Explore and script against REST APIs with comprehensive authentication support (API keys, OAuth 2.0, JWT Bearer tokens, Basic Auth), pagination utilities (cursor-based, offset-based, page-based), retry logic with exponential backoff and jitter, error handling for HTTP status codes, rate limiting with Retry-After hea...",
+    "seoTitle": "REST API Client Harness Skill",
+    "seoDescription": "Explore and script against REST APIs with comprehensive authentication support (API keys, OAuth 2.0, JWT Bearer tokens, Basic Auth), pagination utilities (cu...",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2025-10-15",
+    "contentUpdatedAt": "2026-04-27T02:57:15-06:00",
+    "tags": [
+      "rest",
+      "http",
+      "api",
+      "curl",
+      "node"
+    ],
+    "keywords": [
+      "api",
+      "claude",
+      "client",
+      "curl",
+      "development",
+      "harness",
+      "http",
+      "node",
+      "rest",
+      "skills",
+      "tools",
+      "heyclaude"
+    ],
+    "readingTime": 6,
+    "difficultyScore": 100,
+    "documentationUrl": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview",
+    "cardDescription": "Explore and script against REST APIs with comprehensive authentication support (API keys, OAuth 2.0, JWT Bearer tokens, Basic Auth), pagi...",
+    "installable": true,
+    "installCommand": "curl -L https://heyclau.de/downloads/skills/rest-api-client-harness.zip -o rest-api-client-harness.zip && unzip -o rest-api-client-harness.zip -d ./rest-api-client-harness",
+    "usageSnippet": "Claude can interact with REST APIs: make requests, handle authentication (API keys, OAuth, JWT), paginate through results, handle rate limits with retries, and process responses. Build API integration scripts, test endpoints, and extract data from web services.",
+    "copySnippet": "import { setTimeout as delay } from 'node:timers/promises';\nimport { fetch } from 'undici';\n\nasync function fetchAll(url, token) {\n  let next = url;\n  const items = [];\n  while (next) {\n    const res = await fetch(next, { headers: { Authorization: `Bearer ${token}` } });\n    if (!res.ok) {\n      if (res.status >= 500) { await delay(1000); continue; }\n      throw new Error(`HTTP ${res.status}`);\n    }\n    const data = await res.json();\n    items.push(...data.items);\n    next = data.next;\n  }\n  return items;\n}",
+    "skillType": "general",
+    "skillLevel": "advanced",
+    "verificationStatus": "draft",
+    "verifiedAt": "2025-10-15",
+    "retrievalSources": [
+      "https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview"
+    ],
+    "testedPlatforms": [
+      "Claude",
+      "Codex",
+      "OpenClaw",
+      "Cursor",
+      "Windsurf",
+      "Gemini"
+    ],
+    "prerequisites": [
+      "Node.js 18+",
+      "undici or axios HTTP client library",
+      "API credentials (if required)",
+      "Network access for API requests",
+      "Network access to target API endpoints for making HTTP requests and testing API functionality",
+      "API documentation or OpenAPI/Swagger specification (optional but recommended) for automatic client generation and type safety"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/skills/rest-api-client-harness.zip",
+    "skillPackage": {
+      "format": "agent-skill",
+      "entrypoint": "SKILL.md",
+      "downloadUrl": "/downloads/skills/rest-api-client-harness.zip",
+      "sha256": "7ca26f7e32710870302ff983bbd1f2b443b756a67af553ece30441be5e3b329c"
+    },
+    "platformCompatibility": [
+      {
+        "platform": "Claude",
+        "supportLevel": "native-skill",
+        "installPath": ".claude/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-15"
+      },
+      {
+        "platform": "Codex",
+        "supportLevel": "native-skill",
+        "installPath": ".agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-15"
+      },
+      {
+        "platform": "Windsurf",
+        "supportLevel": "native-skill",
+        "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-15"
+      },
+      {
+        "platform": "Gemini",
+        "supportLevel": "native-skill",
+        "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-15"
+      },
+      {
+        "platform": "Cursor",
+        "supportLevel": "adapter",
+        "installPath": ".cursor/rules/<skill-name>.mdc",
+        "adapterPath": "/data/skill-adapters/cursor/rest-api-client-harness.mdc",
+        "verifiedAt": "2025-10-15"
+      },
+      {
+        "platform": "Generic AGENTS",
+        "supportLevel": "manual-context",
+        "installPath": "AGENTS.md or tool-specific context file",
+        "verifiedAt": "2025-10-15"
+      }
+    ],
+    "downloadTrust": "first-party",
+    "downloadSha256": "7ca26f7e32710870302ff983bbd1f2b443b756a67af553ece30441be5e3b329c",
+    "body": "## What This Skill Enables\n\nClaude can interact with REST APIs: make requests, handle authentication (API keys, OAuth, JWT), paginate through results, handle rate limits with retries, and process responses. Build API integration scripts, test endpoints, and extract data from web services.\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Prerequisites\n\n**Required:**\n\n- Claude Pro subscription\n- Code Interpreter feature enabled\n- API credentials (if required by the API)\n\n**What Claude handles:**\n\n- Installing HTTP libraries (requests, axios, fetch)\n- Making authenticated requests\n- Handling pagination\n- Retry logic with exponential backoff\n- Response parsing and data extraction\n- Error handling\n\n## How to Use This Skill\n\n### Simple API Request\n\n**Prompt:** \"Fetch data from this REST API endpoint: https://api.example.com/users\nUse API key: [your-key]\nShow me the first 10 results.\"\n\nClaude will:\n\n1. Make GET request with auth header\n2. Parse JSON response\n3. Extract and display data\n4. Handle errors gracefully\n\n### Paginated Data Extraction\n\n**Prompt:** \"Fetch all pages from this paginated API:\nURL: https://api.example.com/items\nPagination: cursor-based (next_cursor field)\nAPI Key: [your-key]\nSave all results to items.json\"\n\nClaude will:\n\n1. Make first request\n2. Loop through pages using cursor\n3. Collect all results\n4. Save to JSON file\n5. Report total count\n\n### POST Request with Data\n\n**Prompt:** \"Create a new user via POST request:\nURL: https://api.example.com/users\nPayload: {name: 'John Doe', email: 'john@example.com'}\nAuth: Bearer token [your-token]\nShow me the response.\"\n\nClaude will:\n\n1. Prepare POST request\n2. Set headers (auth, content-type)\n3. Send JSON payload\n4. Parse response\n5. Display result or error\n\n### Batch Operations\n\n**Prompt:** \"Upload all these records to the API:\n\n- Read from users.csv\n- For each row, POST to /users endpoint\n- Handle rate limits (max 10 requests/second)\n- Log successes and failures\n- Retry failures once\"\n\nClaude will:\n\n1. Read CSV data\n2. Iterate through rows\n3. Make POST requests with rate limiting\n4. Retry on failures\n5. Generate success/failure report\n\n## Common Workflows\n\n### API Testing & Exploration\n\n```\n\"Test this API endpoint:\n1. Make GET request to /api/products\n2. Check status code and headers\n3. Validate JSON response schema\n4. Show sample of first 3 records\n5. Report if any fields are null/missing\"\n```\n\n### Data Migration\n\n```\n\"Migrate data from API A to API B:\n1. Fetch all records from source API (paginated)\n2. Transform to target API format\n3. POST to destination API\n4. Handle rate limits (5 req/sec)\n5. Log migration progress and errors\nSave unmigrated records to errors.json\"\n```\n\n### Webhook Testing\n\n```\n\"Test this webhook:\n1. POST sample payload to webhook URL\n2. Check response status\n3. Validate response format\n4. Test with invalid payload\n5. Report all results\"\n```\n\n### API Monitoring\n\n```\n\"Monitor API health:\n1. Hit /health endpoint every minute for 10 minutes\n2. Record response time and status\n3. Alert if response time > 1 second\n4. Create uptime report\n5. Plot response times\"\n```\n\n## Authentication Methods\n\n### API Key Authentication\n\n- Header: `X-API-Key: your-key`\n- Query parameter: `?api_key=your-key`\n- Custom header format\n\n### Bearer Token (JWT)\n\n- Header: `Authorization: Bearer your-token`\n- Token refresh handling\n- Expiration detection\n\n### Basic Authentication\n\n- Header: `Authorization: Basic base64(user:pass)`\n- Credentials encoding\n\n### OAuth 2.0\n\n- Client credentials flow\n- Authorization code flow\n- Token refresh logic\n\n## Advanced Features\n\n### Rate Limiting & Retries\n\n- Respect rate limit headers\n- Exponential backoff\n- Jitter for retry timing\n- Max retry attempts\n\n### Response Handling\n\n- JSON parsing\n- XML/HTML parsing\n- Binary data (images, files)\n- Streaming responses\n\n### Error Handling\n\n- HTTP status code detection\n- Custom error messages\n- Validation errors\n- Network timeouts\n\n### Data Transformation\n\n- JSON to CSV conversion\n- Field mapping and renaming\n- Data type coercion\n- Filtering and aggregation\n\n## Tips for Best Results\n\n1. **Provide API Docs**: Share API documentation link or describe endpoints\n2. **Authentication**: Be clear about auth method and provide credentials securely\n3. **Rate Limits**: Mention any known rate limits (\"max 100 requests/minute\")\n4. **Pagination**: Describe pagination style (cursor, offset, page-based)\n5. **Error Handling**: Specify how to handle failures (\"retry 3 times then skip\")\n6. **Data Volume**: Estimate how many requests (\"expect 1000 records across 10 pages\")\n7. **Response Format**: Mention expected format (JSON, XML, etc.)\n\n## Common Patterns\n\n### Cursor-Based Pagination\n\n```python\nurl = \"https://api.example.com/items\"\nall_items = []\ncursor = None\nwhile True:\n    params = {\"cursor\": cursor} if cursor else {}\n    response = requests.get(url, params=params)\n    data = response.json()\n    all_items.extend(data[\"items\"])\n    cursor = data.get(\"next_cursor\")\n    if not cursor:\n        break\n```\n\n### Retry with Exponential Backoff\n\n```python\nimport time\nmax_retries = 3\nfor attempt in range(max_retries):\n    try:\n        response = requests.get(url)\n        response.raise_for_status()\n        break\n    except requests.exceptions.RequestException:\n        if attempt < max_retries - 1:\n            wait = 2 ** attempt  # 1s, 2s, 4s\n            time.sleep(wait)\n        else:\n            raise\n```\n\n## Troubleshooting\n\n**Issue:** Authentication failing\n**Solution:** Double-check auth method and credentials. Show Claude the API docs for auth section.\n\n**Issue:** Rate limit errors (429)\n**Solution:** \"Add retry logic with exponential backoff\" or \"Reduce concurrent requests to 5/second\"\n\n**Issue:** Response parsing errors\n**Solution:** \"Show me raw response first\" then describe expected structure\n\n**Issue:** Pagination not working\n**Solution:** Clarify pagination method: \"Use offset pagination starting at 0, increment by 100\"\n\n**Issue:** Timeouts on large requests\n**Solution:** \"Increase timeout to 60 seconds\" or \"Fetch in smaller batches\"\n\n**Issue:** CORS errors (in browser context)\n**Solution:** Note: Code Interpreter runs server-side, no CORS issues\n\n## Learn More\n\n- [HTTP Methods](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods) - GET, POST, PUT, DELETE, etc.\n- [HTTP Status Codes](https://httpstatuses.com/) - Understanding response codes\n- [REST API Best Practices](https://restfulapi.net/) - API design principles\n- [Postman Learning](https://learning.postman.com/) - API testing tutorials\n- [Python Requests](https://requests.readthedocs.io/) - Popular HTTP library\n\n## Features\n\n- Token management patterns (API keys, OAuth 2.0, JWT Bearer tokens, Basic Auth)\n- Pagination utilities (cursor-based, offset-based, page-based pagination)\n- Retry with exponential backoff and jitter for rate limits and transient errors\n- Typed responses (TypeScript) with request/response type safety\n- Rate limiting with Retry-After header support and request throttling\n- Error handling for HTTP status codes, network timeouts, and validation errors\n- Response parsing (JSON, XML, HTML, binary data) with streaming support\n- Batch operations with concurrent request management and progress tracking\n\n## Use Cases\n\n- ETL from third-party APIs with data transformation and validation\n- Backfills and migrations with pagination and error recovery\n- Monitoring scripts with health checks and uptime tracking\n- API testing and exploration with schema validation\n- Webhook testing and validation with payload verification\n- Data synchronization between multiple APIs with conflict resolution",
+    "sections": [
+      {
+        "title": "What This Skill Enables",
+        "id": "what-this-skill-enables",
+        "markdown": "Claude can interact with REST APIs: make requests, handle authentication (API keys, OAuth, JWT), paginate through results, handle rate limits with retries, and process responses. Build API integration scripts, test endpoints, and extract data from web services.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Compatibility",
+        "id": "compatibility",
+        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Prerequisites",
+        "id": "prerequisites",
+        "markdown": "**Required:**\n\n- Claude Pro subscription\n- Code Interpreter feature enabled\n- API credentials (if required by the API)\n\n**What Claude handles:**\n\n- Installing HTTP libraries (requests, axios, fetch)\n- Making authenticated requests\n- Handling pagination\n- Retry logic with exponential backoff\n- Response parsing and data extraction\n- Error handling",
+        "codeBlocks": []
+      },
+      {
+        "title": "How to Use This Skill",
+        "id": "how-to-use-this-skill",
+        "markdown": "### Simple API Request\n\n**Prompt:** \"Fetch data from this REST API endpoint: https://api.example.com/users\nUse API key: [your-key]\nShow me the first 10 results.\"\n\nClaude will:\n\n1. Make GET request with auth header\n2. Parse JSON response\n3. Extract and display data\n4. Handle errors gracefully\n\n### Paginated Data Extraction\n\n**Prompt:** \"Fetch all pages from this paginated API:\nURL: https://api.example.com/items\nPagination: cursor-based (next_cursor field)\nAPI Key: [your-key]\nSave all results to items.json\"\n\nClaude will:\n\n1. Make first request\n2. Loop through pages using cursor\n3. Collect all results\n4. Save to JSON file\n5. Report total count\n\n### POST Request with Data\n\n**Prompt:** \"Create a new user via POST request:\nURL: https://api.example.com/users\nPayload: {name: 'John Doe', email: 'john@example.com'}\nAuth: Bearer token [your-token]\nShow me the response.\"\n\nClaude will:\n\n1. Prepare POST request\n2. Set headers (auth, content-type)\n3. Send JSON payload\n4. Parse response\n5. Display result or error\n\n### Batch Operations\n\n**Prompt:** \"Upload all these records to the API:\n\n- Read from users.csv\n- For each row, POST to /users endpoint\n- Handle rate limits (max 10 requests/second)\n- Log successes and failures\n- Retry failures once\"\n\nClaude will:\n\n1. Read CSV data\n2. Iterate through rows\n3. Make POST requests with rate limiting\n4. Retry on failures\n5. Generate success/failure report",
+        "codeBlocks": []
+      },
+      {
+        "title": "Common Workflows",
+        "id": "common-workflows",
+        "markdown": "### API Testing & Exploration\n\n```\n\"Test this API endpoint:\n1. Make GET request to /api/products\n2. Check status code and headers\n3. Validate JSON response schema\n4. Show sample of first 3 records\n5. Report if any fields are null/missing\"\n```\n\n### Data Migration\n\n```\n\"Migrate data from API A to API B:\n1. Fetch all records from source API (paginated)\n2. Transform to target API format\n3. POST to destination API\n4. Handle rate limits (5 req/sec)\n5. Log migration progress and errors\nSave unmigrated records to errors.json\"\n```\n\n### Webhook Testing\n\n```\n\"Test this webhook:\n1. POST sample payload to webhook URL\n2. Check response status\n3. Validate response format\n4. Test with invalid payload\n5. Report all results\"\n```\n\n### API Monitoring\n\n```\n\"Monitor API health:\n1. Hit /health endpoint every minute for 10 minutes\n2. Record response time and status\n3. Alert if response time > 1 second\n4. Create uptime report\n5. Plot response times\"\n```",
+        "codeBlocks": [
+          {
+            "language": "text",
+            "code": "\"Test this API endpoint:\n1. Make GET request to /api/products\n2. Check status code and headers\n3. Validate JSON response schema\n4. Show sample of first 3 records\n5. Report if any fields are null/missing\""
+          },
+          {
+            "language": "text",
+            "code": "\"Migrate data from API A to API B:\n1. Fetch all records from source API (paginated)\n2. Transform to target API format\n3. POST to destination API\n4. Handle rate limits (5 req/sec)\n5. Log migration progress and errors\nSave unmigrated records to errors.json\""
+          },
+          {
+            "language": "text",
+            "code": "\"Test this webhook:\n1. POST sample payload to webhook URL\n2. Check response status\n3. Validate response format\n4. Test with invalid payload\n5. Report all results\""
+          },
+          {
+            "language": "text",
+            "code": "\"Monitor API health:\n1. Hit /health endpoint every minute for 10 minutes\n2. Record response time and status\n3. Alert if response time > 1 second\n4. Create uptime report\n5. Plot response times\""
+          }
+        ]
+      },
+      {
+        "title": "Authentication Methods",
+        "id": "authentication-methods",
+        "markdown": "### API Key Authentication\n\n- Header: `X-API-Key: your-key`\n- Query parameter: `?api_key=your-key`\n- Custom header format\n\n### Bearer Token (JWT)\n\n- Header: `Authorization: Bearer your-token`\n- Token refresh handling\n- Expiration detection\n\n### Basic Authentication\n\n- Header: `Authorization: Basic base64(user:pass)`\n- Credentials encoding\n\n### OAuth 2.0\n\n- Client credentials flow\n- Authorization code flow\n- Token refresh logic",
+        "codeBlocks": []
+      },
+      {
+        "title": "Advanced Features",
+        "id": "advanced-features",
+        "markdown": "### Rate Limiting & Retries\n\n- Respect rate limit headers\n- Exponential backoff\n- Jitter for retry timing\n- Max retry attempts\n\n### Response Handling\n\n- JSON parsing\n- XML/HTML parsing\n- Binary data (images, files)\n- Streaming responses\n\n### Error Handling\n\n- HTTP status code detection\n- Custom error messages\n- Validation errors\n- Network timeouts\n\n### Data Transformation\n\n- JSON to CSV conversion\n- Field mapping and renaming\n- Data type coercion\n- Filtering and aggregation",
+        "codeBlocks": []
+      },
+      {
+        "title": "Tips for Best Results",
+        "id": "tips-for-best-results",
+        "markdown": "1. **Provide API Docs**: Share API documentation link or describe endpoints\n2. **Authentication**: Be clear about auth method and provide credentials securely\n3. **Rate Limits**: Mention any known rate limits (\"max 100 requests/minute\")\n4. **Pagination**: Describe pagination style (cursor, offset, page-based)\n5. **Error Handling**: Specify how to handle failures (\"retry 3 times then skip\")\n6. **Data Volume**: Estimate how many requests (\"expect 1000 records across 10 pages\")\n7. **Response Format**: Mention expected format (JSON, XML, etc.)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Common Patterns",
+        "id": "common-patterns",
+        "markdown": "### Cursor-Based Pagination\n\n```python\nurl = \"https://api.example.com/items\"\nall_items = []\ncursor = None\nwhile True:\n    params = {\"cursor\": cursor} if cursor else {}\n    response = requests.get(url, params=params)\n    data = response.json()\n    all_items.extend(data[\"items\"])\n    cursor = data.get(\"next_cursor\")\n    if not cursor:\n        break\n```\n\n### Retry with Exponential Backoff\n\n```python\nimport time\nmax_retries = 3\nfor attempt in range(max_retries):\n    try:\n        response = requests.get(url)\n        response.raise_for_status()\n        break\n    except requests.exceptions.RequestException:\n        if attempt < max_retries - 1:\n            wait = 2 ** attempt  # 1s, 2s, 4s\n            time.sleep(wait)\n        else:\n            raise\n```",
+        "codeBlocks": [
+          {
+            "language": "python",
+            "code": "url = \"https://api.example.com/items\"\nall_items = []\ncursor = None\nwhile True:\n    params = {\"cursor\": cursor} if cursor else {}\n    response = requests.get(url, params=params)\n    data = response.json()\n    all_items.extend(data[\"items\"])\n    cursor = data.get(\"next_cursor\")\n    if not cursor:\n        break"
+          },
+          {
+            "language": "python",
+            "code": "import time\nmax_retries = 3\nfor attempt in range(max_retries):\n    try:\n        response = requests.get(url)\n        response.raise_for_status()\n        break\n    except requests.exceptions.RequestException:\n        if attempt < max_retries - 1:\n            wait = 2 ** attempt  # 1s, 2s, 4s\n            time.sleep(wait)\n        else:\n            raise"
+          }
+        ]
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "**Issue:** Authentication failing\n**Solution:** Double-check auth method and credentials. Show Claude the API docs for auth section.\n\n**Issue:** Rate limit errors (429)\n**Solution:** \"Add retry logic with exponential backoff\" or \"Reduce concurrent requests to 5/second\"\n\n**Issue:** Response parsing errors\n**Solution:** \"Show me raw response first\" then describe expected structure\n\n**Issue:** Pagination not working\n**Solution:** Clarify pagination method: \"Use offset pagination starting at 0, increment by 100\"\n\n**Issue:** Timeouts on large requests\n**Solution:** \"Increase timeout to 60 seconds\" or \"Fetch in smaller batches\"\n\n**Issue:** CORS errors (in browser context)\n**Solution:** Note: Code Interpreter runs server-side, no CORS issues",
+        "codeBlocks": []
+      },
+      {
+        "title": "Learn More",
+        "id": "learn-more",
+        "markdown": "- [HTTP Methods](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods) - GET, POST, PUT, DELETE, etc.\n- [HTTP Status Codes](https://httpstatuses.com/) - Understanding response codes\n- [REST API Best Practices](https://restfulapi.net/) - API design principles\n- [Postman Learning](https://learning.postman.com/) - API testing tutorials\n- [Python Requests](https://requests.readthedocs.io/) - Popular HTTP library",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Token management patterns (API keys, OAuth 2.0, JWT Bearer tokens, Basic Auth)\n- Pagination utilities (cursor-based, offset-based, page-based pagination)\n- Retry with exponential backoff and jitter for rate limits and transient errors\n- Typed responses (TypeScript) with request/response type safety\n- Rate limiting with Retry-After header support and request throttling\n- Error handling for HTTP status codes, network timeouts, and validation errors\n- Response parsing (JSON, XML, HTML, binary data) with streaming support\n- Batch operations with concurrent request management and progress tracking",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- ETL from third-party APIs with data transformation and validation\n- Backfills and migrations with pagination and error recovery\n- Monitoring scripts with health checks and uptime tracking\n- API testing and exploration with schema validation\n- Webhook testing and validation with payload verification\n- Data synchronization between multiple APIs with conflict resolution",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "What This Skill Enables",
+        "id": "what-this-skill-enables"
+      },
+      {
+        "depth": 2,
+        "text": "Compatibility",
+        "id": "compatibility"
+      },
+      {
+        "depth": 3,
+        "text": "Native",
+        "id": "native"
+      },
+      {
+        "depth": 3,
+        "text": "Manual Adaptation",
+        "id": "manual-adaptation"
+      },
+      {
+        "depth": 2,
+        "text": "Prerequisites",
+        "id": "prerequisites"
+      },
+      {
+        "depth": 2,
+        "text": "How to Use This Skill",
+        "id": "how-to-use-this-skill"
+      },
+      {
+        "depth": 3,
+        "text": "Simple API Request",
+        "id": "simple-api-request"
+      },
+      {
+        "depth": 3,
+        "text": "Paginated Data Extraction",
+        "id": "paginated-data-extraction"
+      },
+      {
+        "depth": 3,
+        "text": "POST Request with Data",
+        "id": "post-request-with-data"
+      },
+      {
+        "depth": 3,
+        "text": "Batch Operations",
+        "id": "batch-operations"
+      },
+      {
+        "depth": 2,
+        "text": "Common Workflows",
+        "id": "common-workflows"
+      },
+      {
+        "depth": 3,
+        "text": "API Testing & Exploration",
+        "id": "api-testing-exploration"
+      },
+      {
+        "depth": 3,
+        "text": "Data Migration",
+        "id": "data-migration"
+      },
+      {
+        "depth": 3,
+        "text": "Webhook Testing",
+        "id": "webhook-testing"
+      },
+      {
+        "depth": 3,
+        "text": "API Monitoring",
+        "id": "api-monitoring"
+      },
+      {
+        "depth": 2,
+        "text": "Authentication Methods",
+        "id": "authentication-methods"
+      },
+      {
+        "depth": 3,
+        "text": "API Key Authentication",
+        "id": "api-key-authentication"
+      },
+      {
+        "depth": 3,
+        "text": "Bearer Token (JWT)",
+        "id": "bearer-token-jwt"
+      },
+      {
+        "depth": 3,
+        "text": "Basic Authentication",
+        "id": "basic-authentication"
+      },
+      {
+        "depth": 3,
+        "text": "OAuth 2.0",
+        "id": "oauth-20"
+      },
+      {
+        "depth": 2,
+        "text": "Advanced Features",
+        "id": "advanced-features"
+      },
+      {
+        "depth": 3,
+        "text": "Rate Limiting & Retries",
+        "id": "rate-limiting-retries"
+      },
+      {
+        "depth": 3,
+        "text": "Response Handling",
+        "id": "response-handling"
+      },
+      {
+        "depth": 3,
+        "text": "Error Handling",
+        "id": "error-handling"
+      },
+      {
+        "depth": 3,
+        "text": "Data Transformation",
+        "id": "data-transformation"
+      },
+      {
+        "depth": 2,
+        "text": "Tips for Best Results",
+        "id": "tips-for-best-results"
+      },
+      {
+        "depth": 2,
+        "text": "Common Patterns",
+        "id": "common-patterns"
+      },
+      {
+        "depth": 3,
+        "text": "Cursor-Based Pagination",
+        "id": "cursor-based-pagination"
+      },
+      {
+        "depth": 3,
+        "text": "Retry with Exponential Backoff",
+        "id": "retry-with-exponential-backoff"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 2,
+        "text": "Learn More",
+        "id": "learn-more"
+      },
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "text",
+        "code": "\"Test this API endpoint:\n1. Make GET request to /api/products\n2. Check status code and headers\n3. Validate JSON response schema\n4. Show sample of first 3 records\n5. Report if any fields are null/missing\""
+      },
+      {
+        "language": "text",
+        "code": "\"Migrate data from API A to API B:\n1. Fetch all records from source API (paginated)\n2. Transform to target API format\n3. POST to destination API\n4. Handle rate limits (5 req/sec)\n5. Log migration progress and errors\nSave unmigrated records to errors.json\""
+      },
+      {
+        "language": "text",
+        "code": "\"Test this webhook:\n1. POST sample payload to webhook URL\n2. Check response status\n3. Validate response format\n4. Test with invalid payload\n5. Report all results\""
+      },
+      {
+        "language": "text",
+        "code": "\"Monitor API health:\n1. Hit /health endpoint every minute for 10 minutes\n2. Record response time and status\n3. Alert if response time > 1 second\n4. Create uptime report\n5. Plot response times\""
+      },
+      {
+        "language": "python",
+        "code": "url = \"https://api.example.com/items\"\nall_items = []\ncursor = None\nwhile True:\n    params = {\"cursor\": cursor} if cursor else {}\n    response = requests.get(url, params=params)\n    data = response.json()\n    all_items.extend(data[\"items\"])\n    cursor = data.get(\"next_cursor\")\n    if not cursor:\n        break"
+      },
+      {
+        "language": "python",
+        "code": "import time\nmax_retries = 3\nfor attempt in range(max_retries):\n    try:\n        response = requests.get(url)\n        response.raise_for_status()\n        break\n    except requests.exceptions.RequestException:\n        if attempt < max_retries - 1:\n            wait = 2 ** attempt  # 1s, 2s, 4s\n            time.sleep(wait)\n        else:\n            raise"
+      }
+    ],
+    "filePath": "content/skills/rest-api-client-harness.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/rest-api-client-harness.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": true,
+    "packageTrust": "first-party",
+    "packageChecksum": "7ca26f7e32710870302ff983bbd1f2b443b756a67af553ece30441be5e3b329c",
+    "checksumPresent": true,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/rest-api-client-harness.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2025-10-15",
+    "adapterGenerated": true,
+    "platforms": [
+      "Claude",
+      "Codex",
+      "Windsurf",
+      "Gemini",
+      "Cursor",
+      "Generic AGENTS"
+    ],
+    "supportLevels": [
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "adapter",
+      "manual-context"
+    ]
+  }
+}

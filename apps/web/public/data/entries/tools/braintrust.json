@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "key": "tools:braintrust",
+  "entry": {
+    "category": "tools",
+    "slug": "braintrust",
+    "title": "Braintrust",
+    "description": "Evaluation, prompt experimentation, logging, and data platform for production AI application development.",
+    "seoTitle": "Braintrust AI evaluation and logging platform",
+    "seoDescription": "Braintrust supports AI evaluation, prompt experiments, logging, and data workflows for production AI applications. HeyClaude adds source links, install...",
+    "author": "Braintrust",
+    "dateAdded": "2026-04-27",
+    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+    "tags": [
+      "evaluation",
+      "prompt-testing"
+    ],
+    "keywords": [
+      "ai evaluation platform",
+      "prompt experiments",
+      "evaluation",
+      "prompt-testing",
+      "tools",
+      "claude",
+      "heyclaude",
+      "braintrust"
+    ],
+    "documentationUrl": "https://www.braintrust.dev/docs",
+    "websiteUrl": "https://www.braintrust.dev",
+    "brandName": "Braintrust",
+    "brandDomain": "braintrust.dev",
+    "brandIconUrl": "/api/brand-assets/icon/braintrust.dev",
+    "brandAssetSource": "brandfetch",
+    "pricingModel": "freemium",
+    "disclosure": "editorial",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Web",
+    "cardDescription": "Evaluation and logging platform for AI applications.",
+    "installable": false,
+    "hasPrerequisites": false,
+    "hasTroubleshooting": false,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Editorial notes\n\nBraintrust is relevant when teams need structured evaluation, experiment tracking, and logging for AI product quality.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+    "sections": [
+      {
+        "title": "Editorial notes",
+        "id": "editorial-notes",
+        "markdown": "Braintrust is relevant when teams need structured evaluation, experiment tracking, and logging for AI product quality.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Disclosure",
+        "id": "disclosure",
+        "markdown": "Editorial listing. No paid placement or affiliate link is used.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Editorial notes",
+        "id": "editorial-notes"
+      },
+      {
+        "depth": 2,
+        "text": "Disclosure",
+        "id": "disclosure"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/tools/braintrust.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/braintrust.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 3,
+    "sourceUrls": [
+      "https://www.braintrust.dev/docs",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/braintrust.mdx",
+      "https://www.braintrust.dev"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

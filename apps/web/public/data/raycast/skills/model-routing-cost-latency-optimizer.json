@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 2,
+  "key": "skills:model-routing-cost-latency-optimizer",
+  "category": "skills",
+  "slug": "model-routing-cost-latency-optimizer",
+  "title": "Model Routing Cost and Latency Optimizer Skill",
+  "author": "JSONbored",
+  "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/model-routing-cost-latency-optimizer.zip -o model-routing-cost-latency-optimizer.zip && unzip -o model-routing-cost-latency-optimizer.zip -d ./model-routing-cost-latency-optimizer\n\nUsage:\nUse this skill to reduce token spend and response times with guardrails that preserve answer quality.\n\nAsset:\n# Trigger\n\"Apply model routing cost/latency optimizer skill to this workflow.\"\n\n# Required output\n1) Current cost + latency baseline\n2) Candidate routing policy (fast/default/high-quality tiers)\n3) Quality regression checks and rollback triggers\n4) Expected savings and SLO impact",
+  "detailMarkdown": "# Model Routing Cost and Latency Optimizer Skill\n\nDesign and validate model routing strategies that reduce cost and latency while preserving output quality.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/model-routing-cost-latency-optimizer.zip -o model-routing-cost-latency-optimizer.zip && unzip -o model-routing-cost-latency-optimizer.zip -d ./model-routing-cost-latency-optimizer\n```\n\n## Usage\nUse this skill to reduce token spend and response times with guardrails that preserve answer quality.",
+  "webUrl": "https://heyclau.de/skills/model-routing-cost-latency-optimizer",
+  "canonicalUrl": "https://heyclau.de/skills/model-routing-cost-latency-optimizer",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/model-routing-cost-latency-optimizer.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/model-routing-cost-latency-optimizer",
+  "seoTitle": "Model Routing Cost and Latency Optimizer Skill",
+  "seoDescription": "Reusable AI skill for multi-model routing, quality thresholds, and token budget optimization in production workflows. HeyClaude adds source links, install...",
+  "repoUrl": "",
+  "documentationUrl": "https://platform.openai.com/docs/guides/latency-optimization"
+}

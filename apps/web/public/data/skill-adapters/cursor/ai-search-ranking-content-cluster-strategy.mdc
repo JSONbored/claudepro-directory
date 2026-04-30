@@ -1,0 +1,14 @@
+---
+description: "Content strategy skill for ranking and growth using intent mapping, cluster architecture, and structured publishing workflows."
+globs:
+alwaysApply: false
+---
+# AI Search Ranking Content Cluster Strategy Skill
+Build SEO-forward content clusters that align with search intent, topical authority, and conversion pathways for AI tooling niches.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/ai-search-ranking-content-cluster-strategy.zip -o ai-search-ranking-content-cluster-strategy.zip && unzip -o ai-search-ranking-content-cluster-strategy.zip -d ./ai-search-ranking-content-cluster-strategy
+```
+## Source
+https://heyclau.de/downloads/skills/ai-search-ranking-content-cluster-strategy.zip

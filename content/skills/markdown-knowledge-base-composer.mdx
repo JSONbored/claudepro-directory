@@ -2,15 +2,15 @@
 title: Markdown Knowledge Base Composer Skill
 slug: markdown-knowledge-base-composer
 category: skills
-description: 'Aggregate Markdown folders into cohesive knowledge bases with automated table of contents generation, cross-link validation and rewriting, heading normalization, and multi-format export (HTML, PDF, DOCX, EPUB).'
-cardDescription: 'Aggregate Markdown folders into cohesive knowledge bases with automated table of contents generation, cross-link validation and rewriting...'
+description: "Aggregate Markdown folders into cohesive knowledge bases with automated table of contents generation, cross-link validation and rewriting, heading normalization, and multi-format export (HTML, PDF, DOCX, EPUB)."
+cardDescription: "Aggregate Markdown folders into cohesive knowledge bases with automated table of contents generation, cross-link validation and rewriting..."
 seoTitle: Markdown Knowledge Base Composer Skill
-seoDescription: 'Aggregate Markdown folders into cohesive knowledge bases with automated table of contents generation, cross-link validation and rewriting, heading normalizat...'
+seoDescription: "Aggregate Markdown folders into cohesive knowledge bases with automated table of contents generation, cross-link validation and rewriting, heading normalizat..."
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-15'
-repoUrl: 'https://github.com/remarkjs/remark'
-documentationUrl: 'https://github.com/remarkjs/remark'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-15"
+repoUrl: "https://github.com/remarkjs/remark"
+documentationUrl: "https://github.com/remarkjs/remark"
 downloadUrl: /downloads/skills/markdown-knowledge-base-composer.zip
 installable: true
 installCommand: npm i remark unified
@@ -40,9 +40,9 @@ copySnippet: |-
 skillType: general
 skillLevel: advanced
 verificationStatus: draft
-verifiedAt: '2025-10-15'
+verifiedAt: "2025-10-15"
 retrievalSources:
-  - 'https://github.com/remarkjs/remark'
+  - "https://github.com/remarkjs/remark"
 testedPlatforms:
   - Claude
   - Codex
@@ -55,7 +55,7 @@ prerequisites:
   - remark / unified
   - Playwright (optional for PDF export)
   - pandoc (optional for DOCX/EPUB export)
-  - 'File system read/write access for Markdown source files, generated HTML/PDF/DOCX/EPUB outputs, and image assets referenced in Markdown'
+  - "File system read/write access for Markdown source files, generated HTML/PDF/DOCX/EPUB outputs, and image assets referenced in Markdown"
   - Markdown syntax knowledge or reference documentation for creating valid Markdown files (CommonMark or GitHub Flavored Markdown specification)
 tags:
   - markdown
@@ -83,6 +83,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## What This Skill Enables
 
 Claude can organize, process, and transform Markdown documentation into cohesive knowledge bases. Generate table of contents, fix broken links, convert formats, create static sites, and export to PDF or HTML.
@@ -96,17 +97,20 @@ Claude can organize, process, and transform Markdown documentation into cohesive
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
-
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 
 **Required:**
+
 - Claude Pro subscription
 - Code Interpreter feature enabled
 - Markdown files uploaded (can be multiple files/folders)
 
 **What Claude handles:**
+
 - Installing Markdown processing tools (remark, unified, pandoc)
 - Parsing and transforming Markdown
 - Link validation and fixing
@@ -121,6 +125,7 @@ Claude can organize, process, and transform Markdown documentation into cohesive
 **Prompt:** "Generate a table of contents from all these Markdown files. Include links to each section."
 
 Claude will:
+
 1. Parse all Markdown files
 2. Extract headings
 3. Create hierarchical TOC
@@ -132,6 +137,7 @@ Claude will:
 **Prompt:** "Check all internal links in these Markdown files and fix any broken ones. Report what was fixed."
 
 Claude will:
+
 1. Parse all Markdown files
 2. Extract all links
 3. Validate targets exist
@@ -141,12 +147,14 @@ Claude will:
 ### Convert Format
 
 **Prompt:** "Convert all these Markdown docs to a single PDF with:
+
 - Table of contents
 - Page numbers
 - Consistent heading styles
 - Code syntax highlighting"
 
 Claude will:
+
 1. Merge Markdown files
 2. Generate TOC
 3. Apply styling
@@ -156,12 +164,14 @@ Claude will:
 ### Create Static Site
 
 **Prompt:** "Generate a static HTML site from these docs:
+
 - Homepage with navigation
 - Responsive design
 - Search functionality
 - Dark mode toggle"
 
 Claude will:
+
 1. Process Markdown to HTML
 2. Generate navigation
 3. Apply responsive CSS
@@ -171,6 +181,7 @@ Claude will:
 ## Common Workflows
 
 ### Documentation Site Generation
+
 ```
 "Create documentation site:
 1. Parse all .md files in docs/
@@ -182,6 +193,7 @@ Use clean, professional styling."
 ```
 
 ### Knowledge Base Consolidation
+
 ```
 "Consolidate scattered notes:
 1. Combine all Markdown files into sections
@@ -193,6 +205,7 @@ Export as both Markdown and PDF."
 ```
 
 ### README Generation
+
 ```
 "Generate professional README.md:
 1. Extract project info from package.json
@@ -203,6 +216,7 @@ Export as both Markdown and PDF."
 ```
 
 ### Multi-Format Export
+
 ```
 "Export documentation in multiple formats:
 1. HTML (with navigation and search)
@@ -215,6 +229,7 @@ Maintain consistent styling across all formats."
 ## Features & Capabilities
 
 ### Markdown Processing
+
 - Parse frontmatter (YAML, TOML)
 - Extract and process links
 - Handle images and media
@@ -223,6 +238,7 @@ Maintain consistent styling across all formats."
 - Support GFM (GitHub Flavored Markdown)
 
 ### Link Management
+
 - Validate internal links
 - Fix broken references
 - Convert relative to absolute
@@ -230,6 +246,7 @@ Maintain consistent styling across all formats."
 - Generate anchor links
 
 ### Content Organization
+
 - Auto-generate TOC at any level
 - Sort files by frontmatter or name
 - Create hierarchical structure
@@ -237,6 +254,7 @@ Maintain consistent styling across all formats."
 - Split large files
 
 ### Format Conversion
+
 - Markdown → HTML
 - Markdown → PDF
 - Markdown → DOCX
@@ -256,6 +274,7 @@ Maintain consistent styling across all formats."
 ## Advanced Operations
 
 ### Custom Transformations
+
 - Replace text patterns across all files
 - Add custom frontmatter
 - Insert headers/footers
@@ -263,11 +282,13 @@ Maintain consistent styling across all formats."
 - Apply templates
 
 ### Multi-Language Support
+
 - Organize by language (en/, es/, etc.)
 - Generate language switcher
 - Maintain translation links
 
 ### Version Control
+
 - Track changes between versions
 - Generate changelogs
 - Compare documentation versions

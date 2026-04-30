@@ -1,0 +1,27 @@
+# LangSmith
+URL: https://heyclau.de/tools/langsmith
+Category: tools
+Author: LangChain
+Date added: 2026-04-27
+Documentation: https://docs.smith.langchain.com
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/langsmith.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/tools/langsmith
+- Source URLs: https://docs.smith.langchain.com, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/langsmith.mdx, https://www.langchain.com/langsmith
+- Brand: LangSmith
+- Brand domain: langchain.com
+- Brand asset source: brandfetch
+- Author: LangChain
+- Last verified: 2026-04-26T23:21:14-06:00
+- Robots: indexable
+## Summary
+Observability, evaluation, tracing, and testing platform for LLM applications and agent workflows.
+## Tags
+- observability
+- evaluation
+## Content
+## Editorial notes
+LangSmith is useful for teams that need traceability, regression testing, and evaluation around LLM and agent systems.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

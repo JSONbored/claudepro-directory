@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "mcp:canva-mcp-server",
+  "category": "mcp",
+  "slug": "canva-mcp-server",
+  "title": "Canva MCP Server for Claude",
+  "author": "Canva",
+  "brandName": "Canva",
+  "brandDomain": "canva.com",
+  "brandIconUrl": "/api/brand-assets/icon/canva.com",
+  "brandAssetSource": "brandfetch",
+  "copyText": "Install:\nclaude mcp list && claude mcp status canva\n\nConfig:\n{\n  \"canva\": {\n    \"url\": \"https://mcp.canva.com/mcp\",\n    \"transport\": \"http\"\n  }\n}\n\nUsage:\n{\n  \"canva\": {\n    \"url\": \"https://mcp.canva.com/mcp\",\n    \"transport\": \"http\"\n  }\n}",
+  "detailMarkdown": "# Canva MCP Server for Claude\n\nBrowse, summarize, and generate Canva designs directly from Claude\n\n## Install\n```bash\nclaude mcp list && claude mcp status canva\n```\n\n## Config\n```json\n{\n  \"canva\": {\n    \"url\": \"https://mcp.canva.com/mcp\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status canva",
+  "webUrl": "https://heyclau.de/mcp/canva-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/canva-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/canva-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/canva-mcp-server",
+  "seoTitle": "Canva MCP Server for Claude",
+  "seoDescription": "Browse, summarize, and generate Canva designs directly from Claude Discover tools for AI development. HeyClaude adds source links, install steps,...",
+  "repoUrl": "",
+  "documentationUrl": "https://www.canva.dev/docs/connect/canva-mcp-server-setup/"
+}

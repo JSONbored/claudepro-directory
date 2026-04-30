@@ -1,0 +1,250 @@
+{
+  "schemaVersion": 1,
+  "key": "collections:content-creation-workflow",
+  "entry": {
+    "category": "collections",
+    "slug": "content-creation-workflow",
+    "title": "Content Creation",
+    "description": "Streamlined workflow for content creators and marketers. Manage projects across multiple platforms, design graphics, and automate content distribution with integrated tools.",
+    "seoTitle": "Content Creation",
+    "seoDescription": "Streamlined workflow for content creators and marketers. Manage projects across multiple platforms, design graphics, and automate content distribution with i...",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2025-10-02",
+    "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+    "tags": [
+      "content",
+      "marketing",
+      "design",
+      "workflow",
+      "automation",
+      "social-media"
+    ],
+    "keywords": [
+      "automation",
+      "claude",
+      "collections",
+      "content",
+      "creation",
+      "design",
+      "development",
+      "marketing",
+      "social-media",
+      "tools",
+      "workflow",
+      "heyclaude"
+    ],
+    "readingTime": 1,
+    "difficultyScore": 0,
+    "cardDescription": "Streamlined workflow for content creators and marketers.",
+    "installable": false,
+    "usageSnippet": "Start with `asana-mcp-server` → `clickup-mcp-server` → `canva-mcp-server`",
+    "items": [
+      {
+        "slug": "asana-mcp-server",
+        "category": "mcp"
+      },
+      {
+        "slug": "clickup-mcp-server",
+        "category": "mcp"
+      },
+      {
+        "slug": "canva-mcp-server",
+        "category": "mcp"
+      },
+      {
+        "slug": "cloudinary-mcp-server",
+        "category": "mcp"
+      },
+      {
+        "slug": "docs",
+        "category": "commands"
+      }
+    ],
+    "installationOrder": [
+      "asana-mcp-server",
+      "clickup-mcp-server",
+      "canva-mcp-server",
+      "cloudinary-mcp-server",
+      "docs"
+    ],
+    "estimatedSetupTime": "25 minutes",
+    "difficulty": "beginner",
+    "prerequisites": [
+      "Asana or ClickUp account",
+      "Canva account (free or Pro)",
+      "Cloudinary account (optional, for advanced media management)"
+    ],
+    "hasPrerequisites": true,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "Streamlined workflow for content creators and marketers. Manage projects across multiple platforms, design graphics, and automate content distribution with integrated tools.\n\n## Features\n\n- Multi-platform project management\n- Visual content creation tools\n- Content distribution automation\n- Team collaboration features\n\n## Use Cases\n\n- Managing content calendars and campaigns\n- Creating social media graphics and assets\n- Coordinating content across multiple platforms\n- Streamlining content approval workflows\n\n## TL;DR\n\nA complete content creation suite for writers, marketers, and developers. Streamline blog writing, documentation, social media, and technical content with Claude-powered workflows.\n\n- Blog post and article generation with SEO optimization\n- Technical documentation and API reference generation\n- Social media content calendars and post templates\n- Markdown workflows and content publishing automation\n\nAccelerate content creation from ideation to publication with this collection of writing prompts, documentation generators, and publishing workflows optimized for Claude Desktop and Code.\n\n## Collection Overview\n\n**Collection Type:** Content & Documentation\n**Focus Area:** Writing & Publishing\n**Skill Level:** All Levels\n**Time Saving:** 50-70% reduction in content creation time\n\n## What's Included\n\n## Collection Contents\n\nComplete content creation toolkit\n\n- **Content Templates** (Writing): Blog posts, articles, tutorials, and marketing copy templates with Claude-optimized prompts.\n- **Docs Generation** (Documentation): API references, user guides, README files, and technical documentation with automated generation.\n- **SEO Optimization** (SEO): Keyword research, meta descriptions, heading structure, and content optimization for search engines.\n- **Automation Workflows** (Publishing): Markdown to HTML, static site generation, CMS integration, and automated publishing pipelines.\n\n## Quick Start\n\nChoose the content type you need to create, then use the templates and prompts to generate high-quality content with Claude. Customize for your voice and publishing platform.\n\n## Prerequisites\n\n- Asana or ClickUp account\n- Canva account (free or Pro)\n- Cloudinary account (optional, for advanced media management)\n\n## Recommended Order\n\n1. `asana-mcp-server`\n2. `clickup-mcp-server`\n3. `canva-mcp-server`\n4. `cloudinary-mcp-server`\n5. `docs`\n\n## Troubleshooting\n\n### Asana and ClickUp MCP servers conflict when both enabled\n\nChoose one project management tool. Edit claude_desktop_config.json to comment out the unused server. Restart Claude Desktop to apply changes.\n\n### Canva MCP server fails with 'API key not found' error\n\nGenerate Canva API token at canva.com/developers. Add to config: CANVA_API_KEY=token. Verify token has design.read and design.write scopes.\n\n### Cloudinary media uploads fail after Canva integration\n\nSet unique output directories for each service. Configure Canva uploads to /canva and Cloudinary to /cloudinary in respective MCP server settings.\n\n### Missing Node.js dependencies for all MCP servers in bundle\n\nInstall Node.js 18+ from nodejs.org. Run npm install -g @modelcontextprotocol/server-\\* for each MCP server. Verify with node --version.\n\n### Collection items installed but not appearing in Claude\n\nVerify installation order: project management first, then media tools. Check claude_desktop_config.json syntax. Restart Claude Desktop completely.",
+    "sections": [
+      {
+        "title": "Overview",
+        "id": "overview",
+        "markdown": "Streamlined workflow for content creators and marketers. Manage projects across multiple platforms, design graphics, and automate content distribution with integrated tools.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Multi-platform project management\n- Visual content creation tools\n- Content distribution automation\n- Team collaboration features",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Managing content calendars and campaigns\n- Creating social media graphics and assets\n- Coordinating content across multiple platforms\n- Streamlining content approval workflows",
+        "codeBlocks": []
+      },
+      {
+        "title": "TL;DR",
+        "id": "tldr",
+        "markdown": "A complete content creation suite for writers, marketers, and developers. Streamline blog writing, documentation, social media, and technical content with Claude-powered workflows.\n\n- Blog post and article generation with SEO optimization\n- Technical documentation and API reference generation\n- Social media content calendars and post templates\n- Markdown workflows and content publishing automation\n\nAccelerate content creation from ideation to publication with this collection of writing prompts, documentation generators, and publishing workflows optimized for Claude Desktop and Code.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Collection Overview",
+        "id": "collection-overview",
+        "markdown": "**Collection Type:** Content & Documentation\n**Focus Area:** Writing & Publishing\n**Skill Level:** All Levels\n**Time Saving:** 50-70% reduction in content creation time",
+        "codeBlocks": []
+      },
+      {
+        "title": "Collection Contents",
+        "id": "collection-contents",
+        "markdown": "Complete content creation toolkit\n\n- **Content Templates** (Writing): Blog posts, articles, tutorials, and marketing copy templates with Claude-optimized prompts.\n- **Docs Generation** (Documentation): API references, user guides, README files, and technical documentation with automated generation.\n- **SEO Optimization** (SEO): Keyword research, meta descriptions, heading structure, and content optimization for search engines.\n- **Automation Workflows** (Publishing): Markdown to HTML, static site generation, CMS integration, and automated publishing pipelines.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Quick Start",
+        "id": "quick-start",
+        "markdown": "Choose the content type you need to create, then use the templates and prompts to generate high-quality content with Claude. Customize for your voice and publishing platform.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Prerequisites",
+        "id": "prerequisites",
+        "markdown": "- Asana or ClickUp account\n- Canva account (free or Pro)\n- Cloudinary account (optional, for advanced media management)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Recommended Order",
+        "id": "recommended-order",
+        "markdown": "1. `asana-mcp-server`\n2. `clickup-mcp-server`\n3. `canva-mcp-server`\n4. `cloudinary-mcp-server`\n5. `docs`",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "### Asana and ClickUp MCP servers conflict when both enabled\n\nChoose one project management tool. Edit claude_desktop_config.json to comment out the unused server. Restart Claude Desktop to apply changes.\n\n### Canva MCP server fails with 'API key not found' error\n\nGenerate Canva API token at canva.com/developers. Add to config: CANVA_API_KEY=token. Verify token has design.read and design.write scopes.\n\n### Cloudinary media uploads fail after Canva integration\n\nSet unique output directories for each service. Configure Canva uploads to /canva and Cloudinary to /cloudinary in respective MCP server settings.\n\n### Missing Node.js dependencies for all MCP servers in bundle\n\nInstall Node.js 18+ from nodejs.org. Run npm install -g @modelcontextprotocol/server-\\* for each MCP server. Verify with node --version.\n\n### Collection items installed but not appearing in Claude\n\nVerify installation order: project management first, then media tools. Check claude_desktop_config.json syntax. Restart Claude Desktop completely.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      },
+      {
+        "depth": 2,
+        "text": "TL;DR",
+        "id": "tldr"
+      },
+      {
+        "depth": 2,
+        "text": "Collection Overview",
+        "id": "collection-overview"
+      },
+      {
+        "depth": 2,
+        "text": "What's Included",
+        "id": "whats-included"
+      },
+      {
+        "depth": 2,
+        "text": "Collection Contents",
+        "id": "collection-contents"
+      },
+      {
+        "depth": 2,
+        "text": "Quick Start",
+        "id": "quick-start"
+      },
+      {
+        "depth": 2,
+        "text": "Prerequisites",
+        "id": "prerequisites"
+      },
+      {
+        "depth": 2,
+        "text": "Recommended Order",
+        "id": "recommended-order"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 3,
+        "text": "Asana and ClickUp MCP servers conflict when both enabled",
+        "id": "asana-and-clickup-mcp-servers-conflict-when-both-enabled"
+      },
+      {
+        "depth": 3,
+        "text": "Canva MCP server fails with 'API key not found' error",
+        "id": "canva-mcp-server-fails-with-api-key-not-found-error"
+      },
+      {
+        "depth": 3,
+        "text": "Cloudinary media uploads fail after Canva integration",
+        "id": "cloudinary-media-uploads-fail-after-canva-integration"
+      },
+      {
+        "depth": 3,
+        "text": "Missing Node.js dependencies for all MCP servers in bundle",
+        "id": "missing-nodejs-dependencies-for-all-mcp-servers-in-bundle"
+      },
+      {
+        "depth": 3,
+        "text": "Collection items installed but not appearing in Claude",
+        "id": "collection-items-installed-but-not-appearing-in-claude"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/collections/content-creation-workflow.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/content-creation-workflow.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 1,
+    "sourceUrls": [
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/content-creation-workflow.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

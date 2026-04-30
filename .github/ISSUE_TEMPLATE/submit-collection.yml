@@ -1,0 +1,122 @@
+name: "Submit Collection"
+description: "Submit a collections entry for HeyClaude."
+title: "Submit Collection: "
+labels:
+  - "content-submission"
+  - "community-collections"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for free, maintainer-reviewed collections submissions.
+        Products, hosted apps, services, paid listings, sponsorships, claims, and jobs use the dedicated website lead forms.
+        Include official source/docs URLs only. Contributor affiliate, referral, tracking, or local package-hosting requests are rejected.
+  - type: input
+    id: name
+    attributes:
+      label: "Name"
+      description: "Required."
+      placeholder: "Human-readable listing name"
+    validations:
+      required: true
+  - type: input
+    id: slug
+    attributes:
+      label: "Slug"
+      description: "Required."
+      placeholder: "kebab-case-slug"
+    validations:
+      required: true
+  - type: input
+    id: category
+    attributes:
+      label: "Category"
+      description: "Required."
+      value: "collections"
+    validations:
+      required: true
+  - type: input
+    id: github_url
+    attributes:
+      label: "GitHub URL"
+      description: "Do not use affiliate, referral, or tracking URLs."
+      placeholder: "https://github.com/owner/repo"
+    validations:
+      required: false
+  - type: input
+    id: docs_url
+    attributes:
+      label: "Docs URL"
+      description: "Do not use affiliate, referral, or tracking URLs."
+      placeholder: "https://example.com/docs"
+    validations:
+      required: false
+  - type: input
+    id: brand_name
+    attributes:
+      label: "Brand name"
+    validations:
+      required: false
+  - type: input
+    id: brand_domain
+    attributes:
+      label: "Brand domain"
+    validations:
+      required: false
+  - type: input
+    id: author
+    attributes:
+      label: "Author"
+      placeholder: "GitHub handle, company, or maintainer name"
+    validations:
+      required: false
+  - type: input
+    id: contact_email
+    attributes:
+      label: "Public contact"
+      description: "Optional public contact. Do not include private contact details."
+      placeholder: "@github-handle or email if you want it public"
+    validations:
+      required: false
+  - type: input
+    id: tags
+    attributes:
+      label: "Tags"
+      placeholder: "claude, mcp, automation"
+    validations:
+      required: false
+  - type: textarea
+    id: description
+    attributes:
+      label: "Description"
+      description: "Required."
+      placeholder: "Explain what this does, why it matters, and when to use it."
+    validations:
+      required: true
+  - type: textarea
+    id: card_description
+    attributes:
+      label: "Card description"
+      description: "Required."
+      placeholder: "Short browse-card preview text."
+    validations:
+      required: true
+  - type: textarea
+    id: items
+    attributes:
+      label: "Items"
+      description: "Required."
+      placeholder: "mcp/example\nskills/example"
+    validations:
+      required: true
+  - type: checkboxes
+    id: acknowledgements
+    attributes:
+      label: Submission checks
+      options:
+        - label: I confirm this is a free content submission, not a paid listing, job, product promotion, or claim request.
+          required: true
+        - label: I confirm external links are official source/docs links and not affiliate, referral, or tracking URLs.
+          required: true
+        - label: I understand maintainers review accepted submissions before an import PR is opened.
+          required: true

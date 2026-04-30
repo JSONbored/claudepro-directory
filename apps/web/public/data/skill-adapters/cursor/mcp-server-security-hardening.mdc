@@ -1,0 +1,14 @@
+---
+description: "Harden Model Context Protocol servers with practical controls for auth, tool scope, input validation, and supply-chain risk."
+globs:
+alwaysApply: false
+---
+# MCP Server Security Hardening Skill
+Secure MCP servers with strict tool boundaries, auth controls, dependency hygiene, and abuse-resistant runtime policies.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/mcp-server-security-hardening.zip -o mcp-server-security-hardening.zip && unzip -o mcp-server-security-hardening.zip -d ./mcp-server-security-hardening
+```
+## Source
+https://heyclau.de/downloads/skills/mcp-server-security-hardening.zip

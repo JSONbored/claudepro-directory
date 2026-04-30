@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "key": "tools:weave",
+  "entry": {
+    "category": "tools",
+    "slug": "weave",
+    "title": "Weave",
+    "description": "Weights and Biases toolkit for tracking, evaluating, and debugging LLM applications and agent workflows.",
+    "seoTitle": "Weave LLM tracking and evaluation",
+    "seoDescription": "Weave helps teams track, evaluate, and debug LLM applications and agent workflows with W&B tooling. HeyClaude adds source links, install steps,...",
+    "author": "Weights and Biases",
+    "dateAdded": "2026-04-27",
+    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+    "tags": [
+      "evaluation",
+      "observability"
+    ],
+    "keywords": [
+      "llm tracking",
+      "wandb weave",
+      "evaluation",
+      "observability",
+      "tools",
+      "claude",
+      "heyclaude",
+      "weave"
+    ],
+    "documentationUrl": "https://weave-docs.wandb.ai",
+    "websiteUrl": "https://wandb.ai/site/weave",
+    "brandName": "Weave",
+    "brandDomain": "wandb.ai",
+    "brandIconUrl": "/api/brand-assets/icon/wandb.ai",
+    "brandAssetSource": "brandfetch",
+    "pricingModel": "freemium",
+    "disclosure": "editorial",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Web",
+    "cardDescription": "Tracking and evaluation toolkit for LLM applications.",
+    "installable": false,
+    "hasPrerequisites": false,
+    "hasTroubleshooting": false,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Editorial notes\n\nWeave belongs in the directory for teams already using W&B or needing experiment tracking around LLM behavior.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+    "sections": [
+      {
+        "title": "Editorial notes",
+        "id": "editorial-notes",
+        "markdown": "Weave belongs in the directory for teams already using W&B or needing experiment tracking around LLM behavior.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Disclosure",
+        "id": "disclosure",
+        "markdown": "Editorial listing. No paid placement or affiliate link is used.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Editorial notes",
+        "id": "editorial-notes"
+      },
+      {
+        "depth": 2,
+        "text": "Disclosure",
+        "id": "disclosure"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/tools/weave.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/weave.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 3,
+    "sourceUrls": [
+      "https://weave-docs.wandb.ai",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/weave.mdx",
+      "https://wandb.ai/site/weave"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

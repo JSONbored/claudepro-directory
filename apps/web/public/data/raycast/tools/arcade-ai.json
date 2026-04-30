@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:arcade-ai",
+  "category": "tools",
+  "slug": "arcade-ai",
+  "title": "Arcade",
+  "author": "Arcade",
+  "brandName": "Arcade",
+  "brandDomain": "arcade.dev",
+  "brandIconUrl": "/api/brand-assets/icon/arcade.dev",
+  "brandAssetSource": "brandfetch",
+  "copyText": "## Editorial notes\n\nArcade fits agent builders that need explicit auth, user approvals, and reliable action execution across services.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Arcade\n\nTool-calling platform for AI agents with authenticated actions, user approvals, and external service integrations.",
+  "webUrl": "https://heyclau.de/tools/arcade-ai",
+  "canonicalUrl": "https://heyclau.de/tools/arcade-ai",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/arcade-ai.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/arcade-ai",
+  "seoTitle": "Arcade tool calling for AI agents",
+  "seoDescription": "Arcade supports authenticated tool calls, user approvals, and external service integrations for AI agents. HeyClaude adds source links, install steps,...",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.arcade.dev"
+}

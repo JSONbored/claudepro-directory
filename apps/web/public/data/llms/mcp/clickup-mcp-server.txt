@@ -1,0 +1,228 @@
+# Clickup MCP Server for Claude
+URL: https://heyclau.de/mcp/clickup-mcp-server
+Category: mcp
+Author: hauptsacheNet
+Date added: 2025-09-18
+Documentation: https://github.com/hauptsacheNet/clickup-mcp
+Repository: https://github.com/hauptsacheNet/clickup-mcp
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/clickup-mcp-server.mdx
+Download: /downloads/mcp/clickup-mcp-server.mcpb
+## Citation Facts
+- Canonical URL: https://heyclau.de/mcp/clickup-mcp-server
+- Source URLs: https://github.com/hauptsacheNet/clickup-mcp, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/clickup-mcp-server.mdx
+- Brand: ClickUp
+- Brand domain: clickup.com
+- Brand asset source: brandfetch
+- Package URL: /downloads/mcp/clickup-mcp-server.mcpb
+- Package SHA256: f790c531d131631b690c489a7219a986c27295cdddc53fa73f732584bfe5611f
+- Author: hauptsacheNet
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
+## Summary
+Task management and project tracking with ClickUp integration
+## Tags
+- project-management
+- clickup
+- tasks
+- productivity
+- team-collaboration
+## Content
+## Content
+Manage ClickUp tasks and projects directly through Claude for comprehensive project management.
+
+## Features
+- Create and update tasks with custom fields
+- Manage project spaces and folders
+- Track time entries and productivity
+- Update task statuses and priorities
+- Assign team members and set due dates
+- Advanced ClickUp task and project management with workspace organization, team collaboration features, and time tracking integration
+- Batch operations support for efficient bulk task creation, updates, and assignments with automatic rate limit handling and retry logic
+- Real-time task synchronization capabilities with webhook integration support for monitoring project changes and triggering automated workflows
+
+## Use Cases
+- Create tasks from requirements documents
+- Update project progress in bulk
+- Generate status reports for stakeholders
+- Perform bulk task operations
+- Automate time tracking entries
+- Build automated project management workflows that sync external systems with ClickUp workspaces for real-time task tracking and team coordination
+
+## Installation
+### Claude Code
+
+1. claude mcp add clickup --env CLICKUP_API_KEY=YOUR_KEY --env CLICKUP_TEAM_ID=YOUR_TEAM_ID -- npx -y @hauptsache.net/clickup-mcp
+2. Verify installation: claude mcp list
+3. Test connection: claude mcp status clickup
+
+### Claude Desktop
+
+1. Get your ClickUp API key from https://app.clickup.com/settings/apps
+2. Find your Team ID in ClickUp settings
+3. Open Claude Desktop configuration file
+4. Add the ClickUp server configuration with your credentials
+5. Restart Claude Desktop
+
+## Requirements
+- ClickUp account with workspace access
+- ClickUp Personal API Token from https://app.clickup.com/settings/apps
+- ClickUp Team ID (found in ClickUp workspace settings)
+- Node.js and npm/npx available for running the @hauptsache.net/clickup-mcp package
+- Internet connection for accessing ClickUp API (https://api.clickup.com endpoints)
+- Claude Desktop 0.7.0+ or Claude Code with MCP support
+- Rate limit awareness: 100 requests per minute per API token
+- Understanding of ClickUp workspace, spaces, lists, and tasks structure
+- Appropriate workspace permissions for target operations (read, write, delete as needed)
+- OAuth scopes (if using OAuth instead of Personal API Token) - read, write, delete permissions
+
+## Configuration
+```json
+{
+  "clickup": {
+    "env": {
+      "CLICKUP_API_KEY": "${CLICKUP_API_KEY}",
+      "CLICKUP_TEAM_ID": "${CLICKUP_TEAM_ID}"
+    },
+    "args": ["-y", "@hauptsache.net/clickup-mcp"],
+    "command": "npx"
+  }
+}
+```
+```json
+{
+  "clickup": {
+    "env": {
+      "CLICKUP_API_KEY": "${CLICKUP_API_KEY}",
+      "CLICKUP_TEAM_ID": "${CLICKUP_TEAM_ID}"
+    },
+    "args": ["-y", "@hauptsache.net/clickup-mcp"],
+    "command": "npx"
+  }
+}
+```
+
+## Examples
+### Create a new task in the Development space
+
+Common usage pattern for this MCP server
+
+```plaintext
+Ask Claude: "Create a new task in the Development space"
+```
+
+### Update task CL-123 to completed
+
+Common usage pattern for this MCP server
+
+```plaintext
+Ask Claude: "Update task CL-123 to completed"
+```
+
+### List all my assigned tasks
+
+Common usage pattern for this MCP server
+
+```plaintext
+Ask Claude: "List all my assigned tasks"
+```
+
+### Add time entry to current task
+
+Common usage pattern for this MCP server
+
+```plaintext
+Ask Claude: "Add time entry to current task"
+```
+
+### Create Task with Custom Fields
+
+Create a new ClickUp task with custom fields, assignees, and status
+
+```typescript
+// Create ClickUp task with custom fields
+const task = await clickup.tasks.create({
+  list_id: "list-id",
+  name: "Complete project documentation",
+  description: "Task description",
+  assignees: ["user-id"],
+  status: "in progress",
+  custom_fields: [
+    {
+      id: "custom-field-id",
+      value: "custom-value",
+    },
+  ],
+});
+```
+```plaintext
+Ask Claude: "Create a new task in the Development space"
+```
+```plaintext
+Ask Claude: "Update task CL-123 to completed"
+```
+```plaintext
+Ask Claude: "List all my assigned tasks"
+```
+```plaintext
+Ask Claude: "Add time entry to current task"
+```
+```typescript
+// Create ClickUp task with custom fields
+const task = await clickup.tasks.create({
+  list_id: "list-id",
+  name: "Complete project documentation",
+  description: "Task description",
+  assignees: ["user-id"],
+  status: "in progress",
+  custom_fields: [
+    {
+      id: "custom-field-id",
+      value: "custom-value",
+    },
+  ],
+});
+```
+
+## Security
+- Use personal API tokens for authentication
+- Limit permissions to necessary spaces only
+- Rotate API keys regularly
+- Monitor API usage for anomalies
+- ClickUp API tokens and personal access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management
+- ClickUp OAuth access tokens should be used for third-party integrations to ensure proper access control, token lifecycle management, and automatic token refresh
+- ClickUp workspace, space, and project IDs may expose organizational structure and team information - ensure ClickUp resource IDs are kept private and not shared in public configurations
+- Rate limiting and API quota management are critical for ClickUp MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption
+- ClickUp webhook configurations and payloads may contain sensitive project and task data - ensure webhook endpoints are properly secured with authentication and HTTPS encryption
+
+## Troubleshooting
+### Getting HTTP 429 with rate limit exceeded errors
+
+ClickUp limits to 100 requests per minute per token. Check X-RateLimit-Reset header for reset time. Implement exponential backoff and wait specified seconds before retry.
+
+### OAuth error: team not authorized for access token
+
+Re-authenticate to authorize workspace access. Verify OAuth scope includes required permissions and check if user revoked authorization. Generate new API token from ClickUp settings if needed.
+
+### Authorization token missing in header error
+
+Add Authorization header with your API key to all requests. Format: Authorization: YOUR_API_KEY. Verify token is correctly copied from ClickUp API settings without extra spaces.
+
+### Cannot access tasks or spaces - permission denied
+
+Verify your ClickUp account has access to target spaces and lists. Check workspace admin settings and ensure API token has necessary permissions for workspace and spaces.
+
+### ClickUp MCP server authentication errors with API tokens
+
+Verify API token is valid and not expired. Check token permissions match required operations. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.
+
+### ClickUp rate limit errors when managing large projects
+
+Implement exponential backoff retry logic with jitter. Use batch operations to reduce API calls. Cache frequently accessed data. Monitor rate limit headers and adjust request frequency accordingly. ClickUp allows 100 requests per minute per API token.
+
+### ClickUp workspace or project access denied errors
+
+Verify API token has access to the workspace, space, and projects. Check workspace permissions and project sharing settings. Ensure OAuth scopes include required workspace and project access permissions.
+
+### ClickUp MCP server connection timeouts or network errors
+
+Check network connectivity and firewall settings. Verify ClickUp API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

@@ -1,0 +1,28 @@
+# Langfuse
+URL: https://heyclau.de/tools/langfuse
+Category: tools
+Author: Langfuse
+Date added: 2026-04-27
+Documentation: https://langfuse.com/docs
+Repository: https://github.com/langfuse/langfuse
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/langfuse.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/tools/langfuse
+- Source URLs: https://langfuse.com/docs, https://github.com/langfuse/langfuse, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/langfuse.mdx, https://langfuse.com
+- Brand: Langfuse
+- Brand domain: langfuse.com
+- Brand asset source: brandfetch
+- Author: Langfuse
+- Last verified: 2026-04-26T23:21:14-06:00
+- Robots: indexable
+## Summary
+Open-source LLM engineering platform for tracing, prompt management, evaluation, metrics, and observability.
+## Tags
+- observability
+- open-source
+## Content
+## Editorial notes
+Langfuse is a strong option when teams want open-source LLM observability with self-hosting and prompt lifecycle support.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

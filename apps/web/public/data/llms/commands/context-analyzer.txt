@@ -1,0 +1,1030 @@
+# Context Analyzer for Claude Code
+URL: https://heyclau.de/commands/context-analyzer
+Category: commands
+Author: JSONbored
+Date added: 2025-10-25
+Documentation: https://docs.claude.com/en/docs/claude-code/analysis
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/context-analyzer.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/commands/context-analyzer
+- Source URLs: https://docs.claude.com/en/docs/claude-code/analysis, https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/context-analyzer.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
+## Summary
+Analyze codebase context with agentic search to understand architecture, patterns, and dependencies before major refactors or feature implementations
+## Tags
+- context-analysis
+- codebase-understanding
+- architecture
+- agentic-search
+- refactoring
+- planning
+## Content
+## Overview
+The `/context-analyzer` command performs deep codebase analysis using Claude's agentic search to understand architecture, patterns, and dependencies for informed decision-making.
+
+## Features
+- **Agentic Search**: Scan and interpret entire project automatically
+- **Architecture Mapping**: Visualize system structure and relationships
+- **Pattern Detection**: Identify common patterns and conventions
+- **Dependency Analysis**: Understand module dependencies and coupling
+- **Tech Stack Discovery**: Auto-detect frameworks, libraries, versions
+- **Code Quality Metrics**: Assess maintainability and technical debt
+- **Refactoring Prerequisites**: Gather context before major changes
+- **Onboarding Tool**: Help new developers understand codebase
+
+## Usage
+```bash
+/context-analyzer [scope] [options]
+```
+
+### Scope
+
+- `--full` - Analyze entire codebase (default)
+- `--directory=<path>` - Analyze specific directory
+- `--module=<name>` - Analyze specific module/feature
+- `--file=<path>` - Deep analysis of single file
+
+### Analysis Types
+
+- `--architecture` - System architecture and structure
+- `--patterns` - Code patterns and conventions
+- `--dependencies` - Dependency graph and coupling
+- `--tech-stack` - Technology stack inventory
+- `--quality` - Code quality and technical debt
+- `--all` - Comprehensive analysis (all types)
+
+### Output
+
+- `--summary` - Executive summary only
+- `--detailed` - Full analysis report
+- `--save-to=<file>` - Save report to file
+```bash
+/context-analyzer [scope] [options]
+```
+
+## Examples
+### Full Codebase Analysis
+
+**Command:**
+
+```bash
+/context-analyzer --full --all
+```
+
+**Analysis Report:**
+
+````
+[Context Analysis: Full Codebase]
+[Using Agentic Search to scan project...]
+
+====================
+PROJECT OVERVIEW
+====================
+
+Name: E-Commerce SaaS Platform
+Size: 450 files, 85K LOC
+Languages: TypeScript (95%), CSS (3%), JSON (2%)
+Last Modified: 2 hours ago
+
+====================
+TECH STACK
+====================
+
+Frontend:
+  - React 19.1.1 (Server Components)
+  - Next.js 15.5.2 (App Router)
+  - TailwindCSS v4.1.13
+  - shadcn/ui components
+  - Framer Motion 11.x
+
+Backend:
+  - Next.js API Routes
+  - tRPC 11.x (type-safe APIs)
+  - Prisma 5.x (ORM)
+  - PostgreSQL 16
+
+Authentication:
+  - better-auth v1.3.9
+  - JWT + Refresh tokens
+  - OAuth2 (Google, GitHub)
+
+Testing:
+  - Vitest (unit/integration)
+  - Playwright (E2E)
+  - React Testing Library
+
+Tooling:
+  - TypeScript 5.3 (strict mode)
+  - Biome (linting/formatting)
+  - pnpm (package manager)
+
+====================
+ARCHITECTURE
+====================
+
+Pattern: Layered Architecture
+
+1. Presentation Layer (app/)
+   - Route groups: (auth), (dashboard), (marketing)
+   - Server Components for data fetching
+   - Client Components for interactivity
+   - Layouts with nested routing
+
+2. API Layer (app/api/)
+   - tRPC routers (type-safe)
+   - REST endpoints (webhooks, public API)
+   - Middleware (auth, rate limiting)
+
+3. Business Logic (lib/)
+   - Services: auth, payments, notifications
+   - Utilities: validation, formatting
+   - Types: shared interfaces
+
+4. Data Layer (prisma/)
+   - Schema: 15 models
+   - Migrations: 23 migrations
+   - Seeders: test data
+
+Key Directories:
+  app/           - Next.js routes (78 files)
+  components/    - React components (125 files)
+  lib/          - Business logic (45 files)
+  hooks/        - Custom React hooks (18 files)
+  prisma/       - Database schema (3 files)
+  tests/        - Test files (89 files)
+
+====================
+CODE PATTERNS
+====================
+
+Detected Patterns:
+
+1. Server Component Data Fetching:
+   ```typescript
+   // Pattern found in 42 files
+   export async function Component() {
+     const data = await db.query();
+     return <div>{data}</div>;
+   }
+````
+
+2. Form Handling (react-hook-form + Zod):
+
+   ```typescript
+   // Pattern found in 15 files
+   const form = useForm({
+     resolver: zodResolver(schema),
+   });
+   ```
+
+3. tRPC API Calls:
+
+   ```typescript
+   // Pattern found in 38 files
+   const { data, isLoading } = trpc.users.list.useQuery();
+   ```
+
+4. Error Boundaries:
+
+   ```typescript
+   // Pattern found in 8 layouts
+   <ErrorBoundary fallback={<ErrorPage />}>
+     {children}
+   </ErrorBoundary>
+   ```
+
+5. Authentication Guards:
+   ```typescript
+   // Pattern found in 12 routes
+   const session = await auth();
+   if (!session) redirect("/login");
+   ```
+
+====================
+DEPENDENCY ANALYSIS
+====================
+
+High Coupling (Needs Refactoring):
+
+- auth.service.ts → 23 files depend on it
+- db/client.ts → 45 files import directly
+- utils/validation.ts → 18 files
+
+Low Coupling (Good):
+
+- components/ui/\* → Self-contained
+- hooks/\* → Independent
+
+Circular Dependencies: None detected ✓
+
+External Dependencies:
+
+- Production: 45 packages
+- Development: 28 packages
+- Total bundle size: 287 KB (gzipped)
+
+Heaviest Dependencies:
+
+1. next: 105 KB
+2. react-dom: 42 KB
+3. framer-motion: 38 KB
+4. @trpc/client: 28 KB
+
+====================
+CODE QUALITY
+====================
+
+Metrics:
+
+- Test Coverage: 78% (target: 80%)
+- TypeScript Errors: 0
+- Linting Warnings: 3
+- Duplicate Code: 2.1%
+- Complexity (avg): 4.2 (good)
+
+Technical Debt:
+🟡 Medium Debt (Manageable)
+
+Priority Issues:
+
+1. auth.service.ts high coupling (23 dependencies)
+2. 3 components exceed 250 lines
+3. 5 files missing JSDoc comments
+4. 2% test coverage gap
+
+Strengths:
+✓ Consistent naming conventions
+✓ Strong TypeScript usage (strict mode)
+✓ Good file organization
+✓ Modern React patterns
+✓ Proper error handling
+
+====================
+RECOMMENDATIONS
+====================
+
+1. Refactor auth.service.ts
+   - Extract to smaller services
+   - Reduce coupling (23 → <10 dependencies)
+
+2. Increase test coverage
+   - Add tests for: payments/, notifications/
+   - Target: 78% → 80%
+
+3. Component splitting
+   - Break down large components (>250 lines)
+   - Extract reusable logic to hooks
+
+4. Documentation
+   - Add JSDoc to public APIs
+   - Update architecture diagrams
+
+5. Performance
+   - Consider code splitting for framer-motion
+   - Lazy load heavy components
+
+====================
+SUMMARY
+====================
+
+Codebase Health: 🟢 Healthy
+
+The codebase is well-structured with modern patterns.
+Minor technical debt is manageable. Ready for feature
+development with recommended refactorings noted above.
+
+Key Findings:
+
+- Strong TypeScript foundation
+- Consistent React 19 patterns
+- Good test coverage (close to target)
+- Manageable technical debt
+- Clear architecture
+
+Recommended Next Steps:
+
+1. Address auth.service.ts coupling
+2. Reach 80% test coverage
+3. Proceed with feature development
+
+````
+
+### Module-Specific Analysis
+
+**Command:**
+```bash
+/context-analyzer --module=authentication --detailed
+````
+
+**Report:**
+
+```
+[Authentication Module Analysis]
+
+====================
+MODULE OVERVIEW
+====================
+
+Location: lib/auth/
+Files: 8 files
+Lines: 1,250 LOC
+Tests: 12 test files (85% coverage)
+
+====================
+FILE STRUCTURE
+====================
+
+lib/auth/
+  ├── index.ts              (Exports)
+  ├── auth.service.ts       (Core logic)
+  ├── jwt.util.ts          (Token handling)
+  ├── password.util.ts     (Hashing)
+  ├── session.manager.ts   (Session mgmt)
+  ├── oauth.provider.ts    (OAuth flow)
+  ├── middleware.ts        (Auth middleware)
+  └── types.ts            (TypeScript types)
+
+====================
+DEPENDENCIES
+====================
+
+External:
+  - bcrypt: Password hashing
+  - jsonwebtoken: JWT creation/verification
+  - better-auth: Core auth library
+
+Internal:
+  → db/client.ts (Database access)
+  → lib/email/service.ts (Verification emails)
+  → lib/config/env.ts (Environment vars)
+
+Dependent Modules:
+  ← app/api/auth/* (23 files)
+  ← middleware.ts (Route protection)
+  ← app/(dashboard)/* (18 files)
+
+====================
+KEY PATTERNS
+====================
+
+1. JWT Strategy:
+   - Access token: 15 min expiry
+   - Refresh token: 7 days expiry
+   - Stored in HTTP-only cookies
+
+2. Password Security:
+   - bcrypt with cost factor 12
+   - Password validation: min 8 chars, complexity rules
+
+3. OAuth Flow:
+   - Supported: Google, GitHub
+   - PKCE flow for security
+   - State parameter for CSRF protection
+
+4. Session Management:
+   - Server-side session validation
+   - Automatic refresh on activity
+   - Logout clears all tokens
+
+====================
+SECURITY ANALYSIS
+====================
+
+✓ Strengths:
+  - HTTP-only secure cookies
+  - CSRF protection
+  - Rate limiting on auth endpoints
+  - Password complexity requirements
+  - JWT expiration enforced
+
+⚠️  Recommendations:
+  - Add 2FA support
+  - Implement session device tracking
+  - Add anomaly detection
+
+====================
+TESTING
+====================
+
+Coverage: 85%
+
+Test Types:
+  - Unit: auth.service.test.ts (42 tests)
+  - Integration: api/auth.test.ts (18 tests)
+  - E2E: auth-flow.spec.ts (8 tests)
+
+Gaps:
+  - OAuth error handling (not tested)
+  - Token refresh edge cases (partial)
+
+====================
+REFACTORING NEEDS
+====================
+
+Priority: Medium
+
+Recommendations:
+1. Split auth.service.ts (currently 350 lines)
+   - Extract JWT logic → jwt.service.ts
+   - Extract OAuth → oauth.service.ts
+
+2. Reduce coupling (23 dependencies)
+   - Use dependency injection
+   - Create interfaces for external services
+
+3. Add JSDoc documentation
+   - Document public API methods
+   - Add usage examples
+
+Estimated Effort: 2-3 days
+```
+
+### Before Refactoring Analysis
+
+**Command:**
+
+```bash
+/context-analyzer --directory=src/components/dashboard --architecture
+```
+
+**Use Case: Planning Refactor**
+
+```
+[Pre-Refactoring Analysis]
+
+Goal: Refactor dashboard components
+
+Current State:
+  Files: 25 components
+  LOC: 3,450 lines
+  Complexity: High (avg 6.8)
+  Dependencies: 45 internal imports
+
+Architecture Issues:
+  1. Prop drilling (5 levels deep)
+  2. State duplication (3 components)
+  3. Large components (4 files >200 lines)
+  4. Tight coupling (shared state)
+
+Recommended Approach:
+  1. Extract state to Zustand store
+  2. Split large components:
+     - DashboardOverview (280 lines) → 3 components
+     - UserTable (320 lines) → 4 components
+  3. Create composable sub-components
+  4. Use context for shared data
+
+Impact Analysis:
+  - Affected files: 25
+  - Dependent modules: 8
+  - Test files to update: 18
+  - Estimated time: 1 week
+
+Ready to proceed? (y/n)
+```
+```bash
+/context-analyzer --full --all
+```
+```text
+[Context Analysis: Full Codebase]
+[Using Agentic Search to scan project...]
+
+====================
+PROJECT OVERVIEW
+====================
+
+Name: E-Commerce SaaS Platform
+Size: 450 files, 85K LOC
+Languages: TypeScript (95%), CSS (3%), JSON (2%)
+Last Modified: 2 hours ago
+
+====================
+TECH STACK
+====================
+
+Frontend:
+  - React 19.1.1 (Server Components)
+  - Next.js 15.5.2 (App Router)
+  - TailwindCSS v4.1.13
+  - shadcn/ui components
+  - Framer Motion 11.x
+
+Backend:
+  - Next.js API Routes
+  - tRPC 11.x (type-safe APIs)
+  - Prisma 5.x (ORM)
+  - PostgreSQL 16
+
+Authentication:
+  - better-auth v1.3.9
+  - JWT + Refresh tokens
+  - OAuth2 (Google, GitHub)
+
+Testing:
+  - Vitest (unit/integration)
+  - Playwright (E2E)
+  - React Testing Library
+
+Tooling:
+  - TypeScript 5.3 (strict mode)
+  - Biome (linting/formatting)
+  - pnpm (package manager)
+
+====================
+ARCHITECTURE
+====================
+
+Pattern: Layered Architecture
+
+1. Presentation Layer (app/)
+   - Route groups: (auth), (dashboard), (marketing)
+   - Server Components for data fetching
+   - Client Components for interactivity
+   - Layouts with nested routing
+
+2. API Layer (app/api/)
+   - tRPC routers (type-safe)
+   - REST endpoints (webhooks, public API)
+   - Middleware (auth, rate limiting)
+
+3. Business Logic (lib/)
+   - Services: auth, payments, notifications
+   - Utilities: validation, formatting
+   - Types: shared interfaces
+
+4. Data Layer (prisma/)
+   - Schema: 15 models
+   - Migrations: 23 migrations
+   - Seeders: test data
+
+Key Directories:
+  app/           - Next.js routes (78 files)
+  components/    - React components (125 files)
+  lib/          - Business logic (45 files)
+  hooks/        - Custom React hooks (18 files)
+  prisma/       - Database schema (3 files)
+  tests/        - Test files (89 files)
+
+====================
+CODE PATTERNS
+====================
+
+Detected Patterns:
+
+1. Server Component Data Fetching:
+```
+```text
+2. Form Handling (react-hook-form + Zod):
+```
+```text
+3. tRPC API Calls:
+```
+```text
+4. Error Boundaries:
+```
+```text
+5. Authentication Guards:
+```
+```text
+====================
+DEPENDENCY ANALYSIS
+====================
+
+High Coupling (Needs Refactoring):
+
+- auth.service.ts → 23 files depend on it
+- db/client.ts → 45 files import directly
+- utils/validation.ts → 18 files
+
+Low Coupling (Good):
+
+- components/ui/\* → Self-contained
+- hooks/\* → Independent
+
+Circular Dependencies: None detected ✓
+
+External Dependencies:
+
+- Production: 45 packages
+- Development: 28 packages
+- Total bundle size: 287 KB (gzipped)
+
+Heaviest Dependencies:
+
+1. next: 105 KB
+2. react-dom: 42 KB
+3. framer-motion: 38 KB
+4. @trpc/client: 28 KB
+
+====================
+CODE QUALITY
+====================
+
+Metrics:
+
+- Test Coverage: 78% (target: 80%)
+- TypeScript Errors: 0
+- Linting Warnings: 3
+- Duplicate Code: 2.1%
+- Complexity (avg): 4.2 (good)
+
+Technical Debt:
+🟡 Medium Debt (Manageable)
+
+Priority Issues:
+
+1. auth.service.ts high coupling (23 dependencies)
+2. 3 components exceed 250 lines
+3. 5 files missing JSDoc comments
+4. 2% test coverage gap
+
+Strengths:
+✓ Consistent naming conventions
+✓ Strong TypeScript usage (strict mode)
+✓ Good file organization
+✓ Modern React patterns
+✓ Proper error handling
+
+====================
+RECOMMENDATIONS
+====================
+
+1. Refactor auth.service.ts
+   - Extract to smaller services
+   - Reduce coupling (23 → <10 dependencies)
+
+2. Increase test coverage
+   - Add tests for: payments/, notifications/
+   - Target: 78% → 80%
+
+3. Component splitting
+   - Break down large components (>250 lines)
+   - Extract reusable logic to hooks
+
+4. Documentation
+   - Add JSDoc to public APIs
+   - Update architecture diagrams
+
+5. Performance
+   - Consider code splitting for framer-motion
+   - Lazy load heavy components
+
+====================
+SUMMARY
+====================
+
+Codebase Health: 🟢 Healthy
+
+The codebase is well-structured with modern patterns.
+Minor technical debt is manageable. Ready for feature
+development with recommended refactorings noted above.
+
+Key Findings:
+
+- Strong TypeScript foundation
+- Consistent React 19 patterns
+- Good test coverage (close to target)
+- Manageable technical debt
+- Clear architecture
+
+Recommended Next Steps:
+
+1. Address auth.service.ts coupling
+2. Reach 80% test coverage
+3. Proceed with feature development
+```
+```bash
+/context-analyzer --module=authentication --detailed
+```
+```text
+[Authentication Module Analysis]
+
+====================
+MODULE OVERVIEW
+====================
+
+Location: lib/auth/
+Files: 8 files
+Lines: 1,250 LOC
+Tests: 12 test files (85% coverage)
+
+====================
+FILE STRUCTURE
+====================
+
+lib/auth/
+  ├── index.ts              (Exports)
+  ├── auth.service.ts       (Core logic)
+  ├── jwt.util.ts          (Token handling)
+  ├── password.util.ts     (Hashing)
+  ├── session.manager.ts   (Session mgmt)
+  ├── oauth.provider.ts    (OAuth flow)
+  ├── middleware.ts        (Auth middleware)
+  └── types.ts            (TypeScript types)
+
+====================
+DEPENDENCIES
+====================
+
+External:
+  - bcrypt: Password hashing
+  - jsonwebtoken: JWT creation/verification
+  - better-auth: Core auth library
+
+Internal:
+  → db/client.ts (Database access)
+  → lib/email/service.ts (Verification emails)
+  → lib/config/env.ts (Environment vars)
+
+Dependent Modules:
+  ← app/api/auth/* (23 files)
+  ← middleware.ts (Route protection)
+  ← app/(dashboard)/* (18 files)
+
+====================
+KEY PATTERNS
+====================
+
+1. JWT Strategy:
+   - Access token: 15 min expiry
+   - Refresh token: 7 days expiry
+   - Stored in HTTP-only cookies
+
+2. Password Security:
+   - bcrypt with cost factor 12
+   - Password validation: min 8 chars, complexity rules
+
+3. OAuth Flow:
+   - Supported: Google, GitHub
+   - PKCE flow for security
+   - State parameter for CSRF protection
+
+4. Session Management:
+   - Server-side session validation
+   - Automatic refresh on activity
+   - Logout clears all tokens
+
+====================
+SECURITY ANALYSIS
+====================
+
+✓ Strengths:
+  - HTTP-only secure cookies
+  - CSRF protection
+  - Rate limiting on auth endpoints
+  - Password complexity requirements
+  - JWT expiration enforced
+
+⚠️  Recommendations:
+  - Add 2FA support
+  - Implement session device tracking
+  - Add anomaly detection
+
+====================
+TESTING
+====================
+
+Coverage: 85%
+
+Test Types:
+  - Unit: auth.service.test.ts (42 tests)
+  - Integration: api/auth.test.ts (18 tests)
+  - E2E: auth-flow.spec.ts (8 tests)
+
+Gaps:
+  - OAuth error handling (not tested)
+  - Token refresh edge cases (partial)
+
+====================
+REFACTORING NEEDS
+====================
+
+Priority: Medium
+
+Recommendations:
+1. Split auth.service.ts (currently 350 lines)
+   - Extract JWT logic → jwt.service.ts
+   - Extract OAuth → oauth.service.ts
+
+2. Reduce coupling (23 dependencies)
+   - Use dependency injection
+   - Create interfaces for external services
+
+3. Add JSDoc documentation
+   - Document public API methods
+   - Add usage examples
+
+Estimated Effort: 2-3 days
+```
+```bash
+/context-analyzer --directory=src/components/dashboard --architecture
+```
+```text
+[Pre-Refactoring Analysis]
+
+Goal: Refactor dashboard components
+
+Current State:
+  Files: 25 components
+  LOC: 3,450 lines
+  Complexity: High (avg 6.8)
+  Dependencies: 45 internal imports
+
+Architecture Issues:
+  1. Prop drilling (5 levels deep)
+  2. State duplication (3 components)
+  3. Large components (4 files >200 lines)
+  4. Tight coupling (shared state)
+
+Recommended Approach:
+  1. Extract state to Zustand store
+  2. Split large components:
+     - DashboardOverview (280 lines) → 3 components
+     - UserTable (320 lines) → 4 components
+  3. Create composable sub-components
+  4. Use context for shared data
+
+Impact Analysis:
+  - Affected files: 25
+  - Dependent modules: 8
+  - Test files to update: 18
+  - Estimated time: 1 week
+
+Ready to proceed? (y/n)
+```
+
+## Use Cases
+### 1. Onboarding New Developers
+
+```bash
+/context-analyzer --full --summary
+
+# New developer gets:
+- Tech stack overview
+- Architecture understanding
+- Code patterns
+- Key files to know
+
+Result: Productive in hours, not days
+```
+
+### 2. Pre-Refactoring Planning
+
+```bash
+/context-analyzer --module=payments --dependencies
+
+# Before refactoring, understand:
+- What depends on this module
+- Internal coupling
+- Impact of changes
+- Test coverage
+
+Result: Informed refactoring decisions
+```
+
+### 3. Technical Debt Assessment
+
+```bash
+/context-analyzer --full --quality
+
+# Management gets:
+- Code quality metrics
+- Technical debt level
+- Refactoring priorities
+- Estimated effort
+
+Result: Data-driven planning
+```
+
+### 4. Architecture Documentation
+
+```bash
+/context-analyzer --architecture --save-to=ARCHITECTURE.md
+
+# Auto-generate:
+- Architecture diagrams
+- Module relationships
+- Data flow
+- Deployment structure
+
+Result: Up-to-date documentation
+```
+```bash
+/context-analyzer --full --summary
+
+# New developer gets:
+- Tech stack overview
+- Architecture understanding
+- Code patterns
+- Key files to know
+
+Result: Productive in hours, not days
+```
+```bash
+/context-analyzer --module=payments --dependencies
+
+# Before refactoring, understand:
+- What depends on this module
+- Internal coupling
+- Impact of changes
+- Test coverage
+
+Result: Informed refactoring decisions
+```
+```bash
+/context-analyzer --full --quality
+
+# Management gets:
+- Code quality metrics
+- Technical debt level
+- Refactoring priorities
+- Estimated effort
+
+Result: Data-driven planning
+```
+```bash
+/context-analyzer --architecture --save-to=ARCHITECTURE.md
+
+# Auto-generate:
+- Architecture diagrams
+- Module relationships
+- Data flow
+- Deployment structure
+
+Result: Up-to-date documentation
+```
+
+## Best Practices
+1. **Run Before Major Changes**
+   - Understand current state
+   - Identify affected areas
+   - Plan migration path
+
+2. **Regular Health Checks**
+   - Monthly quality analysis
+   - Track metrics over time
+   - Identify degradation early
+
+3. **Onboarding Tool**
+   - Run for new team members
+   - Generate onboarding docs
+   - Update as project evolves
+
+4. **Save Reports**
+   - Version control analysis
+   - Track improvements
+   - Share with team
+
+## Integration with Other Commands
+### Context Analysis → Plan Mode
+
+```bash
+/context-analyzer --module=authentication --dependencies
+# Understand current architecture
+
+/plan-mode "Refactor authentication module" --think-harder
+# Create detailed refactoring plan
+```
+
+### Context Analysis → TDD
+
+```bash
+/context-analyzer --file=payment.service.ts --quality
+# Identify untested code paths
+
+/tdd-workflow "Add tests for payment edge cases" --unit
+# Implement missing tests
+```
+
+### Context Analysis → Subagents
+
+```bash
+/context-analyzer --full --quality
+# Identify refactoring needs
+
+/subagent-create --refactoring-specialist --code-reviewer
+# Deploy specialists for refactoring
+```
+```bash
+/context-analyzer --module=authentication --dependencies
+# Understand current architecture
+
+/plan-mode "Refactor authentication module" --think-harder
+# Create detailed refactoring plan
+```
+```bash
+/context-analyzer --file=payment.service.ts --quality
+# Identify untested code paths
+
+/tdd-workflow "Add tests for payment edge cases" --unit
+# Implement missing tests
+```
+```bash
+/context-analyzer --full --quality
+# Identify refactoring needs
+
+/subagent-create --refactoring-specialist --code-reviewer
+# Deploy specialists for refactoring
+```

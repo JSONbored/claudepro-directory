@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "key": "tools:sourcegraph-cody",
+  "entry": {
+    "category": "tools",
+    "slug": "sourcegraph-cody",
+    "title": "Sourcegraph Cody",
+    "description": "AI coding assistant built around large codebase search, context retrieval, chat, and editor integrations.",
+    "seoTitle": "Sourcegraph Cody for codebase-aware AI development",
+    "seoDescription": "Sourcegraph Cody helps developers query, understand, and edit large codebases with AI context and search. HeyClaude adds source links, install steps,...",
+    "author": "Sourcegraph",
+    "dateAdded": "2026-04-27",
+    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+    "tags": [
+      "ai-coding",
+      "code-search"
+    ],
+    "keywords": [
+      "codebase ai",
+      "sourcegraph cody",
+      "ai-coding",
+      "code-search",
+      "tools",
+      "claude",
+      "heyclaude"
+    ],
+    "documentationUrl": "https://sourcegraph.com/docs/cody",
+    "websiteUrl": "https://sourcegraph.com/cody",
+    "brandName": "Sourcegraph",
+    "brandDomain": "sourcegraph.com",
+    "brandIconUrl": "/api/brand-assets/icon/sourcegraph.com",
+    "brandAssetSource": "brandfetch",
+    "pricingModel": "freemium",
+    "disclosure": "editorial",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Web, macOS, Windows, Linux",
+    "cardDescription": "AI coding assistant for large codebase context.",
+    "installable": false,
+    "hasPrerequisites": false,
+    "hasTroubleshooting": false,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Editorial notes\n\nCody is strongest when repository-scale context and search quality matter more than one-off prompt completion.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+    "sections": [
+      {
+        "title": "Editorial notes",
+        "id": "editorial-notes",
+        "markdown": "Cody is strongest when repository-scale context and search quality matter more than one-off prompt completion.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Disclosure",
+        "id": "disclosure",
+        "markdown": "Editorial listing. No paid placement or affiliate link is used.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Editorial notes",
+        "id": "editorial-notes"
+      },
+      {
+        "depth": 2,
+        "text": "Disclosure",
+        "id": "disclosure"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/tools/sourcegraph-cody.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/sourcegraph-cody.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 3,
+    "sourceUrls": [
+      "https://sourcegraph.com/docs/cody",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/sourcegraph-cody.mdx",
+      "https://sourcegraph.com/cody"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

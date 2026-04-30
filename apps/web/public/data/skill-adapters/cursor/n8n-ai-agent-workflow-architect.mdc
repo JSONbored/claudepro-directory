@@ -1,0 +1,14 @@
+---
+description: "Build high-value n8n workflows that automate real business tasks with robust guardrails, retries, and handoff logic."
+globs:
+alwaysApply: false
+---
+# n8n AI Agent Workflow Architect Skill
+Design production-safe n8n automations with AI agents, retries, human approval gates, and observable error handling.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/n8n-ai-agent-workflow-architect.zip -o n8n-ai-agent-workflow-architect.zip && unzip -o n8n-ai-agent-workflow-architect.zip -d ./n8n-ai-agent-workflow-architect
+```
+## Source
+https://heyclau.de/downloads/skills/n8n-ai-agent-workflow-architect.zip

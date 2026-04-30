@@ -1,0 +1,1083 @@
+# Performance Benchmark Report - Hooks
+URL: https://heyclau.de/hooks/performance-benchmark-report
+Category: hooks
+Author: JSONbored
+Date added: 2025-09-19
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/performance-benchmark-report.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/hooks/performance-benchmark-report
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/performance-benchmark-report.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
+## Summary
+Runs performance benchmarks and generates comparison report when session ends.
+## Tags
+- performance
+- benchmarking
+- stop-hook
+- testing
+- metrics
+## Content
+## Features
+- Multi-language performance benchmarking for Node.js, Python, Go, and Rust including Node.js performance benchmarks (npm benchmark scripts detection and execution, bundle size analysis with webpack-bundle-analyzer/vite-bundle-visualizer, build performance measurement, test suite performance analysis), Python performance benchmarks (pytest-benchmark integration with JSON output, timeit benchmark execution, memory profiling with psutil, Python performance metrics), Go performance benchmarks (go test -bench with -benchmem flag, build performance measurement, benchmark memory analysis, Go performance profiling), Rust performance benchmarks (cargo bench execution, release build performance, test performance analysis, Rust benchmark suite), and project type detection (package.json for Node.js, requirements.txt/pyproject.toml for Python, go.mod for Go, Cargo.toml for Rust)
+- Lighthouse web performance auditing with detailed Core Web Vitals including Lighthouse integration (automated Lighthouse audits with headless Chrome, JSON output generation for programmatic analysis, quiet mode execution, Chrome flags configuration), Core Web Vitals measurement (Largest Contentful Paint LCP measurement, First Input Delay FID measurement, Cumulative Layout Shift CLS measurement, First Contentful Paint FCP measurement, Time to Interactive TTI measurement), performance scoring (Performance score 0-100 calculation, accessibility score measurement, best practices score evaluation, SEO score assessment), and web performance recommendations (optimization suggestions for performance improvements, resource hints recommendations, caching strategies suggestions, image optimization recommendations)
+- Bundle size analysis and optimization recommendations including bundle size measurement (webpack-bundle-analyzer for webpack projects, vite-bundle-visualizer for Vite projects, rollup-plugin-visualizer for Rollup projects, bundle size calculation), bundle size tracking (historical bundle size comparison across sessions, size regression detection with threshold-based alerts, bundle size trend analysis), optimization recommendations (code splitting suggestions for reducing bundle size, tree shaking recommendations for unused code removal, lazy loading suggestions for on-demand loading, dynamic import recommendations), and bundle size reporting (detailed bundle breakdown by chunk, dependency size analysis, bundle composition visualization, size impact assessment)
+- Database query performance monitoring and analysis including database connection testing (PostgreSQL connection test with latency measurement, MySQL connection test with query execution, connection pool testing, database availability checks), query performance analysis (query execution time measurement, slow query detection with threshold-based filtering, query optimization suggestions, query plan analysis), and database performance metrics (connection pool metrics monitoring, transaction metrics tracking, query cache metrics analysis, database performance trends)
+- Load testing integration with Artillery, k6, and Apache Bench including Artillery integration (HTTP load testing with scenario-based testing, WebSocket load testing for real-time applications, performance metrics collection, Artillery configuration detection), k6 integration (JavaScript-based load testing with custom scripts, performance metrics collection with detailed statistics, threshold-based testing with pass/fail criteria, k6 script detection and execution), Apache Bench integration (simple HTTP load testing with concurrent requests, request rate measurement, response time statistics, ab command availability detection), and load test reporting (response time statistics with percentiles, throughput metrics calculation, error rate analysis, load test summary generation)
+- Historical benchmark tracking with trend analysis including benchmark history storage (JSON report storage in .performance-reports directory, timestamp-based organization with session IDs, session-based tracking with unique identifiers, report file management), trend analysis (performance regression detection with statistical significance, improvement tracking with percentage calculations, statistical analysis with baseline comparison, performance trend visualization), comparison reporting (previous run comparison with duration differences, percentage change calculation with positive/negative indicators, performance trend visualization with up/down arrows, detailed comparison metrics), and historical data management (report retention policies for storage management, report cleanup for disk space management, data aggregation for summary statistics, historical data analysis)
+- Performance regression detection and alerting including regression detection (threshold-based detection with configurable thresholds, statistical significance testing for reliable detection, baseline comparison with previous runs, regression severity classification), alerting mechanisms (console alerts with emoji indicators, file-based alerts for CI/CD integration, integration-ready alerts for external systems, alert severity levels), regression reporting (detailed regression reports with affected benchmarks, severity classification with critical/high/medium/low levels, regression impact assessment, remediation suggestions), and regression prevention (CI/CD integration with automated blocking, performance gates with threshold enforcement, pre-merge performance checks, automated performance monitoring)
+- Custom benchmark suite execution and reporting including custom benchmark configuration (benchmark script detection in package.json, custom timeout configuration per benchmark, benchmark filtering with include/exclude patterns, project-specific benchmark configuration), benchmark execution (timed benchmark execution with duration tracking, timeout protection with configurable timeouts, error handling with graceful failure, benchmark isolation), benchmark reporting (structured JSON reports with comprehensive metrics, human-readable summaries with emoji indicators, benchmark statistics with pass/fail counts, detailed benchmark results), and benchmark customization (project-specific benchmarks for custom workflows, language-specific benchmarks for multi-language projects, framework-specific benchmarks for framework optimization, custom benchmark integration)
+
+## Use Cases
+- Continuous performance monitoring and regression detection automatically running performance benchmarks on session end, detecting performance regressions with statistical significance, and providing automated alerts for performance degradation
+- Development workflow optimization with automated benchmarking automatically integrating performance benchmarks into development workflows, providing performance feedback during development, and enabling performance-driven development practices
+- Performance-driven development with regular measurement cycles automatically running benchmarks at regular intervals, tracking performance trends over time, and providing performance metrics for development decisions
+- Team performance awareness and improvement tracking automatically generating performance reports for team visibility, tracking performance improvements and regressions, and providing performance metrics for team discussions
+- Production readiness assessment with comprehensive performance analysis automatically assessing application performance before production deployment, identifying performance bottlenecks, and providing performance optimization recommendations
+- Development workflow integration seamlessly integrating performance benchmarking into development workflows without manual benchmark execution or separate performance testing tools
+
+## Installation
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/performance-benchmark-report.sh
+3. Make executable: chmod +x .claude/hooks/performance-benchmark-report.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- Project-specific tools (npm, pytest, go, cargo) installed
+- Performance tools (Lighthouse, hyperfine, ab) optional
+- jq (optional, for JSON parsing)
+
+## Hook Configuration
+```json
+{
+  "hooks": {
+    "stop": {
+      "script": "./.claude/hooks/performance-benchmark-report.sh",
+      "timeout": 120000
+    }
+  }
+}
+```
+```json
+{
+  "hooks": {
+    "stop": {
+      "script": "./.claude/hooks/performance-benchmark-report.sh",
+      "timeout": 120000
+    }
+  }
+}
+```
+
+## Hook Script
+```bash
+#!/usr/bin/env bash
+
+# Performance Benchmark Report Hook
+# Runs comprehensive performance benchmarks when the session ends
+
+echo "⚡ Performance Benchmark Report" >&2
+echo "=============================" >&2
+
+# Initialize benchmark tracking
+BENCHMARKS_RUN=0
+BENCHMARKS_PASSED=0
+BENCHMARKS_FAILED=0
+TOTAL_DURATION=0
+START_TIME=$(date +%s)
+BENCHMARK_RESULTS_DIR=".performance-reports"
+TIMESTAMP=$(date +"%Y-%m-%d-%H-%M-%S")
+REPORT_FILE="$BENCHMARK_RESULTS_DIR/benchmark-$TIMESTAMP.json"
+
+# Create benchmark results directory
+mkdir -p "$BENCHMARK_RESULTS_DIR"
+
+# Function to report benchmark results
+report_benchmark() {
+  local status="$1"
+  local name="$2"
+  local duration="$3"
+  local details="$4"
+
+  BENCHMARKS_RUN=$((BENCHMARKS_RUN + 1))
+
+  case "$status" in
+    "PASS")
+      echo "✅ PASS: $name (${duration}s)" >&2
+      BENCHMARKS_PASSED=$((BENCHMARKS_PASSED + 1))
+      ;;
+    "FAIL")
+      echo "❌ FAIL: $name (${duration}s)" >&2
+      BENCHMARKS_FAILED=$((BENCHMARKS_FAILED + 1))
+      ;;
+    "SKIP")
+      echo "⏭️ SKIP: $name - $details" >&2
+      ;;
+    "INFO")
+      echo "ℹ️ INFO: $name" >&2
+      ;;
+  esac
+
+  if [ -n "$duration" ] && [ "$duration" != "0" ]; then
+    TOTAL_DURATION=$((TOTAL_DURATION + duration))
+  fi
+}
+
+# Function to run command with timing
+run_timed_benchmark() {
+  local name="$1"
+  local command="$2"
+  local timeout_seconds="${3:-60}"
+
+  echo "   🏃 Running: $name..." >&2
+
+  local start_time=$(date +%s)
+  local output_file="/tmp/benchmark_${name//[^a-zA-Z0-9]/_}_$$"
+
+  if timeout "${timeout_seconds}s" bash -c "$command" > "$output_file" 2>&1; then
+    local end_time=$(date +%s)
+    local duration=$((end_time - start_time))
+    report_benchmark "PASS" "$name" "$duration"
+
+    # Show brief output
+    if [ -s "$output_file" ]; then
+      echo "     📊 Results:" >&2
+      head -5 "$output_file" | while read line; do
+        echo "       $line" >&2
+      done
+    fi
+  else
+    local end_time=$(date +%s)
+    local duration=$((end_time - start_time))
+    report_benchmark "FAIL" "$name" "$duration"
+
+    # Show error output
+    if [ -s "$output_file" ]; then
+      echo "     ❌ Error:" >&2
+      tail -3 "$output_file" | while read line; do
+        echo "       $line" >&2
+      done
+    fi
+  fi
+
+  rm -f "$output_file"
+}
+
+# Function to detect project type and language
+detect_project_type() {
+  local project_types=()
+
+  [ -f "package.json" ] && project_types+=("nodejs")
+  [ -f "requirements.txt" ] || [ -f "pyproject.toml" ] && project_types+=("python")
+  [ -f "go.mod" ] && project_types+=("go")
+  [ -f "Cargo.toml" ] && project_types+=("rust")
+  [ -f "composer.json" ] && project_types+=("php")
+  [ -f "Gemfile" ] && project_types+=("ruby")
+  [ -f "pom.xml" ] || [ -f "build.gradle" ] && project_types+=("java")
+
+  echo "${project_types[@]}"
+}
+
+# Initialize JSON report
+cat > "$REPORT_FILE" << EOF
+{
+  "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+  "session_id": "$(uuidgen 2>/dev/null || echo "session-$TIMESTAMP")",
+  "project_path": "$(pwd)",
+  "project_name": "$(basename "$(pwd)")",
+  "benchmarks": [
+EOF
+
+# Detect project types
+PROJECT_TYPES=($(detect_project_type))
+
+if [ ${#PROJECT_TYPES[@]} -eq 0 ]; then
+  report_benchmark "INFO" "No recognized project structure found"
+else
+  echo "   📊 Detected project types: ${PROJECT_TYPES[*]}" >&2
+fi
+
+# 1. Node.js Benchmarks
+if [[ " ${PROJECT_TYPES[*]} " =~ " nodejs " ]]; then
+  echo "📦 Node.js Performance Benchmarks" >&2
+
+  # Check for benchmark scripts in package.json
+  if [ -f "package.json" ]; then
+    BENCHMARK_SCRIPTS=$(jq -r '.scripts | to_entries[] | select(.key | test("benchmark|perf")) | .key' package.json 2>/dev/null || echo "")
+
+    if [ -n "$BENCHMARK_SCRIPTS" ]; then
+      echo "$BENCHMARK_SCRIPTS" | while read script; do
+        run_timed_benchmark "npm run $script" "npm run $script" 180
+      done
+    else
+      report_benchmark "SKIP" "Node.js benchmarks" "No benchmark scripts found in package.json"
+    fi
+
+    # Bundle size analysis
+    if command -v npx &> /dev/null; then
+      if [ -f "dist/" ] || [ -f "build/" ]; then
+        run_timed_benchmark "Bundle size analysis" "npx bundlesize" 60
+      fi
+
+      # Build performance
+      if jq -e '.scripts.build' package.json >/dev/null 2>&1; then
+        run_timed_benchmark "Build performance" "npm run build" 300
+      fi
+
+      # Test performance
+      if jq -e '.scripts.test' package.json >/dev/null 2>&1; then
+        run_timed_benchmark "Test suite performance" "npm test" 180
+      fi
+    fi
+  fi
+fi
+
+# 2. Python Benchmarks
+if [[ " ${PROJECT_TYPES[*]} " =~ " python " ]]; then
+  echo "🐍 Python Performance Benchmarks" >&2
+
+  # pytest-benchmark
+  if command -v pytest &> /dev/null && ([ -f "pytest.ini" ] || [ -f "pyproject.toml" ]); then
+    run_timed_benchmark "pytest benchmarks" "pytest --benchmark-only --benchmark-json=/tmp/pytest_benchmark.json" 300
+  fi
+
+  # Python timeit benchmarks
+  if [ -f "benchmark.py" ]; then
+    run_timed_benchmark "Python benchmark.py" "python benchmark.py" 120
+  fi
+
+  # Memory profiling
+  if command -v python &> /dev/null && command -v pip &> /dev/null; then
+    run_timed_benchmark "Memory profiling" "python -c 'import psutil; print(f\"Memory usage: {psutil.virtual_memory().percent}%\")'" 10
+  fi
+fi
+
+# 3. Go Benchmarks
+if [[ " ${PROJECT_TYPES[*]} " =~ " go " ]]; then
+  echo "🐹 Go Performance Benchmarks" >&2
+
+  if command -v go &> /dev/null; then
+    # Go test benchmarks
+    run_timed_benchmark "Go benchmarks" "go test -bench=. -benchmem" 180
+
+    # Build performance
+    run_timed_benchmark "Go build performance" "go build -o /tmp/go_build_test" 60
+
+    # Clean up
+    rm -f /tmp/go_build_test
+  fi
+fi
+
+# 4. Rust Benchmarks
+if [[ " ${PROJECT_TYPES[*]} " =~ " rust " ]]; then
+  echo "🦀 Rust Performance Benchmarks" >&2
+
+  if command -v cargo &> /dev/null; then
+    # Cargo bench
+    run_timed_benchmark "Cargo benchmarks" "cargo bench" 300
+
+    # Build performance
+    run_timed_benchmark "Cargo build performance" "cargo build --release" 180
+
+    # Test performance
+    run_timed_benchmark "Cargo test performance" "cargo test" 120
+  fi
+fi
+
+# 5. Web Performance Benchmarks
+echo "🌐 Web Performance Analysis" >&2
+
+# Check if this looks like a web project
+WEB_PROJECT=false
+if [ -f "package.json" ] && grep -q '"next"\\|"react"\\|"vue"\\|"angular"\\|"express"\\|"koa"' package.json; then
+  WEB_PROJECT=true
+elif [ -f "index.html" ] || [ -d "public" ] || [ -d "static" ]; then
+  WEB_PROJECT=true
+fi
+
+if [ "$WEB_PROJECT" = true ]; then
+  # Lighthouse audit (if available)
+  if command -v lighthouse &> /dev/null; then
+    # Check for running dev server
+    if curl -s http://localhost:3000 >/dev/null 2>&1; then
+      run_timed_benchmark "Lighthouse audit (localhost:3000)" "lighthouse http://localhost:3000 --output json --quiet --chrome-flags='--headless' --no-sandbox" 120
+    elif curl -s http://localhost:8080 >/dev/null 2>&1; then
+      run_timed_benchmark "Lighthouse audit (localhost:8080)" "lighthouse http://localhost:8080 --output json --quiet --chrome-flags='--headless' --no-sandbox" 120
+    else
+      report_benchmark "SKIP" "Lighthouse audit" "No local server detected"
+    fi
+  else
+    report_benchmark "SKIP" "Lighthouse audit" "Lighthouse not installed"
+  fi
+
+  # Bundle analyzer (if available)
+  if command -v npx &> /dev/null && [ -f "package.json" ]; then
+    if [ -d "dist" ] || [ -d "build" ] || [ -d ".next" ]; then
+      run_timed_benchmark "Bundle analysis" "npx webpack-bundle-analyzer --help >/dev/null && echo 'Bundle analyzer available'" 10
+    fi
+  fi
+else
+  report_benchmark "SKIP" "Web performance" "Not a web project"
+fi
+
+# 6. Database Benchmarks
+echo "🗄️ Database Performance Analysis" >&2
+
+# Check for database connections
+if [ -f ".env" ] && grep -q 'DATABASE_URL\\|DB_' .env; then
+  report_benchmark "INFO" "Database configuration detected"
+
+  # Simple connection test
+  if command -v psql &> /dev/null && grep -q 'postgres' .env 2>/dev/null; then
+    run_timed_benchmark "PostgreSQL connection test" "timeout 10s psql \"$(grep DATABASE_URL .env | cut -d'=' -f2)\" -c 'SELECT 1;'" 15
+  fi
+
+  if command -v mysql &> /dev/null && grep -q 'mysql' .env 2>/dev/null; then
+    run_timed_benchmark "MySQL connection test" "timeout 10s mysql --execute='SELECT 1;'" 15
+  fi
+else
+  report_benchmark "SKIP" "Database benchmarks" "No database configuration found"
+fi
+
+# 7. Load Testing (if tools available)
+echo "🔥 Load Testing" >&2
+
+if command -v hyperfine &> /dev/null; then
+  # Hyperfine command benchmarks
+  if [ -f "package.json" ]; then
+    if jq -e '.scripts.start' package.json >/dev/null 2>&1; then
+      run_timed_benchmark "Command timing analysis" "hyperfine --warmup 1 'npm run start --version' 'npm run build --help'" 30
+    fi
+  fi
+else
+  report_benchmark "SKIP" "Hyperfine benchmarks" "Hyperfine not installed"
+fi
+
+if command -v ab &> /dev/null; then
+  # Apache Bench (if server is running)
+  if curl -s http://localhost:3000 >/dev/null 2>&1; then
+    run_timed_benchmark "Apache Bench load test" "ab -n 100 -c 10 http://localhost:3000/" 60
+  fi
+else
+  report_benchmark "SKIP" "Apache Bench" "ab not installed"
+fi
+
+# 8. Historical Comparison
+echo "📈 Historical Performance Analysis" >&2
+
+# Find previous benchmark reports
+PREVIOUS_REPORTS=($(ls -t "$BENCHMARK_RESULTS_DIR"/benchmark-*.json 2>/dev/null | head -5))
+
+if [ ${#PREVIOUS_REPORTS[@]} -gt 1 ]; then
+  LATEST_PREVIOUS="${PREVIOUS_REPORTS[1]}"
+  echo "   📊 Comparing with previous run: $(basename "$LATEST_PREVIOUS")" >&2
+
+  if [ -f "$LATEST_PREVIOUS" ] && command -v jq &> /dev/null; then
+    PREV_DURATION=$(jq -r '.total_duration // 0' "$LATEST_PREVIOUS" 2>/dev/null || echo "0")
+
+    if [ "$PREV_DURATION" -gt 0 ] && [ "$TOTAL_DURATION" -gt 0 ]; then
+      DURATION_DIFF=$((TOTAL_DURATION - PREV_DURATION))
+      PERCENT_CHANGE=$(echo "scale=1; $DURATION_DIFF * 100 / $PREV_DURATION" | bc -l 2>/dev/null || echo "0")
+
+      if [ "$DURATION_DIFF" -gt 0 ]; then
+        echo "   ⬆️ Performance regression: +${PERCENT_CHANGE}% slower" >&2
+      elif [ "$DURATION_DIFF" -lt 0 ]; then
+        echo "   ⬇️ Performance improvement: ${PERCENT_CHANGE#-}% faster" >&2
+      else
+        echo "   ➡️ Performance unchanged" >&2
+      fi
+    fi
+  fi
+else
+  echo "   📋 No previous benchmarks found for comparison" >&2
+fi
+
+# Complete JSON report
+END_TIME=$(date +%s)
+SESSION_DURATION=$((END_TIME - START_TIME))
+
+cat >> "$REPORT_FILE" << EOF
+  ],
+  "summary": {
+    "benchmarks_run": $BENCHMARKS_RUN,
+    "benchmarks_passed": $BENCHMARKS_PASSED,
+    "benchmarks_failed": $BENCHMARKS_FAILED,
+    "total_duration": $TOTAL_DURATION,
+    "session_duration": $SESSION_DURATION
+  },
+  "project_types": [$(printf '"%s",' "${PROJECT_TYPES[@]}" | sed 's/,$//')]
+}
+EOF
+
+# 9. Generate Final Report
+echo "" >&2
+echo "📋 Performance Benchmark Summary" >&2
+echo "================================" >&2
+echo "   🏃 Benchmarks run: $BENCHMARKS_RUN" >&2
+echo "   ✅ Passed: $BENCHMARKS_PASSED" >&2
+echo "   ❌ Failed: $BENCHMARKS_FAILED" >&2
+echo "   ⏱️ Total benchmark time: ${TOTAL_DURATION}s" >&2
+echo "   📊 Session duration: ${SESSION_DURATION}s" >&2
+echo "   📄 Report saved: $REPORT_FILE" >&2
+
+# Performance assessment
+if [ "$BENCHMARKS_FAILED" -eq 0 ] && [ "$BENCHMARKS_PASSED" -gt 0 ]; then
+  echo "   🎉 Status: All benchmarks passed" >&2
+elif [ "$BENCHMARKS_FAILED" -gt 0 ]; then
+  echo "   ⚠️ Status: Some benchmarks failed" >&2
+elif [ "$BENCHMARKS_RUN" -eq 0 ]; then
+  echo "   ℹ️ Status: No benchmarks configured" >&2
+else
+  echo "   ❓ Status: Mixed results" >&2
+fi
+
+echo "" >&2
+echo "💡 Performance Optimization Tips:" >&2
+echo "   • Run benchmarks regularly to catch regressions early" >&2
+echo "   • Set up CI/CD performance gates" >&2
+echo "   • Monitor Core Web Vitals for web applications" >&2
+echo "   • Profile memory usage and optimize bottlenecks" >&2
+echo "   • Use caching strategies to improve response times" >&2
+echo "   • Consider lazy loading and code splitting" >&2
+
+echo "⚡ Performance benchmark report complete" >&2
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+
+# Performance Benchmark Report Hook
+# Runs comprehensive performance benchmarks when the session ends
+
+echo "⚡ Performance Benchmark Report" >&2
+echo "=============================" >&2
+
+# Initialize benchmark tracking
+BENCHMARKS_RUN=0
+BENCHMARKS_PASSED=0
+BENCHMARKS_FAILED=0
+TOTAL_DURATION=0
+START_TIME=$(date +%s)
+BENCHMARK_RESULTS_DIR=".performance-reports"
+TIMESTAMP=$(date +"%Y-%m-%d-%H-%M-%S")
+REPORT_FILE="$BENCHMARK_RESULTS_DIR/benchmark-$TIMESTAMP.json"
+
+# Create benchmark results directory
+mkdir -p "$BENCHMARK_RESULTS_DIR"
+
+# Function to report benchmark results
+report_benchmark() {
+  local status="$1"
+  local name="$2"
+  local duration="$3"
+  local details="$4"
+
+  BENCHMARKS_RUN=$((BENCHMARKS_RUN + 1))
+
+  case "$status" in
+    "PASS")
+      echo "✅ PASS: $name (${duration}s)" >&2
+      BENCHMARKS_PASSED=$((BENCHMARKS_PASSED + 1))
+      ;;
+    "FAIL")
+      echo "❌ FAIL: $name (${duration}s)" >&2
+      BENCHMARKS_FAILED=$((BENCHMARKS_FAILED + 1))
+      ;;
+    "SKIP")
+      echo "⏭️ SKIP: $name - $details" >&2
+      ;;
+    "INFO")
+      echo "ℹ️ INFO: $name" >&2
+      ;;
+  esac
+
+  if [ -n "$duration" ] && [ "$duration" != "0" ]; then
+    TOTAL_DURATION=$((TOTAL_DURATION + duration))
+  fi
+}
+
+# Function to run command with timing
+run_timed_benchmark() {
+  local name="$1"
+  local command="$2"
+  local timeout_seconds="${3:-60}"
+
+  echo "   🏃 Running: $name..." >&2
+
+  local start_time=$(date +%s)
+  local output_file="/tmp/benchmark_${name//[^a-zA-Z0-9]/_}_$$"
+
+  if timeout "${timeout_seconds}s" bash -c "$command" > "$output_file" 2>&1; then
+    local end_time=$(date +%s)
+    local duration=$((end_time - start_time))
+    report_benchmark "PASS" "$name" "$duration"
+
+    # Show brief output
+    if [ -s "$output_file" ]; then
+      echo "     📊 Results:" >&2
+      head -5 "$output_file" | while read line; do
+        echo "       $line" >&2
+      done
+    fi
+  else
+    local end_time=$(date +%s)
+    local duration=$((end_time - start_time))
+    report_benchmark "FAIL" "$name" "$duration"
+
+    # Show error output
+    if [ -s "$output_file" ]; then
+      echo "     ❌ Error:" >&2
+      tail -3 "$output_file" | while read line; do
+        echo "       $line" >&2
+      done
+    fi
+  fi
+
+  rm -f "$output_file"
+}
+
+# Function to detect project type and language
+detect_project_type() {
+  local project_types=()
+
+  [ -f "package.json" ] && project_types+=("nodejs")
+  [ -f "requirements.txt" ] || [ -f "pyproject.toml" ] && project_types+=("python")
+  [ -f "go.mod" ] && project_types+=("go")
+  [ -f "Cargo.toml" ] && project_types+=("rust")
+  [ -f "composer.json" ] && project_types+=("php")
+  [ -f "Gemfile" ] && project_types+=("ruby")
+  [ -f "pom.xml" ] || [ -f "build.gradle" ] && project_types+=("java")
+
+  echo "${project_types[@]}"
+}
+
+# Initialize JSON report
+cat > "$REPORT_FILE" << EOF
+{
+  "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+  "session_id": "$(uuidgen 2>/dev/null || echo "session-$TIMESTAMP")",
+  "project_path": "$(pwd)",
+  "project_name": "$(basename "$(pwd)")",
+  "benchmarks": [
+EOF
+
+# Detect project types
+PROJECT_TYPES=($(detect_project_type))
+
+if [ ${#PROJECT_TYPES[@]} -eq 0 ]; then
+  report_benchmark "INFO" "No recognized project structure found"
+else
+  echo "   📊 Detected project types: ${PROJECT_TYPES[*]}" >&2
+fi
+
+# 1. Node.js Benchmarks
+if [[ " ${PROJECT_TYPES[*]} " =~ " nodejs " ]]; then
+  echo "📦 Node.js Performance Benchmarks" >&2
+
+  # Check for benchmark scripts in package.json
+  if [ -f "package.json" ]; then
+    BENCHMARK_SCRIPTS=$(jq -r '.scripts | to_entries[] | select(.key | test("benchmark|perf")) | .key' package.json 2>/dev/null || echo "")
+
+    if [ -n "$BENCHMARK_SCRIPTS" ]; then
+      echo "$BENCHMARK_SCRIPTS" | while read script; do
+        run_timed_benchmark "npm run $script" "npm run $script" 180
+      done
+    else
+      report_benchmark "SKIP" "Node.js benchmarks" "No benchmark scripts found in package.json"
+    fi
+
+    # Bundle size analysis
+    if command -v npx &> /dev/null; then
+      if [ -f "dist/" ] || [ -f "build/" ]; then
+        run_timed_benchmark "Bundle size analysis" "npx bundlesize" 60
+      fi
+
+      # Build performance
+      if jq -e '.scripts.build' package.json >/dev/null 2>&1; then
+        run_timed_benchmark "Build performance" "npm run build" 300
+      fi
+
+      # Test performance
+      if jq -e '.scripts.test' package.json >/dev/null 2>&1; then
+        run_timed_benchmark "Test suite performance" "npm test" 180
+      fi
+    fi
+  fi
+fi
+
+# 2. Python Benchmarks
+if [[ " ${PROJECT_TYPES[*]} " =~ " python " ]]; then
+  echo "🐍 Python Performance Benchmarks" >&2
+
+  # pytest-benchmark
+  if command -v pytest &> /dev/null && ([ -f "pytest.ini" ] || [ -f "pyproject.toml" ]); then
+    run_timed_benchmark "pytest benchmarks" "pytest --benchmark-only --benchmark-json=/tmp/pytest_benchmark.json" 300
+  fi
+
+  # Python timeit benchmarks
+  if [ -f "benchmark.py" ]; then
+    run_timed_benchmark "Python benchmark.py" "python benchmark.py" 120
+  fi
+
+  # Memory profiling
+  if command -v python &> /dev/null && command -v pip &> /dev/null; then
+    run_timed_benchmark "Memory profiling" "python -c 'import psutil; print(f\"Memory usage: {psutil.virtual_memory().percent}%\")'" 10
+  fi
+fi
+
+# 3. Go Benchmarks
+if [[ " ${PROJECT_TYPES[*]} " =~ " go " ]]; then
+  echo "🐹 Go Performance Benchmarks" >&2
+
+  if command -v go &> /dev/null; then
+    # Go test benchmarks
+    run_timed_benchmark "Go benchmarks" "go test -bench=. -benchmem" 180
+
+    # Build performance
+    run_timed_benchmark "Go build performance" "go build -o /tmp/go_build_test" 60
+
+    # Clean up
+    rm -f /tmp/go_build_test
+  fi
+fi
+
+# 4. Rust Benchmarks
+if [[ " ${PROJECT_TYPES[*]} " =~ " rust " ]]; then
+  echo "🦀 Rust Performance Benchmarks" >&2
+
+  if command -v cargo &> /dev/null; then
+    # Cargo bench
+    run_timed_benchmark "Cargo benchmarks" "cargo bench" 300
+
+    # Build performance
+    run_timed_benchmark "Cargo build performance" "cargo build --release" 180
+
+    # Test performance
+    run_timed_benchmark "Cargo test performance" "cargo test" 120
+  fi
+fi
+
+# 5. Web Performance Benchmarks
+echo "🌐 Web Performance Analysis" >&2
+
+# Check if this looks like a web project
+WEB_PROJECT=false
+if [ -f "package.json" ] && grep -q '"next"\\|"react"\\|"vue"\\|"angular"\\|"express"\\|"koa"' package.json; then
+  WEB_PROJECT=true
+elif [ -f "index.html" ] || [ -d "public" ] || [ -d "static" ]; then
+  WEB_PROJECT=true
+fi
+
+if [ "$WEB_PROJECT" = true ]; then
+  # Lighthouse audit (if available)
+  if command -v lighthouse &> /dev/null; then
+    # Check for running dev server
+    if curl -s http://localhost:3000 >/dev/null 2>&1; then
+      run_timed_benchmark "Lighthouse audit (localhost:3000)" "lighthouse http://localhost:3000 --output json --quiet --chrome-flags='--headless' --no-sandbox" 120
+    elif curl -s http://localhost:8080 >/dev/null 2>&1; then
+      run_timed_benchmark "Lighthouse audit (localhost:8080)" "lighthouse http://localhost:8080 --output json --quiet --chrome-flags='--headless' --no-sandbox" 120
+    else
+      report_benchmark "SKIP" "Lighthouse audit" "No local server detected"
+    fi
+  else
+    report_benchmark "SKIP" "Lighthouse audit" "Lighthouse not installed"
+  fi
+
+  # Bundle analyzer (if available)
+  if command -v npx &> /dev/null && [ -f "package.json" ]; then
+    if [ -d "dist" ] || [ -d "build" ] || [ -d ".next" ]; then
+      run_timed_benchmark "Bundle analysis" "npx webpack-bundle-analyzer --help >/dev/null && echo 'Bundle analyzer available'" 10
+    fi
+  fi
+else
+  report_benchmark "SKIP" "Web performance" "Not a web project"
+fi
+
+# 6. Database Benchmarks
+echo "🗄️ Database Performance Analysis" >&2
+
+# Check for database connections
+if [ -f ".env" ] && grep -q 'DATABASE_URL\\|DB_' .env; then
+  report_benchmark "INFO" "Database configuration detected"
+
+  # Simple connection test
+  if command -v psql &> /dev/null && grep -q 'postgres' .env 2>/dev/null; then
+    run_timed_benchmark "PostgreSQL connection test" "timeout 10s psql \"$(grep DATABASE_URL .env | cut -d'=' -f2)\" -c 'SELECT 1;'" 15
+  fi
+
+  if command -v mysql &> /dev/null && grep -q 'mysql' .env 2>/dev/null; then
+    run_timed_benchmark "MySQL connection test" "timeout 10s mysql --execute='SELECT 1;'" 15
+  fi
+else
+  report_benchmark "SKIP" "Database benchmarks" "No database configuration found"
+fi
+
+# 7. Load Testing (if tools available)
+echo "🔥 Load Testing" >&2
+
+if command -v hyperfine &> /dev/null; then
+  # Hyperfine command benchmarks
+  if [ -f "package.json" ]; then
+    if jq -e '.scripts.start' package.json >/dev/null 2>&1; then
+      run_timed_benchmark "Command timing analysis" "hyperfine --warmup 1 'npm run start --version' 'npm run build --help'" 30
+    fi
+  fi
+else
+  report_benchmark "SKIP" "Hyperfine benchmarks" "Hyperfine not installed"
+fi
+
+if command -v ab &> /dev/null; then
+  # Apache Bench (if server is running)
+  if curl -s http://localhost:3000 >/dev/null 2>&1; then
+    run_timed_benchmark "Apache Bench load test" "ab -n 100 -c 10 http://localhost:3000/" 60
+  fi
+else
+  report_benchmark "SKIP" "Apache Bench" "ab not installed"
+fi
+
+# 8. Historical Comparison
+echo "📈 Historical Performance Analysis" >&2
+
+# Find previous benchmark reports
+PREVIOUS_REPORTS=($(ls -t "$BENCHMARK_RESULTS_DIR"/benchmark-*.json 2>/dev/null | head -5))
+
+if [ ${#PREVIOUS_REPORTS[@]} -gt 1 ]; then
+  LATEST_PREVIOUS="${PREVIOUS_REPORTS[1]}"
+  echo "   📊 Comparing with previous run: $(basename "$LATEST_PREVIOUS")" >&2
+
+  if [ -f "$LATEST_PREVIOUS" ] && command -v jq &> /dev/null; then
+    PREV_DURATION=$(jq -r '.total_duration // 0' "$LATEST_PREVIOUS" 2>/dev/null || echo "0")
+
+    if [ "$PREV_DURATION" -gt 0 ] && [ "$TOTAL_DURATION" -gt 0 ]; then
+      DURATION_DIFF=$((TOTAL_DURATION - PREV_DURATION))
+      PERCENT_CHANGE=$(echo "scale=1; $DURATION_DIFF * 100 / $PREV_DURATION" | bc -l 2>/dev/null || echo "0")
+
+      if [ "$DURATION_DIFF" -gt 0 ]; then
+        echo "   ⬆️ Performance regression: +${PERCENT_CHANGE}% slower" >&2
+      elif [ "$DURATION_DIFF" -lt 0 ]; then
+        echo "   ⬇️ Performance improvement: ${PERCENT_CHANGE#-}% faster" >&2
+      else
+        echo "   ➡️ Performance unchanged" >&2
+      fi
+    fi
+  fi
+else
+  echo "   📋 No previous benchmarks found for comparison" >&2
+fi
+
+# Complete JSON report
+END_TIME=$(date +%s)
+SESSION_DURATION=$((END_TIME - START_TIME))
+
+cat >> "$REPORT_FILE" << EOF
+  ],
+  "summary": {
+    "benchmarks_run": $BENCHMARKS_RUN,
+    "benchmarks_passed": $BENCHMARKS_PASSED,
+    "benchmarks_failed": $BENCHMARKS_FAILED,
+    "total_duration": $TOTAL_DURATION,
+    "session_duration": $SESSION_DURATION
+  },
+  "project_types": [$(printf '"%s",' "${PROJECT_TYPES[@]}" | sed 's/,$//')]
+}
+EOF
+
+# 9. Generate Final Report
+echo "" >&2
+echo "📋 Performance Benchmark Summary" >&2
+echo "================================" >&2
+echo "   🏃 Benchmarks run: $BENCHMARKS_RUN" >&2
+echo "   ✅ Passed: $BENCHMARKS_PASSED" >&2
+echo "   ❌ Failed: $BENCHMARKS_FAILED" >&2
+echo "   ⏱️ Total benchmark time: ${TOTAL_DURATION}s" >&2
+echo "   📊 Session duration: ${SESSION_DURATION}s" >&2
+echo "   📄 Report saved: $REPORT_FILE" >&2
+
+# Performance assessment
+if [ "$BENCHMARKS_FAILED" -eq 0 ] && [ "$BENCHMARKS_PASSED" -gt 0 ]; then
+  echo "   🎉 Status: All benchmarks passed" >&2
+elif [ "$BENCHMARKS_FAILED" -gt 0 ]; then
+  echo "   ⚠️ Status: Some benchmarks failed" >&2
+elif [ "$BENCHMARKS_RUN" -eq 0 ]; then
+  echo "   ℹ️ Status: No benchmarks configured" >&2
+else
+  echo "   ❓ Status: Mixed results" >&2
+fi
+
+echo "" >&2
+echo "💡 Performance Optimization Tips:" >&2
+echo "   • Run benchmarks regularly to catch regressions early" >&2
+echo "   • Set up CI/CD performance gates" >&2
+echo "   • Monitor Core Web Vitals for web applications" >&2
+echo "   • Profile memory usage and optimize bottlenecks" >&2
+echo "   • Use caching strategies to improve response times" >&2
+echo "   • Consider lazy loading and code splitting" >&2
+
+echo "⚡ Performance benchmark report complete" >&2
+exit 0
+```
+
+## Examples
+### Performance Benchmark Report Hook Script
+
+Complete hook script that performs performance benchmarking when session ends
+
+```bash
+#!/usr/bin/env bash
+echo "⚡ Performance Benchmark Report" >&2
+BENCHMARK_RESULTS_DIR=".performance-reports"
+mkdir -p "$BENCHMARK_RESULTS_DIR"
+TIMESTAMP=$(date +"%Y-%m-%d-%H-%M-%S")
+REPORT_FILE="$BENCHMARK_RESULTS_DIR/benchmark-$TIMESTAMP.json"
+if [ -f "package.json" ]; then
+  BENCHMARK_SCRIPTS=$(jq -r '.scripts | to_entries[] | select(.key | test("benchmark|perf")) | .key' package.json 2>/dev/null || echo "")
+  if [ -n "$BENCHMARK_SCRIPTS" ]; then
+    echo "$BENCHMARK_SCRIPTS" | while read script; do
+      echo "🏃 Running: npm run $script" >&2
+      START_TIME=$(date +%s)
+      if npm run "$script" >/dev/null 2>&1; then
+        END_TIME=$(date +%s)
+        DURATION=$((END_TIME - START_TIME))
+        echo "✅ PASS: npm run $script (${DURATION}s)" >&2
+      else
+        echo "❌ FAIL: npm run $script" >&2
+      fi
+    done
+  fi
+fi
+echo "📄 Report saved: $REPORT_FILE" >&2
+exit 0
+```
+
+### Lighthouse Web Performance Auditing
+
+Enhanced hook script for Lighthouse web performance auditing with Core Web Vitals
+
+```bash
+#!/usr/bin/env bash
+if [ -f "package.json" ]; then
+  if command -v lighthouse &> /dev/null; then
+    if curl -s http://localhost:3000 >/dev/null 2>&1; then
+      echo "🌐 Running Lighthouse audit..." >&2
+      START_TIME=$(date +%s)
+      if lighthouse http://localhost:3000 --output json --quiet --chrome-flags='--headless --no-sandbox' > /tmp/lighthouse.json 2>&1; then
+        END_TIME=$(date +%s)
+        DURATION=$((END_TIME - START_TIME))
+        PERFORMANCE_SCORE=$(jq -r '.categories.performance.score * 100' /tmp/lighthouse.json 2>/dev/null || echo "0")
+        LCP=$(jq -r '.audits["largest-contentful-paint"].numericValue' /tmp/lighthouse.json 2>/dev/null || echo "0")
+        CLS=$(jq -r '.audits["cumulative-layout-shift"].numericValue' /tmp/lighthouse.json 2>/dev/null || echo "0")
+        echo "✅ Lighthouse audit completed (${DURATION}s)" >&2
+        echo "  📊 Performance Score: $PERFORMANCE_SCORE" >&2
+        echo "  📊 LCP: ${LCP}ms" >&2
+        echo "  📊 CLS: $CLS" >&2
+      fi
+      rm -f /tmp/lighthouse.json
+    fi
+  fi
+fi
+exit 0
+```
+
+### Go Performance Benchmarks
+
+Enhanced hook script for Go performance benchmarking with go test -bench
+
+```bash
+#!/usr/bin/env bash
+if [ -f "go.mod" ] && command -v go &> /dev/null; then
+  echo "🐹 Running Go benchmarks..." >&2
+  START_TIME=$(date +%s)
+  BENCH_OUTPUT="/tmp/go_bench_$$"
+  if go test -bench=. -benchmem > "$BENCH_OUTPUT" 2>&1; then
+    END_TIME=$(date +%s)
+    DURATION=$((END_TIME - START_TIME))
+    BENCH_COUNT=$(grep -c '^Benchmark' "$BENCH_OUTPUT" 2>/dev/null || echo "0")
+    echo "✅ Go benchmarks completed (${DURATION}s)" >&2
+    echo "  📊 Benchmarks run: $BENCH_COUNT" >&2
+    head -10 "$BENCH_OUTPUT" | while read line; do
+      echo "  $line" >&2
+    done
+  else
+    echo "❌ Go benchmarks failed" >&2
+  fi
+  rm -f "$BENCH_OUTPUT"
+fi
+exit 0
+```
+
+### Historical Benchmark Comparison
+
+Enhanced hook script for historical benchmark comparison and trend analysis
+
+```bash
+#!/usr/bin/env bash
+BENCHMARK_RESULTS_DIR=".performance-reports"
+PREVIOUS_REPORTS=($(ls -t "$BENCHMARK_RESULTS_DIR"/benchmark-*.json 2>/dev/null | head -2))
+if [ ${#PREVIOUS_REPORTS[@]} -gt 1 ]; then
+  LATEST_PREVIOUS="${PREVIOUS_REPORTS[1]}"
+  CURRENT_REPORT="${PREVIOUS_REPORTS[0]}"
+  if [ -f "$LATEST_PREVIOUS" ] && [ -f "$CURRENT_REPORT" ] && command -v jq &> /dev/null; then
+    PREV_DURATION=$(jq -r '.summary.total_duration // 0' "$LATEST_PREVIOUS" 2>/dev/null || echo "0")
+    CURR_DURATION=$(jq -r '.summary.total_duration // 0' "$CURRENT_REPORT" 2>/dev/null || echo "0")
+    if [ "$PREV_DURATION" -gt 0 ] && [ "$CURR_DURATION" -gt 0 ]; then
+      DURATION_DIFF=$((CURR_DURATION - PREV_DURATION))
+      PERCENT_CHANGE=$(echo "scale=1; $DURATION_DIFF * 100 / $PREV_DURATION" | bc -l 2>/dev/null || echo "0")
+      echo "📈 Performance Comparison:" >&2
+      echo "  Previous: ${PREV_DURATION}s" >&2
+      echo "  Current: ${CURR_DURATION}s" >&2
+      if [ "$DURATION_DIFF" -gt 0 ]; then
+        echo "  ⬆️ Regression: +${PERCENT_CHANGE}% slower" >&2
+      elif [ "$DURATION_DIFF" -lt 0 ]; then
+        echo "  ⬇️ Improvement: ${PERCENT_CHANGE#-}% faster" >&2
+      else
+        echo "  ➡️ Unchanged" >&2
+      fi
+    fi
+  fi
+fi
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+echo "⚡ Performance Benchmark Report" >&2
+BENCHMARK_RESULTS_DIR=".performance-reports"
+mkdir -p "$BENCHMARK_RESULTS_DIR"
+TIMESTAMP=$(date +"%Y-%m-%d-%H-%M-%S")
+REPORT_FILE="$BENCHMARK_RESULTS_DIR/benchmark-$TIMESTAMP.json"
+if [ -f "package.json" ]; then
+  BENCHMARK_SCRIPTS=$(jq -r '.scripts | to_entries[] | select(.key | test("benchmark|perf")) | .key' package.json 2>/dev/null || echo "")
+  if [ -n "$BENCHMARK_SCRIPTS" ]; then
+    echo "$BENCHMARK_SCRIPTS" | while read script; do
+      echo "🏃 Running: npm run $script" >&2
+      START_TIME=$(date +%s)
+      if npm run "$script" >/dev/null 2>&1; then
+        END_TIME=$(date +%s)
+        DURATION=$((END_TIME - START_TIME))
+        echo "✅ PASS: npm run $script (${DURATION}s)" >&2
+      else
+        echo "❌ FAIL: npm run $script" >&2
+      fi
+    done
+  fi
+fi
+echo "📄 Report saved: $REPORT_FILE" >&2
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+if [ -f "package.json" ]; then
+  if command -v lighthouse &> /dev/null; then
+    if curl -s http://localhost:3000 >/dev/null 2>&1; then
+      echo "🌐 Running Lighthouse audit..." >&2
+      START_TIME=$(date +%s)
+      if lighthouse http://localhost:3000 --output json --quiet --chrome-flags='--headless --no-sandbox' > /tmp/lighthouse.json 2>&1; then
+        END_TIME=$(date +%s)
+        DURATION=$((END_TIME - START_TIME))
+        PERFORMANCE_SCORE=$(jq -r '.categories.performance.score * 100' /tmp/lighthouse.json 2>/dev/null || echo "0")
+        LCP=$(jq -r '.audits["largest-contentful-paint"].numericValue' /tmp/lighthouse.json 2>/dev/null || echo "0")
+        CLS=$(jq -r '.audits["cumulative-layout-shift"].numericValue' /tmp/lighthouse.json 2>/dev/null || echo "0")
+        echo "✅ Lighthouse audit completed (${DURATION}s)" >&2
+        echo "  📊 Performance Score: $PERFORMANCE_SCORE" >&2
+        echo "  📊 LCP: ${LCP}ms" >&2
+        echo "  📊 CLS: $CLS" >&2
+      fi
+      rm -f /tmp/lighthouse.json
+    fi
+  fi
+fi
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+if [ -f "go.mod" ] && command -v go &> /dev/null; then
+  echo "🐹 Running Go benchmarks..." >&2
+  START_TIME=$(date +%s)
+  BENCH_OUTPUT="/tmp/go_bench_$$"
+  if go test -bench=. -benchmem > "$BENCH_OUTPUT" 2>&1; then
+    END_TIME=$(date +%s)
+    DURATION=$((END_TIME - START_TIME))
+    BENCH_COUNT=$(grep -c '^Benchmark' "$BENCH_OUTPUT" 2>/dev/null || echo "0")
+    echo "✅ Go benchmarks completed (${DURATION}s)" >&2
+    echo "  📊 Benchmarks run: $BENCH_COUNT" >&2
+    head -10 "$BENCH_OUTPUT" | while read line; do
+      echo "  $line" >&2
+    done
+  else
+    echo "❌ Go benchmarks failed" >&2
+  fi
+  rm -f "$BENCH_OUTPUT"
+fi
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+BENCHMARK_RESULTS_DIR=".performance-reports"
+PREVIOUS_REPORTS=($(ls -t "$BENCHMARK_RESULTS_DIR"/benchmark-*.json 2>/dev/null | head -2))
+if [ ${#PREVIOUS_REPORTS[@]} -gt 1 ]; then
+  LATEST_PREVIOUS="${PREVIOUS_REPORTS[1]}"
+  CURRENT_REPORT="${PREVIOUS_REPORTS[0]}"
+  if [ -f "$LATEST_PREVIOUS" ] && [ -f "$CURRENT_REPORT" ] && command -v jq &> /dev/null; then
+    PREV_DURATION=$(jq -r '.summary.total_duration // 0' "$LATEST_PREVIOUS" 2>/dev/null || echo "0")
+    CURR_DURATION=$(jq -r '.summary.total_duration // 0' "$CURRENT_REPORT" 2>/dev/null || echo "0")
+    if [ "$PREV_DURATION" -gt 0 ] && [ "$CURR_DURATION" -gt 0 ]; then
+      DURATION_DIFF=$((CURR_DURATION - PREV_DURATION))
+      PERCENT_CHANGE=$(echo "scale=1; $DURATION_DIFF * 100 / $PREV_DURATION" | bc -l 2>/dev/null || echo "0")
+      echo "📈 Performance Comparison:" >&2
+      echo "  Previous: ${PREV_DURATION}s" >&2
+      echo "  Current: ${CURR_DURATION}s" >&2
+      if [ "$DURATION_DIFF" -gt 0 ]; then
+        echo "  ⬆️ Regression: +${PERCENT_CHANGE}% slower" >&2
+      elif [ "$DURATION_DIFF" -lt 0 ]; then
+        echo "  ⬇️ Improvement: ${PERCENT_CHANGE#-}% faster" >&2
+      else
+        echo "  ➡️ Unchanged" >&2
+      fi
+    fi
+  fi
+fi
+exit 0
+```
+
+## Troubleshooting
+### Hook timeout reached before benchmarks complete execution
+
+Increase timeout in hookConfig: timeout: 300000 for 5 minutes. Reduce benchmark scope by skipping slow tests. Use timeout 120s wrapper around individual benchmark commands to prevent single test blocking. Verify benchmark duration. Test with various timeout values.
+
+### npm run benchmark fails with 'script not found' in package.json
+
+Check script existence: jq -e '.scripts.benchmark' package.json before execution. Add fallback: if ! jq -e '.scripts.benchmark' package.json; then echo 'No benchmark script'; exit 0; fi. Skip gracefully instead of failing. Verify package.json structure. Test with various script names.
+
+### Lighthouse audit fails with 'No Chrome installation found'
+
+Install Chrome/Chromium: brew install chromium on macOS or apt-get install chromium-browser on Linux. Set CHROME_PATH environment variable. Use --chrome-flags='--headless --no-sandbox' for CI environments. Verify Chrome installation. Test with various Chrome configurations.
+
+### Historical comparison crashes with jq parse errors on old reports
+
+Validate JSON before parsing: jq empty "$REPORT_FILE" 2>/dev/null || continue. Handle malformed reports gracefully. Add schema version field to new reports: {"schema_version": "1.0", ...}. Verify JSON structure. Test with various report formats.
+
+### Stop hook runs benchmarks even when session ends with errors
+
+Check exit status context if available. Add conditional execution: [ -f .benchmark-enabled ] || exit 0. Create .benchmark-enabled flag only when user explicitly requests benchmarking to avoid unnecessary runs. Verify hook execution conditions. Test with various session states.
+
+### Go benchmarks fail with 'no test files' error
+
+Verify Go test files exist: find . -name '*\_test.go'. Check go.mod location. Ensure benchmark functions use Benchmark prefix: func BenchmarkFunction(b *testing.B). Verify Go project structure. Test with various Go test configurations.
+
+### Python pytest-benchmark not found
+
+Install pytest-benchmark: pip install pytest-benchmark. Verify pytest installation: pytest --version. Check pytest.ini or pyproject.toml configuration. Ensure benchmark tests use @pytest.mark.benchmark decorator. Verify Python environment. Test with various pytest configurations.
+
+### Bundle size analysis fails with webpack-bundle-analyzer
+
+Install webpack-bundle-analyzer: npm install --save-dev webpack-bundle-analyzer. Verify webpack configuration. Check for dist/ or build/ directories. Ensure build is completed before analysis. Verify bundle analyzer configuration. Test with various webpack setups.

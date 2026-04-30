@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "key": "tools:helicone",
+  "entry": {
+    "category": "tools",
+    "slug": "helicone",
+    "title": "Helicone",
+    "description": "Open-source LLM observability platform for logging, metrics, cost tracking, feedback, and gateway workflows.",
+    "seoTitle": "Helicone LLM observability and cost tracking",
+    "seoDescription": "Helicone provides LLM logging, metrics, cost tracking, feedback, and gateway workflows for AI applications. HeyClaude adds source links, install steps,...",
+    "author": "Helicone",
+    "dateAdded": "2026-04-27",
+    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+    "tags": [
+      "observability",
+      "cost-tracking"
+    ],
+    "keywords": [
+      "llm cost tracking",
+      "llm logs",
+      "observability",
+      "cost-tracking",
+      "tools",
+      "claude",
+      "heyclaude",
+      "helicone"
+    ],
+    "documentationUrl": "https://docs.helicone.ai",
+    "websiteUrl": "https://www.helicone.ai",
+    "brandName": "Helicone",
+    "brandDomain": "helicone.ai",
+    "brandIconUrl": "/api/brand-assets/icon/helicone.ai",
+    "brandAssetSource": "brandfetch",
+    "pricingModel": "open-source",
+    "disclosure": "editorial",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Web, Self-hosted",
+    "cardDescription": "LLM observability and cost tracking platform.",
+    "installable": false,
+    "hasPrerequisites": false,
+    "hasTroubleshooting": false,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Editorial notes\n\nHelicone is useful when cost visibility, request logging, and feedback capture are central to LLM operations.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+    "sections": [
+      {
+        "title": "Editorial notes",
+        "id": "editorial-notes",
+        "markdown": "Helicone is useful when cost visibility, request logging, and feedback capture are central to LLM operations.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Disclosure",
+        "id": "disclosure",
+        "markdown": "Editorial listing. No paid placement or affiliate link is used.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Editorial notes",
+        "id": "editorial-notes"
+      },
+      {
+        "depth": 2,
+        "text": "Disclosure",
+        "id": "disclosure"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/tools/helicone.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/helicone.mdx",
+    "repoUrl": "https://github.com/Helicone/helicone",
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 4,
+    "sourceUrls": [
+      "https://docs.helicone.ai",
+      "https://github.com/Helicone/helicone",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/helicone.mdx",
+      "https://www.helicone.ai"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

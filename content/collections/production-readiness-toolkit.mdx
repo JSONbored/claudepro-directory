@@ -16,8 +16,8 @@ seoDescription: >-
   before production deployment. Includes automated code reviews, complexity
   monitoring...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-02'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-02"
 installable: false
 usageSnippet: >-
   Start with `production-codebase-auditor` → `code-review-expert` →
@@ -77,6 +77,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 Comprehensive system for ensuring code quality, security, and compliance before production deployment. Includes automated code reviews, complexity monitoring, backup strategies, and production-grade rules for professional development teams.
 
 ## Features
@@ -143,18 +144,23 @@ Work through the production readiness checklist systematically. Start with secur
 6. `generate-tests`
 
 ## Troubleshooting
+
 ### Code complexity monitor triggers false alerts constantly
 
 Configure thresholds in hook settings: cyclomatic_complexity: 15, cognitive_complexity: 20. Add exceptions for generated code in .complexityignore file.
+
 ### Auto-save backup conflicts with Git version control system
 
 Set backup directory outside Git repo in hook config: backup_path: '../backups'. Add backup_path to .gitignore. Schedule cleanup for backups older than 7 days.
+
 ### Code reviewer agent and production auditor rules disagree
 
 Production auditor takes precedence for deployment decisions. Use reviewer agent for development phase. Configure agent to defer to auditor rules.
+
 ### Generate-tests command fails: missing test framework setup
 
 Install test dependencies: npm install -D jest @types/jest ts-jest. Initialize config: npx jest --init. Ensure package.json has test script defined.
+
 ### Collection slows down Claude responses significantly
 
 Disable hooks during development: set enabled: false for complexity monitor and backup. Re-enable before commits. Use agent/rules only for reviews.

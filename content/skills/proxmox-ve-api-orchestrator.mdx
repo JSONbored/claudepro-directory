@@ -2,17 +2,17 @@
 title: Proxmox VE API Orchestrator Skill
 slug: proxmox-ve-api-orchestrator
 category: skills
-description: 'Orchestrate Proxmox VM and LXC lifecycle operations via API with safe sequencing, capacity checks, and rollback-aware automation.'
-cardDescription: 'Proxmox automation skill for repeatable VM/LXC operations, backups, and cluster-safe workflows.'
+description: "Orchestrate Proxmox VM and LXC lifecycle operations via API with safe sequencing, capacity checks, and rollback-aware automation."
+cardDescription: "Proxmox automation skill for repeatable VM/LXC operations, backups, and cluster-safe workflows."
 seoTitle: Proxmox VE API Orchestrator Skill
-seoDescription: 'Reusable AI skill for Proxmox API operations with secure token auth, orchestration sequencing, and operational safeguards.'
+seoDescription: "Reusable AI skill for Proxmox API operations with secure token auth, orchestration sequencing, and operational safeguards."
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2026-04-10'
-documentationUrl: 'https://pve.proxmox.com/mediawiki/index.php?title=Proxmox_VE_API'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2026-04-10"
+documentationUrl: "https://pve.proxmox.com/mediawiki/index.php?title=Proxmox_VE_API"
 downloadUrl: /downloads/skills/proxmox-ve-api-orchestrator.zip
 installable: true
-installCommand: 'curl -L https://heyclau.de/downloads/skills/proxmox-ve-api-orchestrator.zip -o proxmox-ve-api-orchestrator.zip && unzip -o proxmox-ve-api-orchestrator.zip -d ./proxmox-ve-api-orchestrator'
+installCommand: "curl -L https://heyclau.de/downloads/skills/proxmox-ve-api-orchestrator.zip -o proxmox-ve-api-orchestrator.zip && unzip -o proxmox-ve-api-orchestrator.zip -d ./proxmox-ve-api-orchestrator"
 usageSnippet: Use this skill to execute Proxmox infrastructure automations with predictable state transitions and reduced operational risk.
 copySnippet: |-
   # Trigger
@@ -26,9 +26,9 @@ copySnippet: |-
 skillType: general
 skillLevel: advanced
 verificationStatus: draft
-verifiedAt: '2026-04-10'
+verifiedAt: "2026-04-10"
 retrievalSources:
-  - 'https://pve.proxmox.com/mediawiki/index.php?title=Proxmox_VE_API'
+  - "https://pve.proxmox.com/mediawiki/index.php?title=Proxmox_VE_API"
 testedPlatforms:
   - Claude
   - Codex
@@ -60,6 +60,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Overview
 
 This skill helps AI agents orchestrate Proxmox operations in a way that is safe for real infrastructure. It emphasizes pre-flight validation, explicit sequencing, and validation after each change.
@@ -73,7 +74,9 @@ This skill helps AI agents orchestrate Proxmox operations in a way that is safe 
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 

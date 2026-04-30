@@ -9,7 +9,12 @@ type SearchBarProps = {
   name?: string;
 };
 
-export function SearchBar({ value, onChange, placeholder, name }: SearchBarProps) {
+export function SearchBar({
+  value,
+  onChange,
+  placeholder,
+  name,
+}: SearchBarProps) {
   return (
     <div className="directory-search-shell">
       <Search className="directory-search-icon" />

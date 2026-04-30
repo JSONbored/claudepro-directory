@@ -2,18 +2,18 @@
 title: GitHub Actions AI-Powered CI/CD Automation Skill
 slug: github-actions-ai-cicd
 category: skills
-description: 'Build intelligent CI/CD pipelines with GitHub Actions, AI-assisted workflow generation, automated testing, and deployment orchestration.'
-cardDescription: 'Build intelligent CI/CD pipelines with GitHub Actions, AI-assisted workflow generation, automated testing, and deployment orchestration.'
+description: "Build intelligent CI/CD pipelines with GitHub Actions, AI-assisted workflow generation, automated testing, and deployment orchestration."
+cardDescription: "Build intelligent CI/CD pipelines with GitHub Actions, AI-assisted workflow generation, automated testing, and deployment orchestration."
 seoTitle: GitHub Actions AI-Powered CI/CD Automation Skill
-seoDescription: 'Build intelligent CI/CD pipelines with GitHub Actions, AI-assisted workflow generation, automated testing, and deployment orchestration. Includes OIDC authen...'
+seoDescription: "Build intelligent CI/CD pipelines with GitHub Actions, AI-assisted workflow generation, automated testing, and deployment orchestration. Includes OIDC authen..."
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-16'
-documentationUrl: 'https://docs.github.com/en/actions'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-16"
+documentationUrl: "https://docs.github.com/en/actions"
 downloadUrl: /downloads/skills/github-actions-ai-cicd.zip
 installable: true
-installCommand: 'curl -L https://heyclau.de/downloads/skills/github-actions-ai-cicd.zip -o github-actions-ai-cicd.zip && unzip -o github-actions-ai-cicd.zip -d ./github-actions-ai-cicd'
-usageSnippet: 'Claude can design, generate, and optimize GitHub Actions workflows for comprehensive CI/CD pipelines. This skill enables automated testing, intelligent deployment strategies, security scanning, performance monitoring, and infrastructure provisioning - all triggered by GitHub events with AI-optimized configurations.'
+installCommand: "curl -L https://heyclau.de/downloads/skills/github-actions-ai-cicd.zip -o github-actions-ai-cicd.zip && unzip -o github-actions-ai-cicd.zip -d ./github-actions-ai-cicd"
+usageSnippet: "Claude can design, generate, and optimize GitHub Actions workflows for comprehensive CI/CD pipelines. This skill enables automated testing, intelligent deployment strategies, security scanning, performance monitoring, and infrastructure provisioning - all triggered by GitHub events with AI-optimized configurations."
 copySnippet: |-
   name: CI/CD Pipeline
 
@@ -188,9 +188,9 @@ copySnippet: |-
 skillType: general
 skillLevel: advanced
 verificationStatus: draft
-verifiedAt: '2025-10-16'
+verifiedAt: "2025-10-16"
 retrievalSources:
-  - 'https://docs.github.com/en/actions'
+  - "https://docs.github.com/en/actions"
 testedPlatforms:
   - Claude
   - Codex
@@ -200,11 +200,11 @@ testedPlatforms:
   - Gemini
 prerequisites:
   - GitHub repository with Actions enabled
-  - 'Test suite (Vitest, Jest, Playwright)'
-  - 'Deployment target (Vercel, AWS, GCP, etc.)'
-  - 'GitHub account with repository access and Actions enabled (free tier includes 2,000 minutes/month)'
+  - "Test suite (Vitest, Jest, Playwright)"
+  - "Deployment target (Vercel, AWS, GCP, etc.)"
+  - "GitHub account with repository access and Actions enabled (free tier includes 2,000 minutes/month)"
   - Workflow YAML files stored in .github/workflows/ directory with proper YAML syntax and GitHub Actions workflow schema
-  - 'Secrets configured in GitHub repository settings (Settings > Secrets and variables > Actions) for deployment credentials, API keys, and service tokens'
+  - "Secrets configured in GitHub repository settings (Settings > Secrets and variables > Actions) for deployment credentials, API keys, and service tokens"
 tags:
   - github-actions
   - ci-cd
@@ -233,6 +233,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## What This Skill Enables
 
 Claude can design, generate, and optimize GitHub Actions workflows for comprehensive CI/CD pipelines. This skill enables automated testing, intelligent deployment strategies, security scanning, performance monitoring, and infrastructure provisioning - all triggered by GitHub events with AI-optimized configurations.
@@ -246,17 +247,20 @@ Claude can design, generate, and optimize GitHub Actions workflows for comprehen
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
-
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 
 **Required:**
+
 - GitHub repository with Actions enabled
 - Basic understanding of your deployment target (Vercel, AWS, etc.)
 - Test suite in your project
 
 **What Claude handles automatically:**
+
 - Generating complete workflow YAML files
 - Configuring matrix builds for multiple environments
 - Setting up caching strategies for faster builds
@@ -271,6 +275,7 @@ Claude can design, generate, and optimize GitHub Actions workflows for comprehen
 **Prompt:** "Create a GitHub Actions workflow for my Next.js 15 app that runs on every push. Include TypeScript type checking, ESLint, Vitest unit tests, Playwright E2E tests, and deploy to Vercel on main branch."
 
 Claude will generate:
+
 1. `.github/workflows/ci-cd.yml` with multiple jobs
 2. Type checking job with caching
 3. Lint job with auto-fix capability
@@ -284,6 +289,7 @@ Claude will generate:
 **Prompt:** "Set up GitHub Actions to deploy to staging on pull requests and production on main branch merges. Include manual approval for production and rollback capabilities."
 
 Claude will create:
+
 1. Separate workflows for staging and production
 2. Environment-specific secrets configuration
 3. Manual approval gates using GitHub Environments
@@ -296,6 +302,7 @@ Claude will create:
 **Prompt:** "Add comprehensive security scanning to my CI pipeline: dependency vulnerabilities, CodeQL analysis, Docker image scanning, and secrets detection."
 
 Claude will implement:
+
 1. Dependabot integration for automated dependency updates
 2. CodeQL workflow for code security analysis
 3. Trivy for Docker image vulnerability scanning
@@ -308,6 +315,7 @@ Claude will implement:
 **Prompt:** "Create a workflow that runs Lighthouse CI on every deployment preview and fails if Core Web Vitals thresholds are not met."
 
 Claude will set up:
+
 1. Lighthouse CI workflow triggered on deployment
 2. Performance budgets configuration
 3. Core Web Vitals thresholds (LCP, FID, CLS)
@@ -332,6 +340,7 @@ Claude will set up:
 ## Common Workflows
 
 ### Complete Next.js Production Pipeline
+
 ```
 "Create a production-grade GitHub Actions pipeline for Next.js 15:
 1. Install dependencies with pnpm caching
@@ -345,6 +354,7 @@ Claude will set up:
 ```
 
 ### Monorepo CI/CD with Turborepo
+
 ```
 "Set up GitHub Actions for Turborepo monorepo:
 1. Use Turborepo remote caching with Vercel
@@ -356,6 +366,7 @@ Claude will set up:
 ```
 
 ### Docker Multi-Stage Build & Deploy
+
 ```
 "Create workflow for Docker application:
 1. Build Docker image with multi-stage caching
@@ -363,11 +374,12 @@ Claude will set up:
 3. Run integration tests in Docker Compose
 4. Push to GitHub Container Registry with semantic versioning
 5. Deploy to AWS ECS using OIDC authentication
-6. Run smoke tests post-deployment
+6. Run release regression tests post-deployment
 7. Rollback on failure"
 ```
 
 ### Infrastructure as Code Pipeline
+
 ```
 "Generate Terraform deployment workflow:
 1. Validate Terraform syntax and formatting

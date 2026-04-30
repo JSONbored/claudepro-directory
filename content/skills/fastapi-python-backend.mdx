@@ -2,18 +2,18 @@
 title: FastAPI Python API Development Skill
 slug: fastapi-python-backend
 category: skills
-description: 'Build high-performance async REST APIs with FastAPI, Python''s fastest-growing web framework. Automatic OpenAPI/Swagger documentation, type-safe validation with Pydantic, native async/await support, and dependency injection for clean architecture.'
-cardDescription: 'Build high-performance async REST APIs with FastAPI, Python''s fastest-growing web framework.'
+description: "Build high-performance async REST APIs with FastAPI, Python's fastest-growing web framework. Automatic OpenAPI/Swagger documentation, type-safe validation with Pydantic, native async/await support, and dependency injection for clean architecture."
+cardDescription: "Build high-performance async REST APIs with FastAPI, Python's fastest-growing web framework."
 seoTitle: FastAPI Python API Development Skill
-seoDescription: 'Build high-performance async REST APIs with FastAPI, Python''s fastest-growing web framework. Automatic OpenAPI/Swagger documentation, type-safe validation wi...'
+seoDescription: "Build high-performance async REST APIs with FastAPI, Python's fastest-growing web framework. Automatic OpenAPI/Swagger documentation, type-safe validation wi..."
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-23'
-documentationUrl: 'https://fastapi.tiangolo.com/'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-23"
+documentationUrl: "https://fastapi.tiangolo.com/"
 downloadUrl: /downloads/skills/fastapi-python-backend.zip
 installable: true
-installCommand: 'pip install fastapi uvicorn[standard] pydantic sqlalchemy'
-usageSnippet: 'pip install fastapi uvicorn[standard] pydantic sqlalchemy'
+installCommand: "pip install fastapi uvicorn[standard] pydantic sqlalchemy"
+usageSnippet: "pip install fastapi uvicorn[standard] pydantic sqlalchemy"
 copySnippet: |-
   from fastapi import FastAPI, HTTPException
   from pydantic import BaseModel, Field
@@ -73,9 +73,9 @@ copySnippet: |-
 skillType: general
 skillLevel: advanced
 verificationStatus: draft
-verifiedAt: '2025-10-23'
+verifiedAt: "2025-10-23"
 retrievalSources:
-  - 'https://fastapi.tiangolo.com/'
+  - "https://fastapi.tiangolo.com/"
 testedPlatforms:
   - Claude
   - Codex
@@ -86,10 +86,10 @@ testedPlatforms:
 prerequisites:
   - Python 3.9+
   - fastapi ^0.104.0
-  - 'uvicorn[standard] ^0.24.0'
+  - "uvicorn[standard] ^0.24.0"
   - pydantic ^2.0.0
-  - 'ASGI server (uvicorn, hypercorn, or daphne) for running FastAPI applications in production'
-  - 'Database driver for async operations (asyncpg for PostgreSQL, aiomysql for MySQL, or motor for MongoDB) when using database integration'
+  - "ASGI server (uvicorn, hypercorn, or daphne) for running FastAPI applications in production"
+  - "Database driver for async operations (asyncpg for PostgreSQL, aiomysql for MySQL, or motor for MongoDB) when using database integration"
 tags:
   - fastapi
   - python
@@ -117,6 +117,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## What This Skill Enables
 
 Claude can build production-ready REST APIs using FastAPI, Python's fastest web framework with automatic OpenAPI documentation and async support. FastAPI combines Python 3.9+ type hints with Pydantic validation for type-safe APIs that rival Node.js performance. With automatic interactive docs, dependency injection, and async/await, FastAPI eliminates boilerplate while maintaining enterprise-grade reliability.
@@ -130,18 +131,21 @@ Claude can build production-ready REST APIs using FastAPI, Python's fastest web 
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
-
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 
 **Required:**
+
 - Claude Pro subscription or Claude Code CLI
 - Python 3.9+ (3.11+ recommended for best performance)
 - pip or poetry package manager
 - Basic Python knowledge
 
 **What Claude handles automatically:**
+
 - Writing FastAPI route handlers with type hints
 - Creating Pydantic models for request/response validation
 - Adding automatic OpenAPI/Swagger documentation
@@ -158,6 +162,7 @@ Claude can build production-ready REST APIs using FastAPI, Python's fastest web 
 **Prompt:** "Create a FastAPI CRUD API for blog posts with: GET /posts (list), POST /posts (create), GET /posts/{id} (get one), PUT /posts/{id} (update), DELETE /posts/{id} (delete). Use Pydantic for validation."
 
 Claude will:
+
 1. Create FastAPI app with routers
 2. Define Pydantic models for Post
 3. Implement all 5 CRUD endpoints
@@ -171,6 +176,7 @@ Claude will:
 **Prompt:** "Build FastAPI app with PostgreSQL using SQLAlchemy ORM. Include: user authentication, database models for users/posts, async queries, connection pooling, and migrations with Alembic."
 
 Claude will:
+
 1. Set up async SQLAlchemy engine
 2. Create database models with relationships
 3. Implement dependency injection for sessions
@@ -184,6 +190,7 @@ Claude will:
 **Prompt:** "Create FastAPI auth system with JWT tokens. Include: user registration, login, password hashing with bcrypt, protected routes with dependencies, refresh tokens, and role-based access control."
 
 Claude will:
+
 1. Implement password hashing with passlib
 2. Create JWT token generation/validation
 3. Add OAuth2 password bearer scheme
@@ -197,6 +204,7 @@ Claude will:
 **Prompt:** "Build FastAPI endpoint that processes uploaded CSV file in background. Include: file upload validation, background task with progress tracking, webhook notification on completion, and error handling."
 
 Claude will:
+
 1. Create file upload endpoint
 2. Validate CSV format with Pydantic
 3. Launch background task
@@ -222,6 +230,7 @@ Claude will:
 ## Common Workflows
 
 ### E-Commerce API
+
 ```
 "Build FastAPI e-commerce backend:
 1. Products: CRUD with search, filtering, pagination
@@ -235,6 +244,7 @@ Claude will:
 ```
 
 ### Real-Time Analytics API
+
 ```
 "Create FastAPI analytics dashboard backend:
 1. Ingest endpoint: accept events via POST with Pydantic validation
@@ -248,6 +258,7 @@ Claude will:
 ```
 
 ### Multi-Tenant SaaS API
+
 ```
 "Build multi-tenant SaaS API with FastAPI:
 1. Tenant isolation: subdomain-based routing
@@ -261,6 +272,7 @@ Claude will:
 ```
 
 ### GraphQL + REST Hybrid
+
 ```
 "Create FastAPI app with both REST and GraphQL:
 1. REST endpoints: CRUD operations with OpenAPI docs

@@ -1,0 +1,14 @@
+---
+description: "Deep data-layer architecture skill for Cloudflare Workers using D1, KV, and R2 in production-safe patterns."
+globs:
+alwaysApply: false
+---
+# Cloudflare Workers D1 KV R2 Capability Pack Skill
+Expert Cloudflare capability skill for designing workers that combine D1, KV, and R2 with clear consistency, caching, and security boundaries.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/cloudflare-workers-d1-kv-r2-capability-pack.zip -o cloudflare-workers-d1-kv-r2-capability-pack.zip && unzip -o cloudflare-workers-d1-kv-r2-capability-pack.zip -d ./cloudflare-workers-d1-kv-r2-capability-pack
+```
+## Source
+https://heyclau.de/downloads/skills/cloudflare-workers-d1-kv-r2-capability-pack.zip

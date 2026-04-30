@@ -1,0 +1,284 @@
+{
+  "schemaVersion": 1,
+  "key": "skills:coderabbit-lite-pr-review-capability-pack",
+  "entry": {
+    "category": "skills",
+    "slug": "coderabbit-lite-pr-review-capability-pack",
+    "title": "Code Review Automation Capability Pack Skill",
+    "description": "Expert code-review capability pack for deterministic PR audits, risk-ranked findings, and low-noise fix planning without SaaS lock-in.",
+    "seoTitle": "Code Review Automation Capability Pack Skill",
+    "seoDescription": "Advanced AI skill for local PR review automation with risk scoring, exploit checks, and remediation workflows. HeyClaude adds source links, install steps,...",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2026-04-11",
+    "contentUpdatedAt": "2026-04-27T02:57:15-06:00",
+    "tags": [
+      "code-review",
+      "pull-requests",
+      "security",
+      "capability-pack",
+      "automation"
+    ],
+    "keywords": [
+      "pull request audit",
+      "local code review automation",
+      "severity scoring",
+      "exploitability analysis",
+      "code-review",
+      "pull-requests",
+      "security",
+      "capability-pack",
+      "automation",
+      "skills",
+      "claude",
+      "heyclaude"
+    ],
+    "readingTime": 9,
+    "difficultyScore": 88,
+    "documentationUrl": "https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/code-review/about-pull-request-reviews",
+    "cardDescription": "Run a local, repeatable PR review loop with severity scoring, false-positive control, and fix-ready output.",
+    "installable": true,
+    "installCommand": "curl -L https://heyclau.de/downloads/skills/coderabbit-lite-pr-review-capability-pack.zip -o coderabbit-lite-pr-review-capability-pack.zip && unzip -o coderabbit-lite-pr-review-capability-pack.zip -d ./coderabbit-lite-pr-review-capability-pack",
+    "usageSnippet": "Use this skill to run a deterministic PR audit, rank findings by severity, and generate fix-ready patch guidance.",
+    "copySnippet": "# Trigger\n\"Apply the code review automation capability pack to this PR.\"\n\n# Required output\n1) Risk-ranked findings (P0-P3) with evidence\n2) Exploitability notes and blast-radius estimate\n3) Minimal patch plan grouped by file ownership\n4) Post-fix validation checklist",
+    "skillType": "capability-pack",
+    "skillLevel": "expert",
+    "verificationStatus": "validated",
+    "verifiedAt": "2026-04-11",
+    "retrievalSources": [
+      "https://docs.github.com/en/pull-requests",
+      "https://owasp.org/www-project-top-ten/",
+      "https://cheatsheetseries.owasp.org/"
+    ],
+    "testedPlatforms": [
+      "Claude",
+      "Codex",
+      "OpenClaw",
+      "Cursor",
+      "Windsurf",
+      "Gemini"
+    ],
+    "prerequisites": [
+      "Repository access and PR diff",
+      "Security severity policy",
+      "Test/lint/typecheck commands"
+    ],
+    "hasPrerequisites": true,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/skills/coderabbit-lite-pr-review-capability-pack.zip",
+    "skillPackage": {
+      "format": "agent-skill",
+      "entrypoint": "SKILL.md",
+      "downloadUrl": "/downloads/skills/coderabbit-lite-pr-review-capability-pack.zip",
+      "sha256": "5e2a8567d4a88913443a4a9e76823180775eb767e51770c0a3c8ca5e39ffe59b"
+    },
+    "platformCompatibility": [
+      {
+        "platform": "Claude",
+        "supportLevel": "native-skill",
+        "installPath": ".claude/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Codex",
+        "supportLevel": "native-skill",
+        "installPath": ".agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Windsurf",
+        "supportLevel": "native-skill",
+        "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Gemini",
+        "supportLevel": "native-skill",
+        "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Cursor",
+        "supportLevel": "adapter",
+        "installPath": ".cursor/rules/<skill-name>.mdc",
+        "adapterPath": "/data/skill-adapters/cursor/coderabbit-lite-pr-review-capability-pack.mdc",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Generic AGENTS",
+        "supportLevel": "manual-context",
+        "installPath": "AGENTS.md or tool-specific context file",
+        "verifiedAt": "2026-04-11"
+      }
+    ],
+    "downloadTrust": "first-party",
+    "downloadSha256": "5e2a8567d4a88913443a4a9e76823180775eb767e51770c0a3c8ca5e39ffe59b",
+    "body": "## Knowledge Freshness\n\nThis capability pack is pinned to documentation verified on **2026-04-11**.\nRefresh references before using this skill for critical production decisions.\n\n## Retrieval Sources\n\n- https://docs.github.com/en/pull-requests\n- https://owasp.org/www-project-top-ten/\n- https://cheatsheetseries.owasp.org/\n\n## Core Workflow\n\n1. Build threat model from changed files and data boundaries.\n2. Classify findings by exploitability and operational impact.\n3. Remove low-confidence noise before presenting blockers.\n4. Produce minimal, file-scoped patch plan with validation gates.\n5. Re-check changed attack surfaces after fixes land.\n\n## Overview\n\nThis skill teaches agents to perform fast, low-noise code reviews that mimic senior reviewer behavior: clear severity, concrete evidence, and fix-first recommendations.\n\n## Capability Scope\n\n- PR diff triage and risk scoring\n- Security and reliability regression detection\n- False-positive suppression rules\n- Patch-plan generation with owner mapping\n- Post-fix verification guidance\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Production Rules\n\n- Do not block merges on low-confidence findings.\n- Require concrete code evidence for every high-severity claim.\n- Separate exploitability from style concerns.\n- Always include rollback or quick-mitigation options.\n\n## Troubleshooting\n\n**Issue:** Too many low-signal findings  \n**Fix:** tighten rule set to changed files and critical paths first.\n\n**Issue:** Security findings lack proof  \n**Fix:** require request/response, data-flow, or control-path evidence.\n\n**Issue:** Patch plan is too broad  \n**Fix:** break by file ownership and dependency boundary.\n\n## Output Contract\n\n1. Risk-ranked findings with direct evidence.\n2. Priority fix plan with smallest safe diff.\n3. Validation commands and pass criteria.\n4. Remaining residual risks and follow-ups.\n\n## Validation Checklist\n\n- Confirm findings map to changed code.\n- Run test/lint/typecheck after patch.\n- Re-check auth, input validation, and data handling paths.\n- Verify no new critical findings introduced by fixes.",
+    "sections": [
+      {
+        "title": "Knowledge Freshness",
+        "id": "knowledge-freshness",
+        "markdown": "This capability pack is pinned to documentation verified on **2026-04-11**.\nRefresh references before using this skill for critical production decisions.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Retrieval Sources",
+        "id": "retrieval-sources",
+        "markdown": "- https://docs.github.com/en/pull-requests\n- https://owasp.org/www-project-top-ten/\n- https://cheatsheetseries.owasp.org/",
+        "codeBlocks": []
+      },
+      {
+        "title": "Core Workflow",
+        "id": "core-workflow",
+        "markdown": "1. Build threat model from changed files and data boundaries.\n2. Classify findings by exploitability and operational impact.\n3. Remove low-confidence noise before presenting blockers.\n4. Produce minimal, file-scoped patch plan with validation gates.\n5. Re-check changed attack surfaces after fixes land.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Overview",
+        "id": "overview",
+        "markdown": "This skill teaches agents to perform fast, low-noise code reviews that mimic senior reviewer behavior: clear severity, concrete evidence, and fix-first recommendations.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Capability Scope",
+        "id": "capability-scope",
+        "markdown": "- PR diff triage and risk scoring\n- Security and reliability regression detection\n- False-positive suppression rules\n- Patch-plan generation with owner mapping\n- Post-fix verification guidance",
+        "codeBlocks": []
+      },
+      {
+        "title": "Compatibility",
+        "id": "compatibility",
+        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Production Rules",
+        "id": "production-rules",
+        "markdown": "- Do not block merges on low-confidence findings.\n- Require concrete code evidence for every high-severity claim.\n- Separate exploitability from style concerns.\n- Always include rollback or quick-mitigation options.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "**Issue:** Too many low-signal findings  \n**Fix:** tighten rule set to changed files and critical paths first.\n\n**Issue:** Security findings lack proof  \n**Fix:** require request/response, data-flow, or control-path evidence.\n\n**Issue:** Patch plan is too broad  \n**Fix:** break by file ownership and dependency boundary.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Output Contract",
+        "id": "output-contract",
+        "markdown": "1. Risk-ranked findings with direct evidence.\n2. Priority fix plan with smallest safe diff.\n3. Validation commands and pass criteria.\n4. Remaining residual risks and follow-ups.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Validation Checklist",
+        "id": "validation-checklist",
+        "markdown": "- Confirm findings map to changed code.\n- Run test/lint/typecheck after patch.\n- Re-check auth, input validation, and data handling paths.\n- Verify no new critical findings introduced by fixes.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Knowledge Freshness",
+        "id": "knowledge-freshness"
+      },
+      {
+        "depth": 2,
+        "text": "Retrieval Sources",
+        "id": "retrieval-sources"
+      },
+      {
+        "depth": 2,
+        "text": "Core Workflow",
+        "id": "core-workflow"
+      },
+      {
+        "depth": 2,
+        "text": "Overview",
+        "id": "overview"
+      },
+      {
+        "depth": 2,
+        "text": "Capability Scope",
+        "id": "capability-scope"
+      },
+      {
+        "depth": 2,
+        "text": "Compatibility",
+        "id": "compatibility"
+      },
+      {
+        "depth": 3,
+        "text": "Native",
+        "id": "native"
+      },
+      {
+        "depth": 3,
+        "text": "Manual Adaptation",
+        "id": "manual-adaptation"
+      },
+      {
+        "depth": 2,
+        "text": "Production Rules",
+        "id": "production-rules"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 2,
+        "text": "Output Contract",
+        "id": "output-contract"
+      },
+      {
+        "depth": 2,
+        "text": "Validation Checklist",
+        "id": "validation-checklist"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/skills/coderabbit-lite-pr-review-capability-pack.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/coderabbit-lite-pr-review-capability-pack.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": true,
+    "packageTrust": "first-party",
+    "packageChecksum": "5e2a8567d4a88913443a4a9e76823180775eb767e51770c0a3c8ca5e39ffe59b",
+    "checksumPresent": true,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/code-review/about-pull-request-reviews",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/coderabbit-lite-pr-review-capability-pack.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-11",
+    "adapterGenerated": true,
+    "platforms": [
+      "Claude",
+      "Codex",
+      "Windsurf",
+      "Gemini",
+      "Cursor",
+      "Generic AGENTS"
+    ],
+    "supportLevels": [
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "adapter",
+      "manual-context"
+    ]
+  }
+}

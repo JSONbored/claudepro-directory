@@ -2,17 +2,17 @@
 title: OpenNext Cloudflare Capability Pack Skill
 slug: opennext-cloudflare-capability-pack
 category: skills
-description: 'Expert OpenNext + Cloudflare capability skill for Next.js on Workers, runtime constraints, cache strategy, and production-safe deploy architecture.'
-cardDescription: 'Deep operational skill for running Next.js via OpenNext on Cloudflare Workers with correct caching, bindings, and reliability controls.'
+description: "Expert OpenNext + Cloudflare capability skill for Next.js on Workers, runtime constraints, cache strategy, and production-safe deploy architecture."
+cardDescription: "Deep operational skill for running Next.js via OpenNext on Cloudflare Workers with correct caching, bindings, and reliability controls."
 seoTitle: OpenNext Cloudflare Capability Pack Skill
-seoDescription: 'Advanced AI skill for OpenNext Cloudflare deployments, including Workers runtime patterns, cache behavior, and operational hardening.'
+seoDescription: "Advanced AI skill for OpenNext Cloudflare deployments, including Workers runtime patterns, cache behavior, and operational hardening."
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2026-04-10'
-documentationUrl: 'https://opennext.js.org/cloudflare/get-started'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2026-04-10"
+documentationUrl: "https://opennext.js.org/cloudflare/get-started"
 downloadUrl: /downloads/skills/opennext-cloudflare-capability-pack.zip
 installable: true
-installCommand: 'curl -L https://heyclau.de/downloads/skills/opennext-cloudflare-capability-pack.zip -o opennext-cloudflare-capability-pack.zip && unzip -o opennext-cloudflare-capability-pack.zip -d ./opennext-cloudflare-capability-pack'
+installCommand: "curl -L https://heyclau.de/downloads/skills/opennext-cloudflare-capability-pack.zip -o opennext-cloudflare-capability-pack.zip && unzip -o opennext-cloudflare-capability-pack.zip -d ./opennext-cloudflare-capability-pack"
 usageSnippet: Use this skill when shipping Next.js applications to Cloudflare Workers with OpenNext and needing correctness + performance at scale.
 copySnippet: |-
   # Trigger
@@ -26,11 +26,11 @@ copySnippet: |-
 skillType: capability-pack
 skillLevel: expert
 verificationStatus: validated
-verifiedAt: '2026-04-10'
+verifiedAt: "2026-04-10"
 retrievalSources:
-  - 'https://opennext.js.org/cloudflare/get-started'
-  - 'https://developers.cloudflare.com/workers/framework-guides/web-apps/nextjs/'
-  - 'https://developers.cloudflare.com/workers/'
+  - "https://opennext.js.org/cloudflare/get-started"
+  - "https://developers.cloudflare.com/workers/framework-guides/web-apps/nextjs/"
+  - "https://developers.cloudflare.com/workers/"
 testedPlatforms:
   - Claude
   - Codex
@@ -62,6 +62,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Knowledge Freshness
 
 This capability pack is pinned to documentation verified on **2026-04-10**.
@@ -104,7 +105,9 @@ This capability pack teaches agents how to correctly design, deploy, and operate
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Production Rules
 
@@ -134,7 +137,7 @@ This capability pack teaches agents how to correctly design, deploy, and operate
 ## Validation Checklist
 
 - Verify all referenced docs/versions before applying changes.
-- Run smoke checks for core user flow and error paths.
+- Run regression checks for core user flow and error paths.
 - Confirm observability/logging is enabled for changed components.
 - Confirm security controls (auth, rate limits, input validation) still pass.
 - Record final known limitations and follow-up actions.

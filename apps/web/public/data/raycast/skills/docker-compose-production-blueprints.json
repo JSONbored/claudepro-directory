@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 2,
+  "key": "skills:docker-compose-production-blueprints",
+  "category": "skills",
+  "slug": "docker-compose-production-blueprints",
+  "title": "Docker Compose Production Blueprints Skill",
+  "author": "JSONbored",
+  "brandName": "Docker",
+  "brandDomain": "docker.com",
+  "brandIconUrl": "/api/brand-assets/icon/docker.com",
+  "brandAssetSource": "brandfetch",
+  "brandVerifiedAt": "2026-04-10",
+  "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/docker-compose-production-blueprints.zip -o docker-compose-production-blueprints.zip && unzip -o docker-compose-production-blueprints.zip -d ./docker-compose-production-blueprints\n\nUsage:\nUse this skill when you need Docker Compose environments that are stable, secure, and easy to operate.\n\nAsset:\n# Trigger\n\"Apply the Docker Compose production blueprints skill to this stack.\"\n\n# Required output\n1) Compose service topology\n2) Security and secret handling plan\n3) Healthcheck and startup dependency map\n4) Update/rollback procedure",
+  "detailMarkdown": "# Docker Compose Production Blueprints Skill\n\nCreate production-grade Docker Compose stacks with healthchecks, secrets handling, network isolation, and safe rollout patterns.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/docker-compose-production-blueprints.zip -o docker-compose-production-blueprints.zip && unzip -o docker-compose-production-blueprints.zip -d ./docker-compose-production-blueprints\n```\n\n## Usage\nUse this skill when you need Docker Compose environments that are stable, secure, and easy to operate.",
+  "webUrl": "https://heyclau.de/skills/docker-compose-production-blueprints",
+  "canonicalUrl": "https://heyclau.de/skills/docker-compose-production-blueprints",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/docker-compose-production-blueprints.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/docker-compose-production-blueprints",
+  "seoTitle": "Docker Compose Production Blueprints Skill",
+  "seoDescription": "Reusable AI skill for designing secure, resilient Docker Compose deployments with healthchecks, profiles, and operational guardrails.",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.docker.com/compose/"
+}

@@ -1,0 +1,14 @@
+---
+description: "Author polished Unraid CA templates with correct metadata, support links, and production-safe defaults."
+globs:
+alwaysApply: false
+---
+# Unraid CA Template Authoring Capability Pack Skill
+Expert Unraid Community Apps template capability pack for high-quality XML metadata, safer defaults, and CA submission readiness.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/unraid-ca-template-authoring-capability-pack.zip -o unraid-ca-template-authoring-capability-pack.zip && unzip -o unraid-ca-template-authoring-capability-pack.zip -d ./unraid-ca-template-authoring-capability-pack
+```
+## Source
+https://heyclau.de/downloads/skills/unraid-ca-template-authoring-capability-pack.zip

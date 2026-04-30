@@ -1,0 +1,598 @@
+# Five Hour Window Tracker - Statuslines
+URL: https://heyclau.de/statuslines/five-hour-window-tracker
+Category: statuslines
+Author: JSONbored
+Date added: 2025-10-25
+Documentation: https://docs.claude.com/en/docs/claude-code/statusline
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/five-hour-window-tracker.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/statuslines/five-hour-window-tracker
+- Source URLs: https://docs.claude.com/en/docs/claude-code/statusline, https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/five-hour-window-tracker.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
+## Summary
+Claude Code 5-hour rolling session window tracker with visual progress bar, time remaining countdown, and expiry warnings for usage management.
+## Tags
+- 5-hour-window
+- session-tracking
+- usage-limits
+- countdown
+- rolling-window
+## Content
+## Features
+- Claude Code specific 5-hour rolling window tracking (300 minutes)
+- Visual progress bar showing window consumption (20-char bar, each █ = 5%)
+- Time remaining countdown in hours/minutes format
+- Color-coded status alerts (green <50%, yellow 50-80%, red >80%)
+- Expiry warning when window approaches limit
+- Percentage used calculation for quick assessment
+- Handles overflow gracefully (sessions beyond 5 hours)
+- Lightweight bash implementation with no external dependencies
+
+## Use Cases
+- Managing Claude Code's unique 5-hour billing window
+- Preventing unexpected session expiry during critical work
+- Planning work sessions around 5-hour limit
+- Tracking multiple overlapping 5-hour windows
+- Budget management for usage-limited accounts
+- Session planning for long coding marathons
+
+## Requirements
+- Claude Code CLI installed and configured
+- Bash shell available (bash 4.0+ recommended for arithmetic operations)
+- jq command-line JSON processor (jq 1.6+ recommended for safe extraction with // defaults)
+- Terminal with ANSI color code support (256-color mode recommended for color-coded window indicators)
+- Terminal with Unicode block character support (for █ and ░ progress bar characters, or use ASCII alternatives)
+- System clock accuracy (for accurate time remaining calculations)
+
+## Configuration
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/five-hour-window-tracker.sh",
+    "refreshInterval": 1000
+  }
+}
+```
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/five-hour-window-tracker.sh",
+    "refreshInterval": 1000
+  }
+}
+```
+
+## Examples
+### Enhanced Five Hour Window Tracker with Session History
+
+Extended version tracking multiple sessions within the 5-hour window
+
+```bash
+#!/usr/bin/env bash
+
+# Enhanced 5-Hour Window Tracker with Session History
+
+input=$(cat)
+
+session_id=$(echo "$input" | jq -r '.session_id // ""')
+total_duration_ms=$(echo "$input" | jq -r '.cost.total_duration_ms // 0')
+
+# Session history directory
+HISTORY_DIR="${HOME}/.claude-code-windows"
+mkdir -p "$HISTORY_DIR"
+
+# Current session file
+SESSION_FILE="${HISTORY_DIR}/${session_id}.session"
+
+# Store session start time if new session
+if [ ! -f "$SESSION_FILE" ]; then
+  echo "$(date +%s)" > "$SESSION_FILE"
+fi
+
+session_start=$(cat "$SESSION_FILE")
+current_time=$(date +%s)
+session_elapsed=$(( (current_time - session_start) / 60 ))
+
+# Use actual duration from JSON or calculated elapsed time
+duration_minutes=$((total_duration_ms / 60000))
+if [ $duration_minutes -eq 0 ]; then
+  duration_minutes=$session_elapsed
+fi
+
+WINDOW_LIMIT=300
+time_remaining=$((WINDOW_LIMIT - duration_minutes))
+
+if [ $duration_minutes -gt 0 ]; then
+  percentage_used=$(( (duration_minutes * 100) / WINDOW_LIMIT ))
+else
+  percentage_used=0
+fi
+
+if [ $percentage_used -gt 100 ]; then
+  percentage_used=100
+  time_remaining=0
+fi
+
+if [ $percentage_used -lt 50 ]; then
+  STATUS_COLOR="\033[38;5;46m"
+  STATUS_ICON="✓"
+elif [ $percentage_used -lt 80 ]; then
+  STATUS_COLOR="\033[38;5;226m"
+  STATUS_ICON="⚠"
+else
+  STATUS_COLOR="\033[38;5;196m"
+  STATUS_ICON="⏰"
+fi
+
+bar_filled=$((percentage_used / 5))
+bar_empty=$((20 - bar_filled))
+
+if [ $bar_filled -gt 0 ]; then
+  bar=$(printf "█%.0s" $(seq 1 $bar_filled))$(printf "░%.0s" $(seq 1 $bar_empty))
+else
+  bar="░░░░░░░░░░░░░░░░░░░░"
+fi
+
+if [ $time_remaining -gt 60 ]; then
+  remaining_hours=$((time_remaining / 60))
+  remaining_mins=$((time_remaining % 60))
+  time_display="${remaining_hours}h ${remaining_mins}m"
+elif [ $time_remaining -gt 0 ]; then
+  time_display="${time_remaining}m"
+else
+  time_display="EXPIRED"
+fi
+
+RESET="\033[0m"
+
+echo -e "${STATUS_ICON} 5H Window: ${STATUS_COLOR}${bar}${RESET} ${percentage_used}% | ${STATUS_COLOR}${time_display}${RESET} left"
+```
+
+### Five Hour Window Tracker with Custom Window Limit
+
+Configurable window limit for different usage scenarios
+
+```bash
+#!/usr/bin/env bash
+
+# 5-Hour Window Tracker with Custom Window Limit
+
+# Configurable window limit (default 300 minutes = 5 hours)
+WINDOW_LIMIT=${FIVE_HOUR_WINDOW_LIMIT:-300}
+
+input=$(cat)
+
+total_duration_ms=$(echo "$input" | jq -r '.cost.total_duration_ms // 0')
+
+duration_minutes=$((total_duration_ms / 60000))
+
+time_remaining=$((WINDOW_LIMIT - duration_minutes))
+
+if [ $duration_minutes -gt 0 ]; then
+  percentage_used=$(( (duration_minutes * 100) / WINDOW_LIMIT ))
+else
+  percentage_used=0
+fi
+
+if [ $percentage_used -gt 100 ]; then
+  percentage_used=100
+  time_remaining=0
+fi
+
+if [ $percentage_used -lt 50 ]; then
+  STATUS_COLOR="\033[38;5;46m"
+  STATUS_ICON="✓"
+elif [ $percentage_used -lt 80 ]; then
+  STATUS_COLOR="\033[38;5;226m"
+  STATUS_ICON="⚠"
+else
+  STATUS_COLOR="\033[38;5;196m"
+  STATUS_ICON="⏰"
+fi
+
+bar_filled=$((percentage_used / 5))
+bar_empty=$((20 - bar_filled))
+
+if [ $bar_filled -gt 0 ]; then
+  bar=$(printf "█%.0s" $(seq 1 $bar_filled))$(printf "░%.0s" $(seq 1 $bar_empty))
+else
+  bar="░░░░░░░░░░░░░░░░░░░░"
+fi
+
+if [ $time_remaining -gt 60 ]; then
+  remaining_hours=$((time_remaining / 60))
+  remaining_mins=$((time_remaining % 60))
+  time_display="${remaining_hours}h ${remaining_mins}m"
+elif [ $time_remaining -gt 0 ]; then
+  time_display="${time_remaining}m"
+else
+  time_display="EXPIRED"
+fi
+
+RESET="\033[0m"
+
+echo -e "${STATUS_ICON} ${WINDOW_LIMIT}min Window: ${STATUS_COLOR}${bar}${RESET} ${percentage_used}% | ${STATUS_COLOR}${time_display}${RESET} left"
+```
+
+### Five Hour Window Tracker Installation Example
+
+Complete setup script with Unicode character verification
+
+```bash
+#!/bin/bash
+# Installation script for Five Hour Window Tracker
+
+mkdir -p .claude/statuslines
+
+# Check for jq (required for JSON parsing)
+if ! command -v jq &> /dev/null; then
+    echo "Installing jq for JSON parsing..."
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        brew install jq
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        sudo apt-get install -y jq || sudo yum install -y jq
+    else
+        echo "Please install jq manually: https://stedolan.github.io/jq/"
+    fi
+fi
+
+# Test Unicode block characters
+if echo -e '█░' &> /dev/null; then
+    echo "Unicode block characters supported"
+else
+    echo "Warning: Unicode block characters may not be supported in your terminal"
+    echo "Script will use Unicode blocks (█ and ░) - if they don't display, consider ASCII alternatives"
+fi
+
+cat > .claude/statuslines/five-hour-window-tracker.sh << 'SCRIPT_EOF'
+#!/usr/bin/env bash
+
+# 5-Hour Session Window Tracker for Claude Code
+# Tracks Claude's unique 5-hour rolling session window
+
+read -r input
+
+total_duration_ms=$(echo "$input" | jq -r '.cost.total_duration_ms // 0')
+
+duration_minutes=$((total_duration_ms / 60000))
+
+WINDOW_LIMIT=300
+time_remaining=$((WINDOW_LIMIT - duration_minutes))
+
+if [ $duration_minutes -gt 0 ]; then
+  percentage_used=$(( (duration_minutes * 100) / WINDOW_LIMIT ))
+else
+  percentage_used=0
+fi
+
+if [ $percentage_used -gt 100 ]; then
+  percentage_used=100
+  time_remaining=0
+fi
+
+if [ $percentage_used -lt 50 ]; then
+  STATUS_COLOR="\033[38;5;46m"
+  STATUS_ICON="✓"
+elif [ $percentage_used -lt 80 ]; then
+  STATUS_COLOR="\033[38;5;226m"
+  STATUS_ICON="⚠"
+else
+  STATUS_COLOR="\033[38;5;196m"
+  STATUS_ICON="⏰"
+fi
+
+bar_filled=$((percentage_used / 5))
+bar_empty=$((20 - bar_filled))
+
+if [ $bar_filled -gt 0 ]; then
+  bar=$(printf "█%.0s" $(seq 1 $bar_filled))$(printf "░%.0s" $(seq 1 $bar_empty))
+else
+  bar="░░░░░░░░░░░░░░░░░░░░"
+fi
+
+if [ $time_remaining -gt 60 ]; then
+  remaining_hours=$((time_remaining / 60))
+  remaining_mins=$((time_remaining % 60))
+  time_display="${remaining_hours}h ${remaining_mins}m"
+elif [ $time_remaining -gt 0 ]; then
+  time_display="${time_remaining}m"
+else
+  time_display="EXPIRED"
+fi
+
+RESET="\033[0m"
+
+echo -e "${STATUS_ICON} 5H Window: ${STATUS_COLOR}${bar}${RESET} ${percentage_used}% | ${STATUS_COLOR}${time_display}${RESET} left"
+SCRIPT_EOF
+
+chmod +x .claude/statuslines/five-hour-window-tracker.sh
+
+# Add to settings.json
+if [ ! -f .claude/settings.json ]; then
+    echo '{"statusLine":{"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/five-hour-window-tracker.sh","refreshInterval":1000}}' > .claude/settings.json
+else
+    jq '.statusLine = {"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/five-hour-window-tracker.sh","refreshInterval":1000}' .claude/settings.json > .claude/settings.json.tmp
+    mv .claude/settings.json.tmp .claude/settings.json
+fi
+
+echo "Five Hour Window Tracker installed successfully!"
+echo "Note: This tracks Claude Code's unique 5-hour rolling session window (300 minutes)"
+```
+```bash
+#!/usr/bin/env bash
+
+# Enhanced 5-Hour Window Tracker with Session History
+
+input=$(cat)
+
+session_id=$(echo "$input" | jq -r '.session_id // ""')
+total_duration_ms=$(echo "$input" | jq -r '.cost.total_duration_ms // 0')
+
+# Session history directory
+HISTORY_DIR="${HOME}/.claude-code-windows"
+mkdir -p "$HISTORY_DIR"
+
+# Current session file
+SESSION_FILE="${HISTORY_DIR}/${session_id}.session"
+
+# Store session start time if new session
+if [ ! -f "$SESSION_FILE" ]; then
+  echo "$(date +%s)" > "$SESSION_FILE"
+fi
+
+session_start=$(cat "$SESSION_FILE")
+current_time=$(date +%s)
+session_elapsed=$(( (current_time - session_start) / 60 ))
+
+# Use actual duration from JSON or calculated elapsed time
+duration_minutes=$((total_duration_ms / 60000))
+if [ $duration_minutes -eq 0 ]; then
+  duration_minutes=$session_elapsed
+fi
+
+WINDOW_LIMIT=300
+time_remaining=$((WINDOW_LIMIT - duration_minutes))
+
+if [ $duration_minutes -gt 0 ]; then
+  percentage_used=$(( (duration_minutes * 100) / WINDOW_LIMIT ))
+else
+  percentage_used=0
+fi
+
+if [ $percentage_used -gt 100 ]; then
+  percentage_used=100
+  time_remaining=0
+fi
+
+if [ $percentage_used -lt 50 ]; then
+  STATUS_COLOR="\033[38;5;46m"
+  STATUS_ICON="✓"
+elif [ $percentage_used -lt 80 ]; then
+  STATUS_COLOR="\033[38;5;226m"
+  STATUS_ICON="⚠"
+else
+  STATUS_COLOR="\033[38;5;196m"
+  STATUS_ICON="⏰"
+fi
+
+bar_filled=$((percentage_used / 5))
+bar_empty=$((20 - bar_filled))
+
+if [ $bar_filled -gt 0 ]; then
+  bar=$(printf "█%.0s" $(seq 1 $bar_filled))$(printf "░%.0s" $(seq 1 $bar_empty))
+else
+  bar="░░░░░░░░░░░░░░░░░░░░"
+fi
+
+if [ $time_remaining -gt 60 ]; then
+  remaining_hours=$((time_remaining / 60))
+  remaining_mins=$((time_remaining % 60))
+  time_display="${remaining_hours}h ${remaining_mins}m"
+elif [ $time_remaining -gt 0 ]; then
+  time_display="${time_remaining}m"
+else
+  time_display="EXPIRED"
+fi
+
+RESET="\033[0m"
+
+echo -e "${STATUS_ICON} 5H Window: ${STATUS_COLOR}${bar}${RESET} ${percentage_used}% | ${STATUS_COLOR}${time_display}${RESET} left"
+```
+```bash
+#!/usr/bin/env bash
+
+# 5-Hour Window Tracker with Custom Window Limit
+
+# Configurable window limit (default 300 minutes = 5 hours)
+WINDOW_LIMIT=${FIVE_HOUR_WINDOW_LIMIT:-300}
+
+input=$(cat)
+
+total_duration_ms=$(echo "$input" | jq -r '.cost.total_duration_ms // 0')
+
+duration_minutes=$((total_duration_ms / 60000))
+
+time_remaining=$((WINDOW_LIMIT - duration_minutes))
+
+if [ $duration_minutes -gt 0 ]; then
+  percentage_used=$(( (duration_minutes * 100) / WINDOW_LIMIT ))
+else
+  percentage_used=0
+fi
+
+if [ $percentage_used -gt 100 ]; then
+  percentage_used=100
+  time_remaining=0
+fi
+
+if [ $percentage_used -lt 50 ]; then
+  STATUS_COLOR="\033[38;5;46m"
+  STATUS_ICON="✓"
+elif [ $percentage_used -lt 80 ]; then
+  STATUS_COLOR="\033[38;5;226m"
+  STATUS_ICON="⚠"
+else
+  STATUS_COLOR="\033[38;5;196m"
+  STATUS_ICON="⏰"
+fi
+
+bar_filled=$((percentage_used / 5))
+bar_empty=$((20 - bar_filled))
+
+if [ $bar_filled -gt 0 ]; then
+  bar=$(printf "█%.0s" $(seq 1 $bar_filled))$(printf "░%.0s" $(seq 1 $bar_empty))
+else
+  bar="░░░░░░░░░░░░░░░░░░░░"
+fi
+
+if [ $time_remaining -gt 60 ]; then
+  remaining_hours=$((time_remaining / 60))
+  remaining_mins=$((time_remaining % 60))
+  time_display="${remaining_hours}h ${remaining_mins}m"
+elif [ $time_remaining -gt 0 ]; then
+  time_display="${time_remaining}m"
+else
+  time_display="EXPIRED"
+fi
+
+RESET="\033[0m"
+
+echo -e "${STATUS_ICON} ${WINDOW_LIMIT}min Window: ${STATUS_COLOR}${bar}${RESET} ${percentage_used}% | ${STATUS_COLOR}${time_display}${RESET} left"
+```
+```bash
+#!/bin/bash
+# Installation script for Five Hour Window Tracker
+
+mkdir -p .claude/statuslines
+
+# Check for jq (required for JSON parsing)
+if ! command -v jq &> /dev/null; then
+    echo "Installing jq for JSON parsing..."
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        brew install jq
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        sudo apt-get install -y jq || sudo yum install -y jq
+    else
+        echo "Please install jq manually: https://stedolan.github.io/jq/"
+    fi
+fi
+
+# Test Unicode block characters
+if echo -e '█░' &> /dev/null; then
+    echo "Unicode block characters supported"
+else
+    echo "Warning: Unicode block characters may not be supported in your terminal"
+    echo "Script will use Unicode blocks (█ and ░) - if they don't display, consider ASCII alternatives"
+fi
+
+cat > .claude/statuslines/five-hour-window-tracker.sh << 'SCRIPT_EOF'
+#!/usr/bin/env bash
+
+# 5-Hour Session Window Tracker for Claude Code
+# Tracks Claude's unique 5-hour rolling session window
+
+read -r input
+
+total_duration_ms=$(echo "$input" | jq -r '.cost.total_duration_ms // 0')
+
+duration_minutes=$((total_duration_ms / 60000))
+
+WINDOW_LIMIT=300
+time_remaining=$((WINDOW_LIMIT - duration_minutes))
+
+if [ $duration_minutes -gt 0 ]; then
+  percentage_used=$(( (duration_minutes * 100) / WINDOW_LIMIT ))
+else
+  percentage_used=0
+fi
+
+if [ $percentage_used -gt 100 ]; then
+  percentage_used=100
+  time_remaining=0
+fi
+
+if [ $percentage_used -lt 50 ]; then
+  STATUS_COLOR="\033[38;5;46m"
+  STATUS_ICON="✓"
+elif [ $percentage_used -lt 80 ]; then
+  STATUS_COLOR="\033[38;5;226m"
+  STATUS_ICON="⚠"
+else
+  STATUS_COLOR="\033[38;5;196m"
+  STATUS_ICON="⏰"
+fi
+
+bar_filled=$((percentage_used / 5))
+bar_empty=$((20 - bar_filled))
+
+if [ $bar_filled -gt 0 ]; then
+  bar=$(printf "█%.0s" $(seq 1 $bar_filled))$(printf "░%.0s" $(seq 1 $bar_empty))
+else
+  bar="░░░░░░░░░░░░░░░░░░░░"
+fi
+
+if [ $time_remaining -gt 60 ]; then
+  remaining_hours=$((time_remaining / 60))
+  remaining_mins=$((time_remaining % 60))
+  time_display="${remaining_hours}h ${remaining_mins}m"
+elif [ $time_remaining -gt 0 ]; then
+  time_display="${time_remaining}m"
+else
+  time_display="EXPIRED"
+fi
+
+RESET="\033[0m"
+
+echo -e "${STATUS_ICON} 5H Window: ${STATUS_COLOR}${bar}${RESET} ${percentage_used}% | ${STATUS_COLOR}${time_display}${RESET} left"
+SCRIPT_EOF
+
+chmod +x .claude/statuslines/five-hour-window-tracker.sh
+
+# Add to settings.json
+if [ ! -f .claude/settings.json ]; then
+    echo '{"statusLine":{"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/five-hour-window-tracker.sh","refreshInterval":1000}}' > .claude/settings.json
+else
+    jq '.statusLine = {"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/five-hour-window-tracker.sh","refreshInterval":1000}' .claude/settings.json > .claude/settings.json.tmp
+    mv .claude/settings.json.tmp .claude/settings.json
+fi
+
+echo "Five Hour Window Tracker installed successfully!"
+echo "Note: This tracks Claude Code's unique 5-hour rolling session window (300 minutes)"
+```
+
+## Troubleshooting
+### Progress bar not updating or showing as empty boxes
+
+Ensure terminal supports Unicode block characters (█ and ░). Test with: echo -e '█████░░░░░'. If unsupported, replace with ASCII: bar_filled uses '#' and bar_empty uses '-' instead of Unicode blocks. Verify printf command works: printf '█%.0s' $(seq 1 5). Check terminal encoding: locale charmap (should be UTF-8).
+
+### Time remaining showing negative or EXPIRED incorrectly
+
+Check cost.total_duration_ms field in JSON: echo '$input' | jq .cost.total_duration_ms. Verify calculation: duration_minutes should be total_duration_ms / 60000. If sessions overlap, this tracks CURRENT session only, not aggregate time. Check WINDOW_LIMIT is 300: echo $WINDOW_LIMIT. Verify time_remaining calculation: time_remaining=$((WINDOW_LIMIT - duration_minutes)).
+
+### Percentage exceeds 100% showing incorrect progress
+
+Script caps percentage at 100% with overflow protection. Claude sessions can continue beyond 5 hours in practice. If you see 100% + EXPIRED, session has exceeded window. This is expected behavior, not a bug. Start new session to reset window. Verify percentage calculation: percentage_used=$(( (duration_minutes \* 100) / WINDOW_LIMIT )). Check overflow protection: if [ $percentage_used -gt 100 ]; then percentage_used=100; fi.
+
+### Warning colors not displaying at correct thresholds
+
+Verify color thresholds: <50% green, 50-80% yellow, >80% red. Check percentage_used calculation: (duration_minutes \* 100) / 300. Test with known durations: 150 min should be 50% yellow, 250 min should be 83% red. Verify ANSI color codes work: echo -e '\033[38;5;46mGREEN\033[0m'. Check terminal supports 256-color mode: echo $TERM (should be xterm-256color or similar).
+
+### Multiple overlapping sessions not reflected in tracker
+
+Statusline tracks CURRENT session only (based on session_id in JSON). Claude supports multiple overlapping 5-hour windows simultaneously. To track multiple sessions, run separate statusline instances or modify script to read from multiple session files. Verify session_id exists: echo '$input' | jq .session_id. Check if session history tracking is enabled in enhanced version.
+
+### Time display showing incorrect hours/minutes format
+
+Verify time_remaining calculation: time_remaining=$((WINDOW_LIMIT - duration_minutes)). Check hours calculation: remaining_hours=$((time_remaining / 60)). Check minutes calculation: remaining_mins=$((time_remaining % 60)). Test: time_remaining=150 should show '2h 30m'. Verify format logic: if [ $time_remaining -gt 60 ]; then show hours and minutes; elif [ $time_remaining -gt 0 ]; then show minutes only; else show EXPIRED.
+
+### Progress bar calculation showing wrong number of filled blocks
+
+Verify bar_filled calculation: bar_filled=$((percentage_used / 5)) (each char = 5%). Test: percentage=50%; bar_filled=$((50 / 5)); echo $bar_filled (should be 10). Check bar_empty calculation: bar_empty=$((20 - bar_filled)). Verify printf command: printf '█%.0s' $(seq 1 5) should output 5 block characters. Ensure seq command is available: which seq.
+
+### Statusline not updating or stuck at 0%
+
+Check JSON input is being read: echo '$input' | jq .. Verify cost.total_duration_ms exists: echo '$input' | jq .cost.total_duration_ms. Check jq is installed: which jq. Verify duration_minutes calculation: duration_minutes=$((total_duration_ms / 60000)). Test with sample JSON: echo '{"cost":{"total_duration_ms":180000}}' | jq -r '.cost.total_duration_ms // 0' (should return 180000). Check refreshInterval in settings.json is set to 1000ms or lower.

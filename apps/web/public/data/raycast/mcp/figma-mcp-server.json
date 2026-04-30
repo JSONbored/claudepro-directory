@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "mcp:figma-mcp-server",
+  "category": "mcp",
+  "slug": "figma-mcp-server",
+  "title": "Figma MCP Server for Claude",
+  "author": "Figma",
+  "brandName": "Figma",
+  "brandDomain": "figma.com",
+  "brandIconUrl": "/api/brand-assets/icon/figma.com",
+  "brandAssetSource": "brandfetch",
+  "copyText": "Install:\nclaude mcp list && claude mcp status figma\n\nConfig:\n{\n  \"figma\": {\n    \"url\": \"http://127.0.0.1:3845/mcp\",\n    \"transport\": \"http\"\n  }\n}\n\nUsage:\n{\n  \"figma\": {\n    \"url\": \"http://127.0.0.1:3845/mcp\",\n    \"transport\": \"http\"\n  }\n}",
+  "detailMarkdown": "# Figma MCP Server for Claude\n\nAccess designs, export assets, and interact with Figma files through Claude\n\n## Install\n```bash\nclaude mcp list && claude mcp status figma\n```\n\n## Config\n```json\n{\n  \"figma\": {\n    \"url\": \"http://127.0.0.1:3845/mcp\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status figma",
+  "webUrl": "https://heyclau.de/mcp/figma-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/figma-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/figma-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/figma-mcp-server",
+  "seoTitle": "Figma MCP Server for Claude",
+  "seoDescription": "Access designs, export assets, and interact with Figma files through Claude Discover tools for AI development. HeyClaude adds source links, install steps,...",
+  "repoUrl": "",
+  "documentationUrl": "https://help.figma.com/hc/en-us/articles/32132100833559"
+}

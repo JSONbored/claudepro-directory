@@ -1,0 +1,253 @@
+{
+  "schemaVersion": 1,
+  "key": "commands:zod-audit",
+  "entry": {
+    "category": "commands",
+    "slug": "zod-audit",
+    "title": "/zod-audit - Zod Auditor Command for Claude Code",
+    "description": "Production codebase auditor specialized in Zod schema validation coverage, security vulnerability detection, and dead code elimination",
+    "seoTitle": "/zod-audit - Zod Auditor Command for Claude Code",
+    "seoDescription": "Production codebase auditor specialized in Zod schema validation coverage, security vulnerability detection, and dead code elimination Discover tools for AI ...",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2025-09-26",
+    "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+    "tags": [
+      "zod",
+      "validation",
+      "security-audit",
+      "typescript",
+      "dead-code",
+      "duplication",
+      "schema-validation",
+      "open-source",
+      "production",
+      "technical-debt"
+    ],
+    "keywords": [
+      "audit",
+      "claude",
+      "commands",
+      "dead-code",
+      "development",
+      "duplication",
+      "open-source",
+      "production",
+      "schema-validation",
+      "security-audit",
+      "technical-debt",
+      "tools"
+    ],
+    "readingTime": 3,
+    "difficultyScore": 65,
+    "documentationUrl": "https://owasp.org/www-project-top-ten/",
+    "cardDescription": "Audit a codebase for Zod coverage, security gaps, dead code, and duplication.",
+    "installable": true,
+    "installCommand": "/zod-audit",
+    "usageSnippet": "/zod-audit security apps/web",
+    "copySnippet": "/zod-audit security apps/web",
+    "commandSyntax": "/zod-audit [audit-type=full|security|duplication|validation|zod] [path]",
+    "argumentHint": "[audit-type=full|security|duplication|validation|zod] [path]",
+    "allowedTools": [
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(ls:*)",
+      "Read",
+      "Write",
+      "Edit",
+      "Grep",
+      "Glob",
+      "Task"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Context\n\n- Current directory: !`pwd`\n- Project structure: !`ls -la`\n- TypeScript/JavaScript files: !`find . -type f \\( -name \"*.ts\" -o -name \"*.tsx\" -o -name \"*.js\" -o -name \"*.jsx\" \\) -not -path \"*/node_modules/*\" -not -path \"*/dist/*\" | head -20`\n- Package dependencies: !`[ -f package.json ] && cat package.json | grep -A 20 '\"dependencies\"'`\n\n## Audit Scope\n\nAudit Type: ${1:-full}\nTarget Path: ${2:-.}\n\n## Command Metadata\n\n```yaml\nallowed-tools:\n  - Bash(find:*)\n  - Bash(grep:*)\n  - Bash(rg:*)\n  - Bash(ls:*)\n  - Read\n  - Write\n  - Edit\n  - Grep\n  - Glob\n  - Task\nargument-hint: [audit-type=full|security|duplication|validation|zod] [path]\ndescription: Audits codebase for Zod validation coverage, security gaps, and code quality issues\nmodel: claude-3-5-sonnet-20241022\n```\n\n## Your Task\n\nPerform a comprehensive codebase audit focusing on:\n\n### Phase 1: Security Analysis\n\n- Identify ALL missing input validations, especially Zod schemas\n- Find unvalidated API endpoints and form handlers\n- Detect exposed secrets, API keys, or sensitive data\n- Spot authentication/authorization gaps\n- Check for common vulnerabilities (XSS, SQL injection, CSRF)\n- Verify environment variable validation\n\n### Phase 2: Code Quality Assessment\n\n- Find exact duplicates and near-duplicate code (>80% similarity)\n- Identify dead code and unused exports\n- Locate commented-out code blocks\n- Spot orphaned files and abandoned features\n- Detect inconsistent naming patterns\n- Find magic numbers and hardcoded values\n\n### Phase 3: Validation Coverage\n\n- Every user input MUST have Zod validation\n- All API responses MUST be validated\n- Database query results MUST have schemas\n- File uploads MUST be sanitized\n- Environment variables MUST use schemas\n- Form submissions MUST validate all fields\n\n### Phase 4: Modernization Opportunities\n\n- Identify legacy patterns needing updates\n- Find opportunities for React/Next.js optimizations\n- Detect outdated dependencies\n- Spot over-engineered abstractions\n- Locate performance bottlenecks\n\n## Deliverables\n\nProvide a structured report with:\n\n### Critical Security Issues\n\n- File paths and line numbers\n- Specific vulnerability details\n- Recommended fixes with code examples\n- Priority: CRITICAL\n\n### Code Duplication Report\n\n- Duplicated code blocks with locations\n- Consolidation strategies\n- Estimated lines of code reduction\n- Priority: HIGH\n\n### Missing Validations\n\n- Unvalidated endpoints/inputs\n- Required Zod schemas\n- Implementation examples\n- Priority: CRITICAL\n\n### Modernization Recommendations\n\n- Legacy patterns to update\n- Modern alternatives\n- Migration strategies\n- Priority: MEDIUM\n\n### Metrics Summary\n\n- Total files audited\n- Security gaps identified\n- Lines of duplicate code\n- Missing validation schemas\n- Estimated maintenance reduction %\n\n## Open-Source Considerations\n\nThis audit assumes an open-source production codebase:\n\n- No security through obscurity\n- All code is publicly visible\n- Clear, auditable validation logic\n- Explicit security boundaries\n- Well-documented threat model\n\n## Installation\n\nCreate command directory:\n\n```bash\nmkdir -p .claude/commands\n```\n\nCreate command file: `audit-codebase.md` in the commands directory\n\nCopy the command content with YAML frontmatter format\n\n**Usage:**\n\n- `/audit-codebase` - Execute the full audit\n- `/audit-codebase security` - Security-focused audit\n- `/audit-codebase validation` - Validation coverage check\n\n**Config Format:** Markdown file with YAML frontmatter\n\n**Config Paths:**\n\n- Project: `.claude/commands/audit-codebase.md`\n- User: `~/.claude/commands/audit-codebase.md`\n\n## Implementation Notes\n\nWhen auditing:\n\n1. Start with high-risk areas (auth, API, forms)\n2. Use ripgrep for fast pattern matching\n3. Check all file extensions, not just .ts/.tsx\n4. Include configuration files in security scan\n5. Verify all external data sources have validation\n\nPrioritize findings by:\n\n- CRITICAL: Security vulnerabilities, missing validations\n- HIGH: Major duplication, abandoned code\n- MEDIUM: Modernization opportunities\n- LOW: Style inconsistencies",
+    "sections": [
+      {
+        "title": "Context",
+        "id": "context",
+        "markdown": "- Current directory: !`pwd`\n- Project structure: !`ls -la`\n- TypeScript/JavaScript files: !`find . -type f \\( -name \"*.ts\" -o -name \"*.tsx\" -o -name \"*.js\" -o -name \"*.jsx\" \\) -not -path \"*/node_modules/*\" -not -path \"*/dist/*\" | head -20`\n- Package dependencies: !`[ -f package.json ] && cat package.json | grep -A 20 '\"dependencies\"'`",
+        "codeBlocks": []
+      },
+      {
+        "title": "Audit Scope",
+        "id": "audit-scope",
+        "markdown": "Audit Type: ${1:-full}\nTarget Path: ${2:-.}",
+        "codeBlocks": []
+      },
+      {
+        "title": "Command Metadata",
+        "id": "command-metadata",
+        "markdown": "```yaml\nallowed-tools:\n  - Bash(find:*)\n  - Bash(grep:*)\n  - Bash(rg:*)\n  - Bash(ls:*)\n  - Read\n  - Write\n  - Edit\n  - Grep\n  - Glob\n  - Task\nargument-hint: [audit-type=full|security|duplication|validation|zod] [path]\ndescription: Audits codebase for Zod validation coverage, security gaps, and code quality issues\nmodel: claude-3-5-sonnet-20241022\n```",
+        "codeBlocks": [
+          {
+            "language": "yaml",
+            "code": "allowed-tools:\n  - Bash(find:*)\n  - Bash(grep:*)\n  - Bash(rg:*)\n  - Bash(ls:*)\n  - Read\n  - Write\n  - Edit\n  - Grep\n  - Glob\n  - Task\nargument-hint: [audit-type=full|security|duplication|validation|zod] [path]\ndescription: Audits codebase for Zod validation coverage, security gaps, and code quality issues\nmodel: claude-3-5-sonnet-20241022"
+          }
+        ]
+      },
+      {
+        "title": "Your Task",
+        "id": "your-task",
+        "markdown": "Perform a comprehensive codebase audit focusing on:\n\n### Phase 1: Security Analysis\n\n- Identify ALL missing input validations, especially Zod schemas\n- Find unvalidated API endpoints and form handlers\n- Detect exposed secrets, API keys, or sensitive data\n- Spot authentication/authorization gaps\n- Check for common vulnerabilities (XSS, SQL injection, CSRF)\n- Verify environment variable validation\n\n### Phase 2: Code Quality Assessment\n\n- Find exact duplicates and near-duplicate code (>80% similarity)\n- Identify dead code and unused exports\n- Locate commented-out code blocks\n- Spot orphaned files and abandoned features\n- Detect inconsistent naming patterns\n- Find magic numbers and hardcoded values\n\n### Phase 3: Validation Coverage\n\n- Every user input MUST have Zod validation\n- All API responses MUST be validated\n- Database query results MUST have schemas\n- File uploads MUST be sanitized\n- Environment variables MUST use schemas\n- Form submissions MUST validate all fields\n\n### Phase 4: Modernization Opportunities\n\n- Identify legacy patterns needing updates\n- Find opportunities for React/Next.js optimizations\n- Detect outdated dependencies\n- Spot over-engineered abstractions\n- Locate performance bottlenecks",
+        "codeBlocks": []
+      },
+      {
+        "title": "Deliverables",
+        "id": "deliverables",
+        "markdown": "Provide a structured report with:\n\n### Critical Security Issues\n\n- File paths and line numbers\n- Specific vulnerability details\n- Recommended fixes with code examples\n- Priority: CRITICAL\n\n### Code Duplication Report\n\n- Duplicated code blocks with locations\n- Consolidation strategies\n- Estimated lines of code reduction\n- Priority: HIGH\n\n### Missing Validations\n\n- Unvalidated endpoints/inputs\n- Required Zod schemas\n- Implementation examples\n- Priority: CRITICAL\n\n### Modernization Recommendations\n\n- Legacy patterns to update\n- Modern alternatives\n- Migration strategies\n- Priority: MEDIUM\n\n### Metrics Summary\n\n- Total files audited\n- Security gaps identified\n- Lines of duplicate code\n- Missing validation schemas\n- Estimated maintenance reduction %",
+        "codeBlocks": []
+      },
+      {
+        "title": "Open-Source Considerations",
+        "id": "open-source-considerations",
+        "markdown": "This audit assumes an open-source production codebase:\n\n- No security through obscurity\n- All code is publicly visible\n- Clear, auditable validation logic\n- Explicit security boundaries\n- Well-documented threat model",
+        "codeBlocks": []
+      },
+      {
+        "title": "Installation",
+        "id": "installation",
+        "markdown": "Create command directory:\n\n```bash\nmkdir -p .claude/commands\n```\n\nCreate command file: `audit-codebase.md` in the commands directory\n\nCopy the command content with YAML frontmatter format\n\n**Usage:**\n\n- `/audit-codebase` - Execute the full audit\n- `/audit-codebase security` - Security-focused audit\n- `/audit-codebase validation` - Validation coverage check\n\n**Config Format:** Markdown file with YAML frontmatter\n\n**Config Paths:**\n\n- Project: `.claude/commands/audit-codebase.md`\n- User: `~/.claude/commands/audit-codebase.md`",
+        "codeBlocks": [
+          {
+            "language": "bash",
+            "code": "mkdir -p .claude/commands"
+          }
+        ]
+      },
+      {
+        "title": "Implementation Notes",
+        "id": "implementation-notes",
+        "markdown": "When auditing:\n\n1. Start with high-risk areas (auth, API, forms)\n2. Use ripgrep for fast pattern matching\n3. Check all file extensions, not just .ts/.tsx\n4. Include configuration files in security scan\n5. Verify all external data sources have validation\n\nPrioritize findings by:\n\n- CRITICAL: Security vulnerabilities, missing validations\n- HIGH: Major duplication, abandoned code\n- MEDIUM: Modernization opportunities\n- LOW: Style inconsistencies",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Context",
+        "id": "context"
+      },
+      {
+        "depth": 2,
+        "text": "Audit Scope",
+        "id": "audit-scope"
+      },
+      {
+        "depth": 2,
+        "text": "Command Metadata",
+        "id": "command-metadata"
+      },
+      {
+        "depth": 2,
+        "text": "Your Task",
+        "id": "your-task"
+      },
+      {
+        "depth": 3,
+        "text": "Phase 1: Security Analysis",
+        "id": "phase-1-security-analysis"
+      },
+      {
+        "depth": 3,
+        "text": "Phase 2: Code Quality Assessment",
+        "id": "phase-2-code-quality-assessment"
+      },
+      {
+        "depth": 3,
+        "text": "Phase 3: Validation Coverage",
+        "id": "phase-3-validation-coverage"
+      },
+      {
+        "depth": 3,
+        "text": "Phase 4: Modernization Opportunities",
+        "id": "phase-4-modernization-opportunities"
+      },
+      {
+        "depth": 2,
+        "text": "Deliverables",
+        "id": "deliverables"
+      },
+      {
+        "depth": 3,
+        "text": "Critical Security Issues",
+        "id": "critical-security-issues"
+      },
+      {
+        "depth": 3,
+        "text": "Code Duplication Report",
+        "id": "code-duplication-report"
+      },
+      {
+        "depth": 3,
+        "text": "Missing Validations",
+        "id": "missing-validations"
+      },
+      {
+        "depth": 3,
+        "text": "Modernization Recommendations",
+        "id": "modernization-recommendations"
+      },
+      {
+        "depth": 3,
+        "text": "Metrics Summary",
+        "id": "metrics-summary"
+      },
+      {
+        "depth": 2,
+        "text": "Open-Source Considerations",
+        "id": "open-source-considerations"
+      },
+      {
+        "depth": 2,
+        "text": "Installation",
+        "id": "installation"
+      },
+      {
+        "depth": 2,
+        "text": "Implementation Notes",
+        "id": "implementation-notes"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "yaml",
+        "code": "allowed-tools:\n  - Bash(find:*)\n  - Bash(grep:*)\n  - Bash(rg:*)\n  - Bash(ls:*)\n  - Read\n  - Write\n  - Edit\n  - Grep\n  - Glob\n  - Task\nargument-hint: [audit-type=full|security|duplication|validation|zod] [path]\ndescription: Audits codebase for Zod validation coverage, security gaps, and code quality issues\nmodel: claude-3-5-sonnet-20241022"
+      },
+      {
+        "language": "bash",
+        "code": "mkdir -p .claude/commands"
+      }
+    ],
+    "filePath": "content/commands/zod-audit.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/zod-audit.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://owasp.org/www-project-top-ten/",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/zod-audit.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

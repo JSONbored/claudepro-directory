@@ -15,13 +15,13 @@ seoDescription: >-
   tool access, and independent context for parallel task execution and workflow
   orc...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-25'
-documentationUrl: 'https://docs.claude.com/en/docs/claude-code/sub-agents'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-25"
+documentationUrl: "https://docs.claude.com/en/docs/claude-code/sub-agents"
 installable: true
-installCommand: '/subagent-create [role] [options]'
-usageSnippet: '/subagent-create [role] [options]'
-copySnippet: '/subagent-create [role] [options]'
+installCommand: "/subagent-create [role] [options]"
+usageSnippet: "/subagent-create [role] [options]"
+copySnippet: "/subagent-create [role] [options]"
 tags:
   - subagents
   - orchestration
@@ -49,8 +49,9 @@ hasPrerequisites: false
 hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
-commandSyntax: '/subagent-create [role] [options]'
+commandSyntax: "/subagent-create [role] [options]"
 ---
+
 The `/subagent-create` command builds specialized AI subagents in Claude Code with custom expertise, independent context windows, and scoped tool permissions for modular multi-agent workflows.
 
 ## Features
@@ -73,6 +74,7 @@ The `/subagent-create` command builds specialized AI subagents in Claude Code wi
 ### Subagent Roles (Pre-built Templates)
 
 **Development:**
+
 - `--code-reviewer` - Senior code reviewer and security expert
 - `--test-engineer` - Test automation specialist
 - `--debugger` - Debugging and troubleshooting expert
@@ -80,17 +82,20 @@ The `/subagent-create` command builds specialized AI subagents in Claude Code wi
 - `--documentation-writer` - Technical documentation specialist
 
 **Architecture:**
+
 - `--architect` - Software architect and system designer
 - `--database-expert` - Database design and optimization
 - `--security-auditor` - Security vulnerability assessment
 - `--performance-analyst` - Performance optimization expert
 
 **DevOps:**
+
 - `--ci-cd-engineer` - CI/CD pipeline specialist
 - `--infrastructure-specialist` - Cloud infrastructure expert
 - `--monitoring-expert` - Observability and monitoring
 
 **Research:**
+
 - `--researcher` - Web research and data gathering
 - `--analyst` - Data analysis and insights
 - `--technical-writer` - Content creation and synthesis
@@ -116,23 +121,20 @@ The `/subagent-create` command builds specialized AI subagents in Claude Code wi
 ### Code Review Subagent (Pre-built Template)
 
 **Command:**
+
 ```bash
 /subagent-create --code-reviewer
 ```
 
 **Generated Configuration:**
+
 ```json
 {
   "name": "code-reviewer",
   "displayName": "Senior Code Reviewer",
   "description": "Reviews code for security, quality, and best practices",
   "systemPrompt": "You are a senior code reviewer with 15+ years of experience.\n\nYour expertise includes:\n- Security vulnerability detection (OWASP Top 10)\n- Code quality and maintainability assessment\n- Performance optimization identification\n- Best practices enforcement\n- Architecture and design patterns\n\nReview Guidelines:\n1. Identify security vulnerabilities with severity ratings\n2. Flag code smells and anti-patterns\n3. Suggest specific improvements with examples\n4. Praise good practices when found\n5. Consider the broader architectural context\n\nProvide constructive, actionable feedback.",
-  "tools": [
-    "read_file",
-    "grep",
-    "glob",
-    "bash"
-  ],
+  "tools": ["read_file", "grep", "glob", "bash"],
   "capabilities": {
     "canWriteFiles": false,
     "canExecuteCommands": true,
@@ -144,6 +146,7 @@ The `/subagent-create` command builds specialized AI subagents in Claude Code wi
 ```
 
 **Usage in Workflow:**
+
 ```bash
 User: "Review the authentication middleware for security issues"
 
@@ -162,11 +165,13 @@ Claude: *presents aggregated findings to user*
 ### Test Engineering Subagent
 
 **Command:**
+
 ```bash
 /subagent-create --test-engineer --tools=read_file,write_file,bash
 ```
 
 **Configuration:**
+
 ```json
 {
   "name": "test-engineer",
@@ -181,6 +186,7 @@ Claude: *presents aggregated findings to user*
 ```
 
 **Workflow Example:**
+
 ```bash
 User: "Create tests for the user authentication service"
 
@@ -199,11 +205,13 @@ Test Engineer Subagent:
 ### Custom Research Subagent
 
 **Command:**
+
 ```bash
 /subagent-create --custom
 ```
 
 **Interactive Setup:**
+
 ```
 Claude: "What should this subagent specialize in?"
 User: "API documentation research and synthesis"
@@ -215,6 +223,7 @@ Claude: "Generating custom subagent configuration..."
 ```
 
 **Generated Configuration:**
+
 ```json
 {
   "name": "api-researcher",
@@ -231,11 +240,13 @@ Claude: "Generating custom subagent configuration..."
 ### Multi-Subagent Orchestration
 
 **Command:**
+
 ```bash
 /subagent-create --architect --code-reviewer --test-engineer --documentation-writer
 ```
 
 **Workflow: Building a New Feature**
+
 ```bash
 User: "Build a user notification system with email and push notifications"
 
@@ -277,11 +288,13 @@ Final Deliverable:
 ### Debugging Workflow with Specialized Subagents
 
 **Command:**
+
 ```bash
 /subagent-create --debugger --performance-analyst
 ```
 
 **Scenario: Investigating Slow API Response**
+
 ```bash
 User: "The /api/users endpoint is taking 5+ seconds to respond"
 
@@ -309,11 +322,13 @@ Claude (main):
 ### Security Audit with Multiple Specialists
 
 **Command:**
+
 ```bash
 /subagent-create --security-auditor --database-expert --code-reviewer
 ```
 
 **Workflow:**
+
 ```bash
 User: "Perform security audit of authentication system"
 
@@ -352,14 +367,14 @@ Aggregated Report:
 {
   "name": "security-auditor",
   "tools": [
-    "read_file",      // Can read code
-    "grep",           // Can search code
-    "bash"            // Can run security scanners
+    "read_file", // Can read code
+    "grep", // Can search code
+    "bash" // Can run security scanners
   ],
   "excludeTools": [
-    "write_file",     // CANNOT modify code
-    "edit_file",      // CANNOT edit files
-    "web_search"      // CANNOT access external resources
+    "write_file", // CANNOT modify code
+    "edit_file", // CANNOT edit files
+    "web_search" // CANNOT access external resources
   ]
 }
 ```
@@ -369,8 +384,8 @@ Aggregated Report:
 ```json
 {
   "name": "documentation-writer",
-  "contextWindowSize": 100000,  // Large context for full codebase understanding
-  "summaryMode": true            // Automatically summarize after each task
+  "contextWindowSize": 100000, // Large context for full codebase understanding
+  "summaryMode": true // Automatically summarize after each task
 }
 ```
 
@@ -379,8 +394,8 @@ Aggregated Report:
 ```json
 {
   "name": "test-engineer",
-  "maxConcurrent": 5,  // Run up to 5 instances in parallel
-  "queueStrategy": "fifo"  // First-in-first-out when queue full
+  "maxConcurrent": 5, // Run up to 5 instances in parallel
+  "queueStrategy": "fifo" // First-in-first-out when queue full
 }
 ```
 
@@ -402,21 +417,25 @@ Aggregated Report:
 ### Development Templates
 
 **Code Reviewer:**
+
 - Focus: Security, quality, best practices
 - Tools: Read-only + bash for analysis
 - Context: 50K tokens
 
 **Test Engineer:**
+
 - Focus: Test automation, coverage, TDD
 - Tools: Read, write, bash
 - Context: 50K tokens
 
 **Debugger:**
+
 - Focus: Bug reproduction, root cause analysis
 - Tools: All tools except delete
 - Context: 75K tokens
 
 **Refactoring Specialist:**
+
 - Focus: Code modernization, optimization
 - Tools: Read, edit, write
 - Context: 100K tokens
@@ -424,16 +443,19 @@ Aggregated Report:
 ### Architecture Templates
 
 **Software Architect:**
+
 - Focus: System design, scalability, patterns
 - Tools: Read, write (specs only)
 - Context: 100K tokens
 
 **Database Expert:**
+
 - Focus: Schema design, query optimization, migrations
 - Tools: Read, write, bash (for DB tools)
 - Context: 75K tokens
 
 **Security Auditor:**
+
 - Focus: Vulnerability assessment, penetration testing
 - Tools: Read, bash (security scanners)
 - Context: 50K tokens
@@ -441,16 +463,19 @@ Aggregated Report:
 ### Research Templates
 
 **Researcher:**
+
 - Focus: Information gathering, source verification
 - Tools: Web search, read
 - Context: 100K tokens
 
 **Analyst:**
+
 - Focus: Data analysis, pattern recognition, insights
 - Tools: Read, bash (data tools)
 - Context: 75K tokens
 
 **Technical Writer:**
+
 - Focus: Documentation, tutorials, API references
 - Tools: Read, write
 - Context: 100K tokens
@@ -464,6 +489,7 @@ Aggregated Report:
 ```
 
 **Output:**
+
 ```
 Subagent Performance Report:
 

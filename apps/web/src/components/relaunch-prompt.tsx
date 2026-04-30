@@ -45,7 +45,8 @@ export function RelaunchPrompt() {
         Relaunched
       </p>
       <p className="mt-2 text-sm leading-6 text-muted-foreground">
-        HeyClaude is a rebirth of Claude Pro Directory: faster pages, persistent upvotes, and cleaner category-aware detail views.
+        HeyClaude now has faster pages, persistent upvotes, and cleaner
+        category-aware detail views.
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
         <Link

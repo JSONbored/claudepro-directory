@@ -1,0 +1,327 @@
+{
+  "schemaVersion": 1,
+  "key": "mcp:sentry-mcp-server",
+  "entry": {
+    "category": "mcp",
+    "slug": "sentry-mcp-server",
+    "title": "Sentry MCP Server for Claude",
+    "description": "Monitor errors, debug production issues, and track application health",
+    "seoTitle": "Sentry MCP Server for Claude",
+    "seoDescription": "Monitor errors, debug production issues, and track application health Discover tools for AI development. HeyClaude adds source links, install steps,...",
+    "author": "Sentry",
+    "authorProfileUrl": "https://sentry.io/",
+    "dateAdded": "2025-09-18",
+    "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+    "tags": [
+      "monitoring",
+      "sentry",
+      "debugging",
+      "errors",
+      "devops"
+    ],
+    "keywords": [
+      "claude",
+      "debugging",
+      "development",
+      "devops",
+      "errors",
+      "mcp",
+      "mcp servers",
+      "monitoring",
+      "sentry",
+      "server",
+      "tools",
+      "heyclaude"
+    ],
+    "readingTime": 1,
+    "difficultyScore": 6,
+    "documentationUrl": "https://docs.sentry.io/product/sentry-mcp/",
+    "brandName": "Sentry",
+    "brandDomain": "sentry.io",
+    "brandIconUrl": "/api/brand-assets/icon/sentry.io",
+    "brandAssetSource": "brandfetch",
+    "cardDescription": "Monitor errors, debug production issues, and track application health",
+    "installable": true,
+    "installCommand": "claude mcp add --transport http sentry https://mcp.sentry.dev/mcp && claude mcp list",
+    "usageSnippet": "claude mcp add --transport http sentry https://mcp.sentry.dev/mcp && claude mcp list",
+    "copySnippet": "{\n  \"sentry\": {\n    \"url\": \"https://mcp.sentry.dev/mcp\",\n    \"transport\": \"http\"\n  }\n}",
+    "configSnippet": "{\n  \"sentry\": {\n    \"url\": \"https://mcp.sentry.dev/mcp\",\n    \"transport\": \"http\"\n  }\n}",
+    "estimatedSetupTime": "1 minute",
+    "difficulty": "beginner",
+    "prerequisites": [
+      "Sentry account (free or paid plan)",
+      "OAuth authentication setup (via mcp.sentry.dev)",
+      "Network access to mcp.sentry.dev (HTTPS required)",
+      "Understanding of Sentry concepts (organizations, projects, events, issues)",
+      "Sentry organization membership (Member or Admin role for API access)",
+      "Understanding of Sentry API scopes (org:read, project:read, project:write)",
+      "Claude Desktop 0.7.0+ or Claude Code with MCP support",
+      "Understanding of error monitoring and debugging workflows",
+      "Understanding of Sentry rate limits and API quotas",
+      "Optional: Sentry project access permissions (for specific project access)"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/mcp/sentry-mcp-server.mcpb",
+    "downloadTrust": "first-party",
+    "downloadSha256": "fcacfb50943f8657a34ddad5696e4bfa8298d55d9a7b33bb469903188fdea3a5",
+    "body": "## Content\n\nConnect Claude to Sentry for comprehensive error monitoring, debugging, and application health tracking. View and analyze error reports in real-time, access detailed stack traces and context, track error trends and patterns, monitor release health and regressions, analyze performance metrics, search and filter errors, and generate automated reports—all through natural language commands. Supports OAuth authentication, environment filtering, and read-only access for secure error monitoring.\n\n## Features\n\n- View and analyze error reports in real-time (live error monitoring)\n- Access detailed stack traces and error context (full debugging information)\n- Track error trends and patterns over time (error analytics)\n- Monitor release health and regression detection (deployment impact)\n- Analyze performance metrics and bottlenecks (APM integration)\n- Search and filter errors by project, environment, or tags (advanced filtering)\n- Access issue details and event data (comprehensive error information)\n- Monitor error frequency and user impact (prioritization metrics)\n- Advanced Sentry error tracking and performance monitoring with issue management, release tracking, and team collaboration features\n- Batch operations support for efficient bulk issue operations, release management, and performance analysis with automatic rate limit handling and retry logic\n- Real-time error synchronization capabilities with webhook integration support for monitoring Sentry events and triggering automated workflows\n\n## Use Cases\n\n- Debug production errors with full context (stack traces and environment)\n- Identify error patterns and root causes (trend analysis)\n- Track deployment impact on error rates (release health monitoring)\n- Monitor application performance metrics (APM and performance tracking)\n- Generate error reports for stakeholders (automated reporting)\n- Investigate specific error occurrences (event-level debugging)\n- Monitor error trends across projects (multi-project monitoring)\n- Prioritize errors by frequency and user impact (error triage)\n- Build automated error monitoring workflows that sync external systems with Sentry for real-time issue tracking and performance optimization\n\n## Installation\n\n### Claude Code\n\n1. Run: claude mcp add --transport http sentry https://mcp.sentry.dev/mcp\n2. Verify installation: claude mcp list\n3. Test connection: claude mcp status sentry\n4. Authenticate with your Sentry account (OAuth flow)\n5. Grant required permissions (org:read, project:read)\n\n### Claude Desktop\n\n1. Open Claude Desktop configuration file (see configPath below)\n2. Add the Sentry server configuration with HTTP transport and URL\n3. Restart Claude Desktop\n4. Authenticate with your Sentry account (OAuth flow)\n5. Grant required permissions (org:read, project:read)\n6. Verify connection in Claude Desktop\n\n## Requirements\n\n- Sentry account (free or paid plan)\n- OAuth authentication setup (via mcp.sentry.dev)\n- Network access to mcp.sentry.dev (HTTPS required)\n- Understanding of Sentry concepts (organizations, projects, events, issues)\n- Sentry organization membership (Member or Admin role for API access)\n- Understanding of Sentry API scopes (org:read, project:read, project:write)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Understanding of error monitoring and debugging workflows\n- Understanding of Sentry rate limits and API quotas\n- Optional: Sentry project access permissions (for specific project access)\n\n## Configuration\n\n```json\n{\n  \"sentry\": {\n    \"url\": \"https://mcp.sentry.dev/mcp\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Examples\n\n### What are the most common errors in the last 24 hou...\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"What are the most common errors in the last 24 hours?\"\n```\n\n### Show me the stack trace for error ID abc123\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Show me the stack trace for error ID abc123\"\n```\n\n### Which deployment introduced these new errors?\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Which deployment introduced these new errors?\"\n```\n\n### Find all errors affecting the checkout flow\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Find all errors affecting the checkout flow\"\n```\n\n### Get Issue Details\n\nRetrieve detailed information about a Sentry issue\n\n```typescript\n// Get Sentry issue details\nconst issue = await sentry.issues.get({\n  organization_slug: \"org-slug\",\n  project_id: \"project-id\",\n  issue_id: \"issue-id\",\n});\n```\n\n## Security\n\n- OAuth authentication required for access (secure token-based auth)\n- Respect data sensitivity and PII concerns (error data may contain sensitive information)\n- Filter by environment (production/staging) to limit data exposure\n- Use read-only access when appropriate (project:read scope)\n- Rate limit monitoring (429 errors indicate rate limit hits)\n- Sentry API tokens and auth tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- Sentry auth tokens should be scoped with minimal required permissions following the principle of least privilege - regularly audit token permissions and remove unused scopes\n- Sentry issue, project, and organization IDs may expose error tracking data and application information - ensure Sentry resource identifiers are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Sentry MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Sentry webhook configurations and payloads may contain sensitive error data and stack traces - ensure webhook endpoints are properly secured with authentication and HTTPS encryption\n\n## Troubleshooting\n\n### API rate limit exceeded - 429 status code returned\n\nSentry rate limits all API requests per caller identity (not per token). Check `Retry-After` header for wait time in seconds. Implement exponential backoff for retries (wait time increases with each retry). Reduce request frequency by batching queries or caching results. Rate limit types include DSN limit, Global limit, Quota depletion, Spike Protection, and Internal Limit. Use webhooks instead of polling when possible. Contact Sentry support for enterprise rate limit increases. Monitor rate limit headers in API responses.\n\n### Authentication failed or insufficient project permissions\n\nVerify Auth Token has required scopes in Sentry settings (User settings > Personal Tokens). Check token assigned to correct organization/project. Ensure user role has API access (Member or Admin role required). Common scopes needed: `org:read` for organization access, `project:read` for project access, `project:write` for write operations. Re-generate token if expired or revoked. Verify token not exceeded user's maximum permissions. Check organization membership in Sentry dashboard.\n\n### Project not found or access denied errors\n\nVerify project slug matches exactly (case-sensitive). Check organization membership and project access in Sentry dashboard. Ensure Auth Token has `project:read` scope minimum (or `project:write` for write operations). Confirm project not archived or deleted. Verify token has access to the specific organization containing the project. Check project visibility settings (public vs private projects). Ensure user has appropriate role (Member or Admin) in the organization.\n\n### OAuth connection fails or token invalid\n\nRe-authenticate at https://mcp.sentry.dev/mcp to refresh OAuth tokens. Verify OAuth app has required permissions in Sentry (check scopes: org:read, project:read). Check token not revoked in Settings > Auth Tokens. Ensure organization allows OAuth apps in security settings. OAuth tokens are organization-scoped (access only to selected organization during OAuth flow). If token expired, use refresh token to obtain new access token. Verify OAuth redirect URI matches configuration. Check browser console for OAuth errors.\n\n### Sentry MCP server authentication errors with auth tokens\n\nVerify auth token is valid and not expired. Check token scopes match required operations. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.\n\n### Sentry rate limit errors when processing multiple requests\n\nImplement exponential backoff retry logic with jitter. Use Sentry API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed issue data. Sentry allows 100 requests per minute per auth token.\n\n### Sentry issue or project access denied errors\n\nVerify auth token has access to the issue or project. Check organization permissions and team membership. Ensure auth token has required scopes (org:read, project:read) for target operations.\n\n### Sentry MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Sentry API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+    "sections": [
+      {
+        "title": "Content",
+        "id": "content",
+        "markdown": "Connect Claude to Sentry for comprehensive error monitoring, debugging, and application health tracking. View and analyze error reports in real-time, access detailed stack traces and context, track error trends and patterns, monitor release health and regressions, analyze performance metrics, search and filter errors, and generate automated reports—all through natural language commands. Supports OAuth authentication, environment filtering, and read-only access for secure error monitoring.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- View and analyze error reports in real-time (live error monitoring)\n- Access detailed stack traces and error context (full debugging information)\n- Track error trends and patterns over time (error analytics)\n- Monitor release health and regression detection (deployment impact)\n- Analyze performance metrics and bottlenecks (APM integration)\n- Search and filter errors by project, environment, or tags (advanced filtering)\n- Access issue details and event data (comprehensive error information)\n- Monitor error frequency and user impact (prioritization metrics)\n- Advanced Sentry error tracking and performance monitoring with issue management, release tracking, and team collaboration features\n- Batch operations support for efficient bulk issue operations, release management, and performance analysis with automatic rate limit handling and retry logic\n- Real-time error synchronization capabilities with webhook integration support for monitoring Sentry events and triggering automated workflows",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Debug production errors with full context (stack traces and environment)\n- Identify error patterns and root causes (trend analysis)\n- Track deployment impact on error rates (release health monitoring)\n- Monitor application performance metrics (APM and performance tracking)\n- Generate error reports for stakeholders (automated reporting)\n- Investigate specific error occurrences (event-level debugging)\n- Monitor error trends across projects (multi-project monitoring)\n- Prioritize errors by frequency and user impact (error triage)\n- Build automated error monitoring workflows that sync external systems with Sentry for real-time issue tracking and performance optimization",
+        "codeBlocks": []
+      },
+      {
+        "title": "Installation",
+        "id": "installation",
+        "markdown": "### Claude Code\n\n1. Run: claude mcp add --transport http sentry https://mcp.sentry.dev/mcp\n2. Verify installation: claude mcp list\n3. Test connection: claude mcp status sentry\n4. Authenticate with your Sentry account (OAuth flow)\n5. Grant required permissions (org:read, project:read)\n\n### Claude Desktop\n\n1. Open Claude Desktop configuration file (see configPath below)\n2. Add the Sentry server configuration with HTTP transport and URL\n3. Restart Claude Desktop\n4. Authenticate with your Sentry account (OAuth flow)\n5. Grant required permissions (org:read, project:read)\n6. Verify connection in Claude Desktop",
+        "codeBlocks": []
+      },
+      {
+        "title": "Requirements",
+        "id": "requirements",
+        "markdown": "- Sentry account (free or paid plan)\n- OAuth authentication setup (via mcp.sentry.dev)\n- Network access to mcp.sentry.dev (HTTPS required)\n- Understanding of Sentry concepts (organizations, projects, events, issues)\n- Sentry organization membership (Member or Admin role for API access)\n- Understanding of Sentry API scopes (org:read, project:read, project:write)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Understanding of error monitoring and debugging workflows\n- Understanding of Sentry rate limits and API quotas\n- Optional: Sentry project access permissions (for specific project access)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Configuration",
+        "id": "configuration",
+        "markdown": "```json\n{\n  \"sentry\": {\n    \"url\": \"https://mcp.sentry.dev/mcp\",\n    \"transport\": \"http\"\n  }\n}\n```",
+        "codeBlocks": [
+          {
+            "language": "json",
+            "code": "{\n  \"sentry\": {\n    \"url\": \"https://mcp.sentry.dev/mcp\",\n    \"transport\": \"http\"\n  }\n}"
+          }
+        ]
+      },
+      {
+        "title": "Examples",
+        "id": "examples",
+        "markdown": "### What are the most common errors in the last 24 hou...\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"What are the most common errors in the last 24 hours?\"\n```\n\n### Show me the stack trace for error ID abc123\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Show me the stack trace for error ID abc123\"\n```\n\n### Which deployment introduced these new errors?\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Which deployment introduced these new errors?\"\n```\n\n### Find all errors affecting the checkout flow\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Find all errors affecting the checkout flow\"\n```\n\n### Get Issue Details\n\nRetrieve detailed information about a Sentry issue\n\n```typescript\n// Get Sentry issue details\nconst issue = await sentry.issues.get({\n  organization_slug: \"org-slug\",\n  project_id: \"project-id\",\n  issue_id: \"issue-id\",\n});\n```",
+        "codeBlocks": [
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"What are the most common errors in the last 24 hours?\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Show me the stack trace for error ID abc123\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Which deployment introduced these new errors?\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Find all errors affecting the checkout flow\""
+          },
+          {
+            "language": "typescript",
+            "code": "// Get Sentry issue details\nconst issue = await sentry.issues.get({\n  organization_slug: \"org-slug\",\n  project_id: \"project-id\",\n  issue_id: \"issue-id\",\n});"
+          }
+        ]
+      },
+      {
+        "title": "Security",
+        "id": "security",
+        "markdown": "- OAuth authentication required for access (secure token-based auth)\n- Respect data sensitivity and PII concerns (error data may contain sensitive information)\n- Filter by environment (production/staging) to limit data exposure\n- Use read-only access when appropriate (project:read scope)\n- Rate limit monitoring (429 errors indicate rate limit hits)\n- Sentry API tokens and auth tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- Sentry auth tokens should be scoped with minimal required permissions following the principle of least privilege - regularly audit token permissions and remove unused scopes\n- Sentry issue, project, and organization IDs may expose error tracking data and application information - ensure Sentry resource identifiers are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Sentry MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Sentry webhook configurations and payloads may contain sensitive error data and stack traces - ensure webhook endpoints are properly secured with authentication and HTTPS encryption",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "### API rate limit exceeded - 429 status code returned\n\nSentry rate limits all API requests per caller identity (not per token). Check `Retry-After` header for wait time in seconds. Implement exponential backoff for retries (wait time increases with each retry). Reduce request frequency by batching queries or caching results. Rate limit types include DSN limit, Global limit, Quota depletion, Spike Protection, and Internal Limit. Use webhooks instead of polling when possible. Contact Sentry support for enterprise rate limit increases. Monitor rate limit headers in API responses.\n\n### Authentication failed or insufficient project permissions\n\nVerify Auth Token has required scopes in Sentry settings (User settings > Personal Tokens). Check token assigned to correct organization/project. Ensure user role has API access (Member or Admin role required). Common scopes needed: `org:read` for organization access, `project:read` for project access, `project:write` for write operations. Re-generate token if expired or revoked. Verify token not exceeded user's maximum permissions. Check organization membership in Sentry dashboard.\n\n### Project not found or access denied errors\n\nVerify project slug matches exactly (case-sensitive). Check organization membership and project access in Sentry dashboard. Ensure Auth Token has `project:read` scope minimum (or `project:write` for write operations). Confirm project not archived or deleted. Verify token has access to the specific organization containing the project. Check project visibility settings (public vs private projects). Ensure user has appropriate role (Member or Admin) in the organization.\n\n### OAuth connection fails or token invalid\n\nRe-authenticate at https://mcp.sentry.dev/mcp to refresh OAuth tokens. Verify OAuth app has required permissions in Sentry (check scopes: org:read, project:read). Check token not revoked in Settings > Auth Tokens. Ensure organization allows OAuth apps in security settings. OAuth tokens are organization-scoped (access only to selected organization during OAuth flow). If token expired, use refresh token to obtain new access token. Verify OAuth redirect URI matches configuration. Check browser console for OAuth errors.\n\n### Sentry MCP server authentication errors with auth tokens\n\nVerify auth token is valid and not expired. Check token scopes match required operations. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.\n\n### Sentry rate limit errors when processing multiple requests\n\nImplement exponential backoff retry logic with jitter. Use Sentry API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed issue data. Sentry allows 100 requests per minute per auth token.\n\n### Sentry issue or project access denied errors\n\nVerify auth token has access to the issue or project. Check organization permissions and team membership. Ensure auth token has required scopes (org:read, project:read) for target operations.\n\n### Sentry MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Sentry API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Content",
+        "id": "content"
+      },
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      },
+      {
+        "depth": 2,
+        "text": "Installation",
+        "id": "installation"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Code",
+        "id": "claude-code"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Desktop",
+        "id": "claude-desktop"
+      },
+      {
+        "depth": 2,
+        "text": "Requirements",
+        "id": "requirements"
+      },
+      {
+        "depth": 2,
+        "text": "Configuration",
+        "id": "configuration"
+      },
+      {
+        "depth": 2,
+        "text": "Examples",
+        "id": "examples"
+      },
+      {
+        "depth": 3,
+        "text": "What are the most common errors in the last 24 hou...",
+        "id": "what-are-the-most-common-errors-in-the-last-24-hou"
+      },
+      {
+        "depth": 3,
+        "text": "Show me the stack trace for error ID abc123",
+        "id": "show-me-the-stack-trace-for-error-id-abc123"
+      },
+      {
+        "depth": 3,
+        "text": "Which deployment introduced these new errors?",
+        "id": "which-deployment-introduced-these-new-errors"
+      },
+      {
+        "depth": 3,
+        "text": "Find all errors affecting the checkout flow",
+        "id": "find-all-errors-affecting-the-checkout-flow"
+      },
+      {
+        "depth": 3,
+        "text": "Get Issue Details",
+        "id": "get-issue-details"
+      },
+      {
+        "depth": 2,
+        "text": "Security",
+        "id": "security"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 3,
+        "text": "API rate limit exceeded - 429 status code returned",
+        "id": "api-rate-limit-exceeded---429-status-code-returned"
+      },
+      {
+        "depth": 3,
+        "text": "Authentication failed or insufficient project permissions",
+        "id": "authentication-failed-or-insufficient-project-permissions"
+      },
+      {
+        "depth": 3,
+        "text": "Project not found or access denied errors",
+        "id": "project-not-found-or-access-denied-errors"
+      },
+      {
+        "depth": 3,
+        "text": "OAuth connection fails or token invalid",
+        "id": "oauth-connection-fails-or-token-invalid"
+      },
+      {
+        "depth": 3,
+        "text": "Sentry MCP server authentication errors with auth tokens",
+        "id": "sentry-mcp-server-authentication-errors-with-auth-tokens"
+      },
+      {
+        "depth": 3,
+        "text": "Sentry rate limit errors when processing multiple requests",
+        "id": "sentry-rate-limit-errors-when-processing-multiple-requests"
+      },
+      {
+        "depth": 3,
+        "text": "Sentry issue or project access denied errors",
+        "id": "sentry-issue-or-project-access-denied-errors"
+      },
+      {
+        "depth": 3,
+        "text": "Sentry MCP server connection timeouts or network errors",
+        "id": "sentry-mcp-server-connection-timeouts-or-network-errors"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "json",
+        "code": "{\n  \"sentry\": {\n    \"url\": \"https://mcp.sentry.dev/mcp\",\n    \"transport\": \"http\"\n  }\n}"
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"What are the most common errors in the last 24 hours?\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Show me the stack trace for error ID abc123\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Which deployment introduced these new errors?\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Find all errors affecting the checkout flow\""
+      },
+      {
+        "language": "typescript",
+        "code": "// Get Sentry issue details\nconst issue = await sentry.issues.get({\n  organization_slug: \"org-slug\",\n  project_id: \"project-id\",\n  issue_id: \"issue-id\",\n});"
+      }
+    ],
+    "filePath": "content/mcp/sentry-mcp-server.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/sentry-mcp-server.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": true,
+    "packageTrust": "first-party",
+    "packageChecksum": "fcacfb50943f8657a34ddad5696e4bfa8298d55d9a7b33bb469903188fdea3a5",
+    "checksumPresent": true,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://docs.sentry.io/product/sentry-mcp/",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/sentry-mcp-server.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

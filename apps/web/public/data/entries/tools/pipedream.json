@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "key": "tools:pipedream",
+  "entry": {
+    "category": "tools",
+    "slug": "pipedream",
+    "title": "Pipedream",
+    "description": "Workflow automation platform for connecting APIs, building event-driven automations, and integrating developer tools.",
+    "seoTitle": "Pipedream workflow automation for AI teams",
+    "seoDescription": "Pipedream connects APIs and services for event-driven automations, workflows, and developer integrations. HeyClaude adds source links, install steps,...",
+    "author": "Pipedream",
+    "dateAdded": "2026-04-27",
+    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+    "tags": [
+      "workflow-automation",
+      "integrations"
+    ],
+    "keywords": [
+      "api automation",
+      "workflow integrations",
+      "workflow-automation",
+      "integrations",
+      "tools",
+      "claude",
+      "heyclaude",
+      "pipedream"
+    ],
+    "documentationUrl": "https://pipedream.com/docs",
+    "websiteUrl": "https://pipedream.com",
+    "brandName": "Pipedream",
+    "brandDomain": "pipedream.com",
+    "brandIconUrl": "/api/brand-assets/icon/pipedream.com",
+    "brandAssetSource": "brandfetch",
+    "pricingModel": "freemium",
+    "disclosure": "editorial",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Web",
+    "cardDescription": "Developer workflow automation and API integration platform.",
+    "installable": false,
+    "hasPrerequisites": false,
+    "hasTroubleshooting": false,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Editorial notes\n\nPipedream is useful when agent workflows need event triggers, API glue, and custom code steps without building a full backend.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+    "sections": [
+      {
+        "title": "Editorial notes",
+        "id": "editorial-notes",
+        "markdown": "Pipedream is useful when agent workflows need event triggers, API glue, and custom code steps without building a full backend.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Disclosure",
+        "id": "disclosure",
+        "markdown": "Editorial listing. No paid placement or affiliate link is used.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Editorial notes",
+        "id": "editorial-notes"
+      },
+      {
+        "depth": 2,
+        "text": "Disclosure",
+        "id": "disclosure"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/tools/pipedream.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/pipedream.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 3,
+    "sourceUrls": [
+      "https://pipedream.com/docs",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/pipedream.mdx",
+      "https://pipedream.com"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

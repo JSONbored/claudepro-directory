@@ -1,0 +1,96 @@
+# Content Creation
+URL: https://heyclau.de/collections/content-creation-workflow
+Category: collections
+Author: JSONbored
+Date added: 2025-10-02
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/content-creation-workflow.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/collections/content-creation-workflow
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/content-creation-workflow.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
+## Summary
+Streamlined workflow for content creators and marketers. Manage projects across multiple platforms, design graphics, and automate content distribution with integrated tools.
+## Tags
+- content
+- marketing
+- design
+- workflow
+- automation
+- social-media
+## Content
+## Overview
+Streamlined workflow for content creators and marketers. Manage projects across multiple platforms, design graphics, and automate content distribution with integrated tools.
+
+## Features
+- Multi-platform project management
+- Visual content creation tools
+- Content distribution automation
+- Team collaboration features
+
+## Use Cases
+- Managing content calendars and campaigns
+- Creating social media graphics and assets
+- Coordinating content across multiple platforms
+- Streamlining content approval workflows
+
+## TL;DR
+A complete content creation suite for writers, marketers, and developers. Streamline blog writing, documentation, social media, and technical content with Claude-powered workflows.
+
+- Blog post and article generation with SEO optimization
+- Technical documentation and API reference generation
+- Social media content calendars and post templates
+- Markdown workflows and content publishing automation
+
+Accelerate content creation from ideation to publication with this collection of writing prompts, documentation generators, and publishing workflows optimized for Claude Desktop and Code.
+
+## Collection Overview
+**Collection Type:** Content & Documentation
+**Focus Area:** Writing & Publishing
+**Skill Level:** All Levels
+**Time Saving:** 50-70% reduction in content creation time
+
+## Collection Contents
+Complete content creation toolkit
+
+- **Content Templates** (Writing): Blog posts, articles, tutorials, and marketing copy templates with Claude-optimized prompts.
+- **Docs Generation** (Documentation): API references, user guides, README files, and technical documentation with automated generation.
+- **SEO Optimization** (SEO): Keyword research, meta descriptions, heading structure, and content optimization for search engines.
+- **Automation Workflows** (Publishing): Markdown to HTML, static site generation, CMS integration, and automated publishing pipelines.
+
+## Quick Start
+Choose the content type you need to create, then use the templates and prompts to generate high-quality content with Claude. Customize for your voice and publishing platform.
+
+## Prerequisites
+- Asana or ClickUp account
+- Canva account (free or Pro)
+- Cloudinary account (optional, for advanced media management)
+
+## Recommended Order
+1. `asana-mcp-server`
+2. `clickup-mcp-server`
+3. `canva-mcp-server`
+4. `cloudinary-mcp-server`
+5. `docs`
+
+## Troubleshooting
+### Asana and ClickUp MCP servers conflict when both enabled
+
+Choose one project management tool. Edit claude_desktop_config.json to comment out the unused server. Restart Claude Desktop to apply changes.
+
+### Canva MCP server fails with 'API key not found' error
+
+Generate Canva API token at canva.com/developers. Add to config: CANVA_API_KEY=token. Verify token has design.read and design.write scopes.
+
+### Cloudinary media uploads fail after Canva integration
+
+Set unique output directories for each service. Configure Canva uploads to /canva and Cloudinary to /cloudinary in respective MCP server settings.
+
+### Missing Node.js dependencies for all MCP servers in bundle
+
+Install Node.js 18+ from nodejs.org. Run npm install -g @modelcontextprotocol/server-\* for each MCP server. Verify with node --version.
+
+### Collection items installed but not appearing in Claude
+
+Verify installation order: project management first, then media tools. Check claude_desktop_config.json syntax. Restart Claude Desktop completely.

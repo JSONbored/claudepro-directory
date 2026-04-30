@@ -5,11 +5,6 @@ on:
     branches:
       - main
   workflow_dispatch:
-    inputs:
-      version:
-        description: "Release version (semver, e.g. 1.0.3 or v1.0.3)"
-        required: false
-        type: string
 
 permissions:
   contents: write
@@ -29,19 +24,24 @@ jobs:
         id: version
         shell: bash
         env:
-          INPUT_VERSION: ${{ inputs.version }}
           COMMIT_MSG: ${{ github.event.head_commit.message }}
         run: |
           set -euo pipefail
-          raw="${INPUT_VERSION:-}"
-          if [ -z "$raw" ]; then
+          raw=""
+          if [ -n "${COMMIT_MSG:-}" ]; then
             msg="${COMMIT_MSG:-}"
             raw="$(printf '%s' "$msg" | sed -E 's/^chore\(release\):[[:space:]]*//')"
             raw="$(printf '%s' "$raw" | tr -d '[:space:]')"
           fi
           if [ -z "$raw" ]; then
-            echo "Release version is empty."
-            exit 1
+            latest="$(git tag -l 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -n 1)"
+            if [ -z "$latest" ]; then
+              raw="0.1.0"
+            else
+              version="${latest#v}"
+              IFS=. read -r major minor patch <<< "$version"
+              raw="${major}.${minor}.$((patch + 1))"
+            fi
           fi
           if [[ "$raw" == v* ]]; then
             tag="$raw"
@@ -71,3 +71,26 @@ jobs:
         with:
           tag_name: ${{ steps.version.outputs.tag }}
           generate_release_notes: true
+
+      - name: Setup pnpm
+        if: ${{ vars.INDEXNOW_SUBMIT == '1' }}
+        uses: pnpm/action-setup@4f4305e1fe60ad818b8ae6fc4a697cc47eab0b2d
+
+      - name: Setup Node.js
+        if: ${{ vars.INDEXNOW_SUBMIT == '1' }}
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        if: ${{ vars.INDEXNOW_SUBMIT == '1' }}
+        run: pnpm install --frozen-lockfile
+
+      - name: Submit production URLs to IndexNow
+        if: ${{ vars.INDEXNOW_SUBMIT == '1' }}
+        continue-on-error: true
+        env:
+          INDEXNOW_SUBMIT: "1"
+          INDEXNOW_BASE_URL: https://heyclau.de
+        run: pnpm indexnow:submit

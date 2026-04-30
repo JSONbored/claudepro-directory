@@ -1,0 +1,75 @@
+name: Jobs Source Revalidation
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "37 10 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  revalidate-job-sources:
+    runs-on: ubuntu-latest
+    env:
+      ADMIN_API_TOKEN: ${{ secrets.JOBS_ADMIN_API_TOKEN || secrets.ADMIN_API_TOKEN || secrets.LEADS_ADMIN_TOKEN }}
+      DEFAULT_BASE_URL: ${{ vars.JOBS_SOURCE_CHECK_BASE_URL || 'https://heyclau.de' }}
+      CONFIGURED_MODE: ${{ vars.JOBS_SOURCE_CHECK_MODE || '' }}
+    concurrency:
+      group: jobs-source-revalidation
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@4f4305e1fe60ad818b8ae6fc4a697cc47eab0b2d
+
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Resolve source-check mode
+        id: source-check
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            mode="${CONFIGURED_MODE:-dry-run}"
+          else
+            mode="${CONFIGURED_MODE:-apply}"
+          fi
+          if [ "$mode" != "dry-run" ] && [ "$mode" != "apply" ]; then
+            echo "::error::mode must be dry-run or apply"
+            exit 1
+          fi
+          base_url="$DEFAULT_BASE_URL"
+          if [ -z "$base_url" ]; then
+            echo "::error::Missing jobs source-check base URL."
+            exit 1
+          fi
+          if [ -z "$ADMIN_API_TOKEN" ]; then
+            echo "::error::Missing JOBS_ADMIN_API_TOKEN or ADMIN_API_TOKEN."
+            exit 1
+          fi
+          echo "mode=$mode" >> "$GITHUB_OUTPUT"
+          echo "base-url=$base_url" >> "$GITHUB_OUTPUT"
+          echo "Running jobs source revalidation in $mode mode against $base_url"
+
+      - name: Check job sources
+        run: |
+          set +e
+          args=(--base-url "${{ steps.source-check.outputs.base-url }}" --output jobs-source-check.json)
+          if [ "${{ steps.source-check.outputs.mode }}" = "apply" ]; then
+            args+=(--apply --allow-unhealthy)
+          else
+            args+=(--dry-run --fail-on-unhealthy)
+          fi
+          pnpm jobs:check-sources -- "${args[@]}"
+          status=$?
+          node scripts/summarize-job-source-check.mjs jobs-source-check.json >> "$GITHUB_STEP_SUMMARY"
+          exit "$status"

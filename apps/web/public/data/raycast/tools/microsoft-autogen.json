@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:microsoft-autogen",
+  "category": "tools",
+  "slug": "microsoft-autogen",
+  "title": "Microsoft AutoGen",
+  "author": "Microsoft",
+  "brandName": "Microsoft",
+  "brandDomain": "microsoft.github.io",
+  "brandIconUrl": "/api/brand-assets/icon/microsoft.github.io",
+  "brandAssetSource": "brandfetch",
+  "copyText": "## Editorial notes\n\nAutoGen is a useful reference for multi-agent application patterns, especially where conversation loops and coordination matter.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Microsoft AutoGen\n\nOpen-source framework for building multi-agent AI applications, conversations, workflows, and autonomous systems.",
+  "webUrl": "https://heyclau.de/tools/microsoft-autogen",
+  "canonicalUrl": "https://heyclau.de/tools/microsoft-autogen",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/microsoft-autogen.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/microsoft-autogen",
+  "seoTitle": "Microsoft AutoGen multi-agent AI framework",
+  "seoDescription": "Microsoft AutoGen is an open-source framework for multi-agent AI applications, workflows, and autonomous systems. HeyClaude adds source links, install...",
+  "repoUrl": "https://github.com/microsoft/autogen",
+  "documentationUrl": "https://microsoft.github.io/autogen/"
+}

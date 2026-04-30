@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:coderabbit",
+  "category": "tools",
+  "slug": "coderabbit",
+  "title": "CodeRabbit",
+  "author": "CodeRabbit",
+  "brandName": "CodeRabbit",
+  "brandDomain": "coderabbit.ai",
+  "brandIconUrl": "/api/brand-assets/icon/coderabbit.ai",
+  "brandAssetSource": "brandfetch",
+  "copyText": "## Editorial notes\n\nCodeRabbit fits teams that want AI review support directly in the pull request loop rather than only inside an editor.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# CodeRabbit\n\nAI code review platform for pull request summaries, review comments, repository context, and engineering feedback loops.",
+  "webUrl": "https://heyclau.de/tools/coderabbit",
+  "canonicalUrl": "https://heyclau.de/tools/coderabbit",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/coderabbit.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/coderabbit",
+  "seoTitle": "CodeRabbit AI code review platform",
+  "seoDescription": "CodeRabbit provides AI code review for pull requests, summaries, comments, repository context, and feedback loops. HeyClaude adds source links, install...",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.coderabbit.ai"
+}

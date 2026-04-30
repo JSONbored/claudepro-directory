@@ -1,0 +1,28 @@
+# Helicone
+URL: https://heyclau.de/tools/helicone
+Category: tools
+Author: Helicone
+Date added: 2026-04-27
+Documentation: https://docs.helicone.ai
+Repository: https://github.com/Helicone/helicone
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/helicone.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/tools/helicone
+- Source URLs: https://docs.helicone.ai, https://github.com/Helicone/helicone, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/helicone.mdx, https://www.helicone.ai
+- Brand: Helicone
+- Brand domain: helicone.ai
+- Brand asset source: brandfetch
+- Author: Helicone
+- Last verified: 2026-04-26T23:21:14-06:00
+- Robots: indexable
+## Summary
+Open-source LLM observability platform for logging, metrics, cost tracking, feedback, and gateway workflows.
+## Tags
+- observability
+- cost-tracking
+## Content
+## Editorial notes
+Helicone is useful when cost visibility, request logging, and feedback capture are central to LLM operations.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "mcp:intercom-mcp-server",
+  "category": "mcp",
+  "slug": "intercom-mcp-server",
+  "title": "Intercom MCP Server for Claude",
+  "author": "Intercom",
+  "brandName": "Intercom",
+  "brandDomain": "intercom.com",
+  "brandIconUrl": "/api/brand-assets/icon/intercom.com",
+  "brandAssetSource": "brandfetch",
+  "copyText": "Install:\nclaude mcp list && claude mcp status intercom\n\nConfig:\n{\n  \"intercom\": {\n    \"url\": \"https://mcp.intercom.com/sse\",\n    \"transport\": \"sse\"\n  }\n}\n\nUsage:\n{\n  \"intercom\": {\n    \"url\": \"https://mcp.intercom.com/sse\",\n    \"transport\": \"sse\"\n  }\n}",
+  "detailMarkdown": "# Intercom MCP Server for Claude\n\nAccess customer conversations, tickets, and user data in real-time\n\n## Install\n```bash\nclaude mcp list && claude mcp status intercom\n```\n\n## Config\n```json\n{\n  \"intercom\": {\n    \"url\": \"https://mcp.intercom.com/sse\",\n    \"transport\": \"sse\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status intercom",
+  "webUrl": "https://heyclau.de/mcp/intercom-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/intercom-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/intercom-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/intercom-mcp-server",
+  "seoTitle": "Intercom MCP Server for Claude",
+  "seoDescription": "Access customer conversations, tickets, and user data in real-time Discover tools for AI development. HeyClaude adds source links, install steps,...",
+  "repoUrl": "",
+  "documentationUrl": "https://developers.intercom.com/docs/guides/mcp"
+}

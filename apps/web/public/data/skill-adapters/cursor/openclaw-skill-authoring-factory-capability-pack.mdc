@@ -1,0 +1,14 @@
+---
+description: "Build high-quality OpenClaw-compatible skills with deterministic structure, freshness controls, and packaging standards."
+globs:
+alwaysApply: false
+---
+# OpenClaw Skill Authoring Factory Capability Pack Skill
+Expert OpenClaw skill-authoring capability pack for repeatable research, validation, packaging, and distribution workflows.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/openclaw-skill-authoring-factory-capability-pack.zip -o openclaw-skill-authoring-factory-capability-pack.zip && unzip -o openclaw-skill-authoring-factory-capability-pack.zip -d ./openclaw-skill-authoring-factory-capability-pack
+```
+## Source
+https://heyclau.de/downloads/skills/openclaw-skill-authoring-factory-capability-pack.zip

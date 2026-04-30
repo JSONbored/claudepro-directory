@@ -1,0 +1,249 @@
+{
+  "schemaVersion": 1,
+  "key": "statuslines:block-timer-tracker",
+  "entry": {
+    "category": "statuslines",
+    "slug": "block-timer-tracker",
+    "title": "Block Timer Tracker - Statuslines",
+    "description": "Claude 5-hour conversation block tracker with visual countdown, expiration warnings, and color-coded indicators to prevent unexpected session terminations.",
+    "seoTitle": "Block Timer Tracker - Statuslines",
+    "seoDescription": "Claude 5-hour conversation block tracker with visual countdown, expiration warnings, and color-coded indicators to prevent unexpected session terminations.",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2025-10-23",
+    "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+    "tags": [
+      "timer",
+      "session-block",
+      "countdown",
+      "5-hour-limit",
+      "warnings",
+      "productivity"
+    ],
+    "keywords": [
+      "5-hour-limit",
+      "block",
+      "claude",
+      "countdown",
+      "development",
+      "productivity",
+      "session-block",
+      "statuslines",
+      "timer",
+      "tools",
+      "tracker",
+      "warnings"
+    ],
+    "readingTime": 2,
+    "difficultyScore": 5,
+    "documentationUrl": "https://docs.claude.com/en/docs/claude-code/statusline",
+    "cardDescription": "Claude 5-hour conversation block tracker with visual countdown, expiration warnings, and color-coded indicators to prevent unexpected ses...",
+    "installable": true,
+    "usageSnippet": "✓ Block: [████████████████░░░░] 3h 42m 15s (74%)",
+    "copySnippet": "{\n  \"statusLine\": {\n    \"type\": \"command\",\n    \"command\": \"$CLAUDE_PROJECT_DIR/.claude/statuslines/block-timer-tracker.sh\",\n    \"refreshInterval\": 1000\n  }\n}",
+    "configSnippet": "{\n  \"statusLine\": {\n    \"type\": \"command\",\n    \"command\": \"$CLAUDE_PROJECT_DIR/.claude/statuslines/block-timer-tracker.sh\",\n    \"refreshInterval\": 1000\n  }\n}",
+    "scriptLanguage": "bash",
+    "scriptBody": "#!/usr/bin/env bash\n\n# Block Timer Tracker for Claude Code\n# Monitors Claude's 5-hour conversation block limit with countdown\n\n# Read JSON from stdin\nread -r input\n\n# Extract session start time and current timestamp\nsession_start=$(echo \"$input\" | jq -r '.session.startTime // \"\"')\ncurrent_time=$(date +%s)\n\n# Calculate elapsed time in seconds\nif [ -n \"$session_start\" ]; then\n  start_epoch=$(date -j -f \"%Y-%m-%dT%H:%M:%SZ\" \"$session_start\" +%s 2>/dev/null || echo \"$current_time\")\n  elapsed=$((current_time - start_epoch))\nelse\n  elapsed=0\nfi\n\n# 5-hour block = 18000 seconds\nBLOCK_LIMIT=18000\nremaining=$((BLOCK_LIMIT - elapsed))\n\n# Convert to hours:minutes:seconds\nhours=$((remaining / 3600))\nminutes=$(((remaining % 3600) / 60))\nseconds=$((remaining % 60))\n\n# Calculate percentage remaining\nif [ $BLOCK_LIMIT -gt 0 ]; then\n  percent=$((remaining * 100 / BLOCK_LIMIT))\nelse\n  percent=0\nfi\n\n# Color codes based on time remaining\nif [ $percent -gt 50 ]; then\n  # Green: > 2.5 hours remaining\n  COLOR=\"\\033[38;5;46m\"\n  ICON=\"✓\"\nelif [ $percent -gt 20 ]; then\n  # Yellow: 1-2.5 hours remaining\n  COLOR=\"\\033[38;5;226m\"\n  ICON=\"⚠\"\nelif [ $percent -gt 0 ]; then\n  # Red: < 1 hour remaining\n  COLOR=\"\\033[38;5;196m\"\n  ICON=\"⚠\"\nelse\n  # Expired\n  COLOR=\"\\033[38;5;160m\"\n  ICON=\"✗\"\nfi\n\nRESET=\"\\033[0m\"\n\n# Progress bar (20 chars)\nbar_filled=$((percent / 5))\nbar_empty=$((20 - bar_filled))\nbar=\"\"\nfor ((i=0; i<bar_filled; i++)); do bar+=\"█\"; done\nfor ((i=0; i<bar_empty; i++)); do bar+=\"░\"; done\n\n# Format time display\nif [ $remaining -gt 0 ]; then\n  time_display=$(printf \"%dh %02dm %02ds\" $hours $minutes $seconds)\nelse\n  time_display=\"EXPIRED\"\nfi\n\n# Build statusline\necho -e \"${COLOR}${ICON} Block: [${bar}] ${time_display} (${percent}%)${RESET}\"\n\n# Warning messages (stderr for alerts)\nif [ $percent -le 10 ] && [ $percent -gt 0 ]; then\n  echo \"⚠ WARNING: Less than 30 minutes remaining in conversation block!\" >&2\nelif [ $remaining -le 0 ]; then\n  echo \"✗ BLOCK EXPIRED: Start new conversation to continue.\" >&2\nfi",
+    "prerequisites": [
+      "Claude Code CLI installed and configured",
+      "Bash shell available (bash 4.0+ recommended for arithmetic operations and C-style for loops)",
+      "jq command-line JSON processor (jq 1.6+ recommended for safe extraction with // defaults)",
+      "date command with epoch conversion support (macOS: -j flag, Linux: -d flag)",
+      "Terminal with ANSI color code support (256-color mode recommended for color-coded indicators)",
+      "System clock accuracy (NTP sync recommended for accurate time calculations)"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Features\n\n- Real-time countdown from 5-hour conversation block limit\n- Visual progress bar showing time remaining (20-character bar)\n- Color-coded indicators: green (>50%), yellow (20-50%), red (<20%)\n- Percentage display for quick at-a-glance assessment\n- Automatic warnings at 10% remaining (~30 minutes)\n- Expiration alerts when block time exceeded\n- Time display in hours, minutes, seconds format\n- Icons indicating block health status (✓, ⚠, ✗)\n\n## Use Cases\n\n- Preventing unexpected session terminations mid-conversation\n- Planning work sessions around 5-hour block limits\n- Visual reminder to save context before block expiration\n- Productivity tracking for extended Claude Code sessions\n- Warning system for time-sensitive development tasks\n- Team coordination for shared Claude Code sessions with block awareness\n\n## Requirements\n\n- Claude Code CLI installed and configured\n- Bash shell available (bash 4.0+ recommended for arithmetic operations and C-style for loops)\n- jq command-line JSON processor (jq 1.6+ recommended for safe extraction with // defaults)\n- date command with epoch conversion support (macOS: -j flag, Linux: -d flag)\n- Terminal with ANSI color code support (256-color mode recommended for color-coded indicators)\n- System clock accuracy (NTP sync recommended for accurate time calculations)\n\n## Configuration\n\n```json\n{\n  \"statusLine\": {\n    \"type\": \"command\",\n    \"command\": \"$CLAUDE_PROJECT_DIR/.claude/statuslines/block-timer-tracker.sh\",\n    \"refreshInterval\": 1000\n  }\n}\n```\n\n## Examples\n\n### Enhanced Block Timer with Custom Block Limit\n\nExtended version with configurable block limit via environment variable\n\n```bash\n#!/usr/bin/env bash\n\n# Block Timer Tracker with Custom Block Limit\n# Configure via BLOCK_LIMIT_SECONDS environment variable (default: 18000 = 5 hours)\n\nBLOCK_LIMIT=${BLOCK_LIMIT_SECONDS:-18000}\n\ninput=$(cat)\n\nsession_start=$(echo \"$input\" | jq -r '.session.startTime // \"\"')\ncurrent_time=$(date +%s)\n\nif [ -n \"$session_start\" ]; then\n  start_epoch=$(date -j -f \"%Y-%m-%dT%H:%M:%SZ\" \"$session_start\" +%s 2>/dev/null || date -d \"$session_start\" +%s 2>/dev/null || echo \"$current_time\")\n  elapsed=$((current_time - start_epoch))\nelse\n  elapsed=0\nfi\n\nremaining=$((BLOCK_LIMIT - elapsed))\n\nhours=$((remaining / 3600))\nminutes=$(((remaining % 3600) / 60))\nseconds=$((remaining % 60))\n\nif [ $BLOCK_LIMIT -gt 0 ]; then\n  percent=$((remaining * 100 / BLOCK_LIMIT))\nelse\n  percent=0\nfi\n\nif [ $percent -gt 50 ]; then\n  COLOR=\"\\033[38;5;46m\"\n  ICON=\"✓\"\nelif [ $percent -gt 20 ]; then\n  COLOR=\"\\033[38;5;226m\"\n  ICON=\"⚠\"\nelif [ $percent -gt 0 ]; then\n  COLOR=\"\\033[38;5;196m\"\n  ICON=\"⚠\"\nelse\n  COLOR=\"\\033[38;5;160m\"\n  ICON=\"✗\"\nfi\n\nRESET=\"\\033[0m\"\n\nbar_filled=$((percent / 5))\nbar_empty=$((20 - bar_filled))\nbar=\"\"\nfor ((i=0; i<bar_filled; i++)); do bar+=\"█\"; done\nfor ((i=0; i<bar_empty; i++)); do bar+=\"░\"; done\n\nif [ $remaining -gt 0 ]; then\n  time_display=$(printf \"%dh %02dm %02ds\" $hours $minutes $seconds)\nelse\n  time_display=\"EXPIRED\"\nfi\n\necho -e \"${COLOR}${ICON} Block: [${bar}] ${time_display} (${percent}%)${RESET}\"\n\nif [ $percent -le 10 ] && [ $percent -gt 0 ]; then\n  echo \"⚠ WARNING: Less than ${BLOCK_LIMIT} seconds remaining!\" >&2\nelif [ $remaining -le 0 ]; then\n  echo \"✗ BLOCK EXPIRED: Start new conversation to continue.\" >&2\nfi\n```\n\n### Block Timer with Multiple Warning Thresholds\n\nEnhanced version with configurable warning thresholds at different time intervals\n\n```bash\n#!/usr/bin/env bash\n\n# Block Timer with Multiple Warning Thresholds\n\nWARN_50_PERCENT=${WARN_50_PERCENT:-true}\nWARN_25_PERCENT=${WARN_25_PERCENT:-true}\nWARN_10_PERCENT=${WARN_10_PERCENT:-true}\n\nBLOCK_LIMIT=18000\n\ninput=$(cat)\n\nsession_start=$(echo \"$input\" | jq -r '.session.startTime // \"\"')\ncurrent_time=$(date +%s)\n\nif [ -n \"$session_start\" ]; then\n  start_epoch=$(date -j -f \"%Y-%m-%dT%H:%M:%SZ\" \"$session_start\" +%s 2>/dev/null || date -d \"$session_start\" +%s 2>/dev/null || echo \"$current_time\")\n  elapsed=$((current_time - start_epoch))\nelse\n  elapsed=0\nfi\n\nremaining=$((BLOCK_LIMIT - elapsed))\n\nhours=$((remaining / 3600))\nminutes=$(((remaining % 3600) / 60))\nseconds=$((remaining % 60))\n\nif [ $BLOCK_LIMIT -gt 0 ]; then\n  percent=$((remaining * 100 / BLOCK_LIMIT))\nelse\n  percent=0\nfi\n\nif [ $percent -gt 50 ]; then\n  COLOR=\"\\033[38;5;46m\"\n  ICON=\"✓\"\nelif [ $percent -gt 20 ]; then\n  COLOR=\"\\033[38;5;226m\"\n  ICON=\"⚠\"\nelif [ $percent -gt 0 ]; then\n  COLOR=\"\\033[38;5;196m\"\n  ICON=\"⚠\"\nelse\n  COLOR=\"\\033[38;5;160m\"\n  ICON=\"✗\"\nfi\n\nRESET=\"\\033[0m\"\n\nbar_filled=$((percent / 5))\nbar_empty=$((20 - bar_filled))\nbar=\"\"\nfor ((i=0; i<bar_filled; i++)); do bar+=\"█\"; done\nfor ((i=0; i<bar_empty; i++)); do bar+=\"░\"; done\n\nif [ $remaining -gt 0 ]; then\n  time_display=$(printf \"%dh %02dm %02ds\" $hours $minutes $seconds)\nelse\n  time_display=\"EXPIRED\"\nfi\n\necho -e \"${COLOR}${ICON} Block: [${bar}] ${time_display} (${percent}%)${RESET}\"\n\n# Multiple warning thresholds\nif [ \"$WARN_50_PERCENT\" = \"true\" ] && [ $percent -le 50 ] && [ $percent -gt 25 ]; then\n  echo \"⚠ 50% remaining: ~2.5 hours left\" >&2\nfi\n\nif [ \"$WARN_25_PERCENT\" = \"true\" ] && [ $percent -le 25 ] && [ $percent -gt 10 ]; then\n  echo \"⚠ 25% remaining: ~1.25 hours left\" >&2\nfi\n\nif [ \"$WARN_10_PERCENT\" = \"true\" ] && [ $percent -le 10 ] && [ $percent -gt 0 ]; then\n  echo \"⚠ 10% remaining: ~30 minutes left\" >&2\nfi\n\nif [ $remaining -le 0 ]; then\n  echo \"✗ BLOCK EXPIRED: Start new conversation to continue.\" >&2\nfi\n```\n\n### Block Timer Tracker Installation Example\n\nComplete setup script with date command verification\n\n```bash\n#!/bin/bash\n# Installation script for Block Timer Tracker\n\nmkdir -p .claude/statuslines\n\n# Verify date command supports epoch conversion\nif ! date +%s &> /dev/null; then\n  echo \"Error: date command does not support epoch conversion\"\n  exit 1\nfi\n\n# Test date parsing (macOS vs Linux)\nTEST_DATE=\"2025-10-23T10:00:00Z\"\nif date -j -f \"%Y-%m-%dT%H:%M:%SZ\" \"$TEST_DATE\" +%s &> /dev/null; then\n  echo \"macOS date format detected\"\nelif date -d \"$TEST_DATE\" +%s &> /dev/null; then\n  echo \"Linux date format detected\"\nelse\n  echo \"Warning: Date parsing may not work correctly on this system\"\nfi\n\ncat > .claude/statuslines/block-timer-tracker.sh << 'SCRIPT_EOF'\n#!/usr/bin/env bash\n# Paste the full statusline script from the primary example above before running this installer.\nSCRIPT_EOF\n\nchmod +x .claude/statuslines/block-timer-tracker.sh\n\n# Add to settings.json\nif [ ! -f .claude/settings.json ]; then\n  echo '{\"statusLine\":{\"type\":\"command\",\"command\":\"$CLAUDE_PROJECT_DIR/.claude/statuslines/block-timer-tracker.sh\",\"refreshInterval\":1000}}' > .claude/settings.json\nelse\n  jq '.statusLine = {\"type\":\"command\",\"command\":\"$CLAUDE_PROJECT_DIR/.claude/statuslines/block-timer-tracker.sh\",\"refreshInterval\":1000}' .claude/settings.json > .claude/settings.json.tmp\n  mv .claude/settings.json.tmp .claude/settings.json\nfi\n\necho \"Block Timer Tracker installed successfully!\"\necho \"Note: Script refreshes every 1 second to show real-time countdown.\"\n```\n\n## Troubleshooting\n\n### Time showing as 0h 00m 00s or EXPIRED immediately on start\n\nCheck session.startTime exists in JSON input: echo '$input' | jq .session.startTime. Verify date parsing: macOS (date -j -f '%Y-%m-%dT%H:%M:%SZ' '2025-10-23T10:00:00Z' +%s) or Linux (date -d '2025-10-23T10:00:00Z' +%s). On Linux use -d instead of -j flag. Test date parsing: echo '2025-10-23T10:00:00Z' | xargs -I {} date -j -f '%Y-%m-%dT%H:%M:%SZ' {} +%s (macOS) or date -d {} +%s (Linux).\n\n### Progress bar showing all filled or all empty incorrectly\n\nVerify BLOCK_LIMIT=18000 (5 hours in seconds). Check percent calculation: echo $((remaining * 100 / BLOCK_LIMIT)). Ensure remaining time calculated correctly from session start. Test: remaining=$((18000 - 9000)); percent=$((remaining * 100 / 18000)); echo $percent (should be 50). Verify bar_filled calculation: bar_filled=$((percent / 5)) (each char = 5%).\n\n### Warning messages not appearing when time low\n\nWarnings output to stderr (>&2) for alerts. Check stderr visible in terminal. Test: bash statusline.sh 2>&1 | grep WARNING. Ensure percent calculation under 10 triggers warning: if [ $percent -le 10 ] && [ $percent -gt 0 ]. Verify warning condition logic. Check terminal emulator displays stderr output.\n\n### Colors not displaying, showing escape codes instead\n\nTerminal may not support ANSI colors. Test: echo -e '\\033[38;5;46mGreen\\033[0m'. Enable color support in terminal settings. For screen/tmux ensure TERM=screen-256color or xterm-256color. Verify echo -e flag is used for escape sequence interpretation. Check terminal emulator color support settings.\n\n### Countdown refreshing too slowly or appearing static\n\nDecrease refreshInterval to 1000ms (1 second) in configuration: {\"refreshInterval\": 1000}. Verify script executes on each refresh. Check system clock accurate: date. Test manual execution shows changing countdown: Run script multiple times with different current_time values. Verify Claude Code is calling script on each refresh interval.\n\n### Time remaining showing negative values\n\nThis indicates elapsed time exceeds BLOCK_LIMIT. Check elapsed calculation: elapsed=$((current_time - start_epoch)). Verify start_epoch is correct (not future time). Add protection: if [ $remaining -lt 0 ]; then remaining=0; fi. Check system clock is accurate and not set to future time.\n\n### Progress bar characters (█ ░) not displaying correctly\n\nVerify terminal supports Unicode characters. Test: echo '█░'. Check terminal font includes block characters. Some terminals require UTF-8 locale: export LANG=en_US.UTF-8. Alternative: Use ASCII characters: # for filled, - for empty. Verify echo command supports Unicode output.\n\n### Percentage calculation showing incorrect values (e.g., 100% when time remaining)\n\nVerify integer division is working correctly: echo $((100 * 50 / 100)) (should be 50). Check remaining and BLOCK_LIMIT are numeric: echo \"$remaining\" | grep -E '^[0-9]+$'. Ensure BLOCK_LIMIT > 0 before division. Test calculation: percent=$((remaining \\* 100 / BLOCK_LIMIT)). Check for integer overflow if values are very large.",
+    "sections": [
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Real-time countdown from 5-hour conversation block limit\n- Visual progress bar showing time remaining (20-character bar)\n- Color-coded indicators: green (>50%), yellow (20-50%), red (<20%)\n- Percentage display for quick at-a-glance assessment\n- Automatic warnings at 10% remaining (~30 minutes)\n- Expiration alerts when block time exceeded\n- Time display in hours, minutes, seconds format\n- Icons indicating block health status (✓, ⚠, ✗)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Preventing unexpected session terminations mid-conversation\n- Planning work sessions around 5-hour block limits\n- Visual reminder to save context before block expiration\n- Productivity tracking for extended Claude Code sessions\n- Warning system for time-sensitive development tasks\n- Team coordination for shared Claude Code sessions with block awareness",
+        "codeBlocks": []
+      },
+      {
+        "title": "Requirements",
+        "id": "requirements",
+        "markdown": "- Claude Code CLI installed and configured\n- Bash shell available (bash 4.0+ recommended for arithmetic operations and C-style for loops)\n- jq command-line JSON processor (jq 1.6+ recommended for safe extraction with // defaults)\n- date command with epoch conversion support (macOS: -j flag, Linux: -d flag)\n- Terminal with ANSI color code support (256-color mode recommended for color-coded indicators)\n- System clock accuracy (NTP sync recommended for accurate time calculations)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Configuration",
+        "id": "configuration",
+        "markdown": "```json\n{\n  \"statusLine\": {\n    \"type\": \"command\",\n    \"command\": \"$CLAUDE_PROJECT_DIR/.claude/statuslines/block-timer-tracker.sh\",\n    \"refreshInterval\": 1000\n  }\n}\n```",
+        "codeBlocks": [
+          {
+            "language": "json",
+            "code": "{\n  \"statusLine\": {\n    \"type\": \"command\",\n    \"command\": \"$CLAUDE_PROJECT_DIR/.claude/statuslines/block-timer-tracker.sh\",\n    \"refreshInterval\": 1000\n  }\n}"
+          }
+        ]
+      },
+      {
+        "title": "Examples",
+        "id": "examples",
+        "markdown": "### Enhanced Block Timer with Custom Block Limit\n\nExtended version with configurable block limit via environment variable\n\n```bash\n#!/usr/bin/env bash\n\n# Block Timer Tracker with Custom Block Limit\n# Configure via BLOCK_LIMIT_SECONDS environment variable (default: 18000 = 5 hours)\n\nBLOCK_LIMIT=${BLOCK_LIMIT_SECONDS:-18000}\n\ninput=$(cat)\n\nsession_start=$(echo \"$input\" | jq -r '.session.startTime // \"\"')\ncurrent_time=$(date +%s)\n\nif [ -n \"$session_start\" ]; then\n  start_epoch=$(date -j -f \"%Y-%m-%dT%H:%M:%SZ\" \"$session_start\" +%s 2>/dev/null || date -d \"$session_start\" +%s 2>/dev/null || echo \"$current_time\")\n  elapsed=$((current_time - start_epoch))\nelse\n  elapsed=0\nfi\n\nremaining=$((BLOCK_LIMIT - elapsed))\n\nhours=$((remaining / 3600))\nminutes=$(((remaining % 3600) / 60))\nseconds=$((remaining % 60))\n\nif [ $BLOCK_LIMIT -gt 0 ]; then\n  percent=$((remaining * 100 / BLOCK_LIMIT))\nelse\n  percent=0\nfi\n\nif [ $percent -gt 50 ]; then\n  COLOR=\"\\033[38;5;46m\"\n  ICON=\"✓\"\nelif [ $percent -gt 20 ]; then\n  COLOR=\"\\033[38;5;226m\"\n  ICON=\"⚠\"\nelif [ $percent -gt 0 ]; then\n  COLOR=\"\\033[38;5;196m\"\n  ICON=\"⚠\"\nelse\n  COLOR=\"\\033[38;5;160m\"\n  ICON=\"✗\"\nfi\n\nRESET=\"\\033[0m\"\n\nbar_filled=$((percent / 5))\nbar_empty=$((20 - bar_filled))\nbar=\"\"\nfor ((i=0; i<bar_filled; i++)); do bar+=\"█\"; done\nfor ((i=0; i<bar_empty; i++)); do bar+=\"░\"; done\n\nif [ $remaining -gt 0 ]; then\n  time_display=$(printf \"%dh %02dm %02ds\" $hours $minutes $seconds)\nelse\n  time_display=\"EXPIRED\"\nfi\n\necho -e \"${COLOR}${ICON} Block: [${bar}] ${time_display} (${percent}%)${RESET}\"\n\nif [ $percent -le 10 ] && [ $percent -gt 0 ]; then\n  echo \"⚠ WARNING: Less than ${BLOCK_LIMIT} seconds remaining!\" >&2\nelif [ $remaining -le 0 ]; then\n  echo \"✗ BLOCK EXPIRED: Start new conversation to continue.\" >&2\nfi\n```\n\n### Block Timer with Multiple Warning Thresholds\n\nEnhanced version with configurable warning thresholds at different time intervals\n\n```bash\n#!/usr/bin/env bash\n\n# Block Timer with Multiple Warning Thresholds\n\nWARN_50_PERCENT=${WARN_50_PERCENT:-true}\nWARN_25_PERCENT=${WARN_25_PERCENT:-true}\nWARN_10_PERCENT=${WARN_10_PERCENT:-true}\n\nBLOCK_LIMIT=18000\n\ninput=$(cat)\n\nsession_start=$(echo \"$input\" | jq -r '.session.startTime // \"\"')\ncurrent_time=$(date +%s)\n\nif [ -n \"$session_start\" ]; then\n  start_epoch=$(date -j -f \"%Y-%m-%dT%H:%M:%SZ\" \"$session_start\" +%s 2>/dev/null || date -d \"$session_start\" +%s 2>/dev/null || echo \"$current_time\")\n  elapsed=$((current_time - start_epoch))\nelse\n  elapsed=0\nfi\n\nremaining=$((BLOCK_LIMIT - elapsed))\n\nhours=$((remaining / 3600))\nminutes=$(((remaining % 3600) / 60))\nseconds=$((remaining % 60))\n\nif [ $BLOCK_LIMIT -gt 0 ]; then\n  percent=$((remaining * 100 / BLOCK_LIMIT))\nelse\n  percent=0\nfi\n\nif [ $percent -gt 50 ]; then\n  COLOR=\"\\033[38;5;46m\"\n  ICON=\"✓\"\nelif [ $percent -gt 20 ]; then\n  COLOR=\"\\033[38;5;226m\"\n  ICON=\"⚠\"\nelif [ $percent -gt 0 ]; then\n  COLOR=\"\\033[38;5;196m\"\n  ICON=\"⚠\"\nelse\n  COLOR=\"\\033[38;5;160m\"\n  ICON=\"✗\"\nfi\n\nRESET=\"\\033[0m\"\n\nbar_filled=$((percent / 5))\nbar_empty=$((20 - bar_filled))\nbar=\"\"\nfor ((i=0; i<bar_filled; i++)); do bar+=\"█\"; done\nfor ((i=0; i<bar_empty; i++)); do bar+=\"░\"; done\n\nif [ $remaining -gt 0 ]; then\n  time_display=$(printf \"%dh %02dm %02ds\" $hours $minutes $seconds)\nelse\n  time_display=\"EXPIRED\"\nfi\n\necho -e \"${COLOR}${ICON} Block: [${bar}] ${time_display} (${percent}%)${RESET}\"\n\n# Multiple warning thresholds\nif [ \"$WARN_50_PERCENT\" = \"true\" ] && [ $percent -le 50 ] && [ $percent -gt 25 ]; then\n  echo \"⚠ 50% remaining: ~2.5 hours left\" >&2\nfi\n\nif [ \"$WARN_25_PERCENT\" = \"true\" ] && [ $percent -le 25 ] && [ $percent -gt 10 ]; then\n  echo \"⚠ 25% remaining: ~1.25 hours left\" >&2\nfi\n\nif [ \"$WARN_10_PERCENT\" = \"true\" ] && [ $percent -le 10 ] && [ $percent -gt 0 ]; then\n  echo \"⚠ 10% remaining: ~30 minutes left\" >&2\nfi\n\nif [ $remaining -le 0 ]; then\n  echo \"✗ BLOCK EXPIRED: Start new conversation to continue.\" >&2\nfi\n```\n\n### Block Timer Tracker Installation Example\n\nComplete setup script with date command verification\n\n```bash\n#!/bin/bash\n# Installation script for Block Timer Tracker\n\nmkdir -p .claude/statuslines\n\n# Verify date command supports epoch conversion\nif ! date +%s &> /dev/null; then\n  echo \"Error: date command does not support epoch conversion\"\n  exit 1\nfi\n\n# Test date parsing (macOS vs Linux)\nTEST_DATE=\"2025-10-23T10:00:00Z\"\nif date -j -f \"%Y-%m-%dT%H:%M:%SZ\" \"$TEST_DATE\" +%s &> /dev/null; then\n  echo \"macOS date format detected\"\nelif date -d \"$TEST_DATE\" +%s &> /dev/null; then\n  echo \"Linux date format detected\"\nelse\n  echo \"Warning: Date parsing may not work correctly on this system\"\nfi\n\ncat > .claude/statuslines/block-timer-tracker.sh << 'SCRIPT_EOF'\n#!/usr/bin/env bash\n# Paste the full statusline script from the primary example above before running this installer.\nSCRIPT_EOF\n\nchmod +x .claude/statuslines/block-timer-tracker.sh\n\n# Add to settings.json\nif [ ! -f .claude/settings.json ]; then\n  echo '{\"statusLine\":{\"type\":\"command\",\"command\":\"$CLAUDE_PROJECT_DIR/.claude/statuslines/block-timer-tracker.sh\",\"refreshInterval\":1000}}' > .claude/settings.json\nelse\n  jq '.statusLine = {\"type\":\"command\",\"command\":\"$CLAUDE_PROJECT_DIR/.claude/statuslines/block-timer-tracker.sh\",\"refreshInterval\":1000}' .claude/settings.json > .claude/settings.json.tmp\n  mv .claude/settings.json.tmp .claude/settings.json\nfi\n\necho \"Block Timer Tracker installed successfully!\"\necho \"Note: Script refreshes every 1 second to show real-time countdown.\"\n```",
+        "codeBlocks": [
+          {
+            "language": "bash",
+            "code": "#!/usr/bin/env bash\n\n# Block Timer Tracker with Custom Block Limit\n# Configure via BLOCK_LIMIT_SECONDS environment variable (default: 18000 = 5 hours)\n\nBLOCK_LIMIT=${BLOCK_LIMIT_SECONDS:-18000}\n\ninput=$(cat)\n\nsession_start=$(echo \"$input\" | jq -r '.session.startTime // \"\"')\ncurrent_time=$(date +%s)\n\nif [ -n \"$session_start\" ]; then\n  start_epoch=$(date -j -f \"%Y-%m-%dT%H:%M:%SZ\" \"$session_start\" +%s 2>/dev/null || date -d \"$session_start\" +%s 2>/dev/null || echo \"$current_time\")\n  elapsed=$((current_time - start_epoch))\nelse\n  elapsed=0\nfi\n\nremaining=$((BLOCK_LIMIT - elapsed))\n\nhours=$((remaining / 3600))\nminutes=$(((remaining % 3600) / 60))\nseconds=$((remaining % 60))\n\nif [ $BLOCK_LIMIT -gt 0 ]; then\n  percent=$((remaining * 100 / BLOCK_LIMIT))\nelse\n  percent=0\nfi\n\nif [ $percent -gt 50 ]; then\n  COLOR=\"\\033[38;5;46m\"\n  ICON=\"✓\"\nelif [ $percent -gt 20 ]; then\n  COLOR=\"\\033[38;5;226m\"\n  ICON=\"⚠\"\nelif [ $percent -gt 0 ]; then\n  COLOR=\"\\033[38;5;196m\"\n  ICON=\"⚠\"\nelse\n  COLOR=\"\\033[38;5;160m\"\n  ICON=\"✗\"\nfi\n\nRESET=\"\\033[0m\"\n\nbar_filled=$((percent / 5))\nbar_empty=$((20 - bar_filled))\nbar=\"\"\nfor ((i=0; i<bar_filled; i++)); do bar+=\"█\"; done\nfor ((i=0; i<bar_empty; i++)); do bar+=\"░\"; done\n\nif [ $remaining -gt 0 ]; then\n  time_display=$(printf \"%dh %02dm %02ds\" $hours $minutes $seconds)\nelse\n  time_display=\"EXPIRED\"\nfi\n\necho -e \"${COLOR}${ICON} Block: [${bar}] ${time_display} (${percent}%)${RESET}\"\n\nif [ $percent -le 10 ] && [ $percent -gt 0 ]; then\n  echo \"⚠ WARNING: Less than ${BLOCK_LIMIT} seconds remaining!\" >&2\nelif [ $remaining -le 0 ]; then\n  echo \"✗ BLOCK EXPIRED: Start new conversation to continue.\" >&2\nfi"
+          },
+          {
+            "language": "bash",
+            "code": "#!/usr/bin/env bash\n\n# Block Timer with Multiple Warning Thresholds\n\nWARN_50_PERCENT=${WARN_50_PERCENT:-true}\nWARN_25_PERCENT=${WARN_25_PERCENT:-true}\nWARN_10_PERCENT=${WARN_10_PERCENT:-true}\n\nBLOCK_LIMIT=18000\n\ninput=$(cat)\n\nsession_start=$(echo \"$input\" | jq -r '.session.startTime // \"\"')\ncurrent_time=$(date +%s)\n\nif [ -n \"$session_start\" ]; then\n  start_epoch=$(date -j -f \"%Y-%m-%dT%H:%M:%SZ\" \"$session_start\" +%s 2>/dev/null || date -d \"$session_start\" +%s 2>/dev/null || echo \"$current_time\")\n  elapsed=$((current_time - start_epoch))\nelse\n  elapsed=0\nfi\n\nremaining=$((BLOCK_LIMIT - elapsed))\n\nhours=$((remaining / 3600))\nminutes=$(((remaining % 3600) / 60))\nseconds=$((remaining % 60))\n\nif [ $BLOCK_LIMIT -gt 0 ]; then\n  percent=$((remaining * 100 / BLOCK_LIMIT))\nelse\n  percent=0\nfi\n\nif [ $percent -gt 50 ]; then\n  COLOR=\"\\033[38;5;46m\"\n  ICON=\"✓\"\nelif [ $percent -gt 20 ]; then\n  COLOR=\"\\033[38;5;226m\"\n  ICON=\"⚠\"\nelif [ $percent -gt 0 ]; then\n  COLOR=\"\\033[38;5;196m\"\n  ICON=\"⚠\"\nelse\n  COLOR=\"\\033[38;5;160m\"\n  ICON=\"✗\"\nfi\n\nRESET=\"\\033[0m\"\n\nbar_filled=$((percent / 5))\nbar_empty=$((20 - bar_filled))\nbar=\"\"\nfor ((i=0; i<bar_filled; i++)); do bar+=\"█\"; done\nfor ((i=0; i<bar_empty; i++)); do bar+=\"░\"; done\n\nif [ $remaining -gt 0 ]; then\n  time_display=$(printf \"%dh %02dm %02ds\" $hours $minutes $seconds)\nelse\n  time_display=\"EXPIRED\"\nfi\n\necho -e \"${COLOR}${ICON} Block: [${bar}] ${time_display} (${percent}%)${RESET}\"\n\n# Multiple warning thresholds\nif [ \"$WARN_50_PERCENT\" = \"true\" ] && [ $percent -le 50 ] && [ $percent -gt 25 ]; then\n  echo \"⚠ 50% remaining: ~2.5 hours left\" >&2\nfi\n\nif [ \"$WARN_25_PERCENT\" = \"true\" ] && [ $percent -le 25 ] && [ $percent -gt 10 ]; then\n  echo \"⚠ 25% remaining: ~1.25 hours left\" >&2\nfi\n\nif [ \"$WARN_10_PERCENT\" = \"true\" ] && [ $percent -le 10 ] && [ $percent -gt 0 ]; then\n  echo \"⚠ 10% remaining: ~30 minutes left\" >&2\nfi\n\nif [ $remaining -le 0 ]; then\n  echo \"✗ BLOCK EXPIRED: Start new conversation to continue.\" >&2\nfi"
+          },
+          {
+            "language": "bash",
+            "code": "#!/bin/bash\n# Installation script for Block Timer Tracker\n\nmkdir -p .claude/statuslines\n\n# Verify date command supports epoch conversion\nif ! date +%s &> /dev/null; then\n  echo \"Error: date command does not support epoch conversion\"\n  exit 1\nfi\n\n# Test date parsing (macOS vs Linux)\nTEST_DATE=\"2025-10-23T10:00:00Z\"\nif date -j -f \"%Y-%m-%dT%H:%M:%SZ\" \"$TEST_DATE\" +%s &> /dev/null; then\n  echo \"macOS date format detected\"\nelif date -d \"$TEST_DATE\" +%s &> /dev/null; then\n  echo \"Linux date format detected\"\nelse\n  echo \"Warning: Date parsing may not work correctly on this system\"\nfi\n\ncat > .claude/statuslines/block-timer-tracker.sh << 'SCRIPT_EOF'\n#!/usr/bin/env bash\n# Paste the full statusline script from the primary example above before running this installer.\nSCRIPT_EOF\n\nchmod +x .claude/statuslines/block-timer-tracker.sh\n\n# Add to settings.json\nif [ ! -f .claude/settings.json ]; then\n  echo '{\"statusLine\":{\"type\":\"command\",\"command\":\"$CLAUDE_PROJECT_DIR/.claude/statuslines/block-timer-tracker.sh\",\"refreshInterval\":1000}}' > .claude/settings.json\nelse\n  jq '.statusLine = {\"type\":\"command\",\"command\":\"$CLAUDE_PROJECT_DIR/.claude/statuslines/block-timer-tracker.sh\",\"refreshInterval\":1000}' .claude/settings.json > .claude/settings.json.tmp\n  mv .claude/settings.json.tmp .claude/settings.json\nfi\n\necho \"Block Timer Tracker installed successfully!\"\necho \"Note: Script refreshes every 1 second to show real-time countdown.\""
+          }
+        ]
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "### Time showing as 0h 00m 00s or EXPIRED immediately on start\n\nCheck session.startTime exists in JSON input: echo '$input' | jq .session.startTime. Verify date parsing: macOS (date -j -f '%Y-%m-%dT%H:%M:%SZ' '2025-10-23T10:00:00Z' +%s) or Linux (date -d '2025-10-23T10:00:00Z' +%s). On Linux use -d instead of -j flag. Test date parsing: echo '2025-10-23T10:00:00Z' | xargs -I {} date -j -f '%Y-%m-%dT%H:%M:%SZ' {} +%s (macOS) or date -d {} +%s (Linux).\n\n### Progress bar showing all filled or all empty incorrectly\n\nVerify BLOCK_LIMIT=18000 (5 hours in seconds). Check percent calculation: echo $((remaining * 100 / BLOCK_LIMIT)). Ensure remaining time calculated correctly from session start. Test: remaining=$((18000 - 9000)); percent=$((remaining * 100 / 18000)); echo $percent (should be 50). Verify bar_filled calculation: bar_filled=$((percent / 5)) (each char = 5%).\n\n### Warning messages not appearing when time low\n\nWarnings output to stderr (>&2) for alerts. Check stderr visible in terminal. Test: bash statusline.sh 2>&1 | grep WARNING. Ensure percent calculation under 10 triggers warning: if [ $percent -le 10 ] && [ $percent -gt 0 ]. Verify warning condition logic. Check terminal emulator displays stderr output.\n\n### Colors not displaying, showing escape codes instead\n\nTerminal may not support ANSI colors. Test: echo -e '\\033[38;5;46mGreen\\033[0m'. Enable color support in terminal settings. For screen/tmux ensure TERM=screen-256color or xterm-256color. Verify echo -e flag is used for escape sequence interpretation. Check terminal emulator color support settings.\n\n### Countdown refreshing too slowly or appearing static\n\nDecrease refreshInterval to 1000ms (1 second) in configuration: {\"refreshInterval\": 1000}. Verify script executes on each refresh. Check system clock accurate: date. Test manual execution shows changing countdown: Run script multiple times with different current_time values. Verify Claude Code is calling script on each refresh interval.\n\n### Time remaining showing negative values\n\nThis indicates elapsed time exceeds BLOCK_LIMIT. Check elapsed calculation: elapsed=$((current_time - start_epoch)). Verify start_epoch is correct (not future time). Add protection: if [ $remaining -lt 0 ]; then remaining=0; fi. Check system clock is accurate and not set to future time.\n\n### Progress bar characters (█ ░) not displaying correctly\n\nVerify terminal supports Unicode characters. Test: echo '█░'. Check terminal font includes block characters. Some terminals require UTF-8 locale: export LANG=en_US.UTF-8. Alternative: Use ASCII characters: # for filled, - for empty. Verify echo command supports Unicode output.\n\n### Percentage calculation showing incorrect values (e.g., 100% when time remaining)\n\nVerify integer division is working correctly: echo $((100 * 50 / 100)) (should be 50). Check remaining and BLOCK_LIMIT are numeric: echo \"$remaining\" | grep -E '^[0-9]+$'. Ensure BLOCK_LIMIT > 0 before division. Test calculation: percent=$((remaining \\* 100 / BLOCK_LIMIT)). Check for integer overflow if values are very large.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      },
+      {
+        "depth": 2,
+        "text": "Requirements",
+        "id": "requirements"
+      },
+      {
+        "depth": 2,
+        "text": "Configuration",
+        "id": "configuration"
+      },
+      {
+        "depth": 2,
+        "text": "Examples",
+        "id": "examples"
+      },
+      {
+        "depth": 3,
+        "text": "Enhanced Block Timer with Custom Block Limit",
+        "id": "enhanced-block-timer-with-custom-block-limit"
+      },
+      {
+        "depth": 3,
+        "text": "Block Timer with Multiple Warning Thresholds",
+        "id": "block-timer-with-multiple-warning-thresholds"
+      },
+      {
+        "depth": 3,
+        "text": "Block Timer Tracker Installation Example",
+        "id": "block-timer-tracker-installation-example"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 3,
+        "text": "Time showing as 0h 00m 00s or EXPIRED immediately on start",
+        "id": "time-showing-as-0h-00m-00s-or-expired-immediately-on-start"
+      },
+      {
+        "depth": 3,
+        "text": "Progress bar showing all filled or all empty incorrectly",
+        "id": "progress-bar-showing-all-filled-or-all-empty-incorrectly"
+      },
+      {
+        "depth": 3,
+        "text": "Warning messages not appearing when time low",
+        "id": "warning-messages-not-appearing-when-time-low"
+      },
+      {
+        "depth": 3,
+        "text": "Colors not displaying, showing escape codes instead",
+        "id": "colors-not-displaying-showing-escape-codes-instead"
+      },
+      {
+        "depth": 3,
+        "text": "Countdown refreshing too slowly or appearing static",
+        "id": "countdown-refreshing-too-slowly-or-appearing-static"
+      },
+      {
+        "depth": 3,
+        "text": "Time remaining showing negative values",
+        "id": "time-remaining-showing-negative-values"
+      },
+      {
+        "depth": 3,
+        "text": "Progress bar characters (█ ░) not displaying correctly",
+        "id": "progress-bar-characters-not-displaying-correctly"
+      },
+      {
+        "depth": 3,
+        "text": "Percentage calculation showing incorrect values (e.g., 100% when time remaining)",
+        "id": "percentage-calculation-showing-incorrect-values-eg-100-when-time-remaining"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "json",
+        "code": "{\n  \"statusLine\": {\n    \"type\": \"command\",\n    \"command\": \"$CLAUDE_PROJECT_DIR/.claude/statuslines/block-timer-tracker.sh\",\n    \"refreshInterval\": 1000\n  }\n}"
+      },
+      {
+        "language": "bash",
+        "code": "#!/usr/bin/env bash\n\n# Block Timer Tracker with Custom Block Limit\n# Configure via BLOCK_LIMIT_SECONDS environment variable (default: 18000 = 5 hours)\n\nBLOCK_LIMIT=${BLOCK_LIMIT_SECONDS:-18000}\n\ninput=$(cat)\n\nsession_start=$(echo \"$input\" | jq -r '.session.startTime // \"\"')\ncurrent_time=$(date +%s)\n\nif [ -n \"$session_start\" ]; then\n  start_epoch=$(date -j -f \"%Y-%m-%dT%H:%M:%SZ\" \"$session_start\" +%s 2>/dev/null || date -d \"$session_start\" +%s 2>/dev/null || echo \"$current_time\")\n  elapsed=$((current_time - start_epoch))\nelse\n  elapsed=0\nfi\n\nremaining=$((BLOCK_LIMIT - elapsed))\n\nhours=$((remaining / 3600))\nminutes=$(((remaining % 3600) / 60))\nseconds=$((remaining % 60))\n\nif [ $BLOCK_LIMIT -gt 0 ]; then\n  percent=$((remaining * 100 / BLOCK_LIMIT))\nelse\n  percent=0\nfi\n\nif [ $percent -gt 50 ]; then\n  COLOR=\"\\033[38;5;46m\"\n  ICON=\"✓\"\nelif [ $percent -gt 20 ]; then\n  COLOR=\"\\033[38;5;226m\"\n  ICON=\"⚠\"\nelif [ $percent -gt 0 ]; then\n  COLOR=\"\\033[38;5;196m\"\n  ICON=\"⚠\"\nelse\n  COLOR=\"\\033[38;5;160m\"\n  ICON=\"✗\"\nfi\n\nRESET=\"\\033[0m\"\n\nbar_filled=$((percent / 5))\nbar_empty=$((20 - bar_filled))\nbar=\"\"\nfor ((i=0; i<bar_filled; i++)); do bar+=\"█\"; done\nfor ((i=0; i<bar_empty; i++)); do bar+=\"░\"; done\n\nif [ $remaining -gt 0 ]; then\n  time_display=$(printf \"%dh %02dm %02ds\" $hours $minutes $seconds)\nelse\n  time_display=\"EXPIRED\"\nfi\n\necho -e \"${COLOR}${ICON} Block: [${bar}] ${time_display} (${percent}%)${RESET}\"\n\nif [ $percent -le 10 ] && [ $percent -gt 0 ]; then\n  echo \"⚠ WARNING: Less than ${BLOCK_LIMIT} seconds remaining!\" >&2\nelif [ $remaining -le 0 ]; then\n  echo \"✗ BLOCK EXPIRED: Start new conversation to continue.\" >&2\nfi"
+      },
+      {
+        "language": "bash",
+        "code": "#!/usr/bin/env bash\n\n# Block Timer with Multiple Warning Thresholds\n\nWARN_50_PERCENT=${WARN_50_PERCENT:-true}\nWARN_25_PERCENT=${WARN_25_PERCENT:-true}\nWARN_10_PERCENT=${WARN_10_PERCENT:-true}\n\nBLOCK_LIMIT=18000\n\ninput=$(cat)\n\nsession_start=$(echo \"$input\" | jq -r '.session.startTime // \"\"')\ncurrent_time=$(date +%s)\n\nif [ -n \"$session_start\" ]; then\n  start_epoch=$(date -j -f \"%Y-%m-%dT%H:%M:%SZ\" \"$session_start\" +%s 2>/dev/null || date -d \"$session_start\" +%s 2>/dev/null || echo \"$current_time\")\n  elapsed=$((current_time - start_epoch))\nelse\n  elapsed=0\nfi\n\nremaining=$((BLOCK_LIMIT - elapsed))\n\nhours=$((remaining / 3600))\nminutes=$(((remaining % 3600) / 60))\nseconds=$((remaining % 60))\n\nif [ $BLOCK_LIMIT -gt 0 ]; then\n  percent=$((remaining * 100 / BLOCK_LIMIT))\nelse\n  percent=0\nfi\n\nif [ $percent -gt 50 ]; then\n  COLOR=\"\\033[38;5;46m\"\n  ICON=\"✓\"\nelif [ $percent -gt 20 ]; then\n  COLOR=\"\\033[38;5;226m\"\n  ICON=\"⚠\"\nelif [ $percent -gt 0 ]; then\n  COLOR=\"\\033[38;5;196m\"\n  ICON=\"⚠\"\nelse\n  COLOR=\"\\033[38;5;160m\"\n  ICON=\"✗\"\nfi\n\nRESET=\"\\033[0m\"\n\nbar_filled=$((percent / 5))\nbar_empty=$((20 - bar_filled))\nbar=\"\"\nfor ((i=0; i<bar_filled; i++)); do bar+=\"█\"; done\nfor ((i=0; i<bar_empty; i++)); do bar+=\"░\"; done\n\nif [ $remaining -gt 0 ]; then\n  time_display=$(printf \"%dh %02dm %02ds\" $hours $minutes $seconds)\nelse\n  time_display=\"EXPIRED\"\nfi\n\necho -e \"${COLOR}${ICON} Block: [${bar}] ${time_display} (${percent}%)${RESET}\"\n\n# Multiple warning thresholds\nif [ \"$WARN_50_PERCENT\" = \"true\" ] && [ $percent -le 50 ] && [ $percent -gt 25 ]; then\n  echo \"⚠ 50% remaining: ~2.5 hours left\" >&2\nfi\n\nif [ \"$WARN_25_PERCENT\" = \"true\" ] && [ $percent -le 25 ] && [ $percent -gt 10 ]; then\n  echo \"⚠ 25% remaining: ~1.25 hours left\" >&2\nfi\n\nif [ \"$WARN_10_PERCENT\" = \"true\" ] && [ $percent -le 10 ] && [ $percent -gt 0 ]; then\n  echo \"⚠ 10% remaining: ~30 minutes left\" >&2\nfi\n\nif [ $remaining -le 0 ]; then\n  echo \"✗ BLOCK EXPIRED: Start new conversation to continue.\" >&2\nfi"
+      },
+      {
+        "language": "bash",
+        "code": "#!/bin/bash\n# Installation script for Block Timer Tracker\n\nmkdir -p .claude/statuslines\n\n# Verify date command supports epoch conversion\nif ! date +%s &> /dev/null; then\n  echo \"Error: date command does not support epoch conversion\"\n  exit 1\nfi\n\n# Test date parsing (macOS vs Linux)\nTEST_DATE=\"2025-10-23T10:00:00Z\"\nif date -j -f \"%Y-%m-%dT%H:%M:%SZ\" \"$TEST_DATE\" +%s &> /dev/null; then\n  echo \"macOS date format detected\"\nelif date -d \"$TEST_DATE\" +%s &> /dev/null; then\n  echo \"Linux date format detected\"\nelse\n  echo \"Warning: Date parsing may not work correctly on this system\"\nfi\n\ncat > .claude/statuslines/block-timer-tracker.sh << 'SCRIPT_EOF'\n#!/usr/bin/env bash\n# Paste the full statusline script from the primary example above before running this installer.\nSCRIPT_EOF\n\nchmod +x .claude/statuslines/block-timer-tracker.sh\n\n# Add to settings.json\nif [ ! -f .claude/settings.json ]; then\n  echo '{\"statusLine\":{\"type\":\"command\",\"command\":\"$CLAUDE_PROJECT_DIR/.claude/statuslines/block-timer-tracker.sh\",\"refreshInterval\":1000}}' > .claude/settings.json\nelse\n  jq '.statusLine = {\"type\":\"command\",\"command\":\"$CLAUDE_PROJECT_DIR/.claude/statuslines/block-timer-tracker.sh\",\"refreshInterval\":1000}' .claude/settings.json > .claude/settings.json.tmp\n  mv .claude/settings.json.tmp .claude/settings.json\nfi\n\necho \"Block Timer Tracker installed successfully!\"\necho \"Note: Script refreshes every 1 second to show real-time countdown.\""
+      }
+    ],
+    "filePath": "content/statuslines/block-timer-tracker.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/block-timer-tracker.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://docs.claude.com/en/docs/claude-code/statusline",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/block-timer-tracker.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

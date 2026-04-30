@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:garak",
+  "category": "tools",
+  "slug": "garak",
+  "title": "Garak",
+  "author": "NVIDIA",
+  "brandName": "Garak",
+  "brandDomain": "github.com",
+  "brandIconUrl": "/api/brand-assets/icon/github.com",
+  "brandAssetSource": "brandfetch",
+  "copyText": "## Editorial notes\n\nGarak is useful for security teams that need repeatable checks for model, prompt, and application-level LLM risks.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Garak\n\nOpen-source LLM vulnerability scanner for probing model behavior, prompt attack surfaces, and safety failures.",
+  "webUrl": "https://heyclau.de/tools/garak",
+  "canonicalUrl": "https://heyclau.de/tools/garak",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/garak.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/garak",
+  "seoTitle": "Garak LLM vulnerability scanner",
+  "seoDescription": "Garak is an open-source LLM vulnerability scanner for probing model behavior, prompt attacks, and safety risks. HeyClaude adds source links, install steps,...",
+  "repoUrl": "https://github.com/NVIDIA/garak",
+  "documentationUrl": "https://github.com/NVIDIA/garak"
+}

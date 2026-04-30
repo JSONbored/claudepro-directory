@@ -1,0 +1,206 @@
+# Box MCP Server for Claude
+URL: https://heyclau.de/mcp/box-mcp-server
+Category: mcp
+Author: Box
+Date added: 2025-09-18
+Documentation: https://box.dev/guides/box-mcp/remote/
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/box-mcp-server.mdx
+Download: /downloads/mcp/box-mcp-server.mcpb
+## Citation Facts
+- Canonical URL: https://heyclau.de/mcp/box-mcp-server
+- Source URLs: https://box.dev/guides/box-mcp/remote/, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/box-mcp-server.mdx
+- Brand: Box
+- Brand domain: box.com
+- Brand asset source: brandfetch
+- Package URL: /downloads/mcp/box-mcp-server.mcpb
+- Package SHA256: 973bd359536505c1000cffb3e754727c536496bc0b05fd56503a91184b6d5d6d
+- Author: Box
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
+## Summary
+Access enterprise content, analyze unstructured data, and automate workflows
+## Tags
+- storage
+- box
+- enterprise
+- document-management
+- collaboration
+## Content
+## Content
+Connect Claude to Box for enterprise content management and document automation.
+
+## Features
+- Access and search files across your Box enterprise
+- Analyze document content and extract insights
+- Automate content workflows and file organization
+- Manage folder structures and permissions
+- Generate summaries from enterprise documents
+- Enterprise-grade security and audit trails
+- Advanced Box file and folder management with enterprise collaboration features, version control, and granular permission management
+- Batch operations support for efficient bulk file uploads, downloads, and metadata updates with automatic rate limit handling and retry logic
+
+## Use Cases
+- Search enterprise documents by content or metadata
+- Extract and analyze data from invoices and contracts
+- Generate summaries of quarterly reports and documents
+- Automate file organization and folder management
+- Analyze document patterns across your organization
+- Create workflow automations for content processes
+
+## Installation
+### Claude Code
+
+1. claude mcp add --transport http box https://mcp.box.com/
+2. Verify installation: claude mcp list
+3. Test connection: claude mcp status box
+
+### Claude Desktop
+
+1. Open your Claude Desktop configuration file
+2. Add the Box MCP server configuration
+3. Restart Claude Desktop
+4. Authenticate with your Box account
+
+## Requirements
+- Box account (personal or enterprise) with API access enabled
+- Box API access token from Box Developer Console (https://app.box.com/developers/console)
+- OAuth 2.0 authentication configured (for production apps) or Developer Token (for testing/development)
+- HTTP transport support in MCP client (required for Box MCP server)
+- Internet connection for accessing Box API (https://api.box.com endpoints)
+- Claude Desktop 0.7.0+ or Claude Code with MCP support
+- Rate limit awareness: 1,000 API calls per minute per user (16.67 calls/second), 12 searches per second enterprise-wide, 4 uploads per second per user
+- Understanding of Box folder/file structure, permissions, and metadata
+- Appropriate Box folder permissions for target operations (read, write, delete as needed)
+- Box Developer Console access for managing API tokens and OAuth applications
+
+## Configuration
+```json
+{
+  "box": {
+    "url": "https://mcp.box.com/",
+    "transport": "http"
+  }
+}
+```
+```json
+{
+  "box": {
+    "url": "https://mcp.box.com/",
+    "transport": "http"
+  }
+}
+```
+
+## Examples
+### Find all contracts from 2024
+
+Common usage pattern for this MCP server
+
+```plaintext
+Ask Claude: "Find all contracts from 2024"
+```
+
+### Summarize the quarterly reports in the finance fol...
+
+Common usage pattern for this MCP server
+
+```plaintext
+Ask Claude: "Summarize the quarterly reports in the finance folder"
+```
+
+### Extract key data from invoice documents
+
+Common usage pattern for this MCP server
+
+```plaintext
+Ask Claude: "Extract key data from invoice documents"
+```
+
+### Organize project files by client and date
+
+Common usage pattern for this MCP server
+
+```plaintext
+Ask Claude: "Organize project files by client and date"
+```
+
+### Upload File with Metadata
+
+Upload a file to Box with custom metadata and modification timestamp
+
+```typescript
+// Upload file to Box with custom metadata
+const file = await box.files.upload({
+  parent: { id: "folder-id" },
+  name: "document.pdf",
+  file: fileBuffer,
+  content_modified_at: new Date().toISOString(),
+  metadata: { "custom-field": "value" },
+});
+```
+```plaintext
+Ask Claude: "Find all contracts from 2024"
+```
+```plaintext
+Ask Claude: "Summarize the quarterly reports in the finance folder"
+```
+```plaintext
+Ask Claude: "Extract key data from invoice documents"
+```
+```plaintext
+Ask Claude: "Organize project files by client and date"
+```
+```typescript
+// Upload file to Box with custom metadata
+const file = await box.files.upload({
+  parent: { id: "folder-id" },
+  name: "document.pdf",
+  file: fileBuffer,
+  content_modified_at: new Date().toISOString(),
+  metadata: { "custom-field": "value" },
+});
+```
+
+## Security
+- Enterprise authentication and SSO support
+- Respects existing file and folder permissions
+- Maintains complete audit trail of all operations
+- Compliant with data governance requirements
+- Box API tokens and OAuth access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management
+- Box OAuth access tokens should be used for third-party integrations to ensure proper access control, token lifecycle management, and automatic token refresh
+- Box folder and file IDs may expose organizational structure and data hierarchy - ensure Box resource IDs are kept private and not shared in public configurations
+- Rate limiting and API quota management are critical for Box MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption
+- Box webhook configurations and payloads may contain sensitive file and folder metadata - ensure webhook endpoints are properly secured with authentication and HTTPS encryption
+
+## Troubleshooting
+### Getting HTTP 429 error with rate limit exceeded message
+
+Reduce request frequency to stay under 1,000 API calls per minute per user (16.67 calls/second). Implement exponential backoff using the retry-after header value returned in the 429 response.
+
+### Search operations failing across enterprise
+
+Enterprise has 12 searches per second limit total. Distribute search requests across all apps, add delays between searches, or contact Box support to increase quota for your business plan.
+
+### Upload operations timing out or failing
+
+Verify you're staying under 4 uploads per second per user limit. Queue upload requests with proper throttling, check network connectivity, and ensure files meet size requirements for your account tier.
+
+### Authentication fails with invalid token errors
+
+Regenerate your Box API access token from Box Developer Console. Verify token hasn't expired and includes correct scopes (read, write, delete) required for your operations.
+
+### Cannot access specific folders or files
+
+Verify your Box account has appropriate folder permissions set. Check enterprise admin settings for content access restrictions and ensure your API token has necessary permissions for target directories.
+
+### Box MCP server authentication errors with OAuth tokens
+
+Verify OAuth token is valid and not expired. Check token scopes match required permissions. Ensure token format is correct (Bearer token in Authorization header). Implement automatic token refresh logic for long-running operations.
+
+### Box file upload or download failures
+
+Check file size limits (250MB for standard accounts, 5GB for enterprise). Verify folder permissions allow upload/download. Ensure network connectivity is stable. For large files, use chunked upload API with resumable upload support.
+
+### Box MCP server rate limiting or throttling errors
+
+Implement exponential backoff retry logic with jitter. Use Box API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed file metadata. Request rate limit increases from Box support if needed.

@@ -1,0 +1,390 @@
+# AWS CloudFormation Validator - Hooks
+URL: https://heyclau.de/hooks/aws-cloudformation-validator
+Category: hooks
+Author: JSONbored
+Date added: 2025-09-19
+Documentation: https://aws.amazon.com/cloudformation/
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/aws-cloudformation-validator.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/hooks/aws-cloudformation-validator
+- Source URLs: https://aws.amazon.com/cloudformation/, https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/aws-cloudformation-validator.mdx
+- Brand: AWS
+- Brand domain: aws.amazon.com
+- Brand asset source: brandfetch
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
+## Summary
+Validates AWS CloudFormation templates for syntax errors and best practices using cfn-lint v1.40.4+ and AWS CLI v2.27.54+.
+## Tags
+- aws
+- cloudformation
+- infrastructure
+- validation
+- cloud
+## Content
+## Features
+- Advanced CloudFormation template validation with cfn-lint v1.40.4+ supporting multi-region validation and custom rules
+- Syntax error detection and reporting with detailed line numbers, column positions, and error messages
+- AWS best practices compliance checking against AWS Well-Architected Framework guidelines and security standards
+- Type mismatch validation ensuring resource properties match AWS CloudFormation resource schemas
+- Fallback to AWS CLI v2.27.54+ validation when cfn-lint unavailable ensuring validation works in all environments
+- Support for JSON and YAML template formats with automatic format detection and appropriate parsing
+- SAM template support with automatic transformation to CloudFormation before validation
+- Comprehensive error reporting with severity levels (Error, Warning, Info) and actionable remediation guidance
+
+## Use Cases
+- Pre-deployment CloudFormation template validation ensuring templates are valid before stack creation
+- Infrastructure as Code quality assurance with automated validation catching errors early in development
+- CI/CD pipeline integration for AWS deployments preventing invalid templates from reaching production
+- Development workflow validation for cloud resources providing immediate feedback during template editing
+- Compliance checking against AWS best practices ensuring templates follow security and operational guidelines
+- Multi-region validation ensuring templates work correctly across different AWS regions and availability zones
+
+## Installation
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/aws-cloudformation-validator.sh
+3. Make executable: chmod +x .claude/hooks/aws-cloudformation-validator.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- jq installed (for JSON parsing)
+- cfn-lint ^1.40.0 (pip install cfn-lint) or AWS CLI v2.27.54+ (aws --version) for fallback validation
+- AWS CLI installed and configured (aws-cli 2.0+ recommended for CloudFormation validation)
+
+## Hook Configuration
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/aws-cloudformation-validator.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/aws-cloudformation-validator.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+
+## Hook Script
+```bash
+#!/usr/bin/env bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Check if it's a CloudFormation template
+if [[ "$FILE_PATH" == *.cf.json ]] || [[ "$FILE_PATH" == *.cf.yaml ]] || [[ "$FILE_PATH" == *cloudformation*.yaml ]] || [[ "$FILE_PATH" == *cloudformation*.json ]]; then
+  echo "☁️ Validating CloudFormation template $FILE_PATH..." >&2
+
+  # Try cfn-lint first (preferred)
+  if command -v cfn-lint &> /dev/null; then
+    echo "Running cfn-lint validation..." >&2
+    if cfn-lint "$FILE_PATH" 2>&1; then
+      echo "✅ CloudFormation template validation passed" >&2
+    else
+      echo "❌ CloudFormation template validation failed" >&2
+    fi
+  elif command -v aws &> /dev/null; then
+    echo "⚠️ cfn-lint not installed, using AWS CLI validation..." >&2
+    if aws cloudformation validate-template --template-body "file://$FILE_PATH" 2>/dev/null; then
+      echo "✅ Basic CloudFormation validation passed" >&2
+    else
+      echo "❌ CloudFormation template validation failed" >&2
+    fi
+  else
+    echo "⚠️ Neither cfn-lint nor AWS CLI available for validation" >&2
+  fi
+else
+  echo "File $FILE_PATH is not a CloudFormation template, skipping validation" >&2
+fi
+
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Check if it's a CloudFormation template
+if [[ "$FILE_PATH" == *.cf.json ]] || [[ "$FILE_PATH" == *.cf.yaml ]] || [[ "$FILE_PATH" == *cloudformation*.yaml ]] || [[ "$FILE_PATH" == *cloudformation*.json ]]; then
+  echo "☁️ Validating CloudFormation template $FILE_PATH..." >&2
+
+  # Try cfn-lint first (preferred)
+  if command -v cfn-lint &> /dev/null; then
+    echo "Running cfn-lint validation..." >&2
+    if cfn-lint "$FILE_PATH" 2>&1; then
+      echo "✅ CloudFormation template validation passed" >&2
+    else
+      echo "❌ CloudFormation template validation failed" >&2
+    fi
+  elif command -v aws &> /dev/null; then
+    echo "⚠️ cfn-lint not installed, using AWS CLI validation..." >&2
+    if aws cloudformation validate-template --template-body "file://$FILE_PATH" 2>/dev/null; then
+      echo "✅ Basic CloudFormation validation passed" >&2
+    else
+      echo "❌ CloudFormation template validation failed" >&2
+    fi
+  else
+    echo "⚠️ Neither cfn-lint nor AWS CLI available for validation" >&2
+  fi
+else
+  echo "File $FILE_PATH is not a CloudFormation template, skipping validation" >&2
+fi
+
+exit 0
+```
+
+## Examples
+### AWS CloudFormation Validator Hook Script
+
+Complete hook script that validates CloudFormation templates using cfn-lint or AWS CLI fallback
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r ".tool_input.file_path // .tool_input.path // \"\"")
+if [ -z "$FILE_PATH" ]; then exit 0; fi
+if [[ "$FILE_PATH" == *.cf.json ]] || [[ "$FILE_PATH" == *.cf.yaml ]] || [[ "$FILE_PATH" == *cloudformation*.yaml ]] || [[ "$FILE_PATH" == *cloudformation*.json ]]; then
+  echo "Validating CloudFormation template $FILE_PATH..." >&2
+  if command -v cfn-lint &> /dev/null; then
+    if cfn-lint "$FILE_PATH" 2>&1; then
+      echo "CloudFormation template validation passed" >&2
+    else
+      echo "CloudFormation template validation failed" >&2
+    fi
+  elif command -v aws &> /dev/null; then
+    if aws cloudformation validate-template --template-body "file://$FILE_PATH" 2>/dev/null; then
+      echo "Basic CloudFormation validation passed" >&2
+    else
+      echo "CloudFormation template validation failed" >&2
+    fi
+  fi
+fi
+exit 0
+```
+
+### Hook Configuration
+
+Complete hook configuration for .claude/settings.json to enable CloudFormation validation on file writes and edits
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./.claude/hooks/aws-cloudformation-validator.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### Multi-Region Validation Hook
+
+Enhanced hook script that validates CloudFormation templates against multiple AWS regions
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r ".tool_input.file_path")
+if [[ "$FILE_PATH" == *.yaml ]] || [[ "$FILE_PATH" == *.yml ]]; then
+  if command -v cfn-lint &> /dev/null; then
+    cfn-lint "$FILE_PATH" --regions us-east-1 us-west-2 --format json --output-file validation-results.json 2>&1
+    if [ $? -eq 0 ]; then
+      echo "Multi-region validation passed" >&2
+    fi
+  fi
+fi
+exit 0
+```
+
+### Strict Validation with Error Blocking
+
+Hook script that blocks operations on CloudFormation templates with validation errors
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r ".tool_input.file_path")
+if [[ "$FILE_PATH" == *.yaml ]] || [[ "$FILE_PATH" == *.json ]]; then
+  if command -v cfn-lint &> /dev/null; then
+    cfn-lint "$FILE_PATH" --ignore-checks W --format parseable 2>&1
+    EXIT_CODE=$?
+    if [ $EXIT_CODE -ne 0 ]; then
+      echo "Template validation failed with errors" >&2
+      exit 2
+    fi
+  fi
+fi
+exit 0
+```
+
+### Template Detection with Schema Update
+
+Hook script that detects CloudFormation templates by content and updates schemas before validation
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r ".tool_input.file_path")
+if grep -q "AWSTemplateFormatVersion" "$FILE_PATH" 2>/dev/null || grep -q "Transform: AWS::Serverless" "$FILE_PATH" 2>/dev/null; then
+  if command -v cfn-lint &> /dev/null; then
+    cfn-lint "$FILE_PATH" --update-specs 2>/dev/null
+    cfn-lint "$FILE_PATH" 2>&1
+  fi
+fi
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r ".tool_input.file_path // .tool_input.path // \"\"")
+if [ -z "$FILE_PATH" ]; then exit 0; fi
+if [[ "$FILE_PATH" == *.cf.json ]] || [[ "$FILE_PATH" == *.cf.yaml ]] || [[ "$FILE_PATH" == *cloudformation*.yaml ]] || [[ "$FILE_PATH" == *cloudformation*.json ]]; then
+  echo "Validating CloudFormation template $FILE_PATH..." >&2
+  if command -v cfn-lint &> /dev/null; then
+    if cfn-lint "$FILE_PATH" 2>&1; then
+      echo "CloudFormation template validation passed" >&2
+    else
+      echo "CloudFormation template validation failed" >&2
+    fi
+  elif command -v aws &> /dev/null; then
+    if aws cloudformation validate-template --template-body "file://$FILE_PATH" 2>/dev/null; then
+      echo "Basic CloudFormation validation passed" >&2
+    else
+      echo "CloudFormation template validation failed" >&2
+    fi
+  fi
+fi
+exit 0
+```
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./.claude/hooks/aws-cloudformation-validator.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r ".tool_input.file_path")
+if [[ "$FILE_PATH" == *.yaml ]] || [[ "$FILE_PATH" == *.yml ]]; then
+  if command -v cfn-lint &> /dev/null; then
+    cfn-lint "$FILE_PATH" --regions us-east-1 us-west-2 --format json --output-file validation-results.json 2>&1
+    if [ $? -eq 0 ]; then
+      echo "Multi-region validation passed" >&2
+    fi
+  fi
+fi
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r ".tool_input.file_path")
+if [[ "$FILE_PATH" == *.yaml ]] || [[ "$FILE_PATH" == *.json ]]; then
+  if command -v cfn-lint &> /dev/null; then
+    cfn-lint "$FILE_PATH" --ignore-checks W --format parseable 2>&1
+    EXIT_CODE=$?
+    if [ $EXIT_CODE -ne 0 ]; then
+      echo "Template validation failed with errors" >&2
+      exit 2
+    fi
+  fi
+fi
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r ".tool_input.file_path")
+if grep -q "AWSTemplateFormatVersion" "$FILE_PATH" 2>/dev/null || grep -q "Transform: AWS::Serverless" "$FILE_PATH" 2>/dev/null; then
+  if command -v cfn-lint &> /dev/null; then
+    cfn-lint "$FILE_PATH" --update-specs 2>/dev/null
+    cfn-lint "$FILE_PATH" 2>&1
+  fi
+fi
+exit 0
+```
+
+## Troubleshooting
+### Hook recognizes CloudFormation file but cfn-lint fails
+
+Install cfn-lint: pip install cfn-lint or pipx install cfn-lint. Verify Python environment active: which python. Check template syntax with: cfn-lint --version. Review cfn-lint logs without 2>&1. Update CloudFormation schemas: cfn-lint --update-specs.
+
+### AWS CLI validation requires credentials unexpectedly
+
+Use cfn-lint for offline validation instead. Or configure AWS credentials: aws configure. Use IAM role with minimal permissions. Skip AWS CLI fallback if credentials unavailable. Use AWS CLI with --no-verify-ssl for local testing only.
+
+### Template passes validation but hook shows failure message
+
+Check exit code handling in script. Capture command output: OUTPUT=$(cfn-lint file) && echo success. Review conditional logic for success detection. Debug with: set -x in script. Verify cfn-lint exit codes: 0=success, 4=warnings, 8=errors.
+
+### Hook processes YAML files that aren't CloudFormation
+
+Strengthen template detection regex. Check file content for AWSTemplateFormatVersion key: grep -q AWSTemplateFormatVersion file. Add explicit template marker in filename convention. Use content-based detection: grep -q "Resources:" file.
+
+### PostToolUse timing causes validation on incomplete writes
+
+Verify file write completed before validation. Add small sleep: sleep 0.5 before validation. Check file size: [ -s "$FILE_PATH" ]. Use file lock detection if available. Validate file is not empty before processing.
+
+### cfn-lint reports errors but AWS CLI validation passes
+
+cfn-lint performs deeper validation than AWS CLI. Review cfn-lint errors for best practices violations. AWS CLI only validates basic syntax. Use cfn-lint for comprehensive validation. Check cfn-lint rule documentation for specific error codes.
+
+### SAM template validation fails with cfn-lint
+
+cfn-lint automatically transforms SAM templates. Verify Transform: AWS::Serverless-2016-10-31 is present. Update cfn-lint: pip install --upgrade cfn-lint. Check SAM template syntax matches SAM specification. Use --template parameter if needed.
+
+### Multi-region validation takes too long on large templates
+
+Limit regions: cfn-lint file --regions us-east-1. Add timeout wrapper: timeout 60s cfn-lint file. Validate against single region first. Use --ignore-checks to skip non-critical rules. Consider validating in CI/CD instead of on every edit.

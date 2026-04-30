@@ -1,0 +1,28 @@
+# n8n
+URL: https://heyclau.de/tools/n8n
+Category: tools
+Author: n8n
+Date added: 2026-04-27
+Documentation: https://docs.n8n.io
+Repository: https://github.com/n8n-io/n8n
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/n8n.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/tools/n8n
+- Source URLs: https://docs.n8n.io, https://github.com/n8n-io/n8n, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/n8n.mdx, https://n8n.io
+- Brand: n8n
+- Brand domain: n8n.io
+- Brand asset source: brandfetch
+- Author: n8n
+- Last verified: 2026-04-26T23:21:14-06:00
+- Robots: indexable
+## Summary
+Source-available workflow automation platform for self-hosted integrations, AI workflows, triggers, and data pipelines.
+## Tags
+- workflow-automation
+- self-hosted
+## Content
+## Editorial notes
+n8n is valuable for teams that want workflow automation with self-hosting options and AI integration steps.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

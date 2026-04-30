@@ -1,0 +1,302 @@
+{
+  "schemaVersion": 1,
+  "key": "skills:prompt-injection-defense-guardrails",
+  "entry": {
+    "category": "skills",
+    "slug": "prompt-injection-defense-guardrails",
+    "title": "Prompt Injection Defense Guardrails Skill",
+    "description": "Build layered defenses against prompt injection, data exfiltration, and unsafe tool execution in AI agent systems.",
+    "seoTitle": "Prompt Injection Defense Guardrails Skill",
+    "seoDescription": "Reusable AI skill for detecting and mitigating prompt injection attacks with layered controls and validation tests. HeyClaude adds source links, install...",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2026-04-10",
+    "contentUpdatedAt": "2026-04-27T02:57:15-06:00",
+    "tags": [
+      "prompt-injection",
+      "guardrails",
+      "security",
+      "ai-safety",
+      "red-teaming"
+    ],
+    "keywords": [
+      "ai-skill",
+      "prompt-injection-defense",
+      "llm-security",
+      "tool-safety",
+      "adversarial-testing",
+      "prompt-injection",
+      "guardrails",
+      "security",
+      "ai-safety",
+      "red-teaming",
+      "skills",
+      "claude"
+    ],
+    "readingTime": 7,
+    "difficultyScore": 80,
+    "documentationUrl": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+    "cardDescription": "Implement practical prompt injection defenses with policy gates, tool constraints, and adversarial test cases.",
+    "installable": true,
+    "installCommand": "curl -L https://heyclau.de/downloads/skills/prompt-injection-defense-guardrails.zip -o prompt-injection-defense-guardrails.zip && unzip -o prompt-injection-defense-guardrails.zip -d ./prompt-injection-defense-guardrails",
+    "usageSnippet": "Use this skill whenever an agent consumes untrusted input or can trigger external tools/actions.",
+    "copySnippet": "# Trigger\n\"Run the prompt injection defense guardrails skill on this agent flow.\"\n\n# Required output\n1) Injection threat map by input source\n2) Guardrail architecture (prevent, detect, contain)\n3) Red-team prompts and expected safe behavior\n4) Blocking policy and audit log schema",
+    "skillType": "general",
+    "skillLevel": "advanced",
+    "verificationStatus": "draft",
+    "verifiedAt": "2026-04-10",
+    "retrievalSources": [
+      "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
+    ],
+    "testedPlatforms": [
+      "Claude",
+      "Codex",
+      "OpenClaw",
+      "Cursor",
+      "Windsurf",
+      "Gemini"
+    ],
+    "prerequisites": [
+      "Agent flow that processes user input or external web/content data",
+      "Ability to add policy checks before tool execution",
+      "Test harness for adversarial prompt scenarios"
+    ],
+    "hasPrerequisites": true,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/skills/prompt-injection-defense-guardrails.zip",
+    "skillPackage": {
+      "format": "agent-skill",
+      "entrypoint": "SKILL.md",
+      "downloadUrl": "/downloads/skills/prompt-injection-defense-guardrails.zip",
+      "sha256": "8bf9869deb15e9db78456574e555a755fbefe6e70c4362761d1fcbd416496c03"
+    },
+    "platformCompatibility": [
+      {
+        "platform": "Claude",
+        "supportLevel": "native-skill",
+        "installPath": ".claude/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Codex",
+        "supportLevel": "native-skill",
+        "installPath": ".agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Windsurf",
+        "supportLevel": "native-skill",
+        "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Gemini",
+        "supportLevel": "native-skill",
+        "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Cursor",
+        "supportLevel": "adapter",
+        "installPath": ".cursor/rules/<skill-name>.mdc",
+        "adapterPath": "/data/skill-adapters/cursor/prompt-injection-defense-guardrails.mdc",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Generic AGENTS",
+        "supportLevel": "manual-context",
+        "installPath": "AGENTS.md or tool-specific context file",
+        "verifiedAt": "2026-04-10"
+      }
+    ],
+    "downloadTrust": "first-party",
+    "downloadSha256": "8bf9869deb15e9db78456574e555a755fbefe6e70c4362761d1fcbd416496c03",
+    "body": "## Overview\n\nThis skill helps you ship agent workflows that can safely handle hostile or manipulative input. It combines policy-based execution controls with concrete adversarial testing so prompt injection becomes an engineering problem with measurable controls, not a vague risk.\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Prerequisites\n\n- Documented tool calls and data boundaries\n- Clear policy on what actions are ever allowed\n- Logging pipeline for security-relevant events\n\n## Guardrail Model\n\n- **Prevent:** strict policy before any tool/action call\n- **Detect:** prompt pattern heuristics + schema violations + anomalous action chains\n- **Contain:** block, downgrade, or require explicit human confirmation for risky operations\n\n## How to Use This Skill\n\n### Prompt Pattern\n\n```text\nApply prompt injection defense guardrails to this system.\nOutput:\n1) attack tree,\n2) policy controls with enforcement points,\n3) adversarial test suite,\n4) release gate criteria.\n```\n\n### Execution Flow\n\n1. Enumerate all untrusted input channels.\n2. Define hard deny policies for sensitive actions.\n3. Add pre-tool policy checks and argument validation.\n4. Build adversarial test prompts and expected outcomes.\n5. Block release if any critical bypass succeeds.\n\n## Troubleshooting\n\n**Issue:** Guardrails over-block normal user requests  \n**Fix:** Tighten policy conditions by action context, not broad keyword filters.\n\n**Issue:** Model still attempts prohibited actions  \n**Fix:** Enforce server-side policy independently of model output.\n\n**Issue:** Red-team set misses real attacks  \n**Fix:** Continuously seed tests from production incidents and near misses.\n\n## Knowledge Freshness\n\nTreat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.\n\n## Retrieval Sources\n\n- https://genai.owasp.org/llmrisk/llm01-prompt-injection/\n\n## Output Contract\n\n1. Return a concrete plan with implementation order.\n2. Provide production-ready commands/config/code snippets (not placeholders).\n3. Include explicit assumptions and unresolved risks.\n4. Include a verification checklist with pass/fail criteria.\n\n## Quality Gates\n\n- All commands are copy/paste ready.\n- Security-sensitive steps call out secret handling and least privilege.\n- Version-sensitive guidance cites current docs used.\n- Rollback path is included for risky changes.\n- Final output includes quick validation commands/tests.",
+    "sections": [
+      {
+        "title": "Overview",
+        "id": "overview",
+        "markdown": "This skill helps you ship agent workflows that can safely handle hostile or manipulative input. It combines policy-based execution controls with concrete adversarial testing so prompt injection becomes an engineering problem with measurable controls, not a vague risk.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Compatibility",
+        "id": "compatibility",
+        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Prerequisites",
+        "id": "prerequisites",
+        "markdown": "- Documented tool calls and data boundaries\n- Clear policy on what actions are ever allowed\n- Logging pipeline for security-relevant events",
+        "codeBlocks": []
+      },
+      {
+        "title": "Guardrail Model",
+        "id": "guardrail-model",
+        "markdown": "- **Prevent:** strict policy before any tool/action call\n- **Detect:** prompt pattern heuristics + schema violations + anomalous action chains\n- **Contain:** block, downgrade, or require explicit human confirmation for risky operations",
+        "codeBlocks": []
+      },
+      {
+        "title": "How to Use This Skill",
+        "id": "how-to-use-this-skill",
+        "markdown": "### Prompt Pattern\n\n```text\nApply prompt injection defense guardrails to this system.\nOutput:\n1) attack tree,\n2) policy controls with enforcement points,\n3) adversarial test suite,\n4) release gate criteria.\n```\n\n### Execution Flow\n\n1. Enumerate all untrusted input channels.\n2. Define hard deny policies for sensitive actions.\n3. Add pre-tool policy checks and argument validation.\n4. Build adversarial test prompts and expected outcomes.\n5. Block release if any critical bypass succeeds.",
+        "codeBlocks": [
+          {
+            "language": "text",
+            "code": "Apply prompt injection defense guardrails to this system.\nOutput:\n1) attack tree,\n2) policy controls with enforcement points,\n3) adversarial test suite,\n4) release gate criteria."
+          }
+        ]
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "**Issue:** Guardrails over-block normal user requests  \n**Fix:** Tighten policy conditions by action context, not broad keyword filters.\n\n**Issue:** Model still attempts prohibited actions  \n**Fix:** Enforce server-side policy independently of model output.\n\n**Issue:** Red-team set misses real attacks  \n**Fix:** Continuously seed tests from production incidents and near misses.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Knowledge Freshness",
+        "id": "knowledge-freshness",
+        "markdown": "Treat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Retrieval Sources",
+        "id": "retrieval-sources",
+        "markdown": "- https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+        "codeBlocks": []
+      },
+      {
+        "title": "Output Contract",
+        "id": "output-contract",
+        "markdown": "1. Return a concrete plan with implementation order.\n2. Provide production-ready commands/config/code snippets (not placeholders).\n3. Include explicit assumptions and unresolved risks.\n4. Include a verification checklist with pass/fail criteria.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Quality Gates",
+        "id": "quality-gates",
+        "markdown": "- All commands are copy/paste ready.\n- Security-sensitive steps call out secret handling and least privilege.\n- Version-sensitive guidance cites current docs used.\n- Rollback path is included for risky changes.\n- Final output includes quick validation commands/tests.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Overview",
+        "id": "overview"
+      },
+      {
+        "depth": 2,
+        "text": "Compatibility",
+        "id": "compatibility"
+      },
+      {
+        "depth": 3,
+        "text": "Native",
+        "id": "native"
+      },
+      {
+        "depth": 3,
+        "text": "Manual Adaptation",
+        "id": "manual-adaptation"
+      },
+      {
+        "depth": 2,
+        "text": "Prerequisites",
+        "id": "prerequisites"
+      },
+      {
+        "depth": 2,
+        "text": "Guardrail Model",
+        "id": "guardrail-model"
+      },
+      {
+        "depth": 2,
+        "text": "How to Use This Skill",
+        "id": "how-to-use-this-skill"
+      },
+      {
+        "depth": 3,
+        "text": "Prompt Pattern",
+        "id": "prompt-pattern"
+      },
+      {
+        "depth": 3,
+        "text": "Execution Flow",
+        "id": "execution-flow"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 2,
+        "text": "Knowledge Freshness",
+        "id": "knowledge-freshness"
+      },
+      {
+        "depth": 2,
+        "text": "Retrieval Sources",
+        "id": "retrieval-sources"
+      },
+      {
+        "depth": 2,
+        "text": "Output Contract",
+        "id": "output-contract"
+      },
+      {
+        "depth": 2,
+        "text": "Quality Gates",
+        "id": "quality-gates"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "text",
+        "code": "Apply prompt injection defense guardrails to this system.\nOutput:\n1) attack tree,\n2) policy controls with enforcement points,\n3) adversarial test suite,\n4) release gate criteria."
+      }
+    ],
+    "filePath": "content/skills/prompt-injection-defense-guardrails.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/prompt-injection-defense-guardrails.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": true,
+    "packageTrust": "first-party",
+    "packageChecksum": "8bf9869deb15e9db78456574e555a755fbefe6e70c4362761d1fcbd416496c03",
+    "checksumPresent": true,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/prompt-injection-defense-guardrails.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-10",
+    "adapterGenerated": true,
+    "platforms": [
+      "Claude",
+      "Codex",
+      "Windsurf",
+      "Gemini",
+      "Cursor",
+      "Generic AGENTS"
+    ],
+    "supportLevels": [
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "adapter",
+      "manual-context"
+    ]
+  }
+}

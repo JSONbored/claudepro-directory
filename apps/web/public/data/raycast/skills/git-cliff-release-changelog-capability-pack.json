@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 2,
+  "key": "skills:git-cliff-release-changelog-capability-pack",
+  "category": "skills",
+  "slug": "git-cliff-release-changelog-capability-pack",
+  "title": "Git-Cliff Release Changelog Capability Pack Skill",
+  "author": "JSONbored",
+  "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/git-cliff-release-changelog-capability-pack.zip -o git-cliff-release-changelog-capability-pack.zip && unzip -o git-cliff-release-changelog-capability-pack.zip -d ./git-cliff-release-changelog-capability-pack\n\nUsage:\nUse this skill to enforce changelog quality from commit history through release publication.\n\nAsset:\n# Trigger\n\"Apply the git-cliff release changelog capability pack for this release.\"\n\n# Required output\n1) Conventional commit compliance report\n2) Proposed release version and rationale\n3) Generated changelog sections\n4) Tag/release execution checklist",
+  "detailMarkdown": "# Git-Cliff Release Changelog Capability Pack Skill\n\nExpert release-changelog capability pack for git-cliff with conventional commits, deterministic release notes, and low-maintenance versioning.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/git-cliff-release-changelog-capability-pack.zip -o git-cliff-release-changelog-capability-pack.zip && unzip -o git-cliff-release-changelog-capability-pack.zip -d ./git-cliff-release-changelog-capability-pack\n```\n\n## Usage\nUse this skill to enforce changelog quality from commit history through release publication.",
+  "webUrl": "https://heyclau.de/skills/git-cliff-release-changelog-capability-pack",
+  "canonicalUrl": "https://heyclau.de/skills/git-cliff-release-changelog-capability-pack",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/git-cliff-release-changelog-capability-pack.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/git-cliff-release-changelog-capability-pack",
+  "seoTitle": "Git-Cliff Release Changelog Capability Pack Skill",
+  "seoDescription": "Advanced AI skill for git-cliff changelog automation, release note generation, and reliable merge-to-release workflows. HeyClaude adds source links, install...",
+  "repoUrl": "",
+  "documentationUrl": "https://git-cliff.org/docs/"
+}

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:browser-use",
+  "category": "tools",
+  "slug": "browser-use",
+  "title": "Browser Use",
+  "author": "Browser Use",
+  "brandName": "Browser Use",
+  "brandDomain": "browser-use.com",
+  "brandIconUrl": "/api/brand-assets/icon/browser-use.com",
+  "brandAssetSource": "brandfetch",
+  "copyText": "## Editorial notes\n\nBrowser Use is relevant for builders who need programmatic browser interaction as part of AI agent workflows.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Browser Use\n\nOpen-source browser automation library for building AI agents that can navigate, click, type, and inspect websites.",
+  "webUrl": "https://heyclau.de/tools/browser-use",
+  "canonicalUrl": "https://heyclau.de/tools/browser-use",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/browser-use.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/browser-use",
+  "seoTitle": "Browser Use automation library for AI agents",
+  "seoDescription": "Browser Use is an open-source library for building AI agents that navigate, click, type, and inspect websites. HeyClaude adds source links, install steps,...",
+  "repoUrl": "https://github.com/browser-use/browser-use",
+  "documentationUrl": "https://docs.browser-use.com"
+}

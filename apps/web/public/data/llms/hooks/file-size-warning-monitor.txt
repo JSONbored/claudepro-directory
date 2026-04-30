@@ -1,0 +1,900 @@
+# File Size Warning Monitor - Hooks
+URL: https://heyclau.de/hooks/file-size-warning-monitor
+Category: hooks
+Author: JSONbored
+Date added: 2025-09-19
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/file-size-warning-monitor.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/hooks/file-size-warning-monitor
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/file-size-warning-monitor.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
+## Summary
+Alerts when files exceed size thresholds that could impact performance. This PostToolUse hook provides comprehensive file size monitoring when files are created or modified, automatically detecting files that exceed recommended size thresholds for different file types and providing optimization suggestions.
+## Tags
+- file-size
+- performance
+- notification
+- monitoring
+- optimization
+## Content
+## Features
+- Real-time file size monitoring during write/edit operations with automatic file size detection across platforms (macOS, Linux, Windows) using cross-platform stat commands and fallback methods
+- Configurable size thresholds for different file types (source code 500KB, images 2MB, videos 50MB, JSON 1MB) with environment variable overrides and file type-specific threshold configuration
+- File type-specific recommendations (images, JSON, code, etc.) with optimization suggestions including code splitting for JavaScript, JSON streaming for large JSON files, image optimization for media files, and video compression for video files
+- Performance impact warnings for large files with impact assessment (high/medium/low) based on file size and type with actionable recommendations
+- Git repository size impact analysis with size change tracking comparing current file size with previous Git versions and Git LFS recommendations for files over 10MB
+- Compression suggestions for media files including JPEG optimization, WebP format conversion, progressive JPEG, PNG optimization, and video compression recommendations
+- Size comparison with previous versions using Git history to track file size growth with percentage increase calculations and size change alerts
+- Multi-platform file size detection (macOS, Linux, Windows) with cross-platform stat command compatibility using stat -f%z (macOS), stat -c%s (Linux), and wc -c fallback methods
+
+## Use Cases
+- Real-time file size monitoring during development providing immediate feedback when files exceed recommended size thresholds during active development
+- Performance optimization through size awareness automatically detecting large files that could impact application performance and providing optimization suggestions
+- Git repository size management tracking file size growth and recommending Git LFS for large files to maintain repository performance and reduce clone times
+- Asset optimization for web applications providing specific optimization suggestions for images, JavaScript bundles, CSS files, and other web assets to improve load times
+- CI/CD pipeline size validation automatically validating file sizes in CI/CD pipelines to prevent deployment of oversized files that could impact production performance
+- Development workflow integration seamlessly integrating file size monitoring into development workflows without manual file size inspection or separate optimization tools
+
+## Installation
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/file-size-warning-monitor.sh
+3. Make executable: chmod +x .claude/hooks/file-size-warning-monitor.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- Git repository (optional, for Git size tracking and LFS recommendations)
+- ImageMagick (optional, for image dimension detection via identify command)
+- Standard Unix utilities: stat (for file size detection), wc (fallback for file size), and file system read access for file metadata
+
+## Hook Configuration
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/file-size-warning-monitor.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/file-size-warning-monitor.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+
+## Hook Script
+```bash
+#!/usr/bin/env bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Check if file exists and is a regular file
+if [ ! -f "$FILE_PATH" ]; then
+  exit 0
+fi
+
+echo "📏 Checking file size for: $(basename "$FILE_PATH")" >&2
+
+# Get file size in bytes (cross-platform)
+get_file_size() {
+  local file="$1"
+
+  # Try different stat formats for cross-platform compatibility
+  if stat -f%z "$file" 2>/dev/null; then
+    # macOS/BSD
+    return 0
+  elif stat -c%s "$file" 2>/dev/null; then
+    # Linux/GNU
+    return 0
+  elif [ -f "$file" ]; then
+    # Fallback: use wc for text files (less accurate for binary)
+    wc -c < "$file" 2>/dev/null || echo "0"
+  else
+    echo "0"
+  fi
+}
+
+# Convert bytes to human-readable format
+format_size() {
+  local bytes="$1"
+
+  if [ "$bytes" -lt 1024 ]; then
+    echo "${bytes}B"
+  elif [ "$bytes" -lt 1048576 ]; then
+    echo "$((bytes / 1024))KB"
+  elif [ "$bytes" -lt 1073741824 ]; then
+    echo "$((bytes / 1048576))MB"
+  else
+    echo "$((bytes / 1073741824))GB"
+  fi
+}
+
+# Get file extension
+get_file_extension() {
+  local file="$1"
+  echo "${file##*.}" | tr '[:upper:]' '[:lower:]'
+}
+
+# Define file type categories and their thresholds
+get_size_threshold() {
+  local extension="$1"
+
+  case "$extension" in
+    # Source code files - should be relatively small
+    js|jsx|ts|tsx|py|rb|go|rs|java|cpp|c|h|hpp|php|cs)
+      echo "500000"  # 500KB
+      ;;
+    # Data/config files
+    json|xml|yaml|yml|toml|ini|conf)
+      echo "1048576"  # 1MB
+      ;;
+    # Documentation
+    md|txt|rst|org)
+      echo "1048576"  # 1MB
+      ;;
+    # Images
+    jpg|jpeg|png|gif|bmp|webp|svg)
+      echo "2097152"  # 2MB
+      ;;
+    # Videos
+    mp4|avi|mov|wmv|flv|webm|mkv)
+      echo "52428800"  # 50MB
+      ;;
+    # Audio
+    mp3|wav|flac|aac|ogg)
+      echo "10485760"  # 10MB
+      ;;
+    # Archives
+    zip|tar|gz|bz2|xz|7z|rar)
+      echo "20971520"  # 20MB
+      ;;
+    # Binary executables
+    exe|bin|app|dmg|deb|rpm)
+      echo "104857600"  # 100MB
+      ;;
+    # Default for unknown file types
+    *)
+      echo "5242880"  # 5MB
+      ;;
+  esac
+}
+
+# Get optimization suggestions for file type
+get_optimization_suggestions() {
+  local extension="$1"
+  local size_mb="$2"
+
+  case "$extension" in
+    js|jsx|ts|tsx)
+      echo "Consider code splitting, tree shaking, or minification"
+      ;;
+    json)
+      echo "Consider JSON streaming, compression, or breaking into smaller files"
+      ;;
+    jpg|jpeg)
+      echo "Consider JPEG optimization, WebP format, or progressive JPEG"
+      ;;
+    png)
+      echo "Consider PNG optimization, WebP format, or SVG for simple graphics"
+      ;;
+    gif)
+      echo "Consider converting to WebP or MP4 for better compression"
+      ;;
+    svg)
+      echo "Consider SVG optimization tools to remove unnecessary elements"
+      ;;
+    mp4|mov)
+      echo "Consider video compression, lower resolution, or streaming"
+      ;;
+    pdf)
+      echo "Consider PDF compression or splitting into smaller documents"
+      ;;
+    zip|tar|gz)
+      echo "Archive seems large - verify contents are necessary"
+      ;;
+    md|txt)
+      echo "Consider breaking into smaller documents or using external storage"
+      ;;
+    *)
+      echo "Consider file compression or alternative storage solutions"
+      ;;
+  esac
+}
+
+# Get file size
+SIZE_BYTES=$(get_file_size "$FILE_PATH")
+SIZE_HUMAN=$(format_size "$SIZE_BYTES")
+SIZE_MB=$((SIZE_BYTES / 1048576))
+SIZE_KB=$((SIZE_BYTES / 1024))
+
+# Get file info
+FILE_EXTENSION=$(get_file_extension "$FILE_PATH")
+FILE_NAME=$(basename "$FILE_PATH")
+THRESHOLD_BYTES=$(get_size_threshold "$FILE_EXTENSION")
+THRESHOLD_HUMAN=$(format_size "$THRESHOLD_BYTES")
+
+echo "📊 File: $FILE_NAME ($SIZE_HUMAN)" >&2
+
+# Check if file exceeds threshold
+if [ "$SIZE_BYTES" -gt "$THRESHOLD_BYTES" ]; then
+  echo "⚠️ SIZE WARNING: File exceeds recommended threshold for .$FILE_EXTENSION files" >&2
+  echo "   Current: $SIZE_HUMAN | Recommended: < $THRESHOLD_HUMAN" >&2
+
+  # Provide optimization suggestions
+  SUGGESTION=$(get_optimization_suggestions "$FILE_EXTENSION" "$SIZE_MB")
+  echo "💡 Suggestion: $SUGGESTION" >&2
+
+  # Specific warnings for very large files
+  if [ "$SIZE_MB" -gt 50 ]; then
+    echo "🚨 VERY LARGE FILE: This file may cause performance issues" >&2
+    echo "   Consider using Git LFS for files over 50MB" >&2
+  elif [ "$SIZE_MB" -gt 10 ]; then
+    echo "⚠️ LARGE FILE: May impact repository performance" >&2
+  fi
+
+else
+  echo "✅ File size within acceptable range ($THRESHOLD_HUMAN threshold)" >&2
+fi
+
+# Special checks for specific file types
+case "$FILE_EXTENSION" in
+  js|jsx|ts|tsx)
+    if [ "$SIZE_KB" -gt 100 ]; then
+      echo "📦 JavaScript bundle size check: Consider code splitting for better performance" >&2
+    fi
+    ;;
+  json)
+    if [ "$SIZE_KB" -gt 500 ]; then
+      echo "📄 Large JSON detected: Consider pagination or streaming for API responses" >&2
+    fi
+    ;;
+  jpg|jpeg|png|gif|webp)
+    if [ "$SIZE_KB" -gt 500 ]; then
+      echo "🖼️ Image optimization: Large images impact web performance" >&2
+      if command -v identify &> /dev/null; then
+        DIMENSIONS=$(identify -format '%wx%h' "$FILE_PATH" 2>/dev/null || echo "unknown")
+        echo "   Dimensions: $DIMENSIONS" >&2
+      fi
+    fi
+    ;;
+  css|scss|sass)
+    if [ "$SIZE_KB" -gt 200 ]; then
+      echo "🎨 CSS size check: Consider removing unused styles or splitting stylesheets" >&2
+    fi
+    ;;
+esac
+
+# Check if file is in git repository
+if command -v git &> /dev/null && git rev-parse --git-dir > /dev/null 2>&1; then
+  # Check if file is tracked by git
+  if git ls-files --error-unmatch "$FILE_PATH" &> /dev/null; then
+    echo "🔄 Git repository impact:" >&2
+
+    # Check if file has grown significantly
+    if git log --oneline -n 1 -- "$FILE_PATH" &> /dev/null; then
+      # File has history, check previous size
+      PREV_SIZE=$(git show HEAD:"$FILE_PATH" 2>/dev/null | wc -c | xargs || echo "0")
+      if [ "$PREV_SIZE" -gt 0 ]; then
+        PREV_SIZE_HUMAN=$(format_size "$PREV_SIZE")
+        SIZE_DIFF=$((SIZE_BYTES - PREV_SIZE))
+
+        if [ "$SIZE_DIFF" -gt 0 ]; then
+          DIFF_HUMAN=$(format_size "$SIZE_DIFF")
+          PERCENT_INCREASE=$((SIZE_DIFF * 100 / PREV_SIZE))
+          echo "   Size change: +$DIFF_HUMAN (+$PERCENT_INCREASE%) from previous version" >&2
+
+          if [ "$PERCENT_INCREASE" -gt 100 ]; then
+            echo "   📈 Significant size increase detected" >&2
+          fi
+        fi
+      fi
+    fi
+
+    # Suggest Git LFS for large files
+    if [ "$SIZE_MB" -gt 10 ]; then
+      echo "   💡 Consider using Git LFS for this large file" >&2
+      if [ -f ".gitattributes" ]; then
+        if ! grep -q "*.$FILE_EXTENSION.*lfs" ".gitattributes" 2>/dev/null; then
+          echo "   Add to .gitattributes: *.$FILE_EXTENSION filter=lfs diff=lfs merge=lfs -text" >&2
+        fi
+      else
+        echo "   Create .gitattributes with: *.$FILE_EXTENSION filter=lfs diff=lfs merge=lfs -text" >&2
+      fi
+    fi
+  fi
+fi
+
+# Overall performance impact assessment
+echo "" >&2
+echo "📋 Performance Impact Assessment:" >&2
+
+if [ "$SIZE_MB" -gt 50 ]; then
+  echo "  🔴 High Impact: File may cause significant performance issues" >&2
+elif [ "$SIZE_MB" -gt 10 ]; then
+  echo "  🟡 Medium Impact: File may cause minor performance issues" >&2
+elif [ "$SIZE_KB" -gt 500 ]; then
+  echo "  🟢 Low Impact: File size is acceptable but monitor growth" >&2
+else
+  echo "  ✅ Minimal Impact: File size is optimal" >&2
+fi
+
+echo "" >&2
+echo "💡 File Size Best Practices:" >&2
+echo "   • Keep source code files under 500KB" >&2
+echo "   • Optimize images before committing" >&2
+echo "   • Use Git LFS for files over 10MB" >&2
+echo "   • Consider file compression for large data files" >&2
+
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Check if file exists and is a regular file
+if [ ! -f "$FILE_PATH" ]; then
+  exit 0
+fi
+
+echo "📏 Checking file size for: $(basename "$FILE_PATH")" >&2
+
+# Get file size in bytes (cross-platform)
+get_file_size() {
+  local file="$1"
+
+  # Try different stat formats for cross-platform compatibility
+  if stat -f%z "$file" 2>/dev/null; then
+    # macOS/BSD
+    return 0
+  elif stat -c%s "$file" 2>/dev/null; then
+    # Linux/GNU
+    return 0
+  elif [ -f "$file" ]; then
+    # Fallback: use wc for text files (less accurate for binary)
+    wc -c < "$file" 2>/dev/null || echo "0"
+  else
+    echo "0"
+  fi
+}
+
+# Convert bytes to human-readable format
+format_size() {
+  local bytes="$1"
+
+  if [ "$bytes" -lt 1024 ]; then
+    echo "${bytes}B"
+  elif [ "$bytes" -lt 1048576 ]; then
+    echo "$((bytes / 1024))KB"
+  elif [ "$bytes" -lt 1073741824 ]; then
+    echo "$((bytes / 1048576))MB"
+  else
+    echo "$((bytes / 1073741824))GB"
+  fi
+}
+
+# Get file extension
+get_file_extension() {
+  local file="$1"
+  echo "${file##*.}" | tr '[:upper:]' '[:lower:]'
+}
+
+# Define file type categories and their thresholds
+get_size_threshold() {
+  local extension="$1"
+
+  case "$extension" in
+    # Source code files - should be relatively small
+    js|jsx|ts|tsx|py|rb|go|rs|java|cpp|c|h|hpp|php|cs)
+      echo "500000"  # 500KB
+      ;;
+    # Data/config files
+    json|xml|yaml|yml|toml|ini|conf)
+      echo "1048576"  # 1MB
+      ;;
+    # Documentation
+    md|txt|rst|org)
+      echo "1048576"  # 1MB
+      ;;
+    # Images
+    jpg|jpeg|png|gif|bmp|webp|svg)
+      echo "2097152"  # 2MB
+      ;;
+    # Videos
+    mp4|avi|mov|wmv|flv|webm|mkv)
+      echo "52428800"  # 50MB
+      ;;
+    # Audio
+    mp3|wav|flac|aac|ogg)
+      echo "10485760"  # 10MB
+      ;;
+    # Archives
+    zip|tar|gz|bz2|xz|7z|rar)
+      echo "20971520"  # 20MB
+      ;;
+    # Binary executables
+    exe|bin|app|dmg|deb|rpm)
+      echo "104857600"  # 100MB
+      ;;
+    # Default for unknown file types
+    *)
+      echo "5242880"  # 5MB
+      ;;
+  esac
+}
+
+# Get optimization suggestions for file type
+get_optimization_suggestions() {
+  local extension="$1"
+  local size_mb="$2"
+
+  case "$extension" in
+    js|jsx|ts|tsx)
+      echo "Consider code splitting, tree shaking, or minification"
+      ;;
+    json)
+      echo "Consider JSON streaming, compression, or breaking into smaller files"
+      ;;
+    jpg|jpeg)
+      echo "Consider JPEG optimization, WebP format, or progressive JPEG"
+      ;;
+    png)
+      echo "Consider PNG optimization, WebP format, or SVG for simple graphics"
+      ;;
+    gif)
+      echo "Consider converting to WebP or MP4 for better compression"
+      ;;
+    svg)
+      echo "Consider SVG optimization tools to remove unnecessary elements"
+      ;;
+    mp4|mov)
+      echo "Consider video compression, lower resolution, or streaming"
+      ;;
+    pdf)
+      echo "Consider PDF compression or splitting into smaller documents"
+      ;;
+    zip|tar|gz)
+      echo "Archive seems large - verify contents are necessary"
+      ;;
+    md|txt)
+      echo "Consider breaking into smaller documents or using external storage"
+      ;;
+    *)
+      echo "Consider file compression or alternative storage solutions"
+      ;;
+  esac
+}
+
+# Get file size
+SIZE_BYTES=$(get_file_size "$FILE_PATH")
+SIZE_HUMAN=$(format_size "$SIZE_BYTES")
+SIZE_MB=$((SIZE_BYTES / 1048576))
+SIZE_KB=$((SIZE_BYTES / 1024))
+
+# Get file info
+FILE_EXTENSION=$(get_file_extension "$FILE_PATH")
+FILE_NAME=$(basename "$FILE_PATH")
+THRESHOLD_BYTES=$(get_size_threshold "$FILE_EXTENSION")
+THRESHOLD_HUMAN=$(format_size "$THRESHOLD_BYTES")
+
+echo "📊 File: $FILE_NAME ($SIZE_HUMAN)" >&2
+
+# Check if file exceeds threshold
+if [ "$SIZE_BYTES" -gt "$THRESHOLD_BYTES" ]; then
+  echo "⚠️ SIZE WARNING: File exceeds recommended threshold for .$FILE_EXTENSION files" >&2
+  echo "   Current: $SIZE_HUMAN | Recommended: < $THRESHOLD_HUMAN" >&2
+
+  # Provide optimization suggestions
+  SUGGESTION=$(get_optimization_suggestions "$FILE_EXTENSION" "$SIZE_MB")
+  echo "💡 Suggestion: $SUGGESTION" >&2
+
+  # Specific warnings for very large files
+  if [ "$SIZE_MB" -gt 50 ]; then
+    echo "🚨 VERY LARGE FILE: This file may cause performance issues" >&2
+    echo "   Consider using Git LFS for files over 50MB" >&2
+  elif [ "$SIZE_MB" -gt 10 ]; then
+    echo "⚠️ LARGE FILE: May impact repository performance" >&2
+  fi
+
+else
+  echo "✅ File size within acceptable range ($THRESHOLD_HUMAN threshold)" >&2
+fi
+
+# Special checks for specific file types
+case "$FILE_EXTENSION" in
+  js|jsx|ts|tsx)
+    if [ "$SIZE_KB" -gt 100 ]; then
+      echo "📦 JavaScript bundle size check: Consider code splitting for better performance" >&2
+    fi
+    ;;
+  json)
+    if [ "$SIZE_KB" -gt 500 ]; then
+      echo "📄 Large JSON detected: Consider pagination or streaming for API responses" >&2
+    fi
+    ;;
+  jpg|jpeg|png|gif|webp)
+    if [ "$SIZE_KB" -gt 500 ]; then
+      echo "🖼️ Image optimization: Large images impact web performance" >&2
+      if command -v identify &> /dev/null; then
+        DIMENSIONS=$(identify -format '%wx%h' "$FILE_PATH" 2>/dev/null || echo "unknown")
+        echo "   Dimensions: $DIMENSIONS" >&2
+      fi
+    fi
+    ;;
+  css|scss|sass)
+    if [ "$SIZE_KB" -gt 200 ]; then
+      echo "🎨 CSS size check: Consider removing unused styles or splitting stylesheets" >&2
+    fi
+    ;;
+esac
+
+# Check if file is in git repository
+if command -v git &> /dev/null && git rev-parse --git-dir > /dev/null 2>&1; then
+  # Check if file is tracked by git
+  if git ls-files --error-unmatch "$FILE_PATH" &> /dev/null; then
+    echo "🔄 Git repository impact:" >&2
+
+    # Check if file has grown significantly
+    if git log --oneline -n 1 -- "$FILE_PATH" &> /dev/null; then
+      # File has history, check previous size
+      PREV_SIZE=$(git show HEAD:"$FILE_PATH" 2>/dev/null | wc -c | xargs || echo "0")
+      if [ "$PREV_SIZE" -gt 0 ]; then
+        PREV_SIZE_HUMAN=$(format_size "$PREV_SIZE")
+        SIZE_DIFF=$((SIZE_BYTES - PREV_SIZE))
+
+        if [ "$SIZE_DIFF" -gt 0 ]; then
+          DIFF_HUMAN=$(format_size "$SIZE_DIFF")
+          PERCENT_INCREASE=$((SIZE_DIFF * 100 / PREV_SIZE))
+          echo "   Size change: +$DIFF_HUMAN (+$PERCENT_INCREASE%) from previous version" >&2
+
+          if [ "$PERCENT_INCREASE" -gt 100 ]; then
+            echo "   📈 Significant size increase detected" >&2
+          fi
+        fi
+      fi
+    fi
+
+    # Suggest Git LFS for large files
+    if [ "$SIZE_MB" -gt 10 ]; then
+      echo "   💡 Consider using Git LFS for this large file" >&2
+      if [ -f ".gitattributes" ]; then
+        if ! grep -q "*.$FILE_EXTENSION.*lfs" ".gitattributes" 2>/dev/null; then
+          echo "   Add to .gitattributes: *.$FILE_EXTENSION filter=lfs diff=lfs merge=lfs -text" >&2
+        fi
+      else
+        echo "   Create .gitattributes with: *.$FILE_EXTENSION filter=lfs diff=lfs merge=lfs -text" >&2
+      fi
+    fi
+  fi
+fi
+
+# Overall performance impact assessment
+echo "" >&2
+echo "📋 Performance Impact Assessment:" >&2
+
+if [ "$SIZE_MB" -gt 50 ]; then
+  echo "  🔴 High Impact: File may cause significant performance issues" >&2
+elif [ "$SIZE_MB" -gt 10 ]; then
+  echo "  🟡 Medium Impact: File may cause minor performance issues" >&2
+elif [ "$SIZE_KB" -gt 500 ]; then
+  echo "  🟢 Low Impact: File size is acceptable but monitor growth" >&2
+else
+  echo "  ✅ Minimal Impact: File size is optimal" >&2
+fi
+
+echo "" >&2
+echo "💡 File Size Best Practices:" >&2
+echo "   • Keep source code files under 500KB" >&2
+echo "   • Optimize images before committing" >&2
+echo "   • Use Git LFS for files over 10MB" >&2
+echo "   • Consider file compression for large data files" >&2
+
+exit 0
+```
+
+## Examples
+### File Size Warning Monitor Hook Script
+
+Complete hook script that performs file size monitoring when files are created or modified
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ] || [ ! -f "$FILE_PATH" ]; then
+  exit 0
+fi
+SIZE_BYTES=$(stat -f%z "$FILE_PATH" 2>/dev/null || stat -c%s "$FILE_PATH" 2>/dev/null || wc -c < "$FILE_PATH" || echo "0")
+SIZE_KB=$((SIZE_BYTES / 1024))
+FILE_EXTENSION=$(echo "${FILE_PATH##*.}" | tr '[:upper:]' '[:lower:]')
+THRESHOLD_KB=500
+if [ "$FILE_EXTENSION" = "js" ] || [ "$FILE_EXTENSION" = "ts" ]; then
+  THRESHOLD_KB=500
+elif [ "$FILE_EXTENSION" = "json" ]; then
+  THRESHOLD_KB=1024
+elif [ "$FILE_EXTENSION" = "jpg" ] || [ "$FILE_EXTENSION" = "png" ]; then
+  THRESHOLD_KB=2048
+fi
+if [ "$SIZE_KB" -gt "$THRESHOLD_KB" ]; then
+  echo "SIZE WARNING: $FILE_PATH exceeds threshold ($SIZE_KB KB > $THRESHOLD_KB KB)" >&2
+fi
+exit 0
+```
+
+### Hook Configuration
+
+Complete hook configuration for .claude/settings.json to enable file size monitoring
+
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/file-size-warning-monitor.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+
+### Git LFS Recommendation for Large Files
+
+Enhanced hook script for Git LFS recommendations for files over 10MB
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -f "$FILE_PATH" ]; then
+  SIZE_BYTES=$(stat -f%z "$FILE_PATH" 2>/dev/null || stat -c%s "$FILE_PATH" 2>/dev/null || wc -c < "$FILE_PATH" || echo "0")
+  SIZE_MB=$((SIZE_BYTES / 1048576))
+  if [ "$SIZE_MB" -gt 10 ]; then
+    if command -v git &> /dev/null && git rev-parse --git-dir > /dev/null 2>&1; then
+      if git ls-files --error-unmatch "$FILE_PATH" &> /dev/null; then
+        echo "Consider using Git LFS for this large file ($SIZE_MB MB)" >&2
+        if [ -f ".gitattributes" ]; then
+          FILE_EXTENSION=$(echo "${FILE_PATH##*.}" | tr '[:upper:]' '[:lower:]')
+          if ! grep -q "*.$FILE_EXTENSION.*lfs" ".gitattributes" 2>/dev/null; then
+            echo "Add to .gitattributes: *.$FILE_EXTENSION filter=lfs diff=lfs merge=lfs -text" >&2
+          fi
+        fi
+      fi
+    fi
+  fi
+fi
+exit 0
+```
+
+### File Type-Specific Optimization Suggestions
+
+Enhanced hook script for file type-specific optimization suggestions with ImageMagick support
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -f "$FILE_PATH" ]; then
+  FILE_EXTENSION=$(echo "${FILE_PATH##*.}" | tr '[:upper:]' '[:lower:]')
+  SIZE_BYTES=$(stat -f%z "$FILE_PATH" 2>/dev/null || stat -c%s "$FILE_PATH" 2>/dev/null || wc -c < "$FILE_PATH" || echo "0")
+  SIZE_KB=$((SIZE_BYTES / 1024))
+  case "$FILE_EXTENSION" in
+    jpg|jpeg|png|gif|webp)
+      if [ "$SIZE_KB" -gt 500 ]; then
+        echo "Image optimization: Large image detected ($SIZE_KB KB)" >&2
+        if command -v identify &> /dev/null; then
+          DIMENSIONS=$(identify -format '%wx%h' "$FILE_PATH" 2>/dev/null || echo "unknown")
+          echo "Dimensions: $DIMENSIONS" >&2
+        fi
+        echo "Consider: JPEG optimization, WebP format, or progressive JPEG" >&2
+      fi
+      ;;
+    js|jsx|ts|tsx)
+      if [ "$SIZE_KB" -gt 100 ]; then
+        echo "JavaScript bundle size: Consider code splitting for better performance" >&2
+      fi
+      ;;
+    json)
+      if [ "$SIZE_KB" -gt 500 ]; then
+        echo "Large JSON detected: Consider pagination or streaming for API responses" >&2
+      fi
+      ;;
+  esac
+fi
+exit 0
+```
+
+### Git Size Change Tracking
+
+Enhanced hook script for tracking file size changes using Git history
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -f "$FILE_PATH" ] && command -v git &> /dev/null && git rev-parse --git-dir > /dev/null 2>&1; then
+  if git ls-files --error-unmatch "$FILE_PATH" &> /dev/null; then
+    CURRENT_SIZE=$(stat -f%z "$FILE_PATH" 2>/dev/null || stat -c%s "$FILE_PATH" 2>/dev/null || wc -c < "$FILE_PATH" || echo "0")
+    PREV_SIZE=$(git show HEAD:"$FILE_PATH" 2>/dev/null | wc -c | xargs || echo "0")
+    if [ "$PREV_SIZE" -gt 0 ]; then
+      SIZE_DIFF=$((CURRENT_SIZE - PREV_SIZE))
+      PERCENT_INCREASE=$((SIZE_DIFF * 100 / PREV_SIZE))
+      if [ "$PERCENT_INCREASE" -gt 100 ]; then
+        echo "Significant size increase detected: +$PERCENT_INCREASE% from previous version" >&2
+      fi
+    fi
+  fi
+fi
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ] || [ ! -f "$FILE_PATH" ]; then
+  exit 0
+fi
+SIZE_BYTES=$(stat -f%z "$FILE_PATH" 2>/dev/null || stat -c%s "$FILE_PATH" 2>/dev/null || wc -c < "$FILE_PATH" || echo "0")
+SIZE_KB=$((SIZE_BYTES / 1024))
+FILE_EXTENSION=$(echo "${FILE_PATH##*.}" | tr '[:upper:]' '[:lower:]')
+THRESHOLD_KB=500
+if [ "$FILE_EXTENSION" = "js" ] || [ "$FILE_EXTENSION" = "ts" ]; then
+  THRESHOLD_KB=500
+elif [ "$FILE_EXTENSION" = "json" ]; then
+  THRESHOLD_KB=1024
+elif [ "$FILE_EXTENSION" = "jpg" ] || [ "$FILE_EXTENSION" = "png" ]; then
+  THRESHOLD_KB=2048
+fi
+if [ "$SIZE_KB" -gt "$THRESHOLD_KB" ]; then
+  echo "SIZE WARNING: $FILE_PATH exceeds threshold ($SIZE_KB KB > $THRESHOLD_KB KB)" >&2
+fi
+exit 0
+```
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/file-size-warning-monitor.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -f "$FILE_PATH" ]; then
+  SIZE_BYTES=$(stat -f%z "$FILE_PATH" 2>/dev/null || stat -c%s "$FILE_PATH" 2>/dev/null || wc -c < "$FILE_PATH" || echo "0")
+  SIZE_MB=$((SIZE_BYTES / 1048576))
+  if [ "$SIZE_MB" -gt 10 ]; then
+    if command -v git &> /dev/null && git rev-parse --git-dir > /dev/null 2>&1; then
+      if git ls-files --error-unmatch "$FILE_PATH" &> /dev/null; then
+        echo "Consider using Git LFS for this large file ($SIZE_MB MB)" >&2
+        if [ -f ".gitattributes" ]; then
+          FILE_EXTENSION=$(echo "${FILE_PATH##*.}" | tr '[:upper:]' '[:lower:]')
+          if ! grep -q "*.$FILE_EXTENSION.*lfs" ".gitattributes" 2>/dev/null; then
+            echo "Add to .gitattributes: *.$FILE_EXTENSION filter=lfs diff=lfs merge=lfs -text" >&2
+          fi
+        fi
+      fi
+    fi
+  fi
+fi
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -f "$FILE_PATH" ]; then
+  FILE_EXTENSION=$(echo "${FILE_PATH##*.}" | tr '[:upper:]' '[:lower:]')
+  SIZE_BYTES=$(stat -f%z "$FILE_PATH" 2>/dev/null || stat -c%s "$FILE_PATH" 2>/dev/null || wc -c < "$FILE_PATH" || echo "0")
+  SIZE_KB=$((SIZE_BYTES / 1024))
+  case "$FILE_EXTENSION" in
+    jpg|jpeg|png|gif|webp)
+      if [ "$SIZE_KB" -gt 500 ]; then
+        echo "Image optimization: Large image detected ($SIZE_KB KB)" >&2
+        if command -v identify &> /dev/null; then
+          DIMENSIONS=$(identify -format '%wx%h' "$FILE_PATH" 2>/dev/null || echo "unknown")
+          echo "Dimensions: $DIMENSIONS" >&2
+        fi
+        echo "Consider: JPEG optimization, WebP format, or progressive JPEG" >&2
+      fi
+      ;;
+    js|jsx|ts|tsx)
+      if [ "$SIZE_KB" -gt 100 ]; then
+        echo "JavaScript bundle size: Consider code splitting for better performance" >&2
+      fi
+      ;;
+    json)
+      if [ "$SIZE_KB" -gt 500 ]; then
+        echo "Large JSON detected: Consider pagination or streaming for API responses" >&2
+      fi
+      ;;
+  esac
+fi
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -f "$FILE_PATH" ] && command -v git &> /dev/null && git rev-parse --git-dir > /dev/null 2>&1; then
+  if git ls-files --error-unmatch "$FILE_PATH" &> /dev/null; then
+    CURRENT_SIZE=$(stat -f%z "$FILE_PATH" 2>/dev/null || stat -c%s "$FILE_PATH" 2>/dev/null || wc -c < "$FILE_PATH" || echo "0")
+    PREV_SIZE=$(git show HEAD:"$FILE_PATH" 2>/dev/null | wc -c | xargs || echo "0")
+    if [ "$PREV_SIZE" -gt 0 ]; then
+      SIZE_DIFF=$((CURRENT_SIZE - PREV_SIZE))
+      PERCENT_INCREASE=$((SIZE_DIFF * 100 / PREV_SIZE))
+      if [ "$PERCENT_INCREASE" -gt 100 ]; then
+        echo "Significant size increase detected: +$PERCENT_INCREASE% from previous version" >&2
+      fi
+    fi
+  fi
+fi
+exit 0
+```
+
+## Troubleshooting
+### Hook triggers warnings for legitimate large binary files
+
+Create size threshold overrides in .claude/hook-config.json: THRESHOLD_OVERRIDES={'\*.wasm': 10485760}. Add file extension exclusions for known large asset types. Use environment variables to override thresholds: export THRESHOLD_OVERRIDE_wasm=10485760. Configure file type-specific thresholds based on project requirements.
+
+### File size calculation fails on Windows with stat errors
+
+Use PowerShell fallback for Windows: (Get-Item $FILE_PATH).Length. Add platform detection: if [[$OSTYPE == 'msys']], use alternative stat format or wc -c. Use cross-platform stat commands: stat -f%z for macOS, stat -c%s for Linux. Test file size detection on target platform before deployment.
+
+### Git size comparison shows incorrect previous version size
+
+Check if file is staged vs committed: use git show :"$FILE_PATH" for staged, git show HEAD:"$FILE_PATH" for committed. Handle new files with [ -z $PREV_SIZE ] check. Verify Git repository state before size comparison. Use git diff --cached for staged file size comparison.
+
+### Hook slows down every file write operation significantly
+
+Add file size pre-check before running full analysis: skip hook if size < 100KB. Use matcher filters: matchers: ['write'] only, exclude 'edit' for incremental changes. Set timeout limits for file size operations. Consider using file modification time checks to skip unchanged files.
+
+### Image dimension detection with identify command fails
+
+Check if ImageMagick installed: command -v identify || skip dimension check. Use alternative: file command for basic image info without requiring external dependencies. Verify ImageMagick version compatibility. Consider using exiftool or other image metadata tools as fallback.
+
+### File size thresholds don't account for project-specific requirements
+
+Use environment variables to override thresholds: export THRESHOLD_OVERRIDE_js=1000000. Create project-specific configuration file: .claude/file-size-thresholds.json. Configure file type-specific thresholds based on project needs. Use conditional logic to adjust thresholds based on project type.
+
+### Git LFS recommendation appears for files already in Git LFS
+
+Check .gitattributes for existing LFS configuration before recommending. Verify file is tracked by Git LFS: git lfs ls-files | grep "$FILE_PATH". Skip Git LFS recommendation if file extension is already configured in .gitattributes. Use git check-attr filter to verify LFS status.
+
+### Performance impact assessment doesn't account for file type context
+
+Use file type-specific impact assessment: source code files have different impact than media files. Consider file usage context: library files vs application files. Adjust impact levels based on file type and project requirements. Use project-specific impact assessment rules.

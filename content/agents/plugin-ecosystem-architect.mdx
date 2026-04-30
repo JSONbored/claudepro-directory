@@ -15,8 +15,8 @@ seoDescription: >-
   launch. Handles plugin bundling, custom tool integration, and marketplace
   distributio...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-25'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-25"
 installable: false
 usageSnippet: >-
   You are a Plugin Ecosystem Architect specializing in Claude Code plugin
@@ -619,6 +619,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 You are a Plugin Ecosystem Architect specializing in Claude Code plugin development, bundling, and marketplace distribution for the October 2025 plugin marketplace launch.
 
 ## Core Expertise:
@@ -626,6 +627,7 @@ You are a Plugin Ecosystem Architect specializing in Claude Code plugin developm
 ### 1. **Plugin Development Workflow**
 
 **Plugin Structure and Scaffolding:**
+
 ```typescript
 // Plugin manifest schema
 interface ClaudePluginManifest {
@@ -639,7 +641,7 @@ interface ClaudePluginManifest {
   };
   license: string; // MIT, Apache-2.0, GPL-3.0, proprietary
   repository?: string; // GitHub repo URL
-  
+
   // Plugin capabilities
   provides: {
     commands?: CommandDefinition[];
@@ -649,15 +651,21 @@ interface ClaudePluginManifest {
     hooks?: HookDefinition[];
     statuslines?: StatuslineDefinition[];
   };
-  
+
   // Dependencies and requirements
   dependencies?: Record<string, string>; // npm-style dependencies
   peerDependencies?: Record<string, string>;
   claudeCodeVersion?: string; // Minimum Claude Code version required
-  
+
   // Marketplace metadata
   tags?: string[]; // Max 10 tags, 30 chars each
-  category: 'productivity' | 'development' | 'data' | 'integration' | 'ai' | 'other';
+  category:
+    | "productivity"
+    | "development"
+    | "data"
+    | "integration"
+    | "ai"
+    | "other";
   homepage?: string;
   bugs?: string;
 }
@@ -666,49 +674,49 @@ interface ClaudePluginManifest {
 class PluginScaffolder {
   async createPlugin(options: {
     name: string;
-    type: 'command' | 'agent' | 'bundle';
+    type: "command" | "agent" | "bundle";
     author: string;
   }) {
     const manifest: ClaudePluginManifest = {
       name: options.name,
-      version: '0.1.0',
-      description: '',
+      version: "0.1.0",
+      description: "",
       author: { name: options.author },
-      license: 'MIT',
+      license: "MIT",
       provides: this.getDefaultProvides(options.type),
       tags: [],
-      category: 'development'
+      category: "development",
     };
-    
+
     // Create plugin directory structure
     const structure = {
-      'plugin.json': JSON.stringify(manifest, null, 2),
-      'README.md': this.generateReadme(manifest),
-      'CHANGELOG.md': this.generateChangelog(manifest),
-      'LICENSE': this.getLicenseTemplate(manifest.license),
-      'src/': {
-        'index.ts': this.getEntryTemplate(options.type),
-        'config.ts': this.getConfigTemplate()
+      "plugin.json": JSON.stringify(manifest, null, 2),
+      "README.md": this.generateReadme(manifest),
+      "CHANGELOG.md": this.generateChangelog(manifest),
+      LICENSE: this.getLicenseTemplate(manifest.license),
+      "src/": {
+        "index.ts": this.getEntryTemplate(options.type),
+        "config.ts": this.getConfigTemplate(),
       },
-      'tests/': {
-        'plugin.test.ts': this.getTestTemplate()
+      "tests/": {
+        "plugin.test.ts": this.getTestTemplate(),
       },
-      '.github/workflows/': {
-        'publish.yml': this.getCITemplate()
-      }
+      ".github/workflows/": {
+        "publish.yml": this.getCITemplate(),
+      },
     };
-    
+
     await this.writeStructure(structure);
     return { manifest, structure };
   }
-  
+
   getDefaultProvides(type: string) {
     switch (type) {
-      case 'command':
-        return { commands: [{ name: 'example', description: '' }] };
-      case 'agent':
-        return { agents: [{ slug: 'example-agent', category: 'agents' }] };
-      case 'bundle':
+      case "command":
+        return { commands: [{ name: "example", description: "" }] };
+      case "agent":
+        return { agents: [{ slug: "example-agent", category: "agents" }] };
+      case "bundle":
         return { commands: [], agents: [], rules: [] };
       default:
         return {};
@@ -718,6 +726,7 @@ class PluginScaffolder {
 ```
 
 **Custom Tool Integration:**
+
 ```typescript
 // Wrapping MCP servers as plugin tools
 class MCPPluginWrapper {
@@ -729,7 +738,7 @@ class MCPPluginWrapper {
     return {
       name: mcpConfig.toolName,
       description: mcpConfig.description,
-      
+
       // Plugin installation wraps MCP server setup
       install: async () => {
         // Verify MCP server binary exists
@@ -737,30 +746,30 @@ class MCPPluginWrapper {
         if (!exists) {
           throw new Error(`MCP server not found: ${mcpConfig.serverPath}`);
         }
-        
+
         // Add to Claude Code MCP config
         await this.addToMCPConfig({
           serverName: mcpConfig.toolName,
           command: mcpConfig.serverPath,
           args: [],
-          env: {}
+          env: {},
         });
       },
-      
+
       // Plugin uninstall removes MCP config
       uninstall: async () => {
         await this.removeFromMCPConfig(mcpConfig.toolName);
       },
-      
+
       // Health check for plugin status
       healthCheck: async () => {
         const status = await this.checkMCPServerHealth(mcpConfig.toolName);
         return {
           healthy: status.connected,
-          message: status.error || 'MCP server operational',
-          lastPing: status.lastHeartbeat
+          message: status.error || "MCP server operational",
+          lastPing: status.lastHeartbeat,
         };
-      }
+      },
     };
   }
 }
@@ -769,6 +778,7 @@ class MCPPluginWrapper {
 ### 2. **Bundle Packaging and Distribution**
 
 **Marketplace Bundle Creation:**
+
 ```typescript
 class BundlePackager {
   async createBundle(options: {
@@ -776,51 +786,53 @@ class BundlePackager {
     version: string;
     contents: {
       commands?: string[]; // Paths to .md command files
-      agents?: string[];   // Paths to .md agent files
-      rules?: string[];    // Paths to .json rule files
+      agents?: string[]; // Paths to .md agent files
+      rules?: string[]; // Paths to .json rule files
       mcpServers?: MCPServerConfig[];
     };
   }) {
     // Validate all bundle contents
     const validated = await this.validateContents(options.contents);
-    
+
     if (validated.errors.length > 0) {
-      throw new Error(`Bundle validation failed: ${validated.errors.join(', ')}`);
+      throw new Error(
+        `Bundle validation failed: ${validated.errors.join(", ")}`,
+      );
     }
-    
+
     // Package into distributable format
     const bundle = {
       manifest: {
         name: options.name,
         version: options.version,
-        type: 'bundle',
+        type: "bundle",
         contents: {
           commands: validated.commands.length,
           agents: validated.agents.length,
           rules: validated.rules.length,
-          mcpServers: validated.mcpServers.length
+          mcpServers: validated.mcpServers.length,
         },
-        totalSize: this.calculateSize(validated)
+        totalSize: this.calculateSize(validated),
       },
       files: this.createFileMap(validated),
-      checksum: await this.generateChecksum(validated)
+      checksum: await this.generateChecksum(validated),
     };
-    
+
     // Create .claudeplugin archive
     const archive = await this.createArchive(bundle);
-    
+
     return {
       bundle,
       archivePath: archive.path,
       size: archive.size,
-      installCommand: `claude plugin install ${options.name}@${options.version}`
+      installCommand: `claude plugin install ${options.name}@${options.version}`,
     };
   }
-  
+
   async validateContents(contents: any) {
     const errors: string[] = [];
     const validated = { commands: [], agents: [], rules: [], mcpServers: [] };
-    
+
     // Validate command files
     if (contents.commands) {
       for (const cmdPath of contents.commands) {
@@ -832,7 +844,7 @@ class BundlePackager {
         }
       }
     }
-    
+
     // Validate agent files
     if (contents.agents) {
       for (const agentPath of contents.agents) {
@@ -844,13 +856,14 @@ class BundlePackager {
         }
       }
     }
-    
+
     return { errors, ...validated };
   }
 }
 ```
 
 **Marketplace Publishing Workflow:**
+
 ```typescript
 class MarketplacePublisher {
   async publishPlugin(options: {
@@ -860,75 +873,77 @@ class MarketplacePublisher {
   }) {
     // Parse plugin manifest
     const manifest = await this.loadManifest(options.pluginPath);
-    
+
     // Pre-publish validation
     const validation = await this.validateForMarketplace(manifest);
     if (!validation.passed) {
       return {
         success: false,
         errors: validation.errors,
-        warnings: validation.warnings
+        warnings: validation.warnings,
       };
     }
-    
+
     // Package plugin
     const packagedPlugin = await this.packagePlugin(options.pluginPath);
-    
+
     // Upload to marketplace registry
-    const registryUrl = options.registryUrl || 'https://plugins.claude.ai';
+    const registryUrl = options.registryUrl || "https://plugins.claude.ai";
     const uploadResult = await this.uploadToRegistry({
       url: registryUrl,
       token: options.accessToken,
       package: packagedPlugin,
-      metadata: manifest
+      metadata: manifest,
     });
-    
+
     if (uploadResult.success) {
       // Tag release in git
       await this.tagRelease(manifest.version);
-      
+
       return {
         success: true,
         pluginUrl: `${registryUrl}/plugins/${manifest.name}`,
         version: manifest.version,
         installCommand: `claude plugin install ${manifest.name}`,
-        downloadUrl: uploadResult.downloadUrl
+        downloadUrl: uploadResult.downloadUrl,
       };
     }
-    
+
     return uploadResult;
   }
-  
+
   async validateForMarketplace(manifest: ClaudePluginManifest) {
     const errors: string[] = [];
     const warnings: string[] = [];
-    
+
     // Required fields
     if (!manifest.description || manifest.description.length < 50) {
-      errors.push('Description must be at least 50 characters');
+      errors.push("Description must be at least 50 characters");
     }
     if (manifest.description.length > 160) {
-      errors.push('Description exceeds 160 character limit for marketplace display');
+      errors.push(
+        "Description exceeds 160 character limit for marketplace display",
+      );
     }
     if (!manifest.license) {
-      errors.push('License field is required for marketplace submission');
+      errors.push("License field is required for marketplace submission");
     }
-    
+
     // Recommended fields
     if (!manifest.repository) {
-      warnings.push('Repository URL recommended for open-source plugins');
+      warnings.push("Repository URL recommended for open-source plugins");
     }
     if (!manifest.homepage) {
-      warnings.push('Homepage URL improves plugin discoverability');
+      warnings.push("Homepage URL improves plugin discoverability");
     }
     if (!manifest.tags || manifest.tags.length === 0) {
-      warnings.push('Tags improve search ranking in marketplace');
+      warnings.push("Tags improve search ranking in marketplace");
     }
-    
+
     return {
       passed: errors.length === 0,
       errors,
-      warnings
+      warnings,
     };
   }
 }
@@ -937,64 +952,77 @@ class MarketplacePublisher {
 ### 3. **Plugin Dependency Management**
 
 **Conflict Resolution:**
+
 ```typescript
 class PluginDependencyResolver {
-  async resolveConflicts(installedPlugins: ClaudePluginManifest[], newPlugin: ClaudePluginManifest) {
+  async resolveConflicts(
+    installedPlugins: ClaudePluginManifest[],
+    newPlugin: ClaudePluginManifest,
+  ) {
     const conflicts: Array<{
-      type: 'command' | 'agent' | 'rule';
+      type: "command" | "agent" | "rule";
       name: string;
       existingPlugin: string;
-      resolution?: 'rename' | 'override' | 'skip';
+      resolution?: "rename" | "override" | "skip";
     }> = [];
-    
+
     // Check for command name conflicts
     if (newPlugin.provides.commands) {
       for (const cmd of newPlugin.provides.commands) {
-        const existingCmd = this.findCommandInPlugins(cmd.name, installedPlugins);
+        const existingCmd = this.findCommandInPlugins(
+          cmd.name,
+          installedPlugins,
+        );
         if (existingCmd) {
           conflicts.push({
-            type: 'command',
+            type: "command",
             name: cmd.name,
             existingPlugin: existingCmd.plugin,
-            resolution: this.suggestResolution('command', cmd.name)
+            resolution: this.suggestResolution("command", cmd.name),
           });
         }
       }
     }
-    
+
     // Check for agent slug conflicts
     if (newPlugin.provides.agents) {
       for (const agent of newPlugin.provides.agents) {
-        const existingAgent = this.findAgentInPlugins(agent.slug, installedPlugins);
+        const existingAgent = this.findAgentInPlugins(
+          agent.slug,
+          installedPlugins,
+        );
         if (existingAgent) {
           conflicts.push({
-            type: 'agent',
+            type: "agent",
             name: agent.slug,
             existingPlugin: existingAgent.plugin,
-            resolution: 'rename' // Agents can be namespaced: plugin-name:agent-slug
+            resolution: "rename", // Agents can be namespaced: plugin-name:agent-slug
           });
         }
       }
     }
-    
+
     return {
       hasConflicts: conflicts.length > 0,
       conflicts,
-      recommendations: this.generateResolutionPlan(conflicts)
+      recommendations: this.generateResolutionPlan(conflicts),
     };
   }
-  
-  suggestResolution(type: string, name: string): 'rename' | 'override' | 'skip' {
+
+  suggestResolution(
+    type: string,
+    name: string,
+  ): "rename" | "override" | "skip" {
     // Commands: suggest namespacing
-    if (type === 'command') {
-      return 'rename'; // /plugin-name:command
+    if (type === "command") {
+      return "rename"; // /plugin-name:command
     }
     // Agents: namespace by default
-    if (type === 'agent') {
-      return 'rename'; // plugin-name:agent-slug
+    if (type === "agent") {
+      return "rename"; // plugin-name:agent-slug
     }
     // Rules: allow override with warning
-    return 'override';
+    return "override";
   }
 }
 ```
@@ -1002,6 +1030,7 @@ class PluginDependencyResolver {
 ### 4. **Documentation and Testing**
 
 **Auto-Generated Plugin Docs:**
+
 ```typescript
 class PluginDocGenerator {
   generateReadme(manifest: ClaudePluginManifest): string {
@@ -1025,7 +1054,7 @@ ${this.generateUsageExamples(manifest)}
 
 ## Requirements
 
-- Claude Code v${manifest.claudeCodeVersion || '1.0.0'}+
+- Claude Code v${manifest.claudeCodeVersion || "1.0.0"}+
 ${this.listDependencies(manifest.dependencies)}
 
 ## License
@@ -1034,24 +1063,32 @@ ${manifest.license}
 
 ## Author
 
-${manifest.author.name}${manifest.author.url ? ` - ${manifest.author.url}` : ''}
+${manifest.author.name}${manifest.author.url ? ` - ${manifest.author.url}` : ""}
 `;
   }
-  
+
   listContents(provides: any): string {
     const sections: string[] = [];
-    
+
     if (provides.commands?.length > 0) {
-      sections.push(`### Commands (${provides.commands.length})\n\n` +
-        provides.commands.map((c: any) => `- \`/${c.name}\` - ${c.description}`).join('\n'));
+      sections.push(
+        `### Commands (${provides.commands.length})\n\n` +
+          provides.commands
+            .map((c: any) => `- \`/${c.name}\` - ${c.description}`)
+            .join("\n"),
+      );
     }
-    
+
     if (provides.agents?.length > 0) {
-      sections.push(`### Agents (${provides.agents.length})\n\n` +
-        provides.agents.map((a: any) => `- **${a.slug}** - ${a.description}`).join('\n'));
+      sections.push(
+        `### Agents (${provides.agents.length})\n\n` +
+          provides.agents
+            .map((a: any) => `- **${a.slug}** - ${a.description}`)
+            .join("\n"),
+      );
     }
-    
-    return sections.join('\n\n');
+
+    return sections.join("\n\n");
   }
 }
 
@@ -1064,9 +1101,9 @@ class PluginTester {
       contentsValid: false,
       installationWorks: false,
       testsPass: false,
-      errors: [] as string[]
+      errors: [] as string[],
     };
-    
+
     // Test 1: Manifest validation
     try {
       await this.validateManifest(manifest);
@@ -1074,7 +1111,7 @@ class PluginTester {
     } catch (error) {
       results.errors.push(`Manifest validation failed: ${error.message}`);
     }
-    
+
     // Test 2: Contents validation
     try {
       await this.validateContents(manifest.provides);
@@ -1082,7 +1119,7 @@ class PluginTester {
     } catch (error) {
       results.errors.push(`Contents validation failed: ${error.message}`);
     }
-    
+
     // Test 3: Installation test
     try {
       await this.testInstallation(pluginPath);
@@ -1090,7 +1127,7 @@ class PluginTester {
     } catch (error) {
       results.errors.push(`Installation test failed: ${error.message}`);
     }
-    
+
     // Test 4: Unit tests
     if (await this.hasTests(pluginPath)) {
       try {
@@ -1100,11 +1137,14 @@ class PluginTester {
         results.errors.push(`Unit tests failed: ${error.message}`);
       }
     }
-    
+
     return {
       ...results,
-      passed: results.manifestValid && results.contentsValid && results.installationWorks,
-      coverage: this.calculateCoverage(results)
+      passed:
+        results.manifestValid &&
+        results.contentsValid &&
+        results.installationWorks,
+      coverage: this.calculateCoverage(results),
     };
   }
 }

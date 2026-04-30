@@ -13,9 +13,9 @@ seoDescription: >-
   Multi-provider AI token counter displaying real-time context usage for Claude
   (1M), GPT-4.1 (1M), Gemini 2.x (1M), and Grok 3 (1M) with 2025 verified limits
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-16'
-documentationUrl: 'https://docs.anthropic.com/claude/docs/models-overview'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-16"
+documentationUrl: "https://docs.anthropic.com/claude/docs/models-overview"
 installable: true
 usageSnippet: "\U0001F52E Claude │ 456,789/1,000,000 (45.7%)"
 copySnippet: |-
@@ -79,6 +79,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Features
 
 - Automatic provider detection (Claude, GPT-4, Gemini, Grok)
@@ -102,7 +103,7 @@ robotsFollow: true
 ## Requirements
 
 - Claude Code CLI installed and configured
-- Bash shell available (bash 4.0+ recommended for pattern matching with [[ ]] and string manipulation)
+- Bash shell available (bash 4.0+ recommended for pattern matching with [[]] and string manipulation)
 - jq command-line JSON processor (jq 1.6+ recommended for safe extraction with // defaults)
 - awk command (for percentage calculation with floating point precision)
 - bc calculator (optional, for precise floating point comparison - script has integer fallback)
@@ -121,8 +122,11 @@ robotsFollow: true
 ```
 
 ## Examples
+
 ### Enhanced Multi-Provider Token Counter with Input/Output Split
+
 Extended version tracking input and output tokens separately
+
 ```bash
 #!/usr/bin/env bash
 
@@ -215,8 +219,11 @@ RESET="\033[0m"
 
 echo -e "${icon} ${provider} │ ${color}${tokens_formatted}${RESET}/${limit_formatted} (${percentage}%) │ In:${input_formatted} Out:${output_formatted}"
 ```
+
 ### Multi-Provider Token Counter with Custom Limits
+
 Version with configurable context limits via environment variables
+
 ```bash
 #!/usr/bin/env bash
 
@@ -297,8 +304,11 @@ RESET="\033[0m"
 
 echo -e "${icon} ${provider} │ ${color}${tokens_formatted}${RESET}/${limit_formatted} (${percentage}%)"
 ```
+
 ### Multi-Provider Token Counter Installation Example
+
 Complete setup script with provider detection testing and bc calculator verification
+
 ```bash
 #!/bin/bash
 # Installation script for Multi-Provider Token Counter
@@ -456,27 +466,35 @@ echo "Test with: echo -e '🔮 🤖 💎 ⚡ ❓'"
 ```
 
 ## Troubleshooting
+
 ### Percentage shows >100% or incorrect limit
 
-Update model detection logic with latest model names. Check Claude docs for current model IDs. Verify model field: echo '$input' | jq .model.id. Test pattern matching: [[ "$model" == *"claude"* ]] && echo "Matched". Update limit values for new model versions. Check if tokens exceed limit (may indicate incorrect limit or token counting issue).
+Update model detection logic with latest model names. Check Claude docs for current model IDs. Verify model field: echo '$input' | jq .model.id. Test pattern matching: [[ "$model" == _"claude"_ ]] && echo "Matched". Update limit values for new model versions. Check if tokens exceed limit (may indicate incorrect limit or token counting issue).
+
 ### Icons showing as boxes or question marks
 
 Install Nerd Font or emoji-capable font. Test with: echo '🔮 🤖 💎 ⚡ ❓'. Verify terminal encoding: locale charmap (should be UTF-8). Set encoding: export LANG=en_US.UTF-8. Check font configuration in terminal settings. If not supported, modify script to use ASCII alternatives: icon="[C]" for Claude, "[G]" for GPT, etc.
+
 ### Colors not working or showing as escape codes
 
 Ensure TERM environment variable supports colors: echo $TERM (should show 'xterm-256color' or similar). Set if needed: export TERM=xterm-256color. Test colors: echo -e '\033[32mGreen\033[0m' (should show green text). Check 256-color mode: tput colors (should be >= 256). Verify ANSI escape sequences are supported by terminal.
+
 ### Model detection fails for new AI models or versions
 
-Add patterns to detection logic. Common patterns: claude-* (Opus/Sonnet/Haiku), gpt-* (4o/4.1/o3), gemini-* (2.0/2.5-pro), grok-* (3/4). Update with: [[ "$model" == *"pattern"* ]]. Check model name format: echo '$input' | jq .model.id. Test pattern matching: [[ "test-claude-sonnet-4" == *"claude"* ]] && echo "Matched". Add new model variants to appropriate provider block.
+Add patterns to detection logic. Common patterns: claude-_ (Opus/Sonnet/Haiku), gpt-_ (4o/4.1/o3), gemini-_ (2.0/2.5-pro), grok-_ (3/4). Update with: [["$model" == *"pattern"*]]. Check model name format: echo '$input' | jq .model.id. Test pattern matching: [["test-claude-sonnet-4" == *"claude"*]] && echo "Matched". Add new model variants to appropriate provider block.
+
 ### Percentage calculation precision too low or rounded values
 
-Increase awk precision for decimals. Current: awk 'BEGIN {printf "%.1f", ...}' (1 decimal). Use: awk 'BEGIN {printf "%.2f", ($tokens / $limit) * 100}' for two decimals. Higher precision: awk 'BEGIN {printf "%.3f", ...}' (3 decimals). Note: Higher precision may slow execution. Verify calculation: echo '456789 1000000' | awk 'BEGIN {printf "%.1f", (456789 / 1000000) * 100}' (should return 45.7).
+Increase awk precision for decimals. Current: awk 'BEGIN {printf "%.1f", ...}' (1 decimal). Use: awk 'BEGIN {printf "%.2f", ($tokens / $limit) _ 100}' for two decimals. Higher precision: awk 'BEGIN {printf "%.3f", ...}' (3 decimals). Note: Higher precision may slow execution. Verify calculation: echo '456789 1000000' | awk 'BEGIN {printf "%.1f", (456789 / 1000000) _ 100}' (should return 45.7).
+
 ### Token count showing as 0 or incorrect values
 
 Check JSON field names: echo '$input' | jq .cost.total_lines_added (tokens). Verify jq extraction: echo '$input' | jq -r '.cost.total_lines_added // 0'. Check if field exists: echo '$input' | jq 'has("cost")'. Verify token counting: Some Claude Code versions may use different field names (e.g., 'total_tokens', 'input_tokens', 'output_tokens'). Update script to check multiple field names.
+
 ### bc command not found or floating point comparison fails
 
-Install bc calculator: macOS (brew install bc), Linux (sudo apt-get install bc or sudo yum install bc). Verify installation: command -v bc (should return /usr/bin/bc or similar). Test bc: echo '45.7 < 50' | bc -l (should return 1 for true). If bc unavailable, script uses integer comparison fallback. Verify fallback works: percentage_int=${percentage%.*} (extracts integer part).
+Install bc calculator: macOS (brew install bc), Linux (sudo apt-get install bc or sudo yum install bc). Verify installation: command -v bc (should return /usr/bin/bc or similar). Test bc: echo '45.7 < 50' | bc -l (should return 1 for true). If bc unavailable, script uses integer comparison fallback. Verify fallback works: percentage_int=${percentage%.\*} (extracts integer part).
+
 ### Thousands separator not displaying in token counts
 
 Verify printf supports thousands separator: printf "%'d" 12345 (should return 12,345). Check locale settings: locale (should include thousands separator). Set locale if needed: export LC_NUMERIC=en_US.UTF-8. Test formatting: printf "%'d" 1234567 (should return 1,234,567). If not supported, script falls back to plain numbers. Alternative: Use awk for formatting: awk '{printf "%'"'"'d", $1}' <<< 12345.

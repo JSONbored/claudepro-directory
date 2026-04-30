@@ -1,0 +1,47 @@
+# ContrastAPI Security Tools
+URL: https://heyclau.de/mcp/contrastapi-mcp-server
+Category: mcp
+Author: UPinar
+Date added: 2026-04-20
+Documentation: https://api.contrastcyber.com
+Repository: https://github.com/UPinar/contrastapi
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/contrastapi-mcp-server.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/mcp/contrastapi-mcp-server
+- Source URLs: https://api.contrastcyber.com, https://github.com/UPinar/contrastapi, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/contrastapi-mcp-server.mdx
+- Brand: ContrastAPI
+- Brand domain: contrastcyber.com
+- Brand asset source: brandfetch
+- Author: UPinar
+- Last verified: 2026-04-30T04:13:44-06:00
+- Robots: indexable
+## Summary
+41 security intelligence tools over remote MCP: CVE, KEV, CWE, EPSS, domain audit, IP threat reports, IOC enrichment, dependency scanning, MITRE ATLAS AI/ML attacks, and MITRE D3FEND defenses. Free tier: 100 credits/hour, no API key required. Streamable-HTTP transport.
+## Tags
+- security
+- mcp-server
+- cve
+- kev
+- cwe
+- osint
+- threat-intelligence
+- ip-reputation
+- domain-audit
+- dependency-scanner
+- mitre-atlas
+- d3fend
+## Content
+## Overview
+41 security intelligence tools over remote MCP: CVE, KEV, CWE, EPSS, domain audit, IP threat reports, IOC enrichment, dependency scanning, MITRE ATLAS AI/ML attack knowledge, and MITRE D3FEND defensive techniques. Free tier: 100 credits/hour, no API key required. Streamable-HTTP transport.
+
+## Usage
+claude mcp add --transport http contrastapi https://api.contrastcyber.com/mcp/
+claude mcp list
+
+## Auth Requirements
+None required for free tier (100 credits/hour per IP). Optional X-API-Key header for Pro tier (1000/hr). See https://api.contrastcyber.com/pricing
+
+## Verification
+1. `claude mcp list` shows contrastapi as connected
+2. Ask Claude: "Look up CVE-2021-44228 with EPSS and KEV data"
+3. Response includes verdict.completeness=full with real CVSS + EPSS percentile (~94%) + KEV listing date

@@ -1,0 +1,28 @@
+# CrewAI
+URL: https://heyclau.de/tools/crewai
+Category: tools
+Author: CrewAI
+Date added: 2026-04-27
+Documentation: https://docs.crewai.com
+Repository: https://github.com/crewAIInc/crewAI
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/crewai.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/tools/crewai
+- Source URLs: https://docs.crewai.com, https://github.com/crewAIInc/crewAI, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/crewai.mdx, https://www.crewai.com
+- Brand: CrewAI
+- Brand domain: crewai.com
+- Brand asset source: brandfetch
+- Author: CrewAI
+- Last verified: 2026-04-26T23:21:14-06:00
+- Robots: indexable
+## Summary
+Framework and platform for building multi-agent workflows, role-based agents, process automation, and AI crews.
+## Tags
+- agent-framework
+- multi-agent
+## Content
+## Editorial notes
+CrewAI is relevant for users exploring role-based multi-agent systems and process automation patterns.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

@@ -1,0 +1,14 @@
+---
+description: "Opinionated Docker Compose patterns for reliable production deployments and maintainable operations."
+globs:
+alwaysApply: false
+---
+# Docker Compose Production Blueprints Skill
+Create production-grade Docker Compose stacks with healthchecks, secrets handling, network isolation, and safe rollout patterns.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/docker-compose-production-blueprints.zip -o docker-compose-production-blueprints.zip && unzip -o docker-compose-production-blueprints.zip -d ./docker-compose-production-blueprints
+```
+## Source
+https://heyclau.de/downloads/skills/docker-compose-production-blueprints.zip

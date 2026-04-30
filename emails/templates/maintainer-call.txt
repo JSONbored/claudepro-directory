@@ -1,0 +1,11 @@
+HeyClaude maintainer call: {{QUEUE_THEME}}
+
+{{REVIEW_ASK}}
+
+{{QUEUE_SUMMARY}}
+{{QUEUE_URL}}
+
+{{REVIEW_NOTES}}
+
+You are receiving this because you subscribed to HeyClaude.
+{{RESEND_UNSUBSCRIBE}}

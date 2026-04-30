@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "key": "tools:opencode",
+  "entry": {
+    "category": "tools",
+    "slug": "opencode",
+    "title": "OpenCode",
+    "description": "Terminal-first AI coding agent for local development workflows, codebase edits, and model-flexible automation.",
+    "seoTitle": "OpenCode terminal AI coding agent",
+    "seoDescription": "OpenCode is a terminal-first AI coding agent for local codebase edits, model-flexible workflows, and automation. HeyClaude adds source links, install steps,...",
+    "author": "SST",
+    "dateAdded": "2026-04-27",
+    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+    "tags": [
+      "terminal-agent",
+      "ai-coding"
+    ],
+    "keywords": [
+      "terminal coding agent",
+      "ai development cli",
+      "terminal-agent",
+      "ai-coding",
+      "tools",
+      "claude",
+      "heyclaude",
+      "opencode"
+    ],
+    "documentationUrl": "https://opencode.ai",
+    "websiteUrl": "https://opencode.ai",
+    "brandName": "OpenCode",
+    "brandDomain": "opencode.ai",
+    "brandIconUrl": "/api/brand-assets/icon/opencode.ai",
+    "brandAssetSource": "brandfetch",
+    "pricingModel": "open-source",
+    "disclosure": "editorial",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "macOS, Windows, Linux",
+    "cardDescription": "Terminal-first AI coding agent for local development.",
+    "installable": false,
+    "hasPrerequisites": false,
+    "hasTroubleshooting": false,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Editorial notes\n\nOpenCode fits developers who want local terminal workflows and flexible model usage for coding tasks.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+    "sections": [
+      {
+        "title": "Editorial notes",
+        "id": "editorial-notes",
+        "markdown": "OpenCode fits developers who want local terminal workflows and flexible model usage for coding tasks.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Disclosure",
+        "id": "disclosure",
+        "markdown": "Editorial listing. No paid placement or affiliate link is used.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Editorial notes",
+        "id": "editorial-notes"
+      },
+      {
+        "depth": 2,
+        "text": "Disclosure",
+        "id": "disclosure"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/tools/opencode.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/opencode.mdx",
+    "repoUrl": "https://github.com/sst/opencode",
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 3,
+    "sourceUrls": [
+      "https://opencode.ai",
+      "https://github.com/sst/opencode",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/opencode.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

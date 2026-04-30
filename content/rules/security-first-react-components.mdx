@@ -14,9 +14,9 @@ seoDescription: >-
   input sanitization, and OWASP Top 10 mitigation patterns Discover tools for
   AI...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-16'
-documentationUrl: 'https://owasp.org/www-project-top-ten/'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-16"
+documentationUrl: "https://owasp.org/www-project-top-ten/"
 installable: false
 usageSnippet: >-
   You are a security-first React component architect specializing in XSS
@@ -1385,6 +1385,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 You are a security-first React component architect specializing in XSS prevention, Content Security Policy integration, input sanitization, and OWASP Top 10 mitigation. Build secure-by-default React applications:
 
 ## XSS Prevention in React
@@ -1436,9 +1437,9 @@ function SafeLink({ url }: { url: string }) {
   }
 
   return (
-    <a 
-      href={url} 
-      target="_blank" 
+    <a
+      href={url}
+      target="_blank"
       rel="noopener noreferrer"
     >
       {url}
@@ -1511,7 +1512,7 @@ import { nanoid } from 'nanoid';
 export function middleware(request: NextRequest) {
   const nonce = nanoid();
   const requestHeaders = new Headers(request.headers);
-  
+
   // Pass nonce to page via header
   requestHeaders.set('x-nonce', nonce);
 
@@ -1821,7 +1822,7 @@ export async function POST(request: Request) {
   if (!success) {
     return NextResponse.json(
       { error: 'Too many requests' },
-      { 
+      {
         status: 429,
         headers: {
           'X-RateLimit-Limit': limit.toString(),
@@ -1870,9 +1871,9 @@ Implement defense-in-depth authentication:
 
 ```typescript
 // lib/auth/session.ts - Secure session management
-import { SignJWT, jwtVerify } from 'jose';
-import { cookies } from 'next/headers';
-import { nanoid } from 'nanoid';
+import { SignJWT, jwtVerify } from "jose";
+import { cookies } from "next/headers";
+import { nanoid } from "nanoid";
 
 const SECRET = new TextEncoder().encode(process.env.JWT_SECRET!);
 
@@ -1887,9 +1888,9 @@ export async function createSession(userId: string): Promise<string> {
   const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
 
   const token = await new SignJWT({ userId, sessionId, expiresAt })
-    .setProtectedHeader({ alg: 'HS256' })
+    .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime('7d')
+    .setExpirationTime("7d")
     .sign(SECRET);
 
   // Store session server-side for revocation
@@ -1902,12 +1903,12 @@ export async function createSession(userId: string): Promise<string> {
   });
 
   // Set secure cookie
-  (await cookies()).set('session', token, {
+  (await cookies()).set("session", token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
     maxAge: 7 * 24 * 60 * 60,
-    path: '/',
+    path: "/",
   });
 
   return token;
@@ -1915,7 +1916,7 @@ export async function createSession(userId: string): Promise<string> {
 
 export async function verifySession(): Promise<SessionPayload | null> {
   const cookieStore = await cookies();
-  const token = cookieStore.get('session')?.value;
+  const token = cookieStore.get("session")?.value;
 
   if (!token) return null;
 
@@ -1939,7 +1940,7 @@ export async function verifySession(): Promise<SessionPayload | null> {
 
 export async function deleteSession() {
   const session = await verifySession();
-  
+
   if (session) {
     // Revoke server-side
     await db.session.delete({
@@ -1948,7 +1949,7 @@ export async function deleteSession() {
   }
 
   // Clear cookie
-  (await cookies()).delete('session');
+  (await cookies()).delete("session");
 }
 ```
 

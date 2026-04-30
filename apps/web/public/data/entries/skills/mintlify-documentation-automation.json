@@ -1,0 +1,358 @@
+{
+  "schemaVersion": 1,
+  "key": "skills:mintlify-documentation-automation",
+  "entry": {
+    "category": "skills",
+    "slug": "mintlify-documentation-automation",
+    "title": "Mintlify AI Documentation Automation Skill",
+    "description": "Automate beautiful, searchable documentation creation with Mintlify - the modern AI-native documentation platform.",
+    "seoTitle": "Mintlify AI Documentation Automation Skill",
+    "seoDescription": "Automate beautiful, searchable documentation creation with Mintlify - the modern AI-native documentation platform. Generate comprehensive API reference docum...",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2025-10-16",
+    "contentUpdatedAt": "2026-04-27T02:57:15-06:00",
+    "tags": [
+      "mintlify",
+      "documentation",
+      "mdx",
+      "api-docs",
+      "automation"
+    ],
+    "keywords": [
+      "api-docs",
+      "automation",
+      "claude",
+      "development",
+      "documentation",
+      "mdx",
+      "mintlify",
+      "skills",
+      "tools",
+      "heyclaude",
+      "mintlify ai documentation automation skill"
+    ],
+    "readingTime": 6,
+    "difficultyScore": 100,
+    "documentationUrl": "https://mintlify.com/docs",
+    "cardDescription": "Automate beautiful, searchable documentation creation with Mintlify - the modern AI-native documentation platform.",
+    "installable": true,
+    "installCommand": "npm install -g mintlify",
+    "usageSnippet": "npm install -g mintlify",
+    "copySnippet": "---\ntitle: Get User\ndescription: Retrieve a user by their unique identifier\napi: GET /api/users/{userId}\n---\n\n# Get User\n\nRetrieves a user by their unique identifier.\n\n## Path Parameters\n\n<ParamField path=\"userId\" type=\"string\" required>\n  The user's unique identifier\n</ParamField>\n\n## Response\n\n<ResponseField name=\"id\" type=\"string\" required>\n  Unique user identifier\n</ResponseField>\n\n<ResponseField name=\"email\" type=\"string\" required>\n  User's email address\n</ResponseField>\n\n## Code Examples\n\n<CodeGroup>\n\n```typescript TypeScript SDK\nimport { getUser } from '@yourapp/sdk';\nconst user = await getUser('user_123');\n```\n\n```python Python\nimport requests\nresponse = requests.get('https://api.yourapp.com/users/user_123')\n```\n\n</CodeGroup>",
+    "skillType": "general",
+    "skillLevel": "advanced",
+    "verificationStatus": "draft",
+    "verifiedAt": "2025-10-16",
+    "retrievalSources": [
+      "https://mintlify.com/docs"
+    ],
+    "testedPlatforms": [
+      "Claude",
+      "Codex",
+      "OpenClaw",
+      "Cursor",
+      "Windsurf",
+      "Gemini"
+    ],
+    "prerequisites": [
+      "Node.js 18+",
+      "Mintlify CLI: npm install -g mintlify",
+      "Codebase with JSDoc or TypeScript types",
+      "OpenAPI specification (optional, for API reference)",
+      "Mintlify account and API access (free tier available) for documentation site hosting and deployment",
+      "File system read/write access for Mintlify configuration files (mint.json), documentation source files, and generated documentation outputs"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/skills/mintlify-documentation-automation.zip",
+    "skillPackage": {
+      "format": "agent-skill",
+      "entrypoint": "SKILL.md",
+      "downloadUrl": "/downloads/skills/mintlify-documentation-automation.zip",
+      "sha256": "23f581d57c2ddb576db5b593baf9f02b5de5314dda4042592ee3ed366bdc27c9"
+    },
+    "platformCompatibility": [
+      {
+        "platform": "Claude",
+        "supportLevel": "native-skill",
+        "installPath": ".claude/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-16"
+      },
+      {
+        "platform": "Codex",
+        "supportLevel": "native-skill",
+        "installPath": ".agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-16"
+      },
+      {
+        "platform": "Windsurf",
+        "supportLevel": "native-skill",
+        "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-16"
+      },
+      {
+        "platform": "Gemini",
+        "supportLevel": "native-skill",
+        "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-16"
+      },
+      {
+        "platform": "Cursor",
+        "supportLevel": "adapter",
+        "installPath": ".cursor/rules/<skill-name>.mdc",
+        "adapterPath": "/data/skill-adapters/cursor/mintlify-documentation-automation.mdc",
+        "verifiedAt": "2025-10-16"
+      },
+      {
+        "platform": "Generic AGENTS",
+        "supportLevel": "manual-context",
+        "installPath": "AGENTS.md or tool-specific context file",
+        "verifiedAt": "2025-10-16"
+      }
+    ],
+    "downloadTrust": "first-party",
+    "downloadSha256": "23f581d57c2ddb576db5b593baf9f02b5de5314dda4042592ee3ed366bdc27c9",
+    "body": "## What This Skill Enables\n\nClaude can generate comprehensive, production-ready documentation using Mintlify - the modern documentation platform that has become the standard for developer-facing docs in 2025. This skill enables automatic API reference generation from code, interactive MDX components, multi-version documentation, and AI-powered content creation from JSDoc/TypeScript types.\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Prerequisites\n\n**Required:**\n\n- Node.js 18+\n- Existing codebase with functions/APIs to document\n- Basic understanding of Markdown\n\n**What Claude handles automatically:**\n\n- Generating MDX documentation from TypeScript/JSDoc\n- Creating mint.json configuration with navigation\n- Building API reference pages from OpenAPI specs\n- Setting up interactive code examples\n- Configuring search, analytics, and versioning\n- Creating custom MDX components\n\n## How to Use This Skill\n\n### API Documentation from TypeScript\n\n**Prompt:** \"Generate Mintlify documentation from my TypeScript API client at src/api/users.ts. Include all JSDoc comments, parameter types, return types, and code examples.\"\n\nClaude will:\n\n1. Parse TypeScript file and extract exported functions\n2. Read JSDoc comments for descriptions\n3. Generate MDX files for each API endpoint\n4. Create proper Mintlify components (ParamField, ResponseField)\n5. Add code examples in multiple languages\n6. Generate response examples with proper formatting\n7. Update mint.json navigation\n\n### OpenAPI to Interactive Documentation\n\n**Prompt:** \"Convert my OpenAPI 3.0 spec (openapi.yaml) into Mintlify documentation with interactive API playground and authentication examples.\"\n\nClaude will create:\n\n1. API reference section in mint.json\n2. MDX file for each endpoint with proper structure\n3. Request/response examples using CodeGroup\n4. Authentication documentation with examples\n5. Error code reference table\n6. API playground integration\n7. SDK code examples (TypeScript, Python, cURL)\n\n### Complete Documentation Site Setup\n\n**Prompt:** \"Set up a complete Mintlify documentation site for my SaaS product with: Introduction, Quickstart, API Reference, Guides, Changelog. Include dark mode, search, and analytics.\"\n\nClaude will generate:\n\n1. Directory structure with organized MDX files\n2. mint.json with proper navigation tabs\n3. Introduction page with hero and feature cards\n4. Quickstart with step-by-step instructions\n5. API reference structure\n6. Guide templates\n7. Changelog format\n8. Dark mode configuration\n9. Search and analytics integration\n\n### Interactive Component Library Documentation\n\n**Prompt:** \"Document my React component library with interactive examples, prop tables, and usage guidelines. Components are in src/components/ui.\"\n\nClaude will create:\n\n1. Component documentation pages with descriptions\n2. PropTable components with TypeScript types\n3. Interactive code playgrounds\n4. Usage examples with best practices\n5. Accessibility guidelines per component\n6. Storybook integration links\n7. Installation and import instructions\n\n## Tips for Best Results\n\n1. **Rich JSDoc Comments**: Ensure your code has comprehensive JSDoc comments with @param, @returns, @throws, and @example tags for best auto-generation results.\n\n2. **OpenAPI First**: If you have an OpenAPI spec, use that as the source of truth. Mintlify's OpenAPI integration is more reliable than manual documentation.\n\n3. **Code Examples**: Request examples in multiple languages (TypeScript, JavaScript, Python, cURL) to maximize usefulness for different audiences.\n\n4. **Interactive Elements**: Ask for Mintlify-specific components (Accordion, Card, Tabs, CodeGroup) to make docs more engaging than plain Markdown.\n\n5. **Version Management**: For libraries, request versioned documentation setup from the start to avoid migration pain later.\n\n6. **Search Optimization**: Include descriptive meta titles and descriptions in frontmatter for better search discoverability.\n\n## Common Workflows\n\n### Complete API Documentation\n\n```\n\"Generate full Mintlify API documentation:\n1. Parse src/api/*.ts files for all exported functions\n2. Create API reference pages with proper Mintlify components\n3. Include TypeScript type definitions\n4. Add code examples in TypeScript, JavaScript, Python, and cURL\n5. Document all error codes and responses\n6. Set up authentication guide with OAuth 2.0 flow\n7. Configure API playground with authentication\n8. Add rate limiting documentation\"\n```\n\n### Component Library Docs\n\n```\n\"Build Mintlify docs for React component library:\n1. Document all components in src/components/ui\n2. Extract prop types from TypeScript interfaces\n3. Create PropTable for each component\n4. Add usage examples with CodeGroup\n5. Include accessibility guidelines (ARIA, keyboard)\n6. Link to Storybook for interactive demos\n7. Add installation guide with package manager options\n8. Create theming and customization guide\"\n```\n\n### SDK Documentation with Examples\n\n```\n\"Generate SDK documentation from TypeScript client:\n1. Document all SDK methods with parameters and returns\n2. Create quickstart with installation and auth setup\n3. Add comprehensive code examples for each method\n4. Include error handling patterns\n5. Document webhook integration\n6. Add retry and timeout configuration\n7. Create migration guide from v1 to v2\n8. Set up changelog with semantic versioning\"\n```\n\n### Multi-Version Documentation\n\n```\n\"Set up versioned Mintlify docs for API v1 and v2:\n1. Create separate documentation for each version\n2. Configure version switcher in mint.json\n3. Highlight breaking changes between versions\n4. Provide migration guide from v1 to v2\n5. Maintain v1 docs in archive with deprecation notice\n6. Set up URL structure: /v1/... and /v2/...\n7. Add version-specific examples\"\n```\n\n## Troubleshooting\n\n**Issue:** Mintlify build fails with \"Invalid frontmatter\"\n**Solution:** Ensure all MDX files have valid YAML frontmatter with required fields (title, description). Ask Claude to validate frontmatter syntax.\n\n**Issue:** Navigation doesn't match folder structure\n**Solution:** mint.json navigation must explicitly list all pages. Ask Claude to regenerate navigation section matching your actual MDX file structure.\n\n**Issue:** Code examples aren't syntax highlighted correctly\n**Solution:** Specify language in code fence (`typescript, not `ts). Ask Claude to use full language names for better highlighting.\n\n**Issue:** API Reference pages look inconsistent\n**Solution:** Use Mintlify's built-in components (ParamField, ResponseField) instead of manual tables. Request Claude to refactor using proper components.\n\n**Issue:** Search doesn't find relevant pages\n**Solution:** Add descriptive `seoTitle` and `description` in frontmatter. Ask Claude to optimize metadata for search.\n\n## Learn More\n\n- [Mintlify Documentation](https://mintlify.com/docs)\n- [Mintlify Components](https://mintlify.com/docs/components)\n- [OpenAPI Integration](https://mintlify.com/docs/api-playground/openapi)\n- [Custom Components](https://mintlify.com/docs/components/custom)\n- [Versioning Guide](https://mintlify.com/docs/settings/versioning)\n\n## Features\n\n- Auto-generate docs from TypeScript/JSDoc with parameter and return type extraction\n- OpenAPI to interactive API reference with authentication and playground\n- Interactive MDX components (Tabs, Accordion, CodeGroup, Steps, Cards, ParamField, ResponseField)\n- Multi-version documentation support with version switcher\n- Built-in search and analytics integration (PostHog, Google Analytics)\n- API playground with authentication and code examples in multiple languages\n- Dark mode support with customizable themes and branding\n- Automated deployment with Vercel integration and CI/CD workflows\n\n## Use Cases\n\n- API reference documentation from code with interactive playground\n- SDK and library documentation with installation guides and examples\n- Product documentation with guides, tutorials, and quickstarts\n- Component library documentation with prop tables and interactive examples\n- Multi-version API documentation with migration guides\n- Internal knowledge base with search and analytics",
+    "sections": [
+      {
+        "title": "What This Skill Enables",
+        "id": "what-this-skill-enables",
+        "markdown": "Claude can generate comprehensive, production-ready documentation using Mintlify - the modern documentation platform that has become the standard for developer-facing docs in 2025. This skill enables automatic API reference generation from code, interactive MDX components, multi-version documentation, and AI-powered content creation from JSDoc/TypeScript types.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Compatibility",
+        "id": "compatibility",
+        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Prerequisites",
+        "id": "prerequisites",
+        "markdown": "**Required:**\n\n- Node.js 18+\n- Existing codebase with functions/APIs to document\n- Basic understanding of Markdown\n\n**What Claude handles automatically:**\n\n- Generating MDX documentation from TypeScript/JSDoc\n- Creating mint.json configuration with navigation\n- Building API reference pages from OpenAPI specs\n- Setting up interactive code examples\n- Configuring search, analytics, and versioning\n- Creating custom MDX components",
+        "codeBlocks": []
+      },
+      {
+        "title": "How to Use This Skill",
+        "id": "how-to-use-this-skill",
+        "markdown": "### API Documentation from TypeScript\n\n**Prompt:** \"Generate Mintlify documentation from my TypeScript API client at src/api/users.ts. Include all JSDoc comments, parameter types, return types, and code examples.\"\n\nClaude will:\n\n1. Parse TypeScript file and extract exported functions\n2. Read JSDoc comments for descriptions\n3. Generate MDX files for each API endpoint\n4. Create proper Mintlify components (ParamField, ResponseField)\n5. Add code examples in multiple languages\n6. Generate response examples with proper formatting\n7. Update mint.json navigation\n\n### OpenAPI to Interactive Documentation\n\n**Prompt:** \"Convert my OpenAPI 3.0 spec (openapi.yaml) into Mintlify documentation with interactive API playground and authentication examples.\"\n\nClaude will create:\n\n1. API reference section in mint.json\n2. MDX file for each endpoint with proper structure\n3. Request/response examples using CodeGroup\n4. Authentication documentation with examples\n5. Error code reference table\n6. API playground integration\n7. SDK code examples (TypeScript, Python, cURL)\n\n### Complete Documentation Site Setup\n\n**Prompt:** \"Set up a complete Mintlify documentation site for my SaaS product with: Introduction, Quickstart, API Reference, Guides, Changelog. Include dark mode, search, and analytics.\"\n\nClaude will generate:\n\n1. Directory structure with organized MDX files\n2. mint.json with proper navigation tabs\n3. Introduction page with hero and feature cards\n4. Quickstart with step-by-step instructions\n5. API reference structure\n6. Guide templates\n7. Changelog format\n8. Dark mode configuration\n9. Search and analytics integration\n\n### Interactive Component Library Documentation\n\n**Prompt:** \"Document my React component library with interactive examples, prop tables, and usage guidelines. Components are in src/components/ui.\"\n\nClaude will create:\n\n1. Component documentation pages with descriptions\n2. PropTable components with TypeScript types\n3. Interactive code playgrounds\n4. Usage examples with best practices\n5. Accessibility guidelines per component\n6. Storybook integration links\n7. Installation and import instructions",
+        "codeBlocks": []
+      },
+      {
+        "title": "Tips for Best Results",
+        "id": "tips-for-best-results",
+        "markdown": "1. **Rich JSDoc Comments**: Ensure your code has comprehensive JSDoc comments with @param, @returns, @throws, and @example tags for best auto-generation results.\n\n2. **OpenAPI First**: If you have an OpenAPI spec, use that as the source of truth. Mintlify's OpenAPI integration is more reliable than manual documentation.\n\n3. **Code Examples**: Request examples in multiple languages (TypeScript, JavaScript, Python, cURL) to maximize usefulness for different audiences.\n\n4. **Interactive Elements**: Ask for Mintlify-specific components (Accordion, Card, Tabs, CodeGroup) to make docs more engaging than plain Markdown.\n\n5. **Version Management**: For libraries, request versioned documentation setup from the start to avoid migration pain later.\n\n6. **Search Optimization**: Include descriptive meta titles and descriptions in frontmatter for better search discoverability.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Common Workflows",
+        "id": "common-workflows",
+        "markdown": "### Complete API Documentation\n\n```\n\"Generate full Mintlify API documentation:\n1. Parse src/api/*.ts files for all exported functions\n2. Create API reference pages with proper Mintlify components\n3. Include TypeScript type definitions\n4. Add code examples in TypeScript, JavaScript, Python, and cURL\n5. Document all error codes and responses\n6. Set up authentication guide with OAuth 2.0 flow\n7. Configure API playground with authentication\n8. Add rate limiting documentation\"\n```\n\n### Component Library Docs\n\n```\n\"Build Mintlify docs for React component library:\n1. Document all components in src/components/ui\n2. Extract prop types from TypeScript interfaces\n3. Create PropTable for each component\n4. Add usage examples with CodeGroup\n5. Include accessibility guidelines (ARIA, keyboard)\n6. Link to Storybook for interactive demos\n7. Add installation guide with package manager options\n8. Create theming and customization guide\"\n```\n\n### SDK Documentation with Examples\n\n```\n\"Generate SDK documentation from TypeScript client:\n1. Document all SDK methods with parameters and returns\n2. Create quickstart with installation and auth setup\n3. Add comprehensive code examples for each method\n4. Include error handling patterns\n5. Document webhook integration\n6. Add retry and timeout configuration\n7. Create migration guide from v1 to v2\n8. Set up changelog with semantic versioning\"\n```\n\n### Multi-Version Documentation\n\n```\n\"Set up versioned Mintlify docs for API v1 and v2:\n1. Create separate documentation for each version\n2. Configure version switcher in mint.json\n3. Highlight breaking changes between versions\n4. Provide migration guide from v1 to v2\n5. Maintain v1 docs in archive with deprecation notice\n6. Set up URL structure: /v1/... and /v2/...\n7. Add version-specific examples\"\n```",
+        "codeBlocks": [
+          {
+            "language": "text",
+            "code": "\"Generate full Mintlify API documentation:\n1. Parse src/api/*.ts files for all exported functions\n2. Create API reference pages with proper Mintlify components\n3. Include TypeScript type definitions\n4. Add code examples in TypeScript, JavaScript, Python, and cURL\n5. Document all error codes and responses\n6. Set up authentication guide with OAuth 2.0 flow\n7. Configure API playground with authentication\n8. Add rate limiting documentation\""
+          },
+          {
+            "language": "text",
+            "code": "\"Build Mintlify docs for React component library:\n1. Document all components in src/components/ui\n2. Extract prop types from TypeScript interfaces\n3. Create PropTable for each component\n4. Add usage examples with CodeGroup\n5. Include accessibility guidelines (ARIA, keyboard)\n6. Link to Storybook for interactive demos\n7. Add installation guide with package manager options\n8. Create theming and customization guide\""
+          },
+          {
+            "language": "text",
+            "code": "\"Generate SDK documentation from TypeScript client:\n1. Document all SDK methods with parameters and returns\n2. Create quickstart with installation and auth setup\n3. Add comprehensive code examples for each method\n4. Include error handling patterns\n5. Document webhook integration\n6. Add retry and timeout configuration\n7. Create migration guide from v1 to v2\n8. Set up changelog with semantic versioning\""
+          },
+          {
+            "language": "text",
+            "code": "\"Set up versioned Mintlify docs for API v1 and v2:\n1. Create separate documentation for each version\n2. Configure version switcher in mint.json\n3. Highlight breaking changes between versions\n4. Provide migration guide from v1 to v2\n5. Maintain v1 docs in archive with deprecation notice\n6. Set up URL structure: /v1/... and /v2/...\n7. Add version-specific examples\""
+          }
+        ]
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "**Issue:** Mintlify build fails with \"Invalid frontmatter\"\n**Solution:** Ensure all MDX files have valid YAML frontmatter with required fields (title, description). Ask Claude to validate frontmatter syntax.\n\n**Issue:** Navigation doesn't match folder structure\n**Solution:** mint.json navigation must explicitly list all pages. Ask Claude to regenerate navigation section matching your actual MDX file structure.\n\n**Issue:** Code examples aren't syntax highlighted correctly\n**Solution:** Specify language in code fence (`typescript, not `ts). Ask Claude to use full language names for better highlighting.\n\n**Issue:** API Reference pages look inconsistent\n**Solution:** Use Mintlify's built-in components (ParamField, ResponseField) instead of manual tables. Request Claude to refactor using proper components.\n\n**Issue:** Search doesn't find relevant pages\n**Solution:** Add descriptive `seoTitle` and `description` in frontmatter. Ask Claude to optimize metadata for search.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Learn More",
+        "id": "learn-more",
+        "markdown": "- [Mintlify Documentation](https://mintlify.com/docs)\n- [Mintlify Components](https://mintlify.com/docs/components)\n- [OpenAPI Integration](https://mintlify.com/docs/api-playground/openapi)\n- [Custom Components](https://mintlify.com/docs/components/custom)\n- [Versioning Guide](https://mintlify.com/docs/settings/versioning)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Auto-generate docs from TypeScript/JSDoc with parameter and return type extraction\n- OpenAPI to interactive API reference with authentication and playground\n- Interactive MDX components (Tabs, Accordion, CodeGroup, Steps, Cards, ParamField, ResponseField)\n- Multi-version documentation support with version switcher\n- Built-in search and analytics integration (PostHog, Google Analytics)\n- API playground with authentication and code examples in multiple languages\n- Dark mode support with customizable themes and branding\n- Automated deployment with Vercel integration and CI/CD workflows",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- API reference documentation from code with interactive playground\n- SDK and library documentation with installation guides and examples\n- Product documentation with guides, tutorials, and quickstarts\n- Component library documentation with prop tables and interactive examples\n- Multi-version API documentation with migration guides\n- Internal knowledge base with search and analytics",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "What This Skill Enables",
+        "id": "what-this-skill-enables"
+      },
+      {
+        "depth": 2,
+        "text": "Compatibility",
+        "id": "compatibility"
+      },
+      {
+        "depth": 3,
+        "text": "Native",
+        "id": "native"
+      },
+      {
+        "depth": 3,
+        "text": "Manual Adaptation",
+        "id": "manual-adaptation"
+      },
+      {
+        "depth": 2,
+        "text": "Prerequisites",
+        "id": "prerequisites"
+      },
+      {
+        "depth": 2,
+        "text": "How to Use This Skill",
+        "id": "how-to-use-this-skill"
+      },
+      {
+        "depth": 3,
+        "text": "API Documentation from TypeScript",
+        "id": "api-documentation-from-typescript"
+      },
+      {
+        "depth": 3,
+        "text": "OpenAPI to Interactive Documentation",
+        "id": "openapi-to-interactive-documentation"
+      },
+      {
+        "depth": 3,
+        "text": "Complete Documentation Site Setup",
+        "id": "complete-documentation-site-setup"
+      },
+      {
+        "depth": 3,
+        "text": "Interactive Component Library Documentation",
+        "id": "interactive-component-library-documentation"
+      },
+      {
+        "depth": 2,
+        "text": "Tips for Best Results",
+        "id": "tips-for-best-results"
+      },
+      {
+        "depth": 2,
+        "text": "Common Workflows",
+        "id": "common-workflows"
+      },
+      {
+        "depth": 3,
+        "text": "Complete API Documentation",
+        "id": "complete-api-documentation"
+      },
+      {
+        "depth": 3,
+        "text": "Component Library Docs",
+        "id": "component-library-docs"
+      },
+      {
+        "depth": 3,
+        "text": "SDK Documentation with Examples",
+        "id": "sdk-documentation-with-examples"
+      },
+      {
+        "depth": 3,
+        "text": "Multi-Version Documentation",
+        "id": "multi-version-documentation"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 2,
+        "text": "Learn More",
+        "id": "learn-more"
+      },
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "text",
+        "code": "\"Generate full Mintlify API documentation:\n1. Parse src/api/*.ts files for all exported functions\n2. Create API reference pages with proper Mintlify components\n3. Include TypeScript type definitions\n4. Add code examples in TypeScript, JavaScript, Python, and cURL\n5. Document all error codes and responses\n6. Set up authentication guide with OAuth 2.0 flow\n7. Configure API playground with authentication\n8. Add rate limiting documentation\""
+      },
+      {
+        "language": "text",
+        "code": "\"Build Mintlify docs for React component library:\n1. Document all components in src/components/ui\n2. Extract prop types from TypeScript interfaces\n3. Create PropTable for each component\n4. Add usage examples with CodeGroup\n5. Include accessibility guidelines (ARIA, keyboard)\n6. Link to Storybook for interactive demos\n7. Add installation guide with package manager options\n8. Create theming and customization guide\""
+      },
+      {
+        "language": "text",
+        "code": "\"Generate SDK documentation from TypeScript client:\n1. Document all SDK methods with parameters and returns\n2. Create quickstart with installation and auth setup\n3. Add comprehensive code examples for each method\n4. Include error handling patterns\n5. Document webhook integration\n6. Add retry and timeout configuration\n7. Create migration guide from v1 to v2\n8. Set up changelog with semantic versioning\""
+      },
+      {
+        "language": "text",
+        "code": "\"Set up versioned Mintlify docs for API v1 and v2:\n1. Create separate documentation for each version\n2. Configure version switcher in mint.json\n3. Highlight breaking changes between versions\n4. Provide migration guide from v1 to v2\n5. Maintain v1 docs in archive with deprecation notice\n6. Set up URL structure: /v1/... and /v2/...\n7. Add version-specific examples\""
+      }
+    ],
+    "filePath": "content/skills/mintlify-documentation-automation.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/mintlify-documentation-automation.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": true,
+    "packageTrust": "first-party",
+    "packageChecksum": "23f581d57c2ddb576db5b593baf9f02b5de5314dda4042592ee3ed366bdc27c9",
+    "checksumPresent": true,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://mintlify.com/docs",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/mintlify-documentation-automation.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2025-10-16",
+    "adapterGenerated": true,
+    "platforms": [
+      "Claude",
+      "Codex",
+      "Windsurf",
+      "Gemini",
+      "Cursor",
+      "Generic AGENTS"
+    ],
+    "supportLevels": [
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "adapter",
+      "manual-context"
+    ]
+  }
+}

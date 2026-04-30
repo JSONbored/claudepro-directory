@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "mcp:vercel-mcp-server",
+  "category": "mcp",
+  "slug": "vercel-mcp-server",
+  "title": "Vercel MCP Server for Claude",
+  "author": "Vercel",
+  "brandName": "Vercel",
+  "brandDomain": "vercel.com",
+  "brandIconUrl": "/api/brand-assets/icon/vercel.com",
+  "brandAssetSource": "brandfetch",
+  "copyText": "Install:\nclaude mcp add --transport http vercel https://mcp.vercel.com && claude mcp list\n\nConfig:\n{\n  \"vercel\": {\n    \"url\": \"https://mcp.vercel.com\",\n    \"transport\": \"http\"\n  }\n}\n\nUsage:\n{\n  \"vercel\": {\n    \"url\": \"https://mcp.vercel.com\",\n    \"transport\": \"http\"\n  }\n}",
+  "detailMarkdown": "# Vercel MCP Server for Claude\n\nManage deployments, analyze logs, and control Vercel projects\n\n## Install\n```bash\nclaude mcp add --transport http vercel https://mcp.vercel.com && claude mcp list\n```\n\n## Config\n```json\n{\n  \"vercel\": {\n    \"url\": \"https://mcp.vercel.com\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Usage\nclaude mcp add --transport http vercel https://mcp.vercel.com && claude mcp list",
+  "webUrl": "https://heyclau.de/mcp/vercel-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/vercel-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/vercel-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/vercel-mcp-server",
+  "seoTitle": "Vercel MCP Server for Claude",
+  "seoDescription": "Manage deployments, analyze logs, and control Vercel projects Discover tools for AI development. HeyClaude adds source links, install steps, compatibility,...",
+  "repoUrl": "",
+  "documentationUrl": "https://vercel.com/docs/mcp/vercel-mcp"
+}

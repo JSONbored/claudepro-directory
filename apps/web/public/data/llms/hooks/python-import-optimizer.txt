@@ -1,0 +1,507 @@
+# Python Import Optimizer - Hooks
+URL: https://heyclau.de/hooks/python-import-optimizer
+Category: hooks
+Author: JSONbored
+Date added: 2025-09-19
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/python-import-optimizer.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/hooks/python-import-optimizer
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/python-import-optimizer.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
+## Summary
+Automatically sorts and optimizes Python imports using isort when Python files are modified.
+## Tags
+- python
+- imports
+- formatting
+- optimization
+- isort
+## Content
+## Features
+- Automatic import sorting with isort including isort integration (isort command execution with PEP 8 compliant sorting, import grouping by type with standard library/third-party/local separation, import alphabetization with consistent ordering, import formatting with consistent style), PEP 8 compliant import organization (PEP 8 import ordering standards with standard library first, third-party imports second, local imports last, import grouping with blank line separation, import sorting with alphabetical ordering), import configuration (pyproject.toml configuration for isort settings, setup.cfg configuration for isort settings, .isort.cfg configuration for isort settings, configuration file support for project-wide settings), and import validation (import syntax validation with syntax checking, import order validation with order checking, import format validation with format checking)
+- PEP 8 compliant import organization including PEP 8 standards (PEP 8 import ordering standards with standard library first, third-party imports second, local imports last, import grouping with blank line separation, import sorting with alphabetical ordering), import grouping (standard library imports grouped together, third-party imports grouped together, local imports grouped together, blank line separation between groups), import sorting (alphabetical sorting within each group, consistent import ordering across project, import ordering standards compliance), and import formatting (consistent import formatting with PEP 8 style, import line formatting with proper spacing, import statement formatting with consistent style)
+- Unused import removal including autoflake integration (autoflake command execution with unused import detection, unused variable removal with --remove-unused-variables flag, unused import removal with --remove-all-unused-imports flag, import analysis with AST parsing), import cleanup (unused import detection with static analysis, unused import removal with safe removal, import optimization with code cleanup), import validation (import usage analysis with dependency tracking, import safety checks with usage validation, import optimization suggestions with recommendations), and import safety (safe import removal with usage validation, import preservation with # noqa comments, import exclusion with configuration options)
+- Black profile compatibility including Black integration (isort --profile black flag for Black compatibility, line length configuration with --line-length 88 for Black default, import formatting with Black-compatible style, import ordering with Black-compatible ordering), Black profile settings (profile black configuration for consistent formatting, line length 88 matching Black default, import style matching Black preferences, import formatting matching Black output), Black compatibility (Black-compatible import sorting with consistent style, Black-compatible import formatting with matching output, Black-compatible import ordering with consistent ordering), and Black workflow integration (automatic import sorting before Black formatting, import formatting compatible with Black output, import ordering compatible with Black preferences)
+- Import grouping by type including standard library imports (standard library import detection with built-in module detection, standard library import grouping with stdlib section, standard library import sorting with alphabetical ordering), third-party imports (third-party import detection with external package detection, third-party import grouping with third-party section, third-party import sorting with alphabetical ordering), local imports (local import detection with project module detection, local import grouping with local section, local import sorting with alphabetical ordering), and import section separation (blank line separation between import groups, import section organization with clear separation, import section formatting with consistent style)
+- Code formatting integration including formatting integration (isort integration with code formatters like Black, Ruff, autopep8, formatting compatibility with multiple formatters, formatting consistency with project standards), formatting configuration (pyproject.toml configuration for isort settings, setup.cfg configuration for isort settings, .isort.cfg configuration for isort settings, configuration file support for project-wide settings), formatting workflow (automatic formatting on file changes, formatting consistency across project, formatting integration with development workflow), and formatting tools (Black integration with isort, Ruff integration with isort, autopep8 integration with isort, multiple formatter support)
+- Import analysis and statistics including import analysis (import count by type with standard library/third-party/local counts, import structure analysis with import hierarchy, import dependency analysis with dependency tracking), import statistics (import count statistics with detailed counts, import type statistics with type distribution, import usage statistics with usage tracking), import warnings (star import warnings with import \* detection, large import count warnings with import count thresholds, import optimization suggestions with recommendations), and import reporting (import summary reporting with detailed summary, import analysis reporting with analysis results, import optimization reporting with optimization suggestions)
+- Development workflow integration including continuous optimization (real-time import optimization on file changes, immediate import sorting on file updates, automatic import cleanup on file modifications), workflow automation (automated import optimization without manual intervention, import sorting automation with automatic sorting, import cleanup automation with automatic cleanup), and workflow optimization (import change detection with change tracking, incremental import optimization with optimization, import consistency maintenance with consistency checks)
+
+## Use Cases
+- Organize Python imports according to PEP 8 standards automatically sorting imports with PEP 8 ordering, grouping imports by type with standard library/third-party/local separation, and maintaining consistent import formatting across projects
+- Remove unused imports automatically detecting unused imports with static analysis, removing unused imports safely with usage validation, and optimizing import statements for cleaner code
+- Group imports by type (standard library, third-party, local) automatically detecting import types, grouping imports by type with proper separation, and maintaining consistent import organization
+- Maintain consistent import formatting across projects automatically formatting imports with consistent style, ensuring import consistency across project files, and maintaining project-wide import standards
+- Integrate with Black code formatter automatically sorting imports with Black-compatible style, formatting imports with Black-compatible formatting, and ensuring seamless integration with Black workflow
+- Development workflow integration seamlessly integrating Python import optimization into development workflows without manual import sorting or cleanup
+
+## Installation
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/python-import-optimizer.sh
+3. Make executable: chmod +x .claude/hooks/python-import-optimizer.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- Python 3.8+ installed
+- isort installed (pip install isort)
+- autoflake installed (optional, pip install autoflake)
+- jq (optional, for JSON parsing)
+
+## Hook Configuration
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/python-import-optimizer.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/python-import-optimizer.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+
+## Hook Script
+```bash
+#!/bin/bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Check if this is a Python file
+if [[ "$FILE_PATH" == *.py ]]; then
+    echo "🐍 Python Import Optimizer - Processing Python file..."
+    echo "📄 File: $FILE_PATH"
+
+    # Check if file exists
+    if [ ! -f "$FILE_PATH" ]; then
+        echo "⚠️ File not found: $FILE_PATH"
+        exit 1
+    fi
+
+    # Step 1: Sort imports with isort
+    echo "📋 Sorting imports with isort..."
+    if command -v isort >/dev/null 2>&1; then
+        if isort "$FILE_PATH" --profile black --line-length 88 --check-only --diff; then
+            echo "✅ Imports are already sorted"
+        else
+            echo "🔄 Sorting imports..."
+            isort "$FILE_PATH" --profile black --line-length 88
+            echo "✅ Imports sorted successfully"
+        fi
+    else
+        echo "⚠️ isort not found. Install with: pip install isort"
+    fi
+
+    # Step 2: Remove unused imports with autoflake (optional)
+    echo "🧹 Removing unused imports..."
+    if command -v autoflake >/dev/null 2>&1; then
+        # Check for unused imports first
+        if autoflake --check "$FILE_PATH" --remove-unused-variables --remove-all-unused-imports; then
+            echo "✅ No unused imports found"
+        else
+            echo "🔄 Removing unused imports..."
+            autoflake --in-place "$FILE_PATH" --remove-unused-variables --remove-all-unused-imports
+            echo "✅ Unused imports removed"
+        fi
+    else
+        echo "ℹ️ autoflake not found (optional). Install with: pip install autoflake"
+    fi
+
+    # Step 3: Additional import analysis
+    echo "🔍 Analyzing import structure..."
+
+    # Count different types of imports
+    STDLIB_IMPORTS=$(grep -c "^import \(os\|sys\|re\|json\|datetime\|collections\|itertools\|functools\|pathlib\)" "$FILE_PATH" 2>/dev/null || echo 0)
+    THIRD_PARTY_IMPORTS=$(grep -c "^\(import\|from\) \(numpy\|pandas\|requests\|flask\|django\|fastapi\)" "$FILE_PATH" 2>/dev/null || echo 0)
+    RELATIVE_IMPORTS=$(grep -c "^from \.[.]*" "$FILE_PATH" 2>/dev/null || echo 0)
+
+    echo "📊 Import Summary:"
+    echo "  • Standard Library: $STDLIB_IMPORTS"
+    echo "  • Third Party: $THIRD_PARTY_IMPORTS"
+    echo "  • Relative: $RELATIVE_IMPORTS"
+
+    # Check for potential issues
+    if grep -q "^import \*" "$FILE_PATH" 2>/dev/null; then
+        echo "⚠️ Warning: Star imports detected (import *) - consider specific imports"
+    fi
+
+    if [ "$(grep -c '^import\|^from' "$FILE_PATH" 2>/dev/null || echo 0)" -gt 20 ]; then
+        echo "💡 Tip: Consider grouping related imports or using a package structure"
+    fi
+
+    echo ""
+    echo "💡 Python Import Tips:"
+    echo "  • Use absolute imports when possible"
+    echo "  • Group imports: stdlib, third-party, local"
+    echo "  • Avoid star imports (import *)"
+    echo "  • Use 'from module import specific_function' for clarity"
+
+    echo ""
+    echo "🎯 Python import optimization complete!"
+
+else
+    echo "ℹ️ File is not a Python file: $FILE_PATH"
+fi
+
+exit 0
+```
+```bash
+#!/bin/bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Check if this is a Python file
+if [[ "$FILE_PATH" == *.py ]]; then
+    echo "🐍 Python Import Optimizer - Processing Python file..."
+    echo "📄 File: $FILE_PATH"
+
+    # Check if file exists
+    if [ ! -f "$FILE_PATH" ]; then
+        echo "⚠️ File not found: $FILE_PATH"
+        exit 1
+    fi
+
+    # Step 1: Sort imports with isort
+    echo "📋 Sorting imports with isort..."
+    if command -v isort >/dev/null 2>&1; then
+        if isort "$FILE_PATH" --profile black --line-length 88 --check-only --diff; then
+            echo "✅ Imports are already sorted"
+        else
+            echo "🔄 Sorting imports..."
+            isort "$FILE_PATH" --profile black --line-length 88
+            echo "✅ Imports sorted successfully"
+        fi
+    else
+        echo "⚠️ isort not found. Install with: pip install isort"
+    fi
+
+    # Step 2: Remove unused imports with autoflake (optional)
+    echo "🧹 Removing unused imports..."
+    if command -v autoflake >/dev/null 2>&1; then
+        # Check for unused imports first
+        if autoflake --check "$FILE_PATH" --remove-unused-variables --remove-all-unused-imports; then
+            echo "✅ No unused imports found"
+        else
+            echo "🔄 Removing unused imports..."
+            autoflake --in-place "$FILE_PATH" --remove-unused-variables --remove-all-unused-imports
+            echo "✅ Unused imports removed"
+        fi
+    else
+        echo "ℹ️ autoflake not found (optional). Install with: pip install autoflake"
+    fi
+
+    # Step 3: Additional import analysis
+    echo "🔍 Analyzing import structure..."
+
+    # Count different types of imports
+    STDLIB_IMPORTS=$(grep -c "^import \(os\|sys\|re\|json\|datetime\|collections\|itertools\|functools\|pathlib\)" "$FILE_PATH" 2>/dev/null || echo 0)
+    THIRD_PARTY_IMPORTS=$(grep -c "^\(import\|from\) \(numpy\|pandas\|requests\|flask\|django\|fastapi\)" "$FILE_PATH" 2>/dev/null || echo 0)
+    RELATIVE_IMPORTS=$(grep -c "^from \.[.]*" "$FILE_PATH" 2>/dev/null || echo 0)
+
+    echo "📊 Import Summary:"
+    echo "  • Standard Library: $STDLIB_IMPORTS"
+    echo "  • Third Party: $THIRD_PARTY_IMPORTS"
+    echo "  • Relative: $RELATIVE_IMPORTS"
+
+    # Check for potential issues
+    if grep -q "^import \*" "$FILE_PATH" 2>/dev/null; then
+        echo "⚠️ Warning: Star imports detected (import *) - consider specific imports"
+    fi
+
+    if [ "$(grep -c '^import\|^from' "$FILE_PATH" 2>/dev/null || echo 0)" -gt 20 ]; then
+        echo "💡 Tip: Consider grouping related imports or using a package structure"
+    fi
+
+    echo ""
+    echo "💡 Python Import Tips:"
+    echo "  • Use absolute imports when possible"
+    echo "  • Group imports: stdlib, third-party, local"
+    echo "  • Avoid star imports (import *)"
+    echo "  • Use 'from module import specific_function' for clarity"
+
+    echo ""
+    echo "🎯 Python import optimization complete!"
+
+else
+    echo "ℹ️ File is not a Python file: $FILE_PATH"
+fi
+
+exit 0
+```
+
+## Examples
+### Python Import Optimizer Hook Script
+
+Complete hook script that performs Python import optimization
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+if [[ "$FILE_PATH" == *.py ]]; then
+  echo "🐍 Python Import Optimizer - Processing Python file..."
+  if command -v isort >/dev/null 2>&1; then
+    echo "📋 Sorting imports with isort..."
+    isort "$FILE_PATH" --profile black --line-length 88
+    echo "✅ Imports sorted successfully"
+  else
+    echo "⚠️ isort not found. Install with: pip install isort"
+  fi
+fi
+exit 0
+```
+
+### Hook Configuration
+
+Complete hook configuration for .claude/settings.json to enable Python import optimization
+
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/python-import-optimizer.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+
+### Import Sorting with Unused Import Removal
+
+Enhanced hook script with isort sorting and autoflake unused import removal
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.py ]]; then
+  if command -v isort >/dev/null 2>&1; then
+    echo "📋 Sorting imports with isort..."
+    if isort "$FILE_PATH" --profile black --line-length 88 --check-only --diff; then
+      echo "✅ Imports are already sorted"
+    else
+      echo "🔄 Sorting imports..."
+      isort "$FILE_PATH" --profile black --line-length 88
+      echo "✅ Imports sorted successfully"
+    fi
+  fi
+  if command -v autoflake >/dev/null 2>&1; then
+    echo "🧹 Removing unused imports..."
+    if autoflake --check "$FILE_PATH" --remove-unused-variables --remove-all-unused-imports; then
+      echo "✅ No unused imports found"
+    else
+      echo "🔄 Removing unused imports..."
+      autoflake --in-place "$FILE_PATH" --remove-unused-variables --remove-all-unused-imports
+      echo "✅ Unused imports removed"
+    fi
+  fi
+fi
+exit 0
+```
+
+### Import Analysis and Statistics
+
+Enhanced hook script with import analysis and statistics reporting
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.py ]]; then
+  if command -v isort >/dev/null 2>&1; then
+    echo "📋 Sorting imports with isort..."
+    isort "$FILE_PATH" --profile black --line-length 88
+    echo "🔍 Analyzing import structure..."
+    STDLIB_IMPORTS=$(grep -c "^import \(os\|sys\|re\|json\|datetime\|collections\|itertools\|functools\|pathlib\)" "$FILE_PATH" 2>/dev/null || echo 0)
+    THIRD_PARTY_IMPORTS=$(grep -c "^\(import\|from\) \(numpy\|pandas\|requests\|flask\|django\|fastapi\)" "$FILE_PATH" 2>/dev/null || echo 0)
+    RELATIVE_IMPORTS=$(grep -c "^from \\." "$FILE_PATH" 2>/dev/null || echo 0)
+    echo "📊 Import Summary:"
+    echo "  • Standard Library: $STDLIB_IMPORTS"
+    echo "  • Third Party: $THIRD_PARTY_IMPORTS"
+    echo "  • Relative: $RELATIVE_IMPORTS"
+    if grep -q "^import \\*" "$FILE_PATH" 2>/dev/null; then
+      echo "⚠️ Warning: Star imports detected (import *) - consider specific imports"
+    fi
+  fi
+fi
+exit 0
+```
+
+### pyproject.toml Configuration
+
+Example pyproject.toml configuration for isort and Black integration
+
+```toml
+[tool.isort]
+profile = "black"
+line_length = 88
+known_first_party = ["myproject"]
+skip_glob = ["*/migrations/*", "*/__pycache__/*"]
+
+[tool.black]
+line-length = 88
+target-version = ["py312"]
+include = '\.pyi?$'
+```
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+if [[ "$FILE_PATH" == *.py ]]; then
+  echo "🐍 Python Import Optimizer - Processing Python file..."
+  if command -v isort >/dev/null 2>&1; then
+    echo "📋 Sorting imports with isort..."
+    isort "$FILE_PATH" --profile black --line-length 88
+    echo "✅ Imports sorted successfully"
+  else
+    echo "⚠️ isort not found. Install with: pip install isort"
+  fi
+fi
+exit 0
+```
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/python-import-optimizer.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.py ]]; then
+  if command -v isort >/dev/null 2>&1; then
+    echo "📋 Sorting imports with isort..."
+    if isort "$FILE_PATH" --profile black --line-length 88 --check-only --diff; then
+      echo "✅ Imports are already sorted"
+    else
+      echo "🔄 Sorting imports..."
+      isort "$FILE_PATH" --profile black --line-length 88
+      echo "✅ Imports sorted successfully"
+    fi
+  fi
+  if command -v autoflake >/dev/null 2>&1; then
+    echo "🧹 Removing unused imports..."
+    if autoflake --check "$FILE_PATH" --remove-unused-variables --remove-all-unused-imports; then
+      echo "✅ No unused imports found"
+    else
+      echo "🔄 Removing unused imports..."
+      autoflake --in-place "$FILE_PATH" --remove-unused-variables --remove-all-unused-imports
+      echo "✅ Unused imports removed"
+    fi
+  fi
+fi
+exit 0
+```
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.py ]]; then
+  if command -v isort >/dev/null 2>&1; then
+    echo "📋 Sorting imports with isort..."
+    isort "$FILE_PATH" --profile black --line-length 88
+    echo "🔍 Analyzing import structure..."
+    STDLIB_IMPORTS=$(grep -c "^import \(os\|sys\|re\|json\|datetime\|collections\|itertools\|functools\|pathlib\)" "$FILE_PATH" 2>/dev/null || echo 0)
+    THIRD_PARTY_IMPORTS=$(grep -c "^\(import\|from\) \(numpy\|pandas\|requests\|flask\|django\|fastapi\)" "$FILE_PATH" 2>/dev/null || echo 0)
+    RELATIVE_IMPORTS=$(grep -c "^from \\." "$FILE_PATH" 2>/dev/null || echo 0)
+    echo "📊 Import Summary:"
+    echo "  • Standard Library: $STDLIB_IMPORTS"
+    echo "  • Third Party: $THIRD_PARTY_IMPORTS"
+    echo "  • Relative: $RELATIVE_IMPORTS"
+    if grep -q "^import \\*" "$FILE_PATH" 2>/dev/null; then
+      echo "⚠️ Warning: Star imports detected (import *) - consider specific imports"
+    fi
+  fi
+fi
+exit 0
+```
+```toml
+[tool.isort]
+profile = "black"
+line_length = 88
+known_first_party = ["myproject"]
+skip_glob = ["*/migrations/*", "*/__pycache__/*"]
+
+[tool.black]
+line-length = 88
+target-version = ["py312"]
+include = '\.pyi?$'
+```
+
+## Troubleshooting
+### isort conflicts with Black formatter settings
+
+Hook already uses --profile black flag for compatibility. Ensure Black and isort versions are current. Add .isort.cfg with profile = black and line_length = 88 for project-wide consistency. Verify pyproject.toml configuration. Test with various Black versions.
+
+### autoflake removes imports that are actually used
+
+Add # noqa comments to imports that should be preserved. Configure autoflake to exclude specific files with --exclude in hook script, or use **all** exports to signal intentional module-level imports. Verify import usage. Test with various autoflake configurations.
+
+### Hook processes **init**.py and breaks package exports
+
+Exclude **init**.py from autoflake processing by modifying hook to check filename. Add special handling for package files where import \* is intentional for re-exporting. Verify package structure. Test with various package configurations.
+
+### Relative imports get converted to absolute incorrectly
+
+Configure isort with known_first_party setting in setup.cfg or pyproject.toml. Use --src-path flag in hook to help isort determine project root for proper import classification. Verify project structure. Test with various project configurations.
+
+### isort not found error when hook runs
+
+Install isort with 'pip install isort' or 'pip install isort[black]' for Black profile support. Verify isort installation with 'isort --version'. Check Python environment and PATH. Test with various Python environments.
+
+### Import sorting changes break existing code
+
+Review isort configuration and ensure --profile black is used for Black compatibility. Check for import side effects and verify import order doesn't affect functionality. Test with various import configurations.
+
+### autoflake removes type hints or annotations
+
+Configure autoflake to preserve type hints with --remove-unused-variables but keep type annotations. Use --in-place flag carefully and review changes. Verify type hint preservation. Test with various type hint configurations.
+
+### Hook performance is slow on large Python files
+
+Optimize hook script with timeout protection and file size checks. Consider excluding large files or using incremental processing. Verify file size limits. Test with various file sizes.

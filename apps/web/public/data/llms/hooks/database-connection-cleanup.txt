@@ -1,0 +1,454 @@
+# Database Connection Cleanup - Hooks
+URL: https://heyclau.de/hooks/database-connection-cleanup
+Category: hooks
+Author: JSONbored
+Date added: 2025-09-19
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/database-connection-cleanup.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/hooks/database-connection-cleanup
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/database-connection-cleanup.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
+## Summary
+Closes all database connections and cleans up resources when Claude Code session ends using PostgreSQL pg_terminate_backend, MySQL KILL, MongoDB connection management, and Redis CLIENT KILL commands.
+## Tags
+- database
+- cleanup
+- stop-hook
+- connections
+- resources
+## Content
+## Features
+- Automatic database connection cleanup on session end using Stop hook with intelligent connection detection and multi-database support
+- Multi-database support for PostgreSQL 17+, MySQL 8.0+, MongoDB 7.0+ (mongosh), and Redis 7.0+ with automatic database type detection via process monitoring
+- Idle connection termination for PostgreSQL using pg_terminate_backend with configurable timeout thresholds (default: 5 minutes) and state filtering
+- Connection monitoring and reporting showing active, idle, and total connection counts for each database type with detailed statistics
+- Safe cleanup with error handling preventing accidental termination of critical connections and protecting system processes
+- Resource leak prevention automatically closing orphaned connections and cleaning up connection pools to prevent resource exhaustion
+- Connection string detection from environment variables (.env files) for automatic database discovery and configuration validation
+- Detailed reporting with connection statistics and cleanup results for each database type including terminated connection counts and resource usage
+
+## Use Cases
+- Automatic resource cleanup in development environments preventing connection leaks during rapid development cycles
+- Prevention of database connection leaks automatically closing orphaned connections that accumulate over time
+- Clean session termination for database applications ensuring all connections are properly closed when sessions end
+- Resource monitoring and management providing visibility into database connection usage and identifying connection leaks
+- Multi-database environment cleanup supporting projects using multiple database types simultaneously
+- Development workflow optimization preventing database connection exhaustion during long development sessions
+
+## Installation
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/database-connection-cleanup.sh
+3. Make executable: chmod +x .claude/hooks/database-connection-cleanup.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- Database client tools: PostgreSQL (psql from PostgreSQL 17+), MySQL (mysql client from MySQL 8.0+), MongoDB (mongosh 2.0+ for MongoDB 7.0+), Redis (redis-cli from Redis 7.0+)
+- Environment variable access for connection string detection (.env file support or system environment variables)
+- Database server access with appropriate permissions (pg_terminate_backend for PostgreSQL, KILL for MySQL, connection management for MongoDB/Redis)
+
+## Hook Configuration
+```json
+{
+  "hooks": {
+    "stop": {
+      "script": "./.claude/hooks/database-connection-cleanup.sh"
+    }
+  }
+}
+```
+```json
+{
+  "hooks": {
+    "stop": {
+      "script": "./.claude/hooks/database-connection-cleanup.sh"
+    }
+  }
+}
+```
+
+## Hook Script
+```bash
+#!/usr/bin/env bash
+
+echo "🗄️ Starting database connection cleanup..." >&2
+
+# PostgreSQL cleanup
+if pgrep postgres >/dev/null 2>&1; then
+  echo "🐘 PostgreSQL: Checking connections..." >&2
+
+  # Check if psql is available and we can connect
+  if command -v psql &> /dev/null; then
+    # Count active connections
+    ACTIVE_CONNECTIONS=$(psql -t -c "SELECT count(*) FROM pg_stat_activity WHERE state = 'active' AND pid <> pg_backend_pid();" 2>/dev/null | xargs || echo "0")
+    IDLE_CONNECTIONS=$(psql -t -c "SELECT count(*) FROM pg_stat_activity WHERE state = 'idle' AND pid <> pg_backend_pid();" 2>/dev/null | xargs || echo "0")
+
+    echo "📊 PostgreSQL: $ACTIVE_CONNECTIONS active, $IDLE_CONNECTIONS idle connections" >&2
+
+    # Terminate long-running idle connections (older than 5 minutes)
+    if [ "$IDLE_CONNECTIONS" -gt 0 ]; then
+      TERMINATED=$(psql -t -c "SELECT count(*) FROM (SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE state = 'idle' AND state_change < now() - interval '5 minutes' AND pid <> pg_backend_pid()) t;" 2>/dev/null | xargs || echo "0")
+      if [ "$TERMINATED" -gt 0 ]; then
+        echo "✅ PostgreSQL: Terminated $TERMINATED idle connections" >&2
+      fi
+    fi
+  else
+    echo "⚠️ PostgreSQL running but psql not available" >&2
+  fi
+fi
+
+# MySQL cleanup
+if pgrep mysql >/dev/null 2>&1 || pgrep mysqld >/dev/null 2>&1; then
+  echo "🐬 MySQL: Checking connections..." >&2
+
+  if command -v mysql &> /dev/null; then
+    PROCESSLIST=$(mysql -e "SHOW PROCESSLIST;" 2>/dev/null | grep -c "Sleep" || echo "0")
+    TOTAL_CONNECTIONS=$(mysql -e "SHOW PROCESSLIST;" 2>/dev/null | wc -l || echo "0")
+    echo "📊 MySQL: $TOTAL_CONNECTIONS total connections, $PROCESSLIST sleeping" >&2
+
+    # Kill long-running sleeping connections (optional, requires PROCESS privilege)
+    # mysql -e "KILL CONNECTION_ID;" 2>/dev/null || true
+  else
+    echo "⚠️ MySQL running but mysql client not available" >&2
+  fi
+fi
+
+# MongoDB cleanup
+if pgrep mongod >/dev/null 2>&1; then
+  echo "🍃 MongoDB: Checking connections..." >&2
+
+  if command -v mongosh &> /dev/null; then
+    CONNECTIONS=$(mongosh --quiet --eval "db.currentOp().inprog.length" 2>/dev/null || echo "0")
+    echo "📊 MongoDB: $CONNECTIONS active operations" >&2
+  elif command -v mongo &> /dev/null; then
+    CONNECTIONS=$(mongo --quiet --eval "db.currentOp().inprog.length" 2>/dev/null || echo "0")
+    echo "📊 MongoDB: $CONNECTIONS active operations" >&2
+  else
+    echo "⚠️ MongoDB running but mongo client not available" >&2
+  fi
+fi
+
+# Redis cleanup
+if pgrep redis-server >/dev/null 2>&1; then
+  echo "📮 Redis: Checking connections..." >&2
+
+  if command -v redis-cli &> /dev/null; then
+    CLIENT_COUNT=$(redis-cli CLIENT LIST 2>/dev/null | wc -l || echo "0")
+    echo "📊 Redis: $CLIENT_COUNT connected clients" >&2
+
+    # Optionally close idle clients
+    # redis-cli CLIENT KILL TYPE normal SKIPME yes 2>/dev/null || true
+  else
+    echo "⚠️ Redis running but redis-cli not available" >&2
+  fi
+fi
+
+# Check for database connection strings in environment
+if [ -f ".env" ]; then
+  DB_VARS=$(grep -E "(DATABASE_URL|MONGODB_URI|REDIS_URL|POSTGRES|MYSQL)" .env 2>/dev/null | wc -l || echo "0")
+  if [ "$DB_VARS" -gt 0 ]; then
+    echo "📋 Found $DB_VARS database configuration variables in .env" >&2
+  fi
+fi
+
+echo "✅ Database connection cleanup completed" >&2
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+
+echo "🗄️ Starting database connection cleanup..." >&2
+
+# PostgreSQL cleanup
+if pgrep postgres >/dev/null 2>&1; then
+  echo "🐘 PostgreSQL: Checking connections..." >&2
+
+  # Check if psql is available and we can connect
+  if command -v psql &> /dev/null; then
+    # Count active connections
+    ACTIVE_CONNECTIONS=$(psql -t -c "SELECT count(*) FROM pg_stat_activity WHERE state = 'active' AND pid <> pg_backend_pid();" 2>/dev/null | xargs || echo "0")
+    IDLE_CONNECTIONS=$(psql -t -c "SELECT count(*) FROM pg_stat_activity WHERE state = 'idle' AND pid <> pg_backend_pid();" 2>/dev/null | xargs || echo "0")
+
+    echo "📊 PostgreSQL: $ACTIVE_CONNECTIONS active, $IDLE_CONNECTIONS idle connections" >&2
+
+    # Terminate long-running idle connections (older than 5 minutes)
+    if [ "$IDLE_CONNECTIONS" -gt 0 ]; then
+      TERMINATED=$(psql -t -c "SELECT count(*) FROM (SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE state = 'idle' AND state_change < now() - interval '5 minutes' AND pid <> pg_backend_pid()) t;" 2>/dev/null | xargs || echo "0")
+      if [ "$TERMINATED" -gt 0 ]; then
+        echo "✅ PostgreSQL: Terminated $TERMINATED idle connections" >&2
+      fi
+    fi
+  else
+    echo "⚠️ PostgreSQL running but psql not available" >&2
+  fi
+fi
+
+# MySQL cleanup
+if pgrep mysql >/dev/null 2>&1 || pgrep mysqld >/dev/null 2>&1; then
+  echo "🐬 MySQL: Checking connections..." >&2
+
+  if command -v mysql &> /dev/null; then
+    PROCESSLIST=$(mysql -e "SHOW PROCESSLIST;" 2>/dev/null | grep -c "Sleep" || echo "0")
+    TOTAL_CONNECTIONS=$(mysql -e "SHOW PROCESSLIST;" 2>/dev/null | wc -l || echo "0")
+    echo "📊 MySQL: $TOTAL_CONNECTIONS total connections, $PROCESSLIST sleeping" >&2
+
+    # Kill long-running sleeping connections (optional, requires PROCESS privilege)
+    # mysql -e "KILL CONNECTION_ID;" 2>/dev/null || true
+  else
+    echo "⚠️ MySQL running but mysql client not available" >&2
+  fi
+fi
+
+# MongoDB cleanup
+if pgrep mongod >/dev/null 2>&1; then
+  echo "🍃 MongoDB: Checking connections..." >&2
+
+  if command -v mongosh &> /dev/null; then
+    CONNECTIONS=$(mongosh --quiet --eval "db.currentOp().inprog.length" 2>/dev/null || echo "0")
+    echo "📊 MongoDB: $CONNECTIONS active operations" >&2
+  elif command -v mongo &> /dev/null; then
+    CONNECTIONS=$(mongo --quiet --eval "db.currentOp().inprog.length" 2>/dev/null || echo "0")
+    echo "📊 MongoDB: $CONNECTIONS active operations" >&2
+  else
+    echo "⚠️ MongoDB running but mongo client not available" >&2
+  fi
+fi
+
+# Redis cleanup
+if pgrep redis-server >/dev/null 2>&1; then
+  echo "📮 Redis: Checking connections..." >&2
+
+  if command -v redis-cli &> /dev/null; then
+    CLIENT_COUNT=$(redis-cli CLIENT LIST 2>/dev/null | wc -l || echo "0")
+    echo "📊 Redis: $CLIENT_COUNT connected clients" >&2
+
+    # Optionally close idle clients
+    # redis-cli CLIENT KILL TYPE normal SKIPME yes 2>/dev/null || true
+  else
+    echo "⚠️ Redis running but redis-cli not available" >&2
+  fi
+fi
+
+# Check for database connection strings in environment
+if [ -f ".env" ]; then
+  DB_VARS=$(grep -E "(DATABASE_URL|MONGODB_URI|REDIS_URL|POSTGRES|MYSQL)" .env 2>/dev/null | wc -l || echo "0")
+  if [ "$DB_VARS" -gt 0 ]; then
+    echo "📋 Found $DB_VARS database configuration variables in .env" >&2
+  fi
+fi
+
+echo "✅ Database connection cleanup completed" >&2
+exit 0
+```
+
+## Examples
+### Database Connection Cleanup Hook Script
+
+Complete hook script that closes database connections when session ends
+
+```bash
+#!/usr/bin/env bash
+echo "Starting database connection cleanup..." >&2
+if pgrep postgres >/dev/null 2>&1; then
+  if command -v psql &> /dev/null; then
+    IDLE=$(psql -t -c "SELECT count(*) FROM pg_stat_activity WHERE state = 'idle' AND pid <> pg_backend_pid();" 2>/dev/null | xargs || echo "0")
+    if [ "$IDLE" -gt 0 ]; then
+      psql -t -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE state = 'idle' AND state_change < now() - interval '5 minutes' AND pid <> pg_backend_pid();" 2>/dev/null || true
+      echo "Terminated idle PostgreSQL connections" >&2
+    fi
+  fi
+fi
+exit 0
+```
+
+### Hook Configuration
+
+Complete hook configuration for .claude/settings.json to enable database connection cleanup on session stop
+
+```json
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./.claude/hooks/database-connection-cleanup.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### PostgreSQL Connection Cleanup with Threshold
+
+Enhanced hook script with connection count threshold before cleanup
+
+```bash
+#!/usr/bin/env bash
+echo "Starting database cleanup..." >&2
+if pgrep postgres >/dev/null 2>&1 && command -v psql &> /dev/null; then
+  ACTIVE=$(psql -t -c "SELECT count(*) FROM pg_stat_activity WHERE state = 'active' AND pid <> pg_backend_pid();" 2>/dev/null | xargs || echo "0")
+  IDLE=$(psql -t -c "SELECT count(*) FROM pg_stat_activity WHERE state = 'idle' AND pid <> pg_backend_pid();" 2>/dev/null | xargs || echo "0")
+  echo "PostgreSQL: $ACTIVE active, $IDLE idle connections" >&2
+  if [ "$IDLE" -gt 10 ]; then
+    psql -t -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE state = 'idle' AND state_change < now() - interval '5 minutes' AND pid <> pg_backend_pid();" 2>/dev/null || true
+  fi
+fi
+exit 0
+```
+
+### Redis Connection Cleanup
+
+Enhanced hook script for Redis connection cleanup with idle client detection
+
+```bash
+#!/usr/bin/env bash
+echo "Starting database cleanup..." >&2
+if pgrep redis-server >/dev/null 2>&1 && command -v redis-cli &> /dev/null; then
+  CLIENT_COUNT=$(redis-cli CLIENT LIST 2>/dev/null | wc -l || echo "0")
+  IDLE_CLIENTS=$(redis-cli CLIENT LIST 2>/dev/null | grep -c "idle=" || echo "0")
+  echo "Redis: $CLIENT_COUNT connected clients, $IDLE_CLIENTS idle" >&2
+  if [ "$IDLE_CLIENTS" -gt 5 ]; then
+    redis-cli CLIENT KILL TYPE normal SKIPME yes 2>/dev/null || true
+    echo "Cleaned up idle Redis connections" >&2
+  fi
+fi
+exit 0
+```
+
+### Database Discovery and Cleanup
+
+Enhanced hook script that discovers databases from .env and performs cleanup
+
+```bash
+#!/usr/bin/env bash
+echo "Starting database cleanup..." >&2
+if [ -f ".env" ]; then
+  DB_VARS=$(grep -E "(DATABASE_URL|MONGODB_URI|REDIS_URL|POSTGRES|MYSQL)" .env 2>/dev/null | wc -l || echo "0")
+  if [ "$DB_VARS" -gt 0 ]; then
+    echo "Found $DB_VARS database configuration variables" >&2
+  fi
+fi
+if pgrep postgres >/dev/null 2>&1 && command -v psql &> /dev/null; then
+  psql -t -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE state = 'idle' AND state_change < now() - interval '5 minutes' AND pid <> pg_backend_pid();" 2>/dev/null || true
+fi
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+echo "Starting database connection cleanup..." >&2
+if pgrep postgres >/dev/null 2>&1; then
+  if command -v psql &> /dev/null; then
+    IDLE=$(psql -t -c "SELECT count(*) FROM pg_stat_activity WHERE state = 'idle' AND pid <> pg_backend_pid();" 2>/dev/null | xargs || echo "0")
+    if [ "$IDLE" -gt 0 ]; then
+      psql -t -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE state = 'idle' AND state_change < now() - interval '5 minutes' AND pid <> pg_backend_pid();" 2>/dev/null || true
+      echo "Terminated idle PostgreSQL connections" >&2
+    fi
+  fi
+fi
+exit 0
+```
+```json
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./.claude/hooks/database-connection-cleanup.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+```bash
+#!/usr/bin/env bash
+echo "Starting database cleanup..." >&2
+if pgrep postgres >/dev/null 2>&1 && command -v psql &> /dev/null; then
+  ACTIVE=$(psql -t -c "SELECT count(*) FROM pg_stat_activity WHERE state = 'active' AND pid <> pg_backend_pid();" 2>/dev/null | xargs || echo "0")
+  IDLE=$(psql -t -c "SELECT count(*) FROM pg_stat_activity WHERE state = 'idle' AND pid <> pg_backend_pid();" 2>/dev/null | xargs || echo "0")
+  echo "PostgreSQL: $ACTIVE active, $IDLE idle connections" >&2
+  if [ "$IDLE" -gt 10 ]; then
+    psql -t -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE state = 'idle' AND state_change < now() - interval '5 minutes' AND pid <> pg_backend_pid();" 2>/dev/null || true
+  fi
+fi
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+echo "Starting database cleanup..." >&2
+if pgrep redis-server >/dev/null 2>&1 && command -v redis-cli &> /dev/null; then
+  CLIENT_COUNT=$(redis-cli CLIENT LIST 2>/dev/null | wc -l || echo "0")
+  IDLE_CLIENTS=$(redis-cli CLIENT LIST 2>/dev/null | grep -c "idle=" || echo "0")
+  echo "Redis: $CLIENT_COUNT connected clients, $IDLE_CLIENTS idle" >&2
+  if [ "$IDLE_CLIENTS" -gt 5 ]; then
+    redis-cli CLIENT KILL TYPE normal SKIPME yes 2>/dev/null || true
+    echo "Cleaned up idle Redis connections" >&2
+  fi
+fi
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+echo "Starting database cleanup..." >&2
+if [ -f ".env" ]; then
+  DB_VARS=$(grep -E "(DATABASE_URL|MONGODB_URI|REDIS_URL|POSTGRES|MYSQL)" .env 2>/dev/null | wc -l || echo "0")
+  if [ "$DB_VARS" -gt 0 ]; then
+    echo "Found $DB_VARS database configuration variables" >&2
+  fi
+fi
+if pgrep postgres >/dev/null 2>&1 && command -v psql &> /dev/null; then
+  psql -t -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE state = 'idle' AND state_change < now() - interval '5 minutes' AND pid <> pg_backend_pid();" 2>/dev/null || true
+fi
+exit 0
+```
+
+## Troubleshooting
+### PostgreSQL connections not terminated despite hook execution
+
+Verify psql client is in PATH and can connect without password. Check pg_hba.conf allows local connections. Ensure user has permission to query pg_stat_activity and call pg_terminate_backend. Test manually: psql -c SELECT count(\*) FROM pg_stat_activity. Check PostgreSQL version: upgrade to PostgreSQL 17+ for latest features.
+
+### Stop hook runs but database processes still detected
+
+Hook reports connections but does not stop database servers. Use pgrep to verify process detection works. Check connection cleanup SQL executes successfully. Monitor stderr for command errors. Verify hook script has executable permissions: chmod +x.
+
+### Idle connection count shows zero despite active sessions
+
+Check state filter in pg_stat_activity query matches your PostgreSQL version. Verify 5-minute threshold is appropriate for your workflow. Use psql directly to debug query results: psql -c SELECT state, count(\*) FROM pg_stat_activity GROUP BY state. Check PostgreSQL version compatibility.
+
+### MySQL processlist command fails with access denied
+
+Grant PROCESS privilege to MySQL user: GRANT PROCESS ON _._ TO user@localhost. Verify mysql client connects with correct credentials from .env or environment variables. Check MySQL version: upgrade to MySQL 8.0+ for latest features. Test connection manually: mysql -e SHOW PROCESSLIST.
+
+### MongoDB connection check fails with authentication error
+
+Use mongosh for MongoDB 7.0+ or mongo for older versions. Configure connection string with credentials. Check authentication database matches user creation. Verify network access if using remote MongoDB. Test manually: mongosh --eval db.currentOp().inprog.length. Check MongoDB version compatibility.
+
+### Redis CLIENT LIST command fails with connection refused
+
+Verify Redis server is running: redis-cli ping. Check Redis connection configuration and authentication if required. Verify redis-cli is in PATH. Test connection manually: redis-cli CLIENT LIST. Check Redis version: upgrade to Redis 7.0+ for latest features.
+
+### Hook terminates active connections causing application errors
+
+Add state filter to only terminate idle connections: WHERE state = idle. Increase timeout threshold from 5 minutes to 15 minutes. Add application process exclusion: AND application_name != your_app. Use pg_terminate_backend only for idle connections, not active ones.
+
+### Multiple database types detected but only one cleaned up
+
+Check process detection: verify pgrep commands for each database type. Ensure database client tools are installed for all detected databases. Check hook script logic: verify all database cleanup sections execute. Test each database type individually to isolate issues.

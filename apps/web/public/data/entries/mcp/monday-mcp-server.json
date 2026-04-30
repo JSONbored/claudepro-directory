@@ -1,0 +1,326 @@
+{
+  "schemaVersion": 1,
+  "key": "mcp:monday-mcp-server",
+  "entry": {
+    "category": "mcp",
+    "slug": "monday-mcp-server",
+    "title": "Monday MCP Server for Claude",
+    "description": "Manage monday.com boards, items, and CRM activities",
+    "seoTitle": "Monday MCP Server for Claude",
+    "seoDescription": "Manage monday.com boards, items, and CRM activities Discover tools for AI development. HeyClaude adds source links, install steps, compatibility, and metadata.",
+    "author": "Monday.com",
+    "dateAdded": "2025-09-18",
+    "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+    "tags": [
+      "monday",
+      "project-management",
+      "crm",
+      "workflow",
+      "team-management"
+    ],
+    "keywords": [
+      "claude",
+      "crm",
+      "development",
+      "mcp",
+      "mcp servers",
+      "monday",
+      "project-management",
+      "server",
+      "team-management",
+      "tools",
+      "workflow",
+      "heyclaude"
+    ],
+    "readingTime": 1,
+    "difficultyScore": 6,
+    "documentationUrl": "https://developer.monday.com/apps/docs/mondaycom-mcp-integration",
+    "brandName": "Monday.com",
+    "brandDomain": "monday.com",
+    "brandIconUrl": "/api/brand-assets/icon/monday.com",
+    "brandAssetSource": "brandfetch",
+    "cardDescription": "Manage monday.com boards, items, and CRM activities",
+    "installable": true,
+    "installCommand": "claude mcp list && claude mcp status monday",
+    "usageSnippet": "claude mcp list && claude mcp status monday",
+    "copySnippet": "{\n  \"monday\": {\n    \"url\": \"https://mcp.monday.com/sse\",\n    \"transport\": \"sse\"\n  }\n}",
+    "configSnippet": "{\n  \"monday\": {\n    \"url\": \"https://mcp.monday.com/sse\",\n    \"transport\": \"sse\"\n  }\n}",
+    "estimatedSetupTime": "2 minutes",
+    "difficulty": "beginner",
+    "prerequisites": [
+      "monday.com workspace account (Member role required, not Guest)",
+      "Personal V2 API token (generate from Developer Center or Administration tab) or OAuth credentials for hosted service",
+      "SSE transport support (remote MCP server at https://mcp.monday.com/sse or local npx installation)",
+      "Internet connection (remote monday.com API access required)",
+      "Understanding of monday.com API rate limits (complexity: 10M points/minute for paid accounts, 1M for free/trial; daily calls: 200-25,000 depending on tier)",
+      "Understanding of GraphQL query complexity limits (maximum 5M complexity points per individual query)",
+      "Understanding of monday.com workspace permissions and board access settings",
+      "Claude Desktop 0.7.0+ or Claude Code with MCP support",
+      "Understanding of project management concepts (boards, items, columns, groups, workflows, CRM)",
+      "Optional: Node.js installed for local npx installation (hosted service doesn't require this)"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/mcp/monday-mcp-server.mcpb",
+    "downloadTrust": "first-party",
+    "downloadSha256": "188b737c7620ced286f4fcc8ba38e46bb49f98a62729dfe8af6ce3cfe9b13ec4",
+    "body": "## Content\n\nStreamline your project management and CRM workflows by connecting Claude to monday.com. Create and update board items, manage columns and structure, assign team members, set timelines, track CRM deals, query with advanced GraphQL filters, and automate workflows—all through natural language commands. Leverage monday.com's powerful API with complexity-aware queries and rate limit monitoring.\n\n## Features\n\n- Create and update board items with full metadata (name, status, assignees, dates)\n- Manage board columns and structure (add, update, configure column types)\n- Assign owners and team members to items and boards\n- Set timelines and deadlines with date column management\n- Add CRM activities and track deals (pipeline management)\n- Query boards, items, and groups with advanced GraphQL filters\n- Manage workflows and automations programmatically\n- Access workspace settings and user management (admin operations)\n- Advanced Monday.com board and item management with workflow automation, team collaboration features, and analytics integration\n- Batch operations support for efficient bulk item operations, board management, and workflow automation with automatic rate limit handling and retry logic\n- Real-time board synchronization capabilities with webhook integration support for monitoring Monday.com events and triggering automated workflows\n\n## Use Cases\n\n- Create project items from requirements with automatic metadata population\n- Update task status across boards in bulk operations\n- Assign team members to tasks based on workload and skills\n- Track project timelines visually with deadline management\n- Manage CRM pipeline and activities with deal tracking\n- Query and filter boards using advanced GraphQL queries for project analysis\n- Automate workflow transitions and status updates based on rules\n- Sync monday.com data with external systems via API integration\n- Build automated project management workflows that sync external systems with Monday.com for real-time task tracking and team collaboration\n\n## Installation\n\n### Claude Code\n\n1. Get your Personal V2 API token from Developer Center (profile > Developers > API token)\n2. claude mcp add --transport sse monday https://mcp.monday.com/sse\n3. Authenticate with your API token when prompted (or configure in environment)\n4. Verify installation: claude mcp list\n5. Test connection: claude mcp status monday\n6. Verify access: Ask Claude to list your boards\n\n### Claude Desktop\n\n1. Get your Personal V2 API token from Developer Center (profile > Developers > API token)\n2. Open Claude Desktop configuration file (see configPath below)\n3. Add the Monday server configuration with SSE transport pointing to https://mcp.monday.com/sse\n4. Add API token to environment variables or configuration\n5. Restart Claude Desktop\n6. Authenticate with monday.com when prompted\n7. Verify access: Ask Claude to list your boards\n\n## Requirements\n\n- monday.com workspace account (Member role required, not Guest)\n- Personal V2 API token (generate from Developer Center or Administration tab) or OAuth credentials for hosted service\n- SSE transport support (remote MCP server at https://mcp.monday.com/sse or local npx installation)\n- Internet connection (remote monday.com API access required)\n- Understanding of monday.com API rate limits (complexity: 10M points/minute for paid accounts, 1M for free/trial; daily calls: 200-25,000 depending on tier)\n- Understanding of GraphQL query complexity limits (maximum 5M complexity points per individual query)\n- Understanding of monday.com workspace permissions and board access settings\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Understanding of project management concepts (boards, items, columns, groups, workflows, CRM)\n- Optional: Node.js installed for local npx installation (hosted service doesn't require this)\n\n## Configuration\n\n```json\n{\n  \"monday\": {\n    \"url\": \"https://mcp.monday.com/sse\",\n    \"transport\": \"sse\"\n  }\n}\n```\n\n## Examples\n\n### Create a new item in the Projects board\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Create a new item in the Projects board\"\n```\n\n### Update status to Done for item 12345\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Update status to Done for item 12345\"\n```\n\n### Assign this task to the design team\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Assign this task to the design team\"\n```\n\n### Add CRM activity for client meeting\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Add CRM activity for client meeting\"\n```\n\n### Create Board Item\n\nCreate a new Monday.com board item with column values\n\n```typescript\n// Create Monday.com board item\nconst item = await monday.items.create({\n  board_id: \"board-id\",\n  item_name: \"New Task\",\n  column_values: {\n    status: \"Working on it\",\n    text: \"Task description\",\n  },\n});\n```\n\n## Security\n\n- Personal V2 API token authentication (tokens mirror UI permissions) or OAuth for hosted service\n- Board-level permissions respected (token permissions match your account access)\n- Audit log tracking for all changes (workspace activity logs)\n- Regular permission reviews recommended (verify token access matches requirements)\n- Monitor complexity and rate limit headers to avoid service disruption\n- Monday.com API tokens and personal access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- Monday.com OAuth access tokens should be used for third-party integrations to ensure proper access control, token lifecycle management, and automatic token refresh\n- Monday.com board, item, and workspace IDs may expose organizational structure and project information - ensure Monday.com resource identifiers are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Monday.com MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Monday.com webhook configurations and payloads may contain sensitive board data and item information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption\n\n## Troubleshooting\n\n### API rate limit exceeded - 429 error code returned\n\nComplexity limit: 10M points/minute for paid accounts (personal API tokens), 1M for trial/free/NGO accounts. Daily call limits: 200 (free/trial), 1,000 (standard/basic), 10,000 (pro), 25,000 (enterprise). Check Retry-After header in response to see wait time. Monitor complexity using `complexity` query field. Reduce query complexity or split operations into smaller batches. Use `page` and `limit` arguments to paginate large result sets.\n\n### API token authentication fails or workspace access denied\n\nVerify Personal V2 API token is correctly configured. Generate token from Developer Center (profile > Developers > API token) or Administration tab (for admins). Token permissions mirror your UI permissions. Verify workspace permissions allow API access. Check account has Member role (not Guest). For hosted service, ensure OAuth authentication is properly configured. Contact workspace admin to grant API permissions if needed.\n\n### GraphQL query complexity calculation too high\n\nIndividual query cannot exceed 5M complexity points. Reduce nested fields in queries. Limit items per query to 50-100. Use `complexity { query before after }` field to check costs before execution. Request only data you need. Split complex queries into multiple simpler requests. Utilize `page` and `limit` arguments for pagination. Check monday.com developer docs for complexity calculation guidelines.\n\n### Board or item permissions insufficient for operation\n\nVerify your account has write permissions to specific board. Check board sharing settings allow modifications. Token permissions mirror your UI permissions (board, column, item, account level). Contact board owner to upgrade access level if read-only. Verify you're using correct workspace and board IDs in queries.\n\n### Monday.com MCP server authentication errors with API tokens\n\nVerify API token is valid and not expired. Check token permissions match required operations. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.\n\n### Monday.com rate limit errors when making multiple API calls\n\nImplement exponential backoff retry logic with jitter. Use Monday.com API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed board data. Monday.com allows 25 requests per minute per API token.\n\n### Monday.com board or item access denied errors\n\nVerify API token has access to the board or item. Check board permissions and workspace membership. Ensure API token has required permissions for target operations.\n\n### Monday.com MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Monday.com API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+    "sections": [
+      {
+        "title": "Content",
+        "id": "content",
+        "markdown": "Streamline your project management and CRM workflows by connecting Claude to monday.com. Create and update board items, manage columns and structure, assign team members, set timelines, track CRM deals, query with advanced GraphQL filters, and automate workflows—all through natural language commands. Leverage monday.com's powerful API with complexity-aware queries and rate limit monitoring.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Create and update board items with full metadata (name, status, assignees, dates)\n- Manage board columns and structure (add, update, configure column types)\n- Assign owners and team members to items and boards\n- Set timelines and deadlines with date column management\n- Add CRM activities and track deals (pipeline management)\n- Query boards, items, and groups with advanced GraphQL filters\n- Manage workflows and automations programmatically\n- Access workspace settings and user management (admin operations)\n- Advanced Monday.com board and item management with workflow automation, team collaboration features, and analytics integration\n- Batch operations support for efficient bulk item operations, board management, and workflow automation with automatic rate limit handling and retry logic\n- Real-time board synchronization capabilities with webhook integration support for monitoring Monday.com events and triggering automated workflows",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Create project items from requirements with automatic metadata population\n- Update task status across boards in bulk operations\n- Assign team members to tasks based on workload and skills\n- Track project timelines visually with deadline management\n- Manage CRM pipeline and activities with deal tracking\n- Query and filter boards using advanced GraphQL queries for project analysis\n- Automate workflow transitions and status updates based on rules\n- Sync monday.com data with external systems via API integration\n- Build automated project management workflows that sync external systems with Monday.com for real-time task tracking and team collaboration",
+        "codeBlocks": []
+      },
+      {
+        "title": "Installation",
+        "id": "installation",
+        "markdown": "### Claude Code\n\n1. Get your Personal V2 API token from Developer Center (profile > Developers > API token)\n2. claude mcp add --transport sse monday https://mcp.monday.com/sse\n3. Authenticate with your API token when prompted (or configure in environment)\n4. Verify installation: claude mcp list\n5. Test connection: claude mcp status monday\n6. Verify access: Ask Claude to list your boards\n\n### Claude Desktop\n\n1. Get your Personal V2 API token from Developer Center (profile > Developers > API token)\n2. Open Claude Desktop configuration file (see configPath below)\n3. Add the Monday server configuration with SSE transport pointing to https://mcp.monday.com/sse\n4. Add API token to environment variables or configuration\n5. Restart Claude Desktop\n6. Authenticate with monday.com when prompted\n7. Verify access: Ask Claude to list your boards",
+        "codeBlocks": []
+      },
+      {
+        "title": "Requirements",
+        "id": "requirements",
+        "markdown": "- monday.com workspace account (Member role required, not Guest)\n- Personal V2 API token (generate from Developer Center or Administration tab) or OAuth credentials for hosted service\n- SSE transport support (remote MCP server at https://mcp.monday.com/sse or local npx installation)\n- Internet connection (remote monday.com API access required)\n- Understanding of monday.com API rate limits (complexity: 10M points/minute for paid accounts, 1M for free/trial; daily calls: 200-25,000 depending on tier)\n- Understanding of GraphQL query complexity limits (maximum 5M complexity points per individual query)\n- Understanding of monday.com workspace permissions and board access settings\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Understanding of project management concepts (boards, items, columns, groups, workflows, CRM)\n- Optional: Node.js installed for local npx installation (hosted service doesn't require this)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Configuration",
+        "id": "configuration",
+        "markdown": "```json\n{\n  \"monday\": {\n    \"url\": \"https://mcp.monday.com/sse\",\n    \"transport\": \"sse\"\n  }\n}\n```",
+        "codeBlocks": [
+          {
+            "language": "json",
+            "code": "{\n  \"monday\": {\n    \"url\": \"https://mcp.monday.com/sse\",\n    \"transport\": \"sse\"\n  }\n}"
+          }
+        ]
+      },
+      {
+        "title": "Examples",
+        "id": "examples",
+        "markdown": "### Create a new item in the Projects board\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Create a new item in the Projects board\"\n```\n\n### Update status to Done for item 12345\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Update status to Done for item 12345\"\n```\n\n### Assign this task to the design team\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Assign this task to the design team\"\n```\n\n### Add CRM activity for client meeting\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Add CRM activity for client meeting\"\n```\n\n### Create Board Item\n\nCreate a new Monday.com board item with column values\n\n```typescript\n// Create Monday.com board item\nconst item = await monday.items.create({\n  board_id: \"board-id\",\n  item_name: \"New Task\",\n  column_values: {\n    status: \"Working on it\",\n    text: \"Task description\",\n  },\n});\n```",
+        "codeBlocks": [
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Create a new item in the Projects board\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Update status to Done for item 12345\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Assign this task to the design team\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Add CRM activity for client meeting\""
+          },
+          {
+            "language": "typescript",
+            "code": "// Create Monday.com board item\nconst item = await monday.items.create({\n  board_id: \"board-id\",\n  item_name: \"New Task\",\n  column_values: {\n    status: \"Working on it\",\n    text: \"Task description\",\n  },\n});"
+          }
+        ]
+      },
+      {
+        "title": "Security",
+        "id": "security",
+        "markdown": "- Personal V2 API token authentication (tokens mirror UI permissions) or OAuth for hosted service\n- Board-level permissions respected (token permissions match your account access)\n- Audit log tracking for all changes (workspace activity logs)\n- Regular permission reviews recommended (verify token access matches requirements)\n- Monitor complexity and rate limit headers to avoid service disruption\n- Monday.com API tokens and personal access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- Monday.com OAuth access tokens should be used for third-party integrations to ensure proper access control, token lifecycle management, and automatic token refresh\n- Monday.com board, item, and workspace IDs may expose organizational structure and project information - ensure Monday.com resource identifiers are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Monday.com MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Monday.com webhook configurations and payloads may contain sensitive board data and item information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "### API rate limit exceeded - 429 error code returned\n\nComplexity limit: 10M points/minute for paid accounts (personal API tokens), 1M for trial/free/NGO accounts. Daily call limits: 200 (free/trial), 1,000 (standard/basic), 10,000 (pro), 25,000 (enterprise). Check Retry-After header in response to see wait time. Monitor complexity using `complexity` query field. Reduce query complexity or split operations into smaller batches. Use `page` and `limit` arguments to paginate large result sets.\n\n### API token authentication fails or workspace access denied\n\nVerify Personal V2 API token is correctly configured. Generate token from Developer Center (profile > Developers > API token) or Administration tab (for admins). Token permissions mirror your UI permissions. Verify workspace permissions allow API access. Check account has Member role (not Guest). For hosted service, ensure OAuth authentication is properly configured. Contact workspace admin to grant API permissions if needed.\n\n### GraphQL query complexity calculation too high\n\nIndividual query cannot exceed 5M complexity points. Reduce nested fields in queries. Limit items per query to 50-100. Use `complexity { query before after }` field to check costs before execution. Request only data you need. Split complex queries into multiple simpler requests. Utilize `page` and `limit` arguments for pagination. Check monday.com developer docs for complexity calculation guidelines.\n\n### Board or item permissions insufficient for operation\n\nVerify your account has write permissions to specific board. Check board sharing settings allow modifications. Token permissions mirror your UI permissions (board, column, item, account level). Contact board owner to upgrade access level if read-only. Verify you're using correct workspace and board IDs in queries.\n\n### Monday.com MCP server authentication errors with API tokens\n\nVerify API token is valid and not expired. Check token permissions match required operations. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.\n\n### Monday.com rate limit errors when making multiple API calls\n\nImplement exponential backoff retry logic with jitter. Use Monday.com API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed board data. Monday.com allows 25 requests per minute per API token.\n\n### Monday.com board or item access denied errors\n\nVerify API token has access to the board or item. Check board permissions and workspace membership. Ensure API token has required permissions for target operations.\n\n### Monday.com MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Monday.com API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Content",
+        "id": "content"
+      },
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      },
+      {
+        "depth": 2,
+        "text": "Installation",
+        "id": "installation"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Code",
+        "id": "claude-code"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Desktop",
+        "id": "claude-desktop"
+      },
+      {
+        "depth": 2,
+        "text": "Requirements",
+        "id": "requirements"
+      },
+      {
+        "depth": 2,
+        "text": "Configuration",
+        "id": "configuration"
+      },
+      {
+        "depth": 2,
+        "text": "Examples",
+        "id": "examples"
+      },
+      {
+        "depth": 3,
+        "text": "Create a new item in the Projects board",
+        "id": "create-a-new-item-in-the-projects-board"
+      },
+      {
+        "depth": 3,
+        "text": "Update status to Done for item 12345",
+        "id": "update-status-to-done-for-item-12345"
+      },
+      {
+        "depth": 3,
+        "text": "Assign this task to the design team",
+        "id": "assign-this-task-to-the-design-team"
+      },
+      {
+        "depth": 3,
+        "text": "Add CRM activity for client meeting",
+        "id": "add-crm-activity-for-client-meeting"
+      },
+      {
+        "depth": 3,
+        "text": "Create Board Item",
+        "id": "create-board-item"
+      },
+      {
+        "depth": 2,
+        "text": "Security",
+        "id": "security"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 3,
+        "text": "API rate limit exceeded - 429 error code returned",
+        "id": "api-rate-limit-exceeded---429-error-code-returned"
+      },
+      {
+        "depth": 3,
+        "text": "API token authentication fails or workspace access denied",
+        "id": "api-token-authentication-fails-or-workspace-access-denied"
+      },
+      {
+        "depth": 3,
+        "text": "GraphQL query complexity calculation too high",
+        "id": "graphql-query-complexity-calculation-too-high"
+      },
+      {
+        "depth": 3,
+        "text": "Board or item permissions insufficient for operation",
+        "id": "board-or-item-permissions-insufficient-for-operation"
+      },
+      {
+        "depth": 3,
+        "text": "Monday.com MCP server authentication errors with API tokens",
+        "id": "mondaycom-mcp-server-authentication-errors-with-api-tokens"
+      },
+      {
+        "depth": 3,
+        "text": "Monday.com rate limit errors when making multiple API calls",
+        "id": "mondaycom-rate-limit-errors-when-making-multiple-api-calls"
+      },
+      {
+        "depth": 3,
+        "text": "Monday.com board or item access denied errors",
+        "id": "mondaycom-board-or-item-access-denied-errors"
+      },
+      {
+        "depth": 3,
+        "text": "Monday.com MCP server connection timeouts or network errors",
+        "id": "mondaycom-mcp-server-connection-timeouts-or-network-errors"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "json",
+        "code": "{\n  \"monday\": {\n    \"url\": \"https://mcp.monday.com/sse\",\n    \"transport\": \"sse\"\n  }\n}"
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Create a new item in the Projects board\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Update status to Done for item 12345\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Assign this task to the design team\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Add CRM activity for client meeting\""
+      },
+      {
+        "language": "typescript",
+        "code": "// Create Monday.com board item\nconst item = await monday.items.create({\n  board_id: \"board-id\",\n  item_name: \"New Task\",\n  column_values: {\n    status: \"Working on it\",\n    text: \"Task description\",\n  },\n});"
+      }
+    ],
+    "filePath": "content/mcp/monday-mcp-server.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/monday-mcp-server.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": true,
+    "packageTrust": "first-party",
+    "packageChecksum": "188b737c7620ced286f4fcc8ba38e46bb49f98a62729dfe8af6ce3cfe9b13ec4",
+    "checksumPresent": true,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://developer.monday.com/apps/docs/mondaycom-mcp-integration",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/monday-mcp-server.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

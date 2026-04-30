@@ -1,0 +1,97 @@
+# n8n Production Security Capability Pack Skill
+URL: https://heyclau.de/skills/n8n-production-security-capability-pack
+Category: skills
+Author: JSONbored
+Date added: 2026-04-10
+Documentation: https://docs.n8n.io/hosting/securing/
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/n8n-production-security-capability-pack.mdx
+Download: /downloads/skills/n8n-production-security-capability-pack.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/n8n-production-security-capability-pack
+- Source URLs: https://docs.n8n.io/hosting/securing/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/n8n-production-security-capability-pack.mdx
+- Brand: n8n
+- Brand domain: n8n.io
+- Brand asset source: brandfetch
+- Package URL: /downloads/skills/n8n-production-security-capability-pack.zip
+- Package SHA256: a4563ec065238789a4e01fa371b8681b120f9141ab6bd415563d8e1bb966e74a
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-10
+- Robots: indexable
+## Summary
+Expert n8n capability skill focused on secure production operation, workflow isolation, secret hygiene, and abuse-resistant automation design.
+## Tags
+- n8n
+- security
+- automation
+- ai-workflows
+- capability-pack
+## Content
+## Knowledge Freshness
+This capability pack is pinned to documentation verified on **2026-04-10**.
+When upstream docs change, refresh endpoint contracts, examples, and constraints before using this skill for production changes.
+
+## Retrieval Sources
+- https://docs.n8n.io/hosting/securing/overview/
+- https://docs.n8n.io/hosting/configuration/environment-variables/
+- https://docs.n8n.io/advanced-ai/
+
+Always prefer direct retrieval from official docs/API references over model memory for limits, endpoint signatures, and behavior guarantees.
+
+## Core Workflow
+1. Confirm target version/runtime and pull latest official docs for the task scope.
+2. Build an execution plan with explicit read-only discovery before any mutation.
+3. Validate contracts, permissions, and safety constraints before applying changes.
+4. Execute with deterministic checkpoints and rollback criteria.
+5. Produce a verification report with evidence, caveats, and next actions.
+
+## Overview
+This capability pack teaches an agent how to operate n8n securely in production. It is focused on practical controls that reduce breach risk and workflow abuse without destroying usability.
+
+## Capability Scope
+- Credential handling and secret lifecycle
+- Workflow-level blast-radius reduction
+- AI node risk boundaries
+- Code node and custom logic controls
+- Logging, alerts, and forensic readiness
+
+## Compatibility
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Production Rules
+- Keep credentials segmented by workflow purpose.
+- Gate destructive actions behind explicit approval.
+- Validate AI output before external writes.
+- Preserve full workflow execution traceability.
+
+## Troubleshooting
+**Issue:** Credential leaks through logs or outputs  
+**Fix:** Redact sensitive fields and disable verbose logging for secure paths.
+
+**Issue:** AI node triggers unintended side effects  
+**Fix:** Add deterministic validation/approval stage before mutation nodes.
+
+**Issue:** Hard to scope incident impact  
+**Fix:** Isolate workflows by domain and use least-privilege credentials.
+
+## Output Contract
+1. Provide an implementation plan ordered by risk and dependency.
+2. Provide exact production-ready config/commands with no placeholders.
+3. Call out secrets, permissions, and least-privilege requirements.
+4. Include rollback and recovery guidance for each risky step.
+
+## Validation Checklist
+- Verify all referenced docs/versions before applying changes.
+- Run regression checks for core user flow and error paths.
+- Confirm observability/logging is enabled for changed components.
+- Confirm security controls (auth, rate limits, input validation) still pass.
+- Record final known limitations and follow-up actions.

@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "key": "tools:cloudflare-agents-sdk",
+  "entry": {
+    "category": "tools",
+    "slug": "cloudflare-agents-sdk",
+    "title": "Cloudflare Agents SDK",
+    "description": "Cloudflare framework for building, deploying, and running AI agents on Workers with durable platform primitives.",
+    "seoTitle": "Cloudflare Agents SDK for AI agents",
+    "seoDescription": "Cloudflare Agents SDK helps build, deploy, and run AI agents on Workers with Cloudflare platform primitives. HeyClaude adds source links, install steps,...",
+    "author": "Cloudflare",
+    "dateAdded": "2026-04-27",
+    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+    "tags": [
+      "agent-framework",
+      "cloudflare"
+    ],
+    "keywords": [
+      "ai agents cloudflare",
+      "workers agents",
+      "agent-framework",
+      "cloudflare",
+      "tools",
+      "claude",
+      "heyclaude",
+      "cloudflare agents sdk"
+    ],
+    "documentationUrl": "https://developers.cloudflare.com/agents/",
+    "websiteUrl": "https://developers.cloudflare.com/agents/",
+    "brandName": "Cloudflare",
+    "brandDomain": "developers.cloudflare.com",
+    "brandIconUrl": "/api/brand-assets/icon/developers.cloudflare.com",
+    "brandAssetSource": "brandfetch",
+    "pricingModel": "freemium",
+    "disclosure": "editorial",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Web",
+    "cardDescription": "Framework for building AI agents on Cloudflare Workers.",
+    "installable": false,
+    "hasPrerequisites": false,
+    "hasTroubleshooting": false,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Editorial notes\n\nCloudflare Agents SDK is relevant for teams that want agent runtimes close to edge compute, durable objects, and serverless deployment.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+    "sections": [
+      {
+        "title": "Editorial notes",
+        "id": "editorial-notes",
+        "markdown": "Cloudflare Agents SDK is relevant for teams that want agent runtimes close to edge compute, durable objects, and serverless deployment.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Disclosure",
+        "id": "disclosure",
+        "markdown": "Editorial listing. No paid placement or affiliate link is used.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Editorial notes",
+        "id": "editorial-notes"
+      },
+      {
+        "depth": 2,
+        "text": "Disclosure",
+        "id": "disclosure"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/tools/cloudflare-agents-sdk.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/cloudflare-agents-sdk.mdx",
+    "repoUrl": "https://github.com/cloudflare/agents",
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 3,
+    "sourceUrls": [
+      "https://developers.cloudflare.com/agents/",
+      "https://github.com/cloudflare/agents",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/cloudflare-agents-sdk.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

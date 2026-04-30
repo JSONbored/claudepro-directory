@@ -1,4 +1,12 @@
 import { SnippetCard } from "@/components/snippet-card";
+import {
+  extractSectionSubitems,
+  findNextH3Start,
+  getEmbeddedSectionType,
+  htmlBeforeFirstH3,
+  stripSectionTypeComments,
+} from "@/lib/content-section-parsing";
+import { htmlToPlainText } from "@/lib/detail-assembly";
 
 type ContentSection = {
   title: string;
@@ -14,12 +22,6 @@ type ContentSection = {
 type ContentSectionsProps = {
   sections: ContentSection[];
   omitCode?: string[];
-};
-
-type SectionSubitem = {
-  id: string;
-  title: string;
-  html: string;
 };
 
 function getSectionVariant(title: string) {
@@ -38,68 +40,48 @@ function getSectionVariant(title: string) {
   ) {
     return "warning";
   }
-  if (normalized.includes("troubleshooting") || normalized.includes("common issues")) {
+  if (
+    normalized.includes("troubleshooting") ||
+    normalized.includes("common issues")
+  ) {
     return "troubleshooting";
   }
   return "default";
 }
 
-function stripTags(value: string) {
-  return value.replace(/<[^>]+>/g, "").trim();
-}
-
-function getEmbeddedSectionType(html: string) {
-  const match = html.match(/Section type:\s*([a-z_]+)/i);
-  return match?.[1]?.toLowerCase() ?? null;
-}
-
-function stripSectionTypeComments(html: string) {
-  return html.replace(/<!--\s*Section type:\s*[a-z_]+\s*-->/gi, "").trim();
-}
-
-function extractSectionSubitems(html: string, sectionId: string): SectionSubitem[] {
-  if (!html.includes("<h3")) return [];
-
-  const pieces = html.split(/(?=<h3\b)/);
-  const items: SectionSubitem[] = [];
-
-  for (const piece of pieces) {
-    if (!piece.trim().startsWith("<h3")) continue;
-    const match = piece.match(/<h3[^>]*id="([^"]+)"[^>]*>(.*?)<\/h3>/i);
-    const fallbackTitle = stripTags(piece).split("\n")[0] || "Troubleshooting item";
-    items.push({
-      id: match?.[1] || `${sectionId}-${items.length + 1}`,
-      title: stripTags(match?.[2] || fallbackTitle),
-      html: piece.replace(/<h3[^>]*>.*?<\/h3>/i, "").trim()
-    });
-  }
-
-  return items.filter((item) => item.html.length > 0);
-}
-
-export function ContentSections({ sections, omitCode = [] }: ContentSectionsProps) {
+export function ContentSections({
+  sections,
+  omitCode = [],
+}: ContentSectionsProps) {
   return (
     <div className="space-y-6">
       {sections.map((section, index) => {
         const embeddedType = getEmbeddedSectionType(section.html);
         const cleanHtml = stripSectionTypeComments(section.html);
         const cleanProseHtml = stripSectionTypeComments(section.proseHtml);
-        const hasProse = cleanProseHtml.replace(/<[^>]+>/g, "").trim().length > 0;
+        const hasProse = htmlToPlainText(cleanProseHtml).length > 0;
         const variant = embeddedType ?? getSectionVariant(section.title);
-        const sectionSubitems = cleanHtml.includes("<h3")
-          ? extractSectionSubitems(cleanHtml, section.id)
-          : [];
+        const sectionSubitems =
+          findNextH3Start(cleanHtml) >= 0
+            ? extractSectionSubitems(cleanHtml, section.id)
+            : [];
         const renderedCode =
           sectionSubitems.length > 0
             ? []
-            : section.codeBlocks.filter((block) => !omitCode.includes(block.code.trim()));
+            : section.codeBlocks.filter(
+                (block) => !omitCode.includes(block.code.trim()),
+              );
         const proseHtml =
           sectionSubitems.length > 0
-            ? cleanProseHtml.split(/(?=<h3\b)/)[0].trim()
+            ? htmlBeforeFirstH3(cleanProseHtml)
             : cleanProseHtml;
-        const hasProseAfterSplit = proseHtml.replace(/<[^>]+>/g, "").trim().length > 0;
+        const hasProseAfterSplit = htmlToPlainText(proseHtml).length > 0;
 
-        if (!hasProse && renderedCode.length === 0 && sectionSubitems.length === 0) {
+        if (
+          !hasProse &&
+          renderedCode.length === 0 &&
+          sectionSubitems.length === 0
+        ) {
           return null;
         }
 
@@ -107,7 +89,11 @@ export function ContentSections({ sections, omitCode = [] }: ContentSectionsProp
           <section key={section.id} id={section.id} className="scroll-mt-28">
             <details
               className={`section-card section-card-${variant}`}
-              open={index < 2 || variant === "warning" || variant === "quick_reference"}
+              open={
+                index < 2 ||
+                variant === "warning" ||
+                variant === "quick_reference"
+              }
             >
               <summary className="section-card-summary">
                 <div>

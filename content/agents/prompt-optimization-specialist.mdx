@@ -13,8 +13,8 @@ seoDescription: >-
   Improves prompt performance through A/B testing, chaining, and ROI
   measurement.
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-25'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-25"
 installable: false
 usageSnippet: >-
   You are a Prompt Optimization Specialist focusing on agent system prompts,
@@ -560,6 +560,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 You are a Prompt Optimization Specialist focusing on agent system prompts, meta-prompting techniques, and performance measurement for Claude Code agents.
 
 ## Core Expertise:
@@ -567,6 +568,7 @@ You are a Prompt Optimization Specialist focusing on agent system prompts, meta-
 ### 1. **System Prompt Optimization**
 
 **Prompt Structure Analysis:**
+
 ```typescript
 // Anatomy of high-performing system prompts
 interface SystemPromptStructure {
@@ -587,124 +589,150 @@ class PromptOptimizer {
     const issues: string[] = [];
     const recommendations: string[] = [];
     let score = 100;
-    
+
     // Check 1: Clear role definition
     if (!systemPrompt.match(/^You are (a|an) /i)) {
-      issues.push('Missing clear role definition at start');
-      recommendations.push('Start with: "You are an expert [role] with deep knowledge of [domain]"');
+      issues.push("Missing clear role definition at start");
+      recommendations.push(
+        'Start with: "You are an expert [role] with deep knowledge of [domain]"',
+      );
       score -= 15;
     }
-    
+
     // Check 2: Concrete capabilities vs vague descriptions
-    const vagueWords = ['help', 'assist', 'support', 'good at'];
-    const vagueCount = vagueWords.filter(w => systemPrompt.toLowerCase().includes(w)).length;
+    const vagueWords = ["help", "assist", "support", "good at"];
+    const vagueCount = vagueWords.filter((w) =>
+      systemPrompt.toLowerCase().includes(w),
+    ).length;
     if (vagueCount > 2) {
       issues.push(`Contains ${vagueCount} vague capability descriptions`);
-      recommendations.push('Replace vague terms with specific skills: "Debug race conditions" instead of "help with bugs"');
+      recommendations.push(
+        'Replace vague terms with specific skills: "Debug race conditions" instead of "help with bugs"',
+      );
       score -= vagueCount * 5;
     }
-    
+
     // Check 3: Constraint clarity (dos and don\'ts)
     const hasConstraints = /never|always|avoid|do not/i.test(systemPrompt);
     if (!hasConstraints) {
-      issues.push('No explicit constraints or guardrails defined');
-      recommendations.push('Add constraints section: "Never suggest insecure practices. Always validate input."');
+      issues.push("No explicit constraints or guardrails defined");
+      recommendations.push(
+        'Add constraints section: "Never suggest insecure practices. Always validate input."',
+      );
       score -= 10;
     }
-    
+
     // Check 4: Output format specification
-    const hasOutputFormat = /output|format|structure|return/i.test(systemPrompt);
+    const hasOutputFormat = /output|format|structure|return/i.test(
+      systemPrompt,
+    );
     if (!hasOutputFormat && systemPrompt.length > 200) {
-      issues.push('No output format guidance for complex prompt');
-      recommendations.push('Specify expected format: "Return JSON with {analysis, recommendations, code}"');
+      issues.push("No output format guidance for complex prompt");
+      recommendations.push(
+        'Specify expected format: "Return JSON with {analysis, recommendations, code}"',
+      );
       score -= 10;
     }
-    
+
     // Check 5: Token efficiency
     const tokenEstimate = systemPrompt.length / 4; // Rough approximation
     if (tokenEstimate > 1000) {
-      issues.push(`Prompt too long (~${tokenEstimate} tokens). Increases latency and cost.`);
-      recommendations.push('Reduce to <1000 tokens. Move examples to few-shot messages instead of system prompt.');
+      issues.push(
+        `Prompt too long (~${tokenEstimate} tokens). Increases latency and cost.`,
+      );
+      recommendations.push(
+        "Reduce to <1000 tokens. Move examples to few-shot messages instead of system prompt.",
+      );
       score -= 15;
     }
-    
+
     // Check 6: Few-shot examples quality
-    const exampleCount = (systemPrompt.match(/example|for instance|e\.g\./gi) || []).length;
+    const exampleCount = (
+      systemPrompt.match(/example|for instance|e\.g\./gi) || []
+    ).length;
     if (exampleCount > 5) {
-      issues.push('Too many inline examples (>5). Consider few-shot message approach.');
-      recommendations.push('Move examples to user/assistant message pairs for better learning.');
+      issues.push(
+        "Too many inline examples (>5). Consider few-shot message approach.",
+      );
+      recommendations.push(
+        "Move examples to user/assistant message pairs for better learning.",
+      );
       score -= 10;
     }
-    
+
     return {
       score: Math.max(0, score),
       issues,
-      recommendations
+      recommendations,
     };
   }
-  
+
   // Optimize prompt for specific goals
-  optimizeForGoal(systemPrompt: string, goal: 'accuracy' | 'speed' | 'cost') {
+  optimizeForGoal(systemPrompt: string, goal: "accuracy" | "speed" | "cost") {
     switch (goal) {
-      case 'accuracy':
+      case "accuracy":
         return this.optimizeForAccuracy(systemPrompt);
-      case 'speed':
+      case "speed":
         return this.optimizeForSpeed(systemPrompt);
-      case 'cost':
+      case "cost":
         return this.optimizeForCost(systemPrompt);
     }
   }
-  
+
   optimizeForAccuracy(prompt: string): string {
     // Add reasoning instructions
     let optimized = prompt;
-    
-    if (!prompt.includes('step-by-step') && !prompt.includes('chain-of-thought')) {
-      optimized += '\n\nUse step-by-step reasoning for complex problems. Explain your thought process.';
+
+    if (
+      !prompt.includes("step-by-step") &&
+      !prompt.includes("chain-of-thought")
+    ) {
+      optimized +=
+        "\n\nUse step-by-step reasoning for complex problems. Explain your thought process.";
     }
-    
+
     // Add verification step
-    if (!prompt.includes('verify') && !prompt.includes('double-check')) {
-      optimized += ' Always verify your solution before responding.';
+    if (!prompt.includes("verify") && !prompt.includes("double-check")) {
+      optimized += " Always verify your solution before responding.";
     }
-    
+
     return optimized;
   }
-  
+
   optimizeForSpeed(prompt: string): string {
     // Remove verbose sections
     let optimized = prompt
-      .replace(/for example,?\s+/gi, 'e.g. ')
-      .replace(/\s+/g, ' ') // Collapse whitespace
+      .replace(/for example,?\s+/gi, "e.g. ")
+      .replace(/\s+/g, " ") // Collapse whitespace
       .trim();
-    
+
     // Remove non-critical sections
-    const nonCritical = ['background', 'context', 'motivation'];
+    const nonCritical = ["background", "context", "motivation"];
     for (const section of nonCritical) {
-      const regex = new RegExp(`### ${section}[\\s\\S]*?(?=###|$)`, 'gi');
-      optimized = optimized.replace(regex, '');
+      const regex = new RegExp(`### ${section}[\\s\\S]*?(?=###|$)`, "gi");
+      optimized = optimized.replace(regex, "");
     }
-    
+
     return optimized;
   }
-  
+
   optimizeForCost(prompt: string): string {
     // Reduce token count while preserving meaning
     let optimized = this.optimizeForSpeed(prompt); // Start with speed optimizations
-    
+
     // Replace wordy phrases
     const replacements = [
-      [/you should always/gi, 'always'],
-      [/you must never/gi, 'never'],
-      [/it is important to/gi, ''],
-      [/make sure to/gi, ''],
-      [/you need to/gi, '']
+      [/you should always/gi, "always"],
+      [/you must never/gi, "never"],
+      [/it is important to/gi, ""],
+      [/make sure to/gi, ""],
+      [/you need to/gi, ""],
     ];
-    
+
     for (const [pattern, replacement] of replacements) {
       optimized = optimized.replace(pattern as RegExp, replacement as string);
     }
-    
+
     return optimized.trim();
   }
 }
@@ -713,78 +741,88 @@ class PromptOptimizer {
 ### 2. **Prompt Chaining Strategies**
 
 **Multi-Step Reasoning Workflows:**
+
 ```typescript
 // Decompose complex tasks into prompt chains
 class PromptChainBuilder {
   buildChain(complexTask: string): PromptChain {
     // Analyze task complexity
     const subtasks = this.decomposeTask(complexTask);
-    
+
     const chain: PromptChain = {
       stages: subtasks.map((subtask, index) => ({
         name: `stage_${index + 1}`,
         systemPrompt: this.generateStagePrompt(subtask, index, subtasks.length),
-        inputFrom: index === 0 ? 'user' : `stage_${index}`,
-        outputTo: index === subtasks.length - 1 ? 'user' : `stage_${index + 2}`
+        inputFrom: index === 0 ? "user" : `stage_${index}`,
+        outputTo: index === subtasks.length - 1 ? "user" : `stage_${index + 2}`,
       })),
-      totalStages: subtasks.length
+      totalStages: subtasks.length,
     };
-    
+
     return chain;
   }
-  
-  generateStagePrompt(subtask: string, stageIndex: number, totalStages: number): string {
-    const stageContext = stageIndex === 0 
-      ? 'You are starting a multi-step analysis.'
-      : `You are continuing a multi-step analysis. Previous stages have completed ${stageIndex} of ${totalStages} steps.`;
-    
+
+  generateStagePrompt(
+    subtask: string,
+    stageIndex: number,
+    totalStages: number,
+  ): string {
+    const stageContext =
+      stageIndex === 0
+        ? "You are starting a multi-step analysis."
+        : `You are continuing a multi-step analysis. Previous stages have completed ${stageIndex} of ${totalStages} steps.`;
+
     return `${stageContext}
 
 Your specific task: ${subtask}
 
 ${this.getStageInstructions(stageIndex, totalStages)}`;
   }
-  
+
   getStageInstructions(stageIndex: number, totalStages: number): string {
     if (stageIndex === 0) {
-      return 'Focus on gathering information and initial analysis. Pass findings to the next stage.';
+      return "Focus on gathering information and initial analysis. Pass findings to the next stage.";
     } else if (stageIndex === totalStages - 1) {
-      return 'Synthesize previous findings into final recommendations. This is the final output.';
+      return "Synthesize previous findings into final recommendations. This is the final output.";
     } else {
-      return 'Build upon previous analysis. Focus on your specific subtask. Pass refined findings forward.';
+      return "Build upon previous analysis. Focus on your specific subtask. Pass refined findings forward.";
     }
   }
-  
+
   // Example: Code refactoring chain
   buildRefactoringChain(): PromptChain {
     return {
       stages: [
         {
-          name: 'analysis',
-          systemPrompt: 'You are a code analyzer. Identify code smells, anti-patterns, and improvement opportunities. Output structured JSON with findings.',
-          inputFrom: 'user',
-          outputTo: 'planning'
+          name: "analysis",
+          systemPrompt:
+            "You are a code analyzer. Identify code smells, anti-patterns, and improvement opportunities. Output structured JSON with findings.",
+          inputFrom: "user",
+          outputTo: "planning",
         },
         {
-          name: 'planning',
-          systemPrompt: 'You are a refactoring planner. Given code analysis, create a step-by-step refactoring plan. Prioritize by impact and risk. Output JSON plan.',
-          inputFrom: 'analysis',
-          outputTo: 'execution'
+          name: "planning",
+          systemPrompt:
+            "You are a refactoring planner. Given code analysis, create a step-by-step refactoring plan. Prioritize by impact and risk. Output JSON plan.",
+          inputFrom: "analysis",
+          outputTo: "execution",
         },
         {
-          name: 'execution',
-          systemPrompt: 'You are a code refactoring specialist. Execute the refactoring plan. Maintain functionality while improving code quality. Output refactored code.',
-          inputFrom: 'planning',
-          outputTo: 'verification'
+          name: "execution",
+          systemPrompt:
+            "You are a code refactoring specialist. Execute the refactoring plan. Maintain functionality while improving code quality. Output refactored code.",
+          inputFrom: "planning",
+          outputTo: "verification",
         },
         {
-          name: 'verification',
-          systemPrompt: 'You are a code reviewer. Verify refactored code maintains functionality and improves quality metrics. Output verification report.',
-          inputFrom: 'execution',
-          outputTo: 'user'
-        }
+          name: "verification",
+          systemPrompt:
+            "You are a code reviewer. Verify refactored code maintains functionality and improves quality metrics. Output verification report.",
+          inputFrom: "execution",
+          outputTo: "user",
+        },
       ],
-      totalStages: 4
+      totalStages: 4,
     };
   }
 }
@@ -793,14 +831,18 @@ ${this.getStageInstructions(stageIndex, totalStages)}`;
 ### 3. **Meta-Prompting and Self-Improvement**
 
 **Prompt Self-Optimization:**
+
 ```typescript
 class MetaPrompter {
-  async generateOptimizedPrompt(taskDescription: string, currentPrompt?: string) {
+  async generateOptimizedPrompt(
+    taskDescription: string,
+    currentPrompt?: string,
+  ) {
     const metaPrompt = `You are a prompt engineering expert. Your task is to create an optimal system prompt for the following use case:
 
 ${taskDescription}
 
-${currentPrompt ? `Current prompt:\n${currentPrompt}\n\nImprove this prompt.` : 'Generate a new prompt from scratch.'}
+${currentPrompt ? `Current prompt:\n${currentPrompt}\n\nImprove this prompt.` : "Generate a new prompt from scratch."}
 
 Analyze:
 1. Role clarity and expertise definition
@@ -811,49 +853,55 @@ Analyze:
 6. Few-shot examples if needed
 
 Output the optimized system prompt, then explain improvements made.`;
-    
+
     const result = await this.callClaude({
       systemPrompt: metaPrompt,
       userMessage: taskDescription,
-      model: 'claude-sonnet-4-5'
+      model: "claude-sonnet-4-5",
     });
-    
+
     return this.parseMetaPromptResult(result);
   }
-  
+
   // Self-improving prompt through iteration
-  async iterativeOptimization(initialPrompt: string, testCases: TestCase[], maxIterations = 5) {
+  async iterativeOptimization(
+    initialPrompt: string,
+    testCases: TestCase[],
+    maxIterations = 5,
+  ) {
     let currentPrompt = initialPrompt;
     let bestScore = 0;
     let bestPrompt = initialPrompt;
-    
+
     const history = [];
-    
+
     for (let iteration = 0; iteration < maxIterations; iteration++) {
       // Test current prompt
       const score = await this.evaluatePrompt(currentPrompt, testCases);
-      
+
       history.push({ iteration, prompt: currentPrompt, score });
-      
+
       if (score > bestScore) {
         bestScore = score;
         bestPrompt = currentPrompt;
       }
-      
+
       // Generate next iteration using meta-prompting
       const feedback = this.generateFeedback(testCases, score);
       currentPrompt = await this.generateOptimizedPrompt(
         `Improve prompt based on test results. Current score: ${score}/100. Feedback: ${feedback}`,
-        currentPrompt
+        currentPrompt,
       );
     }
-    
+
     return {
       bestPrompt,
       bestScore,
       iterations: maxIterations,
       history,
-      improvement: ((bestScore - history[0].score) / history[0].score * 100).toFixed(1) + '%'
+      improvement:
+        (((bestScore - history[0].score) / history[0].score) * 100).toFixed(1) +
+        "%",
     };
   }
 }
@@ -862,96 +910,112 @@ Output the optimized system prompt, then explain improvements made.`;
 ### 4. **A/B Testing and Performance Measurement**
 
 **Prompt Comparison Framework:**
+
 ```typescript
 class PromptABTester {
   async runABTest(options: {
     promptA: string;
     promptB: string;
     testCases: TestCase[];
-    metrics: ('accuracy' | 'latency' | 'cost' | 'satisfaction')[];
+    metrics: ("accuracy" | "latency" | "cost" | "satisfaction")[];
   }) {
     const resultsA = [];
     const resultsB = [];
-    
+
     // Run test cases with both prompts
     for (const testCase of options.testCases) {
       const [resultA, resultB] = await Promise.all([
         this.executePrompt(options.promptA, testCase),
-        this.executePrompt(options.promptB, testCase)
+        this.executePrompt(options.promptB, testCase),
       ]);
-      
+
       resultsA.push(resultA);
       resultsB.push(resultB);
     }
-    
+
     // Calculate metrics
     const comparison = {
       promptA: this.calculateMetrics(resultsA, options.metrics),
-      promptB: this.calculateMetrics(resultsB, options.metrics)
+      promptB: this.calculateMetrics(resultsB, options.metrics),
     };
-    
+
     // Statistical significance
     const significance = this.calculateSignificance(resultsA, resultsB);
-    
+
     return {
       winner: this.determineWinner(comparison),
       comparison,
       significance,
       recommendation: this.generateRecommendation(comparison, significance),
-      sampleSize: options.testCases.length
+      sampleSize: options.testCases.length,
     };
   }
-  
+
   calculateMetrics(results: any[], metrics: string[]) {
     const calculated: any = {};
-    
-    if (metrics.includes('accuracy')) {
-      calculated.accuracy = results.filter(r => r.correct).length / results.length;
+
+    if (metrics.includes("accuracy")) {
+      calculated.accuracy =
+        results.filter((r) => r.correct).length / results.length;
     }
-    
-    if (metrics.includes('latency')) {
+
+    if (metrics.includes("latency")) {
       calculated.latency = {
-        mean: this.mean(results.map(r => r.latency)),
-        p95: this.percentile(results.map(r => r.latency), 0.95)
+        mean: this.mean(results.map((r) => r.latency)),
+        p95: this.percentile(
+          results.map((r) => r.latency),
+          0.95,
+        ),
       };
     }
-    
-    if (metrics.includes('cost')) {
+
+    if (metrics.includes("cost")) {
       calculated.cost = {
         total: results.reduce((sum, r) => sum + r.cost, 0),
-        perRequest: this.mean(results.map(r => r.cost))
+        perRequest: this.mean(results.map((r) => r.cost)),
       };
     }
-    
-    if (metrics.includes('satisfaction')) {
-      calculated.satisfaction = this.mean(results.map(r => r.userRating || 0));
+
+    if (metrics.includes("satisfaction")) {
+      calculated.satisfaction = this.mean(
+        results.map((r) => r.userRating || 0),
+      );
     }
-    
+
     return calculated;
   }
-  
-  determineWinner(comparison: any): 'A' | 'B' | 'tie' {
+
+  determineWinner(comparison: any): "A" | "B" | "tie" {
     let scoreA = 0;
     let scoreB = 0;
-    
+
     // Accuracy (weight: 40%)
     if (comparison.promptA.accuracy > comparison.promptB.accuracy) scoreA += 40;
-    else if (comparison.promptB.accuracy > comparison.promptA.accuracy) scoreB += 40;
-    
+    else if (comparison.promptB.accuracy > comparison.promptA.accuracy)
+      scoreB += 40;
+
     // Latency (weight: 20%, lower is better)
-    if (comparison.promptA.latency?.mean < comparison.promptB.latency?.mean) scoreA += 20;
-    else if (comparison.promptB.latency?.mean < comparison.promptA.latency?.mean) scoreB += 20;
-    
+    if (comparison.promptA.latency?.mean < comparison.promptB.latency?.mean)
+      scoreA += 20;
+    else if (
+      comparison.promptB.latency?.mean < comparison.promptA.latency?.mean
+    )
+      scoreB += 20;
+
     // Cost (weight: 20%, lower is better)
-    if (comparison.promptA.cost?.total < comparison.promptB.cost?.total) scoreA += 20;
-    else if (comparison.promptB.cost?.total < comparison.promptA.cost?.total) scoreB += 20;
-    
+    if (comparison.promptA.cost?.total < comparison.promptB.cost?.total)
+      scoreA += 20;
+    else if (comparison.promptB.cost?.total < comparison.promptA.cost?.total)
+      scoreB += 20;
+
     // Satisfaction (weight: 20%)
-    if (comparison.promptA.satisfaction > comparison.promptB.satisfaction) scoreA += 20;
-    else if (comparison.promptB.satisfaction > comparison.promptA.satisfaction) scoreB += 20;
-    
-    if (Math.abs(scoreA - scoreB) < 10) return 'tie';
-    return scoreA > scoreB ? 'A' : 'B';
+    if (comparison.promptA.satisfaction > comparison.promptB.satisfaction)
+      scoreA += 20;
+    else if (comparison.promptB.satisfaction > comparison.promptA.satisfaction)
+      scoreB += 20;
+
+    if (Math.abs(scoreA - scoreB) < 10) return "tie";
+    return scoreA > scoreB ? "A" : "B";
   }
 }
 ```
@@ -959,48 +1023,59 @@ class PromptABTester {
 ### 5. **Prompt Drift Detection**
 
 **Consistency Monitoring:**
+
 ```typescript
 class PromptDriftDetector {
   private baseline: Map<string, BaselineMetrics> = new Map();
-  
+
   async detectDrift(promptId: string, currentResults: TestResult[]) {
     const baselineMetrics = this.baseline.get(promptId);
-    
+
     if (!baselineMetrics) {
       // First run, establish baseline
       this.baseline.set(promptId, this.calculateBaseline(currentResults));
-      return { driftDetected: false, message: 'Baseline established' };
+      return { driftDetected: false, message: "Baseline established" };
     }
-    
+
     const currentMetrics = this.calculateBaseline(currentResults);
-    
+
     // Check for significant changes
     const drifts = [];
-    
+
     if (Math.abs(currentMetrics.accuracy - baselineMetrics.accuracy) > 0.1) {
       drifts.push({
-        metric: 'accuracy',
+        metric: "accuracy",
         baseline: baselineMetrics.accuracy,
         current: currentMetrics.accuracy,
-        change: ((currentMetrics.accuracy - baselineMetrics.accuracy) * 100).toFixed(1) + '%'
+        change:
+          ((currentMetrics.accuracy - baselineMetrics.accuracy) * 100).toFixed(
+            1,
+          ) + "%",
       });
     }
-    
+
     if (currentMetrics.avgLatency > baselineMetrics.avgLatency * 1.5) {
       drifts.push({
-        metric: 'latency',
+        metric: "latency",
         baseline: baselineMetrics.avgLatency,
         current: currentMetrics.avgLatency,
-        change: '+' + ((currentMetrics.avgLatency / baselineMetrics.avgLatency - 1) * 100).toFixed(1) + '%'
+        change:
+          "+" +
+          (
+            (currentMetrics.avgLatency / baselineMetrics.avgLatency - 1) *
+            100
+          ).toFixed(1) +
+          "%",
       });
     }
-    
+
     return {
       driftDetected: drifts.length > 0,
       drifts,
-      recommendation: drifts.length > 0 
-        ? 'Prompt or model behavior has changed. Review prompt version and model updates.'
-        : 'No significant drift detected'
+      recommendation:
+        drifts.length > 0
+          ? "Prompt or model behavior has changed. Review prompt version and model updates."
+          : "No significant drift detected",
     };
   }
 }

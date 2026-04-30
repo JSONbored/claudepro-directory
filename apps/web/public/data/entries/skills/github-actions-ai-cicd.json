@@ -1,0 +1,364 @@
+{
+  "schemaVersion": 1,
+  "key": "skills:github-actions-ai-cicd",
+  "entry": {
+    "category": "skills",
+    "slug": "github-actions-ai-cicd",
+    "title": "GitHub Actions AI-Powered CI/CD Automation Skill",
+    "description": "Build intelligent CI/CD pipelines with GitHub Actions, AI-assisted workflow generation, automated testing, and deployment orchestration.",
+    "seoTitle": "GitHub Actions AI-Powered CI/CD Automation Skill",
+    "seoDescription": "Build intelligent CI/CD pipelines with GitHub Actions, AI-assisted workflow generation, automated testing, and deployment orchestration. Includes OIDC authen...",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2025-10-16",
+    "contentUpdatedAt": "2026-04-27T02:57:15-06:00",
+    "tags": [
+      "github-actions",
+      "ci-cd",
+      "automation",
+      "devops",
+      "ai"
+    ],
+    "keywords": [
+      "actions",
+      "automation",
+      "ci-cd",
+      "claude",
+      "development",
+      "devops",
+      "github",
+      "github-actions",
+      "powered",
+      "skills",
+      "tools",
+      "ai"
+    ],
+    "readingTime": 5,
+    "difficultyScore": 100,
+    "documentationUrl": "https://docs.github.com/en/actions",
+    "brandName": "GitHub",
+    "brandDomain": "github.com",
+    "brandIconUrl": "/api/brand-assets/icon/github.com",
+    "brandAssetSource": "brandfetch",
+    "brandVerifiedAt": "2025-10-16",
+    "cardDescription": "Build intelligent CI/CD pipelines with GitHub Actions, AI-assisted workflow generation, automated testing, and deployment orchestration.",
+    "installable": true,
+    "installCommand": "curl -L https://heyclau.de/downloads/skills/github-actions-ai-cicd.zip -o github-actions-ai-cicd.zip && unzip -o github-actions-ai-cicd.zip -d ./github-actions-ai-cicd",
+    "usageSnippet": "Claude can design, generate, and optimize GitHub Actions workflows for comprehensive CI/CD pipelines. This skill enables automated testing, intelligent deployment strategies, security scanning, performance monitoring, and infrastructure provisioning - all triggered by GitHub events with AI-optimized configurations.",
+    "copySnippet": "name: CI/CD Pipeline\n\non:\n  push:\n    branches: [main, develop]\n  pull_request:\n    branches: [main, develop]\n\nconcurrency:\n  group: ${{ github.workflow }}-${{ github.ref }}\n  cancel-in-progress: true\n\njobs:\n  install:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      \n      - uses: pnpm/action-setup@v2\n        with:\n          version: 8\n      \n      - uses: actions/setup-node@v4\n        with:\n          node-version: 20\n          cache: 'pnpm'\n      \n      - name: Install dependencies\n        run: pnpm install --frozen-lockfile\n      \n      - name: Cache node_modules\n        uses: actions/cache@v4\n        with:\n          path: node_modules\n          key: ${{ runner.os }}-node-${{ hashFiles('**/pnpm-lock.yaml') }}\n\n  lint:\n    needs: install\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: pnpm/action-setup@v2\n      - uses: actions/setup-node@v4\n        with:\n          node-version: 20\n          cache: 'pnpm'\n      \n      - name: Restore dependencies\n        uses: actions/cache@v4\n        with:\n          path: node_modules\n          key: ${{ runner.os }}-node-${{ hashFiles('**/pnpm-lock.yaml') }}\n      \n      - name: Run ESLint\n        run: pnpm lint\n\n  typecheck:\n    needs: install\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: pnpm/action-setup@v2\n      - uses: actions/setup-node@v4\n        with:\n          node-version: 20\n          cache: 'pnpm'\n      \n      - name: Restore dependencies\n        uses: actions/cache@v4\n        with:\n          path: node_modules\n          key: ${{ runner.os }}-node-${{ hashFiles('**/pnpm-lock.yaml') }}\n      \n      - name: Run TypeScript\n        run: pnpm type-check\n\n  test:\n    needs: install\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: pnpm/action-setup@v2\n      - uses: actions/setup-node@v4\n        with:\n          node-version: 20\n          cache: 'pnpm'\n      \n      - name: Restore dependencies\n        uses: actions/cache@v4\n        with:\n          path: node_modules\n          key: ${{ runner.os }}-node-${{ hashFiles('**/pnpm-lock.yaml') }}\n      \n      - name: Run unit tests\n        run: pnpm test:unit --coverage\n      \n      - name: Upload coverage\n        uses: codecov/codecov-action@v4\n        with:\n          token: ${{ secrets.CODECOV_TOKEN }}\n\n  e2e:\n    needs: install\n    runs-on: ubuntu-latest\n    strategy:\n      matrix:\n        browser: [chromium, firefox]\n    steps:\n      - uses: actions/checkout@v4\n      - uses: pnpm/action-setup@v2\n      - uses: actions/setup-node@v4\n        with:\n          node-version: 20\n          cache: 'pnpm'\n      \n      - name: Restore dependencies\n        uses: actions/cache@v4\n        with:\n          path: node_modules\n          key: ${{ runner.os }}-node-${{ hashFiles('**/pnpm-lock.yaml') }}\n      \n      - name: Install Playwright Browsers\n        run: pnpm exec playwright install --with-deps ${{ matrix.browser }}\n      \n      - name: Run E2E tests\n        run: pnpm test:e2e --project=${{ matrix.browser }}\n      \n      - name: Upload test results\n        if: failure()\n        uses: actions/upload-artifact@v4\n        with:\n          name: playwright-report-${{ matrix.browser }}\n          path: playwright-report/\n\n  deploy:\n    needs: [lint, typecheck, test, e2e]\n    if: github.ref == 'refs/heads/main'\n    runs-on: ubuntu-latest\n    environment:\n      name: production\n      url: https://yourapp.com\n    steps:\n      - uses: actions/checkout@v4\n      \n      - name: Deploy to Vercel\n        uses: amondnet/vercel-action@v25\n        with:\n          vercel-token: ${{ secrets.VERCEL_TOKEN }}\n          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}\n          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}\n          vercel-args: '--prod'\n      \n      - name: Notify Slack\n        uses: slackapi/slack-github-action@v1\n        with:\n          payload: |\n            {\n              \"text\": \"Deployment to production successful!\",\n              \"blocks\": [\n                {\n                  \"type\": \"section\",\n                  \"text\": {\n                    \"type\": \"mrkdwn\",\n                    \"text\": \"✅ *Deployment Successful*\\nCommit: ${{ github.sha }}\\nAuthor: ${{ github.actor }}\"\n                  }\n                }\n              ]\n            }\n        env:\n          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}",
+    "skillType": "general",
+    "skillLevel": "advanced",
+    "verificationStatus": "draft",
+    "verifiedAt": "2025-10-16",
+    "retrievalSources": [
+      "https://docs.github.com/en/actions"
+    ],
+    "testedPlatforms": [
+      "Claude",
+      "Codex",
+      "OpenClaw",
+      "Cursor",
+      "Windsurf",
+      "Gemini"
+    ],
+    "prerequisites": [
+      "GitHub repository with Actions enabled",
+      "Test suite (Vitest, Jest, Playwright)",
+      "Deployment target (Vercel, AWS, GCP, etc.)",
+      "GitHub account with repository access and Actions enabled (free tier includes 2,000 minutes/month)",
+      "Workflow YAML files stored in .github/workflows/ directory with proper YAML syntax and GitHub Actions workflow schema",
+      "Secrets configured in GitHub repository settings (Settings > Secrets and variables > Actions) for deployment credentials, API keys, and service tokens"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/skills/github-actions-ai-cicd.zip",
+    "skillPackage": {
+      "format": "agent-skill",
+      "entrypoint": "SKILL.md",
+      "downloadUrl": "/downloads/skills/github-actions-ai-cicd.zip",
+      "sha256": "8276d46f6ba2637b3be4efad277356648c49279ba4179cdd00ba5df2396daa06"
+    },
+    "platformCompatibility": [
+      {
+        "platform": "Claude",
+        "supportLevel": "native-skill",
+        "installPath": ".claude/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-16"
+      },
+      {
+        "platform": "Codex",
+        "supportLevel": "native-skill",
+        "installPath": ".agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-16"
+      },
+      {
+        "platform": "Windsurf",
+        "supportLevel": "native-skill",
+        "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-16"
+      },
+      {
+        "platform": "Gemini",
+        "supportLevel": "native-skill",
+        "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-16"
+      },
+      {
+        "platform": "Cursor",
+        "supportLevel": "adapter",
+        "installPath": ".cursor/rules/<skill-name>.mdc",
+        "adapterPath": "/data/skill-adapters/cursor/github-actions-ai-cicd.mdc",
+        "verifiedAt": "2025-10-16"
+      },
+      {
+        "platform": "Generic AGENTS",
+        "supportLevel": "manual-context",
+        "installPath": "AGENTS.md or tool-specific context file",
+        "verifiedAt": "2025-10-16"
+      }
+    ],
+    "downloadTrust": "first-party",
+    "downloadSha256": "8276d46f6ba2637b3be4efad277356648c49279ba4179cdd00ba5df2396daa06",
+    "body": "## What This Skill Enables\n\nClaude can design, generate, and optimize GitHub Actions workflows for comprehensive CI/CD pipelines. This skill enables automated testing, intelligent deployment strategies, security scanning, performance monitoring, and infrastructure provisioning - all triggered by GitHub events with AI-optimized configurations.\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Prerequisites\n\n**Required:**\n\n- GitHub repository with Actions enabled\n- Basic understanding of your deployment target (Vercel, AWS, etc.)\n- Test suite in your project\n\n**What Claude handles automatically:**\n\n- Generating complete workflow YAML files\n- Configuring matrix builds for multiple environments\n- Setting up caching strategies for faster builds\n- Implementing security best practices\n- Configuring deployment gates and approvals\n- Optimizing workflow performance\n\n## How to Use This Skill\n\n### Complete CI/CD Pipeline Generation\n\n**Prompt:** \"Create a GitHub Actions workflow for my Next.js 15 app that runs on every push. Include TypeScript type checking, ESLint, Vitest unit tests, Playwright E2E tests, and deploy to Vercel on main branch.\"\n\nClaude will generate:\n\n1. `.github/workflows/ci-cd.yml` with multiple jobs\n2. Type checking job with caching\n3. Lint job with auto-fix capability\n4. Unit test job with coverage reporting\n5. E2E test job with browser matrix\n6. Deployment job with environment protection\n7. Proper job dependencies and parallelization\n\n### Multi-Environment Deployment Strategy\n\n**Prompt:** \"Set up GitHub Actions to deploy to staging on pull requests and production on main branch merges. Include manual approval for production and rollback capabilities.\"\n\nClaude will create:\n\n1. Separate workflows for staging and production\n2. Environment-specific secrets configuration\n3. Manual approval gates using GitHub Environments\n4. Deployment status checks\n5. Rollback workflow with version tagging\n6. Slack/Discord notifications on deployment events\n\n### Security Scanning Pipeline\n\n**Prompt:** \"Add comprehensive security scanning to my CI pipeline: dependency vulnerabilities, CodeQL analysis, Docker image scanning, and secrets detection.\"\n\nClaude will implement:\n\n1. Dependabot integration for automated dependency updates\n2. CodeQL workflow for code security analysis\n3. Trivy for Docker image vulnerability scanning\n4. Gitleaks for secrets detection\n5. SARIF upload for Security tab integration\n6. Fail-fast on critical vulnerabilities\n\n### Performance Testing Integration\n\n**Prompt:** \"Create a workflow that runs Lighthouse CI on every deployment preview and fails if Core Web Vitals thresholds are not met.\"\n\nClaude will set up:\n\n1. Lighthouse CI workflow triggered on deployment\n2. Performance budgets configuration\n3. Core Web Vitals thresholds (LCP, FID, CLS)\n4. Comment PR with performance scores\n5. Historical performance tracking\n6. Regression detection and alerts\n\n## Tips for Best Results\n\n1. **Parallel Jobs**: Request explicit job parallelization for independent tasks (lint, test, type-check) to minimize CI runtime.\n\n2. **Smart Caching**: Ask for dependency caching strategies specific to your package manager (npm, pnpm, yarn) to speed up workflows.\n\n3. **Matrix Builds**: For libraries, request matrix builds across Node versions (18, 20, 22) and OS (ubuntu, macos, windows).\n\n4. **Conditional Execution**: Use path filters to only run workflows when relevant files change (e.g., only run E2E tests when app/ changes).\n\n5. **Reusable Workflows**: For common patterns, ask Claude to create reusable workflows that can be called from multiple repositories.\n\n6. **Security First**: Always request OIDC authentication instead of long-lived credentials for cloud deployments (AWS, GCP, Azure).\n\n## Common Workflows\n\n### Complete Next.js Production Pipeline\n\n```\n\"Create a production-grade GitHub Actions pipeline for Next.js 15:\n1. Install dependencies with pnpm caching\n2. Run TypeScript type checking in parallel with linting\n3. Run Vitest unit tests with coverage (fail if < 80%)\n4. Run Playwright E2E tests on Chrome and Firefox\n5. Build Next.js app and verify no build errors\n6. Deploy to Vercel preview on PR, production on main\n7. Run Lighthouse CI and comment scores on PR\n8. Send Slack notification on success/failure\"\n```\n\n### Monorepo CI/CD with Turborepo\n\n```\n\"Set up GitHub Actions for Turborepo monorepo:\n1. Use Turborepo remote caching with Vercel\n2. Run affected tasks only (lint, test, build)\n3. Matrix build for each package\n4. Publish packages to npm on release tags\n5. Deploy apps to respective environments\n6. Coordinate deployments across dependent services\"\n```\n\n### Docker Multi-Stage Build & Deploy\n\n```\n\"Create workflow for Docker application:\n1. Build Docker image with multi-stage caching\n2. Run security scan with Trivy\n3. Run integration tests in Docker Compose\n4. Push to GitHub Container Registry with semantic versioning\n5. Deploy to AWS ECS using OIDC authentication\n6. Run release regression tests post-deployment\n7. Rollback on failure\"\n```\n\n### Infrastructure as Code Pipeline\n\n```\n\"Generate Terraform deployment workflow:\n1. Validate Terraform syntax and formatting\n2. Run terraform plan and comment on PR\n3. Run security scan with tfsec and Checkov\n4. Require manual approval for apply\n5. Apply Terraform on main branch merge\n6. Store state in S3 with DynamoDB locking\n7. Post-apply validation tests\"\n```\n\n## Troubleshooting\n\n**Issue:** Workflows are too slow (>15 minutes)\n**Solution:** Ask Claude to implement aggressive caching (dependencies, build artifacts), parallelize independent jobs, and use path filters to skip unnecessary runs.\n\n**Issue:** Flaky E2E tests causing false failures\n**Solution:** Request implementation of test retry logic with `@playwright/test` retry configuration, and ask for separate \"required\" vs \"optional\" status checks.\n\n**Issue:** Deployment fails intermittently\n**Solution:** Ask for timeout increases, exponential backoff retry logic, and health check validation before marking deployment as successful.\n\n**Issue:** Secrets management is complex\n**Solution:** Request migration to GitHub Environments for environment-specific secrets, and OIDC for cloud provider authentication instead of long-lived tokens.\n\n**Issue:** Too many concurrent workflow runs\n**Solution:** Ask for concurrency groups configuration to cancel in-progress runs when new commits are pushed to same branch.\n\n## Learn More\n\n- [GitHub Actions Documentation](https://docs.github.com/en/actions)\n- [GitHub Actions Best Practices](https://docs.github.com/en/actions/learn-github-actions/best-practices)\n- [Workflow Syntax Reference](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions)\n- [Security Hardening Guide](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions)\n- [Reusable Workflows](https://docs.github.com/en/actions/learn-github-actions/reusing-workflows)\n\n## Features\n\n- Complete CI/CD pipeline generation\n- Multi-environment deployment strategies\n- Security scanning integration (CodeQL, Trivy, Dependabot)\n- Performance testing with Lighthouse CI\n- Matrix builds across platforms\n- Smart caching and parallelization\n- Reusable workflows and workflow composition for DRY automation\n- Workflow status reporting and notifications with Slack/Discord integration, deployment status badges, and comprehensive workflow analytics for monitoring CI/CD health\n\n## Use Cases\n\n- Automated testing and deployment pipelines\n- Security vulnerability scanning\n- Performance regression detection\n- Multi-environment infrastructure deployment\n- Infrastructure as Code (IaC) deployment with Terraform/CloudFormation\n- Automated dependency updates and security patching with Dependabot",
+    "sections": [
+      {
+        "title": "What This Skill Enables",
+        "id": "what-this-skill-enables",
+        "markdown": "Claude can design, generate, and optimize GitHub Actions workflows for comprehensive CI/CD pipelines. This skill enables automated testing, intelligent deployment strategies, security scanning, performance monitoring, and infrastructure provisioning - all triggered by GitHub events with AI-optimized configurations.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Compatibility",
+        "id": "compatibility",
+        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Prerequisites",
+        "id": "prerequisites",
+        "markdown": "**Required:**\n\n- GitHub repository with Actions enabled\n- Basic understanding of your deployment target (Vercel, AWS, etc.)\n- Test suite in your project\n\n**What Claude handles automatically:**\n\n- Generating complete workflow YAML files\n- Configuring matrix builds for multiple environments\n- Setting up caching strategies for faster builds\n- Implementing security best practices\n- Configuring deployment gates and approvals\n- Optimizing workflow performance",
+        "codeBlocks": []
+      },
+      {
+        "title": "How to Use This Skill",
+        "id": "how-to-use-this-skill",
+        "markdown": "### Complete CI/CD Pipeline Generation\n\n**Prompt:** \"Create a GitHub Actions workflow for my Next.js 15 app that runs on every push. Include TypeScript type checking, ESLint, Vitest unit tests, Playwright E2E tests, and deploy to Vercel on main branch.\"\n\nClaude will generate:\n\n1. `.github/workflows/ci-cd.yml` with multiple jobs\n2. Type checking job with caching\n3. Lint job with auto-fix capability\n4. Unit test job with coverage reporting\n5. E2E test job with browser matrix\n6. Deployment job with environment protection\n7. Proper job dependencies and parallelization\n\n### Multi-Environment Deployment Strategy\n\n**Prompt:** \"Set up GitHub Actions to deploy to staging on pull requests and production on main branch merges. Include manual approval for production and rollback capabilities.\"\n\nClaude will create:\n\n1. Separate workflows for staging and production\n2. Environment-specific secrets configuration\n3. Manual approval gates using GitHub Environments\n4. Deployment status checks\n5. Rollback workflow with version tagging\n6. Slack/Discord notifications on deployment events\n\n### Security Scanning Pipeline\n\n**Prompt:** \"Add comprehensive security scanning to my CI pipeline: dependency vulnerabilities, CodeQL analysis, Docker image scanning, and secrets detection.\"\n\nClaude will implement:\n\n1. Dependabot integration for automated dependency updates\n2. CodeQL workflow for code security analysis\n3. Trivy for Docker image vulnerability scanning\n4. Gitleaks for secrets detection\n5. SARIF upload for Security tab integration\n6. Fail-fast on critical vulnerabilities\n\n### Performance Testing Integration\n\n**Prompt:** \"Create a workflow that runs Lighthouse CI on every deployment preview and fails if Core Web Vitals thresholds are not met.\"\n\nClaude will set up:\n\n1. Lighthouse CI workflow triggered on deployment\n2. Performance budgets configuration\n3. Core Web Vitals thresholds (LCP, FID, CLS)\n4. Comment PR with performance scores\n5. Historical performance tracking\n6. Regression detection and alerts",
+        "codeBlocks": []
+      },
+      {
+        "title": "Tips for Best Results",
+        "id": "tips-for-best-results",
+        "markdown": "1. **Parallel Jobs**: Request explicit job parallelization for independent tasks (lint, test, type-check) to minimize CI runtime.\n\n2. **Smart Caching**: Ask for dependency caching strategies specific to your package manager (npm, pnpm, yarn) to speed up workflows.\n\n3. **Matrix Builds**: For libraries, request matrix builds across Node versions (18, 20, 22) and OS (ubuntu, macos, windows).\n\n4. **Conditional Execution**: Use path filters to only run workflows when relevant files change (e.g., only run E2E tests when app/ changes).\n\n5. **Reusable Workflows**: For common patterns, ask Claude to create reusable workflows that can be called from multiple repositories.\n\n6. **Security First**: Always request OIDC authentication instead of long-lived credentials for cloud deployments (AWS, GCP, Azure).",
+        "codeBlocks": []
+      },
+      {
+        "title": "Common Workflows",
+        "id": "common-workflows",
+        "markdown": "### Complete Next.js Production Pipeline\n\n```\n\"Create a production-grade GitHub Actions pipeline for Next.js 15:\n1. Install dependencies with pnpm caching\n2. Run TypeScript type checking in parallel with linting\n3. Run Vitest unit tests with coverage (fail if < 80%)\n4. Run Playwright E2E tests on Chrome and Firefox\n5. Build Next.js app and verify no build errors\n6. Deploy to Vercel preview on PR, production on main\n7. Run Lighthouse CI and comment scores on PR\n8. Send Slack notification on success/failure\"\n```\n\n### Monorepo CI/CD with Turborepo\n\n```\n\"Set up GitHub Actions for Turborepo monorepo:\n1. Use Turborepo remote caching with Vercel\n2. Run affected tasks only (lint, test, build)\n3. Matrix build for each package\n4. Publish packages to npm on release tags\n5. Deploy apps to respective environments\n6. Coordinate deployments across dependent services\"\n```\n\n### Docker Multi-Stage Build & Deploy\n\n```\n\"Create workflow for Docker application:\n1. Build Docker image with multi-stage caching\n2. Run security scan with Trivy\n3. Run integration tests in Docker Compose\n4. Push to GitHub Container Registry with semantic versioning\n5. Deploy to AWS ECS using OIDC authentication\n6. Run release regression tests post-deployment\n7. Rollback on failure\"\n```\n\n### Infrastructure as Code Pipeline\n\n```\n\"Generate Terraform deployment workflow:\n1. Validate Terraform syntax and formatting\n2. Run terraform plan and comment on PR\n3. Run security scan with tfsec and Checkov\n4. Require manual approval for apply\n5. Apply Terraform on main branch merge\n6. Store state in S3 with DynamoDB locking\n7. Post-apply validation tests\"\n```",
+        "codeBlocks": [
+          {
+            "language": "text",
+            "code": "\"Create a production-grade GitHub Actions pipeline for Next.js 15:\n1. Install dependencies with pnpm caching\n2. Run TypeScript type checking in parallel with linting\n3. Run Vitest unit tests with coverage (fail if < 80%)\n4. Run Playwright E2E tests on Chrome and Firefox\n5. Build Next.js app and verify no build errors\n6. Deploy to Vercel preview on PR, production on main\n7. Run Lighthouse CI and comment scores on PR\n8. Send Slack notification on success/failure\""
+          },
+          {
+            "language": "text",
+            "code": "\"Set up GitHub Actions for Turborepo monorepo:\n1. Use Turborepo remote caching with Vercel\n2. Run affected tasks only (lint, test, build)\n3. Matrix build for each package\n4. Publish packages to npm on release tags\n5. Deploy apps to respective environments\n6. Coordinate deployments across dependent services\""
+          },
+          {
+            "language": "text",
+            "code": "\"Create workflow for Docker application:\n1. Build Docker image with multi-stage caching\n2. Run security scan with Trivy\n3. Run integration tests in Docker Compose\n4. Push to GitHub Container Registry with semantic versioning\n5. Deploy to AWS ECS using OIDC authentication\n6. Run release regression tests post-deployment\n7. Rollback on failure\""
+          },
+          {
+            "language": "text",
+            "code": "\"Generate Terraform deployment workflow:\n1. Validate Terraform syntax and formatting\n2. Run terraform plan and comment on PR\n3. Run security scan with tfsec and Checkov\n4. Require manual approval for apply\n5. Apply Terraform on main branch merge\n6. Store state in S3 with DynamoDB locking\n7. Post-apply validation tests\""
+          }
+        ]
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "**Issue:** Workflows are too slow (>15 minutes)\n**Solution:** Ask Claude to implement aggressive caching (dependencies, build artifacts), parallelize independent jobs, and use path filters to skip unnecessary runs.\n\n**Issue:** Flaky E2E tests causing false failures\n**Solution:** Request implementation of test retry logic with `@playwright/test` retry configuration, and ask for separate \"required\" vs \"optional\" status checks.\n\n**Issue:** Deployment fails intermittently\n**Solution:** Ask for timeout increases, exponential backoff retry logic, and health check validation before marking deployment as successful.\n\n**Issue:** Secrets management is complex\n**Solution:** Request migration to GitHub Environments for environment-specific secrets, and OIDC for cloud provider authentication instead of long-lived tokens.\n\n**Issue:** Too many concurrent workflow runs\n**Solution:** Ask for concurrency groups configuration to cancel in-progress runs when new commits are pushed to same branch.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Learn More",
+        "id": "learn-more",
+        "markdown": "- [GitHub Actions Documentation](https://docs.github.com/en/actions)\n- [GitHub Actions Best Practices](https://docs.github.com/en/actions/learn-github-actions/best-practices)\n- [Workflow Syntax Reference](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions)\n- [Security Hardening Guide](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions)\n- [Reusable Workflows](https://docs.github.com/en/actions/learn-github-actions/reusing-workflows)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Complete CI/CD pipeline generation\n- Multi-environment deployment strategies\n- Security scanning integration (CodeQL, Trivy, Dependabot)\n- Performance testing with Lighthouse CI\n- Matrix builds across platforms\n- Smart caching and parallelization\n- Reusable workflows and workflow composition for DRY automation\n- Workflow status reporting and notifications with Slack/Discord integration, deployment status badges, and comprehensive workflow analytics for monitoring CI/CD health",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Automated testing and deployment pipelines\n- Security vulnerability scanning\n- Performance regression detection\n- Multi-environment infrastructure deployment\n- Infrastructure as Code (IaC) deployment with Terraform/CloudFormation\n- Automated dependency updates and security patching with Dependabot",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "What This Skill Enables",
+        "id": "what-this-skill-enables"
+      },
+      {
+        "depth": 2,
+        "text": "Compatibility",
+        "id": "compatibility"
+      },
+      {
+        "depth": 3,
+        "text": "Native",
+        "id": "native"
+      },
+      {
+        "depth": 3,
+        "text": "Manual Adaptation",
+        "id": "manual-adaptation"
+      },
+      {
+        "depth": 2,
+        "text": "Prerequisites",
+        "id": "prerequisites"
+      },
+      {
+        "depth": 2,
+        "text": "How to Use This Skill",
+        "id": "how-to-use-this-skill"
+      },
+      {
+        "depth": 3,
+        "text": "Complete CI/CD Pipeline Generation",
+        "id": "complete-cicd-pipeline-generation"
+      },
+      {
+        "depth": 3,
+        "text": "Multi-Environment Deployment Strategy",
+        "id": "multi-environment-deployment-strategy"
+      },
+      {
+        "depth": 3,
+        "text": "Security Scanning Pipeline",
+        "id": "security-scanning-pipeline"
+      },
+      {
+        "depth": 3,
+        "text": "Performance Testing Integration",
+        "id": "performance-testing-integration"
+      },
+      {
+        "depth": 2,
+        "text": "Tips for Best Results",
+        "id": "tips-for-best-results"
+      },
+      {
+        "depth": 2,
+        "text": "Common Workflows",
+        "id": "common-workflows"
+      },
+      {
+        "depth": 3,
+        "text": "Complete Next.js Production Pipeline",
+        "id": "complete-nextjs-production-pipeline"
+      },
+      {
+        "depth": 3,
+        "text": "Monorepo CI/CD with Turborepo",
+        "id": "monorepo-cicd-with-turborepo"
+      },
+      {
+        "depth": 3,
+        "text": "Docker Multi-Stage Build & Deploy",
+        "id": "docker-multi-stage-build-deploy"
+      },
+      {
+        "depth": 3,
+        "text": "Infrastructure as Code Pipeline",
+        "id": "infrastructure-as-code-pipeline"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 2,
+        "text": "Learn More",
+        "id": "learn-more"
+      },
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "text",
+        "code": "\"Create a production-grade GitHub Actions pipeline for Next.js 15:\n1. Install dependencies with pnpm caching\n2. Run TypeScript type checking in parallel with linting\n3. Run Vitest unit tests with coverage (fail if < 80%)\n4. Run Playwright E2E tests on Chrome and Firefox\n5. Build Next.js app and verify no build errors\n6. Deploy to Vercel preview on PR, production on main\n7. Run Lighthouse CI and comment scores on PR\n8. Send Slack notification on success/failure\""
+      },
+      {
+        "language": "text",
+        "code": "\"Set up GitHub Actions for Turborepo monorepo:\n1. Use Turborepo remote caching with Vercel\n2. Run affected tasks only (lint, test, build)\n3. Matrix build for each package\n4. Publish packages to npm on release tags\n5. Deploy apps to respective environments\n6. Coordinate deployments across dependent services\""
+      },
+      {
+        "language": "text",
+        "code": "\"Create workflow for Docker application:\n1. Build Docker image with multi-stage caching\n2. Run security scan with Trivy\n3. Run integration tests in Docker Compose\n4. Push to GitHub Container Registry with semantic versioning\n5. Deploy to AWS ECS using OIDC authentication\n6. Run release regression tests post-deployment\n7. Rollback on failure\""
+      },
+      {
+        "language": "text",
+        "code": "\"Generate Terraform deployment workflow:\n1. Validate Terraform syntax and formatting\n2. Run terraform plan and comment on PR\n3. Run security scan with tfsec and Checkov\n4. Require manual approval for apply\n5. Apply Terraform on main branch merge\n6. Store state in S3 with DynamoDB locking\n7. Post-apply validation tests\""
+      }
+    ],
+    "filePath": "content/skills/github-actions-ai-cicd.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/github-actions-ai-cicd.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": true,
+    "packageTrust": "first-party",
+    "packageChecksum": "8276d46f6ba2637b3be4efad277356648c49279ba4179cdd00ba5df2396daa06",
+    "checksumPresent": true,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://docs.github.com/en/actions",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/github-actions-ai-cicd.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2025-10-16",
+    "adapterGenerated": true,
+    "platforms": [
+      "Claude",
+      "Codex",
+      "Windsurf",
+      "Gemini",
+      "Cursor",
+      "Generic AGENTS"
+    ],
+    "supportLevels": [
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "adapter",
+      "manual-context"
+    ]
+  }
+}

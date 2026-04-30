@@ -1,0 +1,28 @@
+# Firecrawl
+URL: https://heyclau.de/tools/firecrawl
+Category: tools
+Author: Firecrawl
+Date added: 2026-04-27
+Documentation: https://docs.firecrawl.dev
+Repository: https://github.com/mendableai/firecrawl
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/firecrawl.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/tools/firecrawl
+- Source URLs: https://docs.firecrawl.dev, https://github.com/mendableai/firecrawl, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/firecrawl.mdx, https://www.firecrawl.dev
+- Brand: Firecrawl
+- Brand domain: firecrawl.dev
+- Brand asset source: brandfetch
+- Author: Firecrawl
+- Last verified: 2026-04-26T23:21:14-06:00
+- Robots: indexable
+## Summary
+Web scraping and crawling API for turning websites into clean markdown, structured data, and LLM-ready content.
+## Tags
+- web-crawling
+- data-extraction
+## Content
+## Editorial notes
+Firecrawl is useful when agent and RAG workflows need cleaner web ingestion than raw scraping or ad hoc parsing.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

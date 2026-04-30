@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "mcp:square-mcp-server",
+  "category": "mcp",
+  "slug": "square-mcp-server",
+  "title": "Square MCP Server for Claude",
+  "author": "Square",
+  "brandName": "Square",
+  "brandDomain": "squareup.com",
+  "brandIconUrl": "/api/brand-assets/icon/squareup.com",
+  "brandAssetSource": "brandfetch",
+  "copyText": "Install:\nclaude mcp add --transport sse square https://mcp.squareup.com/sse && claude mcp list\n\nConfig:\n{\n  \"square\": {\n    \"url\": \"https://mcp.squareup.com/sse\",\n    \"transport\": \"sse\"\n  }\n}\n\nUsage:\n{\n  \"square\": {\n    \"url\": \"https://mcp.squareup.com/sse\",\n    \"transport\": \"sse\"\n  }\n}",
+  "detailMarkdown": "# Square MCP Server for Claude\n\nBuild on Square APIs for payments, inventory, and order management\n\n## Install\n```bash\nclaude mcp add --transport sse square https://mcp.squareup.com/sse && claude mcp list\n```\n\n## Config\n```json\n{\n  \"square\": {\n    \"url\": \"https://mcp.squareup.com/sse\",\n    \"transport\": \"sse\"\n  }\n}\n```\n\n## Usage\nclaude mcp add --transport sse square https://mcp.squareup.com/sse && claude mcp list",
+  "webUrl": "https://heyclau.de/mcp/square-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/square-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/square-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/square-mcp-server",
+  "seoTitle": "Square MCP Server for Claude",
+  "seoDescription": "Build on Square APIs for payments, inventory, and order management Discover tools for AI development. HeyClaude adds source links, install steps,...",
+  "repoUrl": "",
+  "documentationUrl": "https://developer.squareup.com/docs/mcp"
+}

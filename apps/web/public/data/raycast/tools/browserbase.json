@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:browserbase",
+  "category": "tools",
+  "slug": "browserbase",
+  "title": "Browserbase",
+  "author": "Browserbase",
+  "brandName": "Browserbase",
+  "brandDomain": "browserbase.com",
+  "brandIconUrl": "/api/brand-assets/icon/browserbase.com",
+  "brandAssetSource": "brandfetch",
+  "copyText": "## Editorial notes\n\nBrowserbase is useful when AI agents need reliable hosted browser sessions, debugging, and web automation infrastructure.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Browserbase\n\nCloud browser infrastructure for browser automation, AI agents, scraping workflows, and web interaction at scale.",
+  "webUrl": "https://heyclau.de/tools/browserbase",
+  "canonicalUrl": "https://heyclau.de/tools/browserbase",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/browserbase.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/browserbase",
+  "seoTitle": "Browserbase cloud browsers for AI agents",
+  "seoDescription": "Browserbase provides cloud browser infrastructure for browser automation, AI agents, scraping, and web interaction. HeyClaude adds source links, install...",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.browserbase.com"
+}

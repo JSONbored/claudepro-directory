@@ -1,0 +1,14 @@
+---
+description: "Build full-stack applications with Supabase Postgres, real-time subscriptions, Edge Functions, and pgvector AI integration for 4M+ develo..."
+globs:
+alwaysApply: false
+---
+# Supabase Realtime Database Builder Skill
+Build full-stack applications with Supabase Postgres, real-time subscriptions, Edge Functions, and pgvector AI integration for 4M+ developers.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+npm install @supabase/supabase-js
+```
+## Source
+https://heyclau.de/downloads/skills/supabase-realtime-database.zip

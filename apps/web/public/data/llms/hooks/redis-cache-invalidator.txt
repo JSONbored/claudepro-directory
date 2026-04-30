@@ -1,0 +1,523 @@
+# Redis Cache Invalidator - Hooks
+URL: https://heyclau.de/hooks/redis-cache-invalidator
+Category: hooks
+Author: JSONbored
+Date added: 2025-09-19
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/redis-cache-invalidator.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/hooks/redis-cache-invalidator
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/redis-cache-invalidator.mdx
+- Brand: Redis
+- Brand domain: redis.io
+- Brand asset source: brandfetch
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
+## Summary
+Automatically clears relevant Redis cache keys when data model files are modified.
+## Tags
+- redis
+- cache
+- performance
+- data-models
+- invalidation
+## Content
+## Features
+- Intelligent cache key invalidation including cache key detection (intelligent cache key detection with pattern matching, cache key scanning with SCAN command, cache key filtering with wildcard patterns, cache key validation with key existence checking), cache key invalidation (selective cache key deletion with DEL command, batch cache key deletion with pipeline operations, cache key pattern matching with wildcard patterns, cache key namespace management with key prefixes), cache key management (cache key organization with consistent naming, cache key indexing with key patterns, cache key lifecycle management with TTL, cache key monitoring with key statistics), and cache key optimization (cache key optimization with efficient patterns, cache key compression with key naming, cache key deduplication with key validation, cache key performance with efficient operations)
+- Model-based cache clearing including model detection (automatic model file detection with path patterns, model name extraction from file paths, model type detection with file extensions, model change detection with file modification), cache clearing (model-specific cache clearing with pattern matching, related cache clearing with dependency tracking, cascade cache clearing with related models, selective cache clearing with targeted invalidation), cache patterns (cache key pattern matching with wildcard patterns, cache namespace patterns with key prefixes, cache hierarchy patterns with nested keys, cache relationship patterns with related keys), and cache consistency (cache consistency maintenance with invalidation, cache coherence with related caches, cache synchronization with data models, cache integrity with validation)
+- Pattern matching for cache keys including pattern detection (cache key pattern detection with wildcard matching, pattern-based cache key scanning with SCAN command, pattern-based cache key filtering with pattern matching, pattern-based cache key validation with pattern validation), pattern matching (wildcard pattern matching with \* and ? patterns, regex pattern matching with pattern matching, namespace pattern matching with key prefixes, hierarchical pattern matching with nested patterns), pattern optimization (pattern matching optimization with efficient patterns, pattern caching with pattern compilation, pattern performance with optimized matching, pattern scalability with large key sets), and pattern management (pattern management with pattern libraries, pattern documentation with pattern descriptions, pattern versioning with pattern evolution, pattern testing with pattern validation)
+- Safe asynchronous cache flushing including safe flushing (safe cache flushing with validation, atomic cache operations with transaction support, idempotent cache operations with safe retries, error handling with graceful degradation), asynchronous operations (asynchronous cache invalidation with background processing, non-blocking cache operations with async execution, concurrent cache operations with thread safety, parallel cache operations with performance optimization), cache safety (cache operation safety with validation, cache data safety with backup, cache consistency safety with transactions, cache performance safety with rate limiting), and cache monitoring (cache operation monitoring with logging, cache performance monitoring with metrics, cache error monitoring with error tracking, cache health monitoring with health checks)
+- Multi-language model support including language support (multi-language model support with language detection, language-specific cache patterns with language prefixes, language-specific cache keys with language suffixes, language-specific cache invalidation with language filtering), model languages (JavaScript/TypeScript model support, Python model support, Ruby model support, Go model support), model formats (JSON schema support, YAML schema support, SQL schema support, GraphQL schema support), and model integration (model integration with ORMs, model integration with frameworks, model integration with APIs, model integration with databases)
+- Cache consistency maintenance including consistency management (cache consistency management with invalidation strategies, cache coherence with data models, cache synchronization with database changes, cache integrity with validation), consistency strategies (immediate invalidation with real-time clearing, lazy invalidation with on-demand clearing, time-based invalidation with TTL expiration, event-based invalidation with change events), consistency monitoring (cache consistency monitoring with validation, cache coherence monitoring with checks, cache synchronization monitoring with tracking, cache integrity monitoring with verification), and consistency reporting (cache consistency reporting with reports, cache coherence reporting with analysis, cache synchronization reporting with statistics, cache integrity reporting with validation)
+- Redis connection and management including connection management (Redis connection validation with ping command, Redis connection pooling with connection reuse, Redis connection retry with automatic retry, Redis connection monitoring with health checks), Redis operations (Redis SCAN command for key scanning, Redis DEL command for key deletion, Redis pipeline for batch operations, Redis transaction for atomic operations), Redis monitoring (Redis statistics with DBSIZE and INFO, Redis memory monitoring with memory usage, Redis performance monitoring with latency tracking, Redis health monitoring with health checks), and Redis configuration (Redis configuration management with redis.conf, Redis database selection with -n flag, Redis authentication with AUTH command, Redis cluster support with cluster mode)
+- Development workflow integration including continuous invalidation (real-time cache invalidation on model changes, immediate cache clearing on file modifications, automatic cache synchronization on data model updates, seamless cache integration with development workflow), workflow automation (automated cache invalidation without manual intervention, cache clearing automation with automatic clearing, cache consistency automation with automatic synchronization), and workflow optimization (cache change detection with change tracking, incremental cache invalidation with optimization, cache consistency maintenance with consistency checks)
+
+## Use Cases
+- Invalidate cache when data models are modified automatically detecting model file changes, scanning for related cache keys, and invalidating matching cache entries to maintain cache consistency
+- Maintain cache consistency in Redis automatically synchronizing cache with data model changes, ensuring cache coherence across cache layers, and preventing stale data in cache
+- Clear related cache entries automatically detecting related cache keys, clearing dependent cache entries, and maintaining cache relationships
+- Prevent stale data in cache after model changes automatically invalidating stale cache entries, ensuring fresh data in cache, and maintaining data integrity
+- Optimize cache management workflow automatically managing cache invalidation, reducing manual cache management, and streamlining cache operations
+- Development workflow integration seamlessly integrating Redis cache invalidation into development workflows without manual cache clearing or cache management
+
+## Installation
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/redis-cache-invalidator.sh
+3. Make executable: chmod +x .claude/hooks/redis-cache-invalidator.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- Redis server running and accessible
+- redis-cli installed (apt-get install redis-tools or brew install redis)
+- jq (optional, for JSON parsing)
+
+## Hook Configuration
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/redis-cache-invalidator.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/redis-cache-invalidator.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+
+## Hook Script
+```bash
+#!/bin/bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+echo "🔄 Redis Cache Invalidator - Analyzing file changes..."
+echo "📄 File: $FILE_PATH"
+
+# Check if this is a model or data file that should trigger cache invalidation
+if [[ "$FILE_PATH" == *models/*.js ]] || [[ "$FILE_PATH" == *models/*.py ]] || [[ "$FILE_PATH" == *models/*.ts ]] || [[ "$FILE_PATH" == *schemas/*.* ]] || [[ "$FILE_PATH" == *entities/*.* ]]; then
+
+    MODEL_NAME=$(basename "${FILE_PATH%.*}")
+    echo "📊 Model detected: $MODEL_NAME"
+
+    # Check if Redis CLI is available
+    if ! command -v redis-cli >/dev/null 2>&1; then
+        echo "⚠️ redis-cli not found - please install Redis CLI tools"
+        echo "💡 Install with: apt-get install redis-tools (Ubuntu) or brew install redis (macOS)"
+        exit 0
+    fi
+
+    # Test Redis connection
+    if ! redis-cli ping >/dev/null 2>&1; then
+        echo "⚠️ Redis server not accessible - skipping cache invalidation"
+        echo "💡 Ensure Redis server is running and accessible"
+        exit 0
+    fi
+
+    echo "🔍 Scanning for cache keys related to: $MODEL_NAME"
+
+    # Find cache keys related to this model
+    CACHE_KEYS=$(redis-cli --scan --pattern "*${MODEL_NAME}*" 2>/dev/null)
+
+    if [ -n "$CACHE_KEYS" ]; then
+        KEY_COUNT=$(echo "$CACHE_KEYS" | wc -l)
+        echo "🗑️ Found $KEY_COUNT cache keys to invalidate:"
+
+        # Show first few keys for confirmation
+        echo "$CACHE_KEYS" | head -5 | while read -r key; do
+            echo "  • $key"
+        done
+
+        if [ "$KEY_COUNT" -gt 5 ]; then
+            echo "  ... and $((KEY_COUNT - 5)) more keys"
+        fi
+
+        # Delete the keys
+        echo "$CACHE_KEYS" | xargs -r redis-cli DEL >/dev/null 2>&1
+        echo "✅ Invalidated $KEY_COUNT cache keys for model: $MODEL_NAME"
+    else
+        echo "ℹ️ No cache keys found for model: $MODEL_NAME"
+    fi
+
+    # Additional patterns to check
+    echo "🔍 Checking additional cache patterns..."
+
+    # Check for API route caches
+    API_KEYS=$(redis-cli --scan --pattern "api:*${MODEL_NAME}*" 2>/dev/null)
+    if [ -n "$API_KEYS" ]; then
+        API_COUNT=$(echo "$API_KEYS" | wc -l)
+        echo "$API_KEYS" | xargs -r redis-cli DEL >/dev/null 2>&1
+        echo "✅ Invalidated $API_COUNT API cache keys"
+    fi
+
+    # Check for query result caches
+    QUERY_KEYS=$(redis-cli --scan --pattern "query:*${MODEL_NAME}*" 2>/dev/null)
+    if [ -n "$QUERY_KEYS" ]; then
+        QUERY_COUNT=$(echo "$QUERY_KEYS" | wc -l)
+        echo "$QUERY_KEYS" | xargs -r redis-cli DEL >/dev/null 2>&1
+        echo "✅ Invalidated $QUERY_COUNT query cache keys"
+    fi
+
+    # Check current Redis stats
+    echo ""
+    echo "📊 Redis Cache Statistics:"
+    TOTAL_KEYS=$(redis-cli DBSIZE 2>/dev/null || echo "unknown")
+    MEMORY_USAGE=$(redis-cli INFO memory 2>/dev/null | grep used_memory_human | cut -d: -f2 | tr -d '\r' || echo "unknown")
+    echo "  • Total keys: $TOTAL_KEYS"
+    echo "  • Memory usage: $MEMORY_USAGE"
+
+    echo ""
+    echo "💡 Cache Invalidation Tips:"
+    echo "  • Use consistent cache key naming patterns"
+    echo "  • Consider cache TTL for automatic expiration"
+    echo "  • Monitor cache hit/miss ratios"
+    echo "  • Use Redis keyspace notifications for advanced invalidation"
+
+    echo ""
+    echo "🎯 Cache invalidation complete!"
+
+elif [[ "$FILE_PATH" == *config/*.* ]] || [[ "$FILE_PATH" == *.env ]]; then
+    echo "⚙️ Configuration file detected - consider full cache flush if needed"
+    echo "💡 Run 'redis-cli FLUSHDB' manually if configuration affects cached data"
+
+else
+    echo "ℹ️ File does not require cache invalidation: $FILE_PATH"
+fi
+
+exit 0
+```
+```bash
+#!/bin/bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+echo "🔄 Redis Cache Invalidator - Analyzing file changes..."
+echo "📄 File: $FILE_PATH"
+
+# Check if this is a model or data file that should trigger cache invalidation
+if [[ "$FILE_PATH" == *models/*.js ]] || [[ "$FILE_PATH" == *models/*.py ]] || [[ "$FILE_PATH" == *models/*.ts ]] || [[ "$FILE_PATH" == *schemas/*.* ]] || [[ "$FILE_PATH" == *entities/*.* ]]; then
+
+    MODEL_NAME=$(basename "${FILE_PATH%.*}")
+    echo "📊 Model detected: $MODEL_NAME"
+
+    # Check if Redis CLI is available
+    if ! command -v redis-cli >/dev/null 2>&1; then
+        echo "⚠️ redis-cli not found - please install Redis CLI tools"
+        echo "💡 Install with: apt-get install redis-tools (Ubuntu) or brew install redis (macOS)"
+        exit 0
+    fi
+
+    # Test Redis connection
+    if ! redis-cli ping >/dev/null 2>&1; then
+        echo "⚠️ Redis server not accessible - skipping cache invalidation"
+        echo "💡 Ensure Redis server is running and accessible"
+        exit 0
+    fi
+
+    echo "🔍 Scanning for cache keys related to: $MODEL_NAME"
+
+    # Find cache keys related to this model
+    CACHE_KEYS=$(redis-cli --scan --pattern "*${MODEL_NAME}*" 2>/dev/null)
+
+    if [ -n "$CACHE_KEYS" ]; then
+        KEY_COUNT=$(echo "$CACHE_KEYS" | wc -l)
+        echo "🗑️ Found $KEY_COUNT cache keys to invalidate:"
+
+        # Show first few keys for confirmation
+        echo "$CACHE_KEYS" | head -5 | while read -r key; do
+            echo "  • $key"
+        done
+
+        if [ "$KEY_COUNT" -gt 5 ]; then
+            echo "  ... and $((KEY_COUNT - 5)) more keys"
+        fi
+
+        # Delete the keys
+        echo "$CACHE_KEYS" | xargs -r redis-cli DEL >/dev/null 2>&1
+        echo "✅ Invalidated $KEY_COUNT cache keys for model: $MODEL_NAME"
+    else
+        echo "ℹ️ No cache keys found for model: $MODEL_NAME"
+    fi
+
+    # Additional patterns to check
+    echo "🔍 Checking additional cache patterns..."
+
+    # Check for API route caches
+    API_KEYS=$(redis-cli --scan --pattern "api:*${MODEL_NAME}*" 2>/dev/null)
+    if [ -n "$API_KEYS" ]; then
+        API_COUNT=$(echo "$API_KEYS" | wc -l)
+        echo "$API_KEYS" | xargs -r redis-cli DEL >/dev/null 2>&1
+        echo "✅ Invalidated $API_COUNT API cache keys"
+    fi
+
+    # Check for query result caches
+    QUERY_KEYS=$(redis-cli --scan --pattern "query:*${MODEL_NAME}*" 2>/dev/null)
+    if [ -n "$QUERY_KEYS" ]; then
+        QUERY_COUNT=$(echo "$QUERY_KEYS" | wc -l)
+        echo "$QUERY_KEYS" | xargs -r redis-cli DEL >/dev/null 2>&1
+        echo "✅ Invalidated $QUERY_COUNT query cache keys"
+    fi
+
+    # Check current Redis stats
+    echo ""
+    echo "📊 Redis Cache Statistics:"
+    TOTAL_KEYS=$(redis-cli DBSIZE 2>/dev/null || echo "unknown")
+    MEMORY_USAGE=$(redis-cli INFO memory 2>/dev/null | grep used_memory_human | cut -d: -f2 | tr -d '\r' || echo "unknown")
+    echo "  • Total keys: $TOTAL_KEYS"
+    echo "  • Memory usage: $MEMORY_USAGE"
+
+    echo ""
+    echo "💡 Cache Invalidation Tips:"
+    echo "  • Use consistent cache key naming patterns"
+    echo "  • Consider cache TTL for automatic expiration"
+    echo "  • Monitor cache hit/miss ratios"
+    echo "  • Use Redis keyspace notifications for advanced invalidation"
+
+    echo ""
+    echo "🎯 Cache invalidation complete!"
+
+elif [[ "$FILE_PATH" == *config/*.* ]] || [[ "$FILE_PATH" == *.env ]]; then
+    echo "⚙️ Configuration file detected - consider full cache flush if needed"
+    echo "💡 Run 'redis-cli FLUSHDB' manually if configuration affects cached data"
+
+else
+    echo "ℹ️ File does not require cache invalidation: $FILE_PATH"
+fi
+
+exit 0
+```
+
+## Examples
+### Redis Cache Invalidator Hook Script
+
+Complete hook script that invalidates Redis cache keys when model files are modified
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+if [[ "$FILE_PATH" == *models/*.js ]] || [[ "$FILE_PATH" == *models/*.ts ]]; then
+  MODEL_NAME=$(basename "${FILE_PATH%.*}")
+  if command -v redis-cli >/dev/null 2>&1; then
+    if redis-cli ping >/dev/null 2>&1; then
+      CACHE_KEYS=$(redis-cli --scan --pattern "*${MODEL_NAME}*" 2>/dev/null)
+      if [ -n "$CACHE_KEYS" ]; then
+        echo "$CACHE_KEYS" | xargs -r redis-cli DEL >/dev/null 2>&1
+        echo "✅ Invalidated cache keys for: $MODEL_NAME"
+      fi
+    fi
+  fi
+fi
+exit 0
+```
+
+### Hook Configuration
+
+Complete hook configuration for .claude/settings.json to enable Redis cache invalidation
+
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/redis-cache-invalidator.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+
+### Multi-Pattern Cache Invalidation
+
+Enhanced hook script with multiple cache pattern matching
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *models/* ]]; then
+  MODEL_NAME=$(basename "${FILE_PATH%.*}")
+  if command -v redis-cli >/dev/null 2>&1 && redis-cli ping >/dev/null 2>&1; then
+    echo "🔍 Scanning for cache keys related to: $MODEL_NAME"
+    redis-cli --scan --pattern "*${MODEL_NAME}*" | while read -r key; do
+      redis-cli DEL "$key" >/dev/null 2>&1
+      echo "  • Deleted: $key"
+    done
+    redis-cli --scan --pattern "api:*${MODEL_NAME}*" | xargs -r redis-cli DEL >/dev/null 2>&1
+    redis-cli --scan --pattern "query:*${MODEL_NAME}*" | xargs -r redis-cli DEL >/dev/null 2>&1
+    echo "✅ Cache invalidation complete"
+  fi
+fi
+exit 0
+```
+
+### Batch Cache Invalidation with Pipeline
+
+Enhanced hook script with Redis pipeline for efficient batch operations
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *models/* ]]; then
+  MODEL_NAME=$(basename "${FILE_PATH%.*}")
+  if command -v redis-cli >/dev/null 2>&1 && redis-cli ping >/dev/null 2>&1; then
+    redis-cli --scan --pattern "*${MODEL_NAME}*" | redis-cli --pipe >/dev/null 2>&1 <<EOF
+$(redis-cli --scan --pattern "*${MODEL_NAME}*" | sed 's/^/DEL /')
+EOF
+    echo "✅ Batch cache invalidation complete"
+  fi
+fi
+exit 0
+```
+
+### Redis Cache Invalidator Configuration
+
+Example configuration for Redis cache invalidator settings
+
+```json
+{
+  "redis": {
+    "host": "localhost",
+    "port": 6379,
+    "database": 0,
+    "patterns": [
+      "*{model}*",
+      "api:*{model}*",
+      "query:*{model}*",
+      "cache:*{model}*"
+    ],
+    "timeout": 5,
+    "retry_attempts": 3
+  }
+}
+```
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+if [[ "$FILE_PATH" == *models/*.js ]] || [[ "$FILE_PATH" == *models/*.ts ]]; then
+  MODEL_NAME=$(basename "${FILE_PATH%.*}")
+  if command -v redis-cli >/dev/null 2>&1; then
+    if redis-cli ping >/dev/null 2>&1; then
+      CACHE_KEYS=$(redis-cli --scan --pattern "*${MODEL_NAME}*" 2>/dev/null)
+      if [ -n "$CACHE_KEYS" ]; then
+        echo "$CACHE_KEYS" | xargs -r redis-cli DEL >/dev/null 2>&1
+        echo "✅ Invalidated cache keys for: $MODEL_NAME"
+      fi
+    fi
+  fi
+fi
+exit 0
+```
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/redis-cache-invalidator.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *models/* ]]; then
+  MODEL_NAME=$(basename "${FILE_PATH%.*}")
+  if command -v redis-cli >/dev/null 2>&1 && redis-cli ping >/dev/null 2>&1; then
+    echo "🔍 Scanning for cache keys related to: $MODEL_NAME"
+    redis-cli --scan --pattern "*${MODEL_NAME}*" | while read -r key; do
+      redis-cli DEL "$key" >/dev/null 2>&1
+      echo "  • Deleted: $key"
+    done
+    redis-cli --scan --pattern "api:*${MODEL_NAME}*" | xargs -r redis-cli DEL >/dev/null 2>&1
+    redis-cli --scan --pattern "query:*${MODEL_NAME}*" | xargs -r redis-cli DEL >/dev/null 2>&1
+    echo "✅ Cache invalidation complete"
+  fi
+fi
+exit 0
+```
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *models/* ]]; then
+  MODEL_NAME=$(basename "${FILE_PATH%.*}")
+  if command -v redis-cli >/dev/null 2>&1 && redis-cli ping >/dev/null 2>&1; then
+    redis-cli --scan --pattern "*${MODEL_NAME}*" | redis-cli --pipe >/dev/null 2>&1 <<EOF
+$(redis-cli --scan --pattern "*${MODEL_NAME}*" | sed 's/^/DEL /')
+EOF
+    echo "✅ Batch cache invalidation complete"
+  fi
+fi
+exit 0
+```
+```json
+{
+  "redis": {
+    "host": "localhost",
+    "port": 6379,
+    "database": 0,
+    "patterns": [
+      "*{model}*",
+      "api:*{model}*",
+      "query:*{model}*",
+      "cache:*{model}*"
+    ],
+    "timeout": 5,
+    "retry_attempts": 3
+  }
+}
+```
+
+## Troubleshooting
+### Hook skips invalidation with redis-cli not found warning
+
+Install Redis CLI tools using 'apt-get install redis-tools' (Ubuntu/Debian) or 'brew install redis' (macOS). The hook gracefully exits if Redis tools are unavailable. Verify redis-cli installation. Test with various Redis installations.
+
+### Redis server not accessible error during invalidation
+
+Verify Redis is running with 'redis-cli ping'. Check connection settings in redis.conf. The hook tests connectivity before attempting invalidation and exits safely if unreachable. Verify Redis connection. Test with various Redis configurations.
+
+### Too many or too few cache keys being invalidated
+
+Review cache key naming patterns. The hook uses wildcard matching on model names. Use consistent prefixes like 'api:', 'query:', 'model:' for precise pattern matching and control. Verify cache key patterns. Test with various cache key naming conventions.
+
+### Hook triggers on non-model files causing unnecessary scans
+
+The hook only processes files in _/models/_, _/schemas/_, _/entities/_ directories. Organize your codebase to match these patterns or customize the path matching logic in the script. Verify file path patterns. Test with various project structures.
+
+### Cache invalidation completes but stale data persists
+
+Check if your application uses multiple Redis databases (DB0, DB1, etc.) or instances. The hook targets the default database. Use 'redis-cli -n <db>' to verify which database stores your cache. Verify Redis database selection. Test with various Redis database configurations.
+
+### Redis SCAN command is slow on large key sets
+
+SCAN can be slow with millions of keys. Use cursor-based scanning with SCAN cursor COUNT option. Consider using Redis keyspace notifications for event-driven invalidation. Optimize cache key patterns. Test with various key set sizes.
+
+### Cache invalidation fails with permission denied errors
+
+Verify Redis user has DEL and SCAN permissions. Check Redis ACL configuration. Ensure Redis connection uses appropriate authentication. Verify Redis permissions. Test with various Redis permission configurations.
+
+### Multiple Redis instances or clusters not supported
+
+Hook targets single Redis instance. For clusters, use Redis Cluster mode with redis-cli --cluster option. For multiple instances, configure hook to iterate through instances. Verify Redis topology. Test with various Redis configurations.

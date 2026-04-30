@@ -2,14 +2,14 @@
 title: CLI Data Visualization Quickstart Skill
 slug: cli-data-viz-quickstart
 category: skills
-description: 'Create publication-ready charts and visualizations from CSV, JSON, and Excel data using Python (matplotlib/seaborn) or Node.js (vega/vega-lite). Generate bar charts, line plots, scatter plots, heatmaps, and statistical visualizations with custom styling.'
-cardDescription: 'Create publication-ready charts and visualizations from CSV, JSON, and Excel data using Python (matplotlib/seaborn) or Node.js (vega/vega...'
+description: "Create publication-ready charts and visualizations from CSV, JSON, and Excel data using Python (matplotlib/seaborn) or Node.js (vega/vega-lite). Generate bar charts, line plots, scatter plots, heatmaps, and statistical visualizations with custom styling."
+cardDescription: "Create publication-ready charts and visualizations from CSV, JSON, and Excel data using Python (matplotlib/seaborn) or Node.js (vega/vega..."
 seoTitle: CLI Data Visualization Quickstart Skill
-seoDescription: 'Create publication-ready charts and visualizations from CSV, JSON, and Excel data using Python (matplotlib/seaborn) or Node.js (vega/vega-lite). Generate bar...'
+seoDescription: "Create publication-ready charts and visualizations from CSV, JSON, and Excel data using Python (matplotlib/seaborn) or Node.js (vega/vega-lite). Generate bar..."
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-15'
-documentationUrl: 'https://matplotlib.org/'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-15"
+documentationUrl: "https://matplotlib.org/"
 downloadUrl: /downloads/skills/cli-data-viz-quickstart.zip
 installable: true
 installCommand: npm i vega vega-lite
@@ -24,9 +24,9 @@ copySnippet: |-
 skillType: general
 skillLevel: advanced
 verificationStatus: draft
-verifiedAt: '2025-10-15'
+verifiedAt: "2025-10-15"
 retrievalSources:
-  - 'https://matplotlib.org/'
+  - "https://matplotlib.org/"
 testedPlatforms:
   - Claude
   - Codex
@@ -37,7 +37,7 @@ testedPlatforms:
 prerequisites:
   - Python 3.11+ or Node.js 18+
   - matplotlib/seaborn or vega/vega-lite
-  - 'Data file in supported format (CSV, JSON, Excel)'
+  - "Data file in supported format (CSV, JSON, Excel)"
   - Code Interpreter enabled (for Python path)
   - Node.js 18+ or Python 3.8+ runtime environment for executing visualization scripts
   - Terminal with ANSI color support and Unicode character rendering for proper chart display
@@ -68,6 +68,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## What This Skill Enables
 
 Claude can create charts and visualizations from your data (CSV, JSON, Excel) using matplotlib, seaborn, plotly, or other visualization libraries. Generate publication-ready charts, dashboards, and data visualizations with custom styling.
@@ -81,17 +82,20 @@ Claude can create charts and visualizations from your data (CSV, JSON, Excel) us
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
-
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 
 **Required:**
+
 - Claude Pro subscription
 - Code Interpreter feature enabled
 - Data file uploaded (CSV, JSON, Excel)
 
 **What Claude handles:**
+
 - Installing visualization libraries (matplotlib, seaborn, plotly)
 - Data loading and preprocessing
 - Chart generation with customization
@@ -105,6 +109,7 @@ Claude can create charts and visualizations from your data (CSV, JSON, Excel) us
 **Prompt:** "Create a bar chart from this CSV showing sales by category. Make it professional-looking with labels and save as chart.png"
 
 Claude will:
+
 1. Load and analyze the CSV
 2. Generate bar chart
 3. Add labels, title, legend
@@ -116,6 +121,7 @@ Claude will:
 **Prompt:** "Plot this time series data: dates on x-axis, values on y-axis. Show trend line and save as SVG."
 
 Claude will:
+
 1. Parse date column
 2. Create line plot
 3. Add trend line (regression)
@@ -125,13 +131,15 @@ Claude will:
 ### Multiple Subplots
 
 **Prompt:** "Create a 2x2 grid of charts from this data:
+
 - Top left: revenue by month
 - Top right: customer distribution
 - Bottom left: product performance
 - Bottom right: regional breakdown
-Use consistent colors and save as dashboard.png"
+  Use consistent colors and save as dashboard.png"
 
 Claude will:
+
 1. Create subplot layout
 2. Generate each chart
 3. Apply consistent styling
@@ -143,6 +151,7 @@ Claude will:
 **Prompt:** "Create an interactive plotly chart with hover tooltips and zoom. Save as HTML."
 
 Claude will:
+
 1. Use plotly library
 2. Create interactive visualization
 3. Add hover information
@@ -152,6 +161,7 @@ Claude will:
 ## Common Workflows
 
 ### Sales Dashboard
+
 ```
 "Create a sales dashboard from this data:
 1. Line chart: monthly revenue trend
@@ -162,6 +172,7 @@ Use a professional color scheme and save as sales_dashboard.png"
 ```
 
 ### Statistical Visualization
+
 ```
 "Visualize this dataset statistically:
 1. Histogram with distribution curve
@@ -172,6 +183,7 @@ Add statistical annotations and save as analysis.png"
 ```
 
 ### Comparative Analysis
+
 ```
 "Compare Year 2024 vs 2025 data:
 1. Side-by-side bar charts
@@ -182,6 +194,7 @@ Make it presentation-ready"
 ```
 
 ### Custom Styled Chart
+
 ```
 "Create a chart matching our brand:
 - Primary color: #FF6B35
@@ -195,6 +208,7 @@ Show monthly data as area chart"
 ## Chart Types Available
 
 ### Basic Charts
+
 - Line plots (single/multiple series)
 - Bar charts (vertical/horizontal)
 - Scatter plots (with trend lines)
@@ -202,6 +216,7 @@ Show monthly data as area chart"
 - Area charts (stacked/unstacked)
 
 ### Statistical Charts
+
 - Histograms (with KDE)
 - Box plots (with outliers)
 - Violin plots
@@ -209,6 +224,7 @@ Show monthly data as area chart"
 - Distribution plots
 
 ### Advanced Charts
+
 - Multi-axis plots
 - Subplots and grids
 - 3D visualizations
@@ -228,12 +244,14 @@ Show monthly data as area chart"
 ## Customization Options
 
 ### Colors & Themes
+
 - Built-in themes (seaborn, ggplot, bmh)
 - Custom color palettes
 - Brand color matching
 - Color-blind friendly palettes
 
 ### Annotations
+
 - Data labels on points/bars
 - Trend lines and statistics
 - Reference lines
@@ -241,6 +259,7 @@ Show monthly data as area chart"
 - Arrows and callouts
 
 ### Export Options
+
 - PNG (raster, high DPI)
 - SVG (vector, scalable)
 - PDF (print-ready)

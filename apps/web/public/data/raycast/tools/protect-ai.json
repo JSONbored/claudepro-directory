@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:protect-ai",
+  "category": "tools",
+  "slug": "protect-ai",
+  "title": "Protect AI",
+  "author": "Protect AI",
+  "brandName": "Protect AI",
+  "brandDomain": "protectai.com",
+  "brandIconUrl": "/api/brand-assets/icon/protectai.com",
+  "brandAssetSource": "brandfetch",
+  "copyText": "## Editorial notes\n\nProtect AI is relevant for organizations that treat AI systems as a security and supply-chain surface, not only a product feature.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Protect AI\n\nAI security platform for securing machine learning and LLM supply chains, models, applications, and infrastructure.",
+  "webUrl": "https://heyclau.de/tools/protect-ai",
+  "canonicalUrl": "https://heyclau.de/tools/protect-ai",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/protect-ai.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/protect-ai",
+  "seoTitle": "Protect AI security platform for AI systems",
+  "seoDescription": "Protect AI focuses on securing AI and ML supply chains, models, applications, and infrastructure. HeyClaude adds source links, install steps, compatibility,...",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.protectai.com"
+}

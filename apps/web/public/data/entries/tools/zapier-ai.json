@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "key": "tools:zapier-ai",
+  "entry": {
+    "category": "tools",
+    "slug": "zapier-ai",
+    "title": "Zapier AI",
+    "description": "Automation platform with AI-assisted workflows, app integrations, agents, actions, and business process automation.",
+    "seoTitle": "Zapier AI workflow automation",
+    "seoDescription": "Zapier AI supports app integrations, AI-assisted workflows, agents, actions, and business process automation. HeyClaude adds source links, install steps,...",
+    "author": "Zapier",
+    "dateAdded": "2026-04-27",
+    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+    "tags": [
+      "workflow-automation",
+      "integrations"
+    ],
+    "keywords": [
+      "ai automation",
+      "app integrations",
+      "workflow-automation",
+      "integrations",
+      "tools",
+      "claude",
+      "heyclaude",
+      "zapier ai"
+    ],
+    "documentationUrl": "https://help.zapier.com",
+    "websiteUrl": "https://zapier.com/ai",
+    "brandName": "Zapier",
+    "brandDomain": "zapier.com",
+    "brandIconUrl": "/api/brand-assets/icon/zapier.com",
+    "brandAssetSource": "brandfetch",
+    "pricingModel": "freemium",
+    "disclosure": "editorial",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "cardDescription": "AI-assisted automation across business apps.",
+    "installable": false,
+    "hasPrerequisites": false,
+    "hasTroubleshooting": false,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Editorial notes\n\nZapier AI is relevant for non-engineering and operations teams that need AI-assisted workflows across existing business apps.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+    "sections": [
+      {
+        "title": "Editorial notes",
+        "id": "editorial-notes",
+        "markdown": "Zapier AI is relevant for non-engineering and operations teams that need AI-assisted workflows across existing business apps.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Disclosure",
+        "id": "disclosure",
+        "markdown": "Editorial listing. No paid placement or affiliate link is used.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Editorial notes",
+        "id": "editorial-notes"
+      },
+      {
+        "depth": 2,
+        "text": "Disclosure",
+        "id": "disclosure"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/tools/zapier-ai.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/zapier-ai.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 3,
+    "sourceUrls": [
+      "https://help.zapier.com",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/zapier-ai.mdx",
+      "https://zapier.com/ai"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

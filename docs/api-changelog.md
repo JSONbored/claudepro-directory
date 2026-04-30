@@ -1,0 +1,30 @@
+# API Changelog
+
+## 2026-04-27
+
+- Added `/atom.xml` as a registry update feed alongside `/feed.xml`.
+- Added factual `trustSignals` metadata to registry search, feeds, and entry detail artifacts.
+- Added a dry-run-first Resend Templates sync command for dashboard review without app-side sending.
+- Strengthened generated README validation so category counts and every file-backed entry stay aligned.
+- Added sharded distribution feeds under `/data/feeds/` for category and platform consumers.
+- Added IndexNow release submission tooling guarded to production URLs.
+- Added the browser-side Agent Skill package validator at `/tools/skill-validator`.
+- Added platform compatibility pages under `/platforms/` for Agent Skills and generated adapters.
+- Added the read-only `@heyclaude/mcp` package for registry search, detail, compatibility, install guidance, adapter lookup, and feed discovery.
+- Added React Email source templates with rendered Resend Broadcast HTML/text artifacts.
+- Added generated skill platform compatibility metadata for native Agent Skills platforms and adapter targets.
+- Added generated Cursor `.mdc` skill adapters under `/data/skill-adapters/cursor/`.
+- Added deployment artifact validation for preview release candidates.
+- Clarified that registry publishing remains outside the public API.
+
+## 2026-04-26
+
+- Added read-only registry endpoints for manifest, categories, search, entry detail, and per-entry LLM text.
+- Added `ETag` support to static registry API responses for cheaper client sync.
+- Added `/api/registry/feed` as a lightweight read-only descriptor for downstream builders.
+- Added `/api/intent-events` for privacy-light copy/open/install/download/vote intent metrics.
+- Added token-protected listing lead review/export with JSON and CSV responses.
+
+All public registry payloads remain read-only and versioned. Editorial content
+continues to be sourced from the Git-backed registry, while votes, leads,
+placements, jobs, and intent metrics remain dynamic state in `SITE_DB`.

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:roo-code",
+  "category": "tools",
+  "slug": "roo-code",
+  "title": "Roo Code",
+  "author": "Roo Code",
+  "brandName": "Roo Code",
+  "brandDomain": "roocode.com",
+  "brandIconUrl": "/api/brand-assets/icon/roocode.com",
+  "brandAssetSource": "brandfetch",
+  "copyText": "## Editorial notes\n\nRoo Code is a good fit when users want mode-specific agent behavior for planning, code edits, debugging, and routine project work.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Roo Code\n\nOpen-source AI coding agent for VS Code with modes for planning, editing, debugging, and workflow automation.",
+  "webUrl": "https://heyclau.de/tools/roo-code",
+  "canonicalUrl": "https://heyclau.de/tools/roo-code",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/roo-code.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/roo-code",
+  "seoTitle": "Roo Code AI coding agent for VS Code",
+  "seoDescription": "Roo Code is an open-source VS Code AI coding agent with modes for planning, editing, debugging, and automation. HeyClaude adds source links, install steps,...",
+  "repoUrl": "https://github.com/RooCodeInc/Roo-Code",
+  "documentationUrl": "https://docs.roocode.com"
+}

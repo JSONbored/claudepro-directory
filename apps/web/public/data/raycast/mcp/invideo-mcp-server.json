@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "mcp:invideo-mcp-server",
+  "category": "mcp",
+  "slug": "invideo-mcp-server",
+  "title": "Invideo MCP Server for Claude",
+  "author": "invideo",
+  "brandName": "Invideo",
+  "brandDomain": "invideo.io",
+  "brandIconUrl": "/api/brand-assets/icon/invideo.io",
+  "brandAssetSource": "brandfetch",
+  "copyText": "Install:\nclaude mcp list && claude mcp status invideo\n\nConfig:\n{\n  \"invideo\": {\n    \"url\": \"https://mcp.invideo.io/sse\",\n    \"transport\": \"sse\"\n  }\n}\n\nUsage:\n{\n  \"invideo\": {\n    \"url\": \"https://mcp.invideo.io/sse\",\n    \"transport\": \"sse\"\n  }\n}",
+  "detailMarkdown": "# Invideo MCP Server for Claude\n\nBuild video creation capabilities into your applications\n\n## Install\n```bash\nclaude mcp list && claude mcp status invideo\n```\n\n## Config\n```json\n{\n  \"invideo\": {\n    \"url\": \"https://mcp.invideo.io/sse\",\n    \"transport\": \"sse\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status invideo",
+  "webUrl": "https://heyclau.de/mcp/invideo-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/invideo-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/invideo-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/invideo-mcp-server",
+  "seoTitle": "Invideo MCP Server for Claude",
+  "seoDescription": "Build video creation capabilities into your applications Discover tools for AI development. HeyClaude adds source links, install steps, compatibility, and...",
+  "repoUrl": "",
+  "documentationUrl": "https://invideo.io/ai/mcp"
+}

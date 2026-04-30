@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "mcp:workato-mcp-server",
+  "category": "mcp",
+  "slug": "workato-mcp-server",
+  "title": "Workato MCP Server for Claude",
+  "author": "Workato",
+  "brandName": "Workato",
+  "brandDomain": "workato.com",
+  "brandIconUrl": "/api/brand-assets/icon/workato.com",
+  "brandAssetSource": "brandfetch",
+  "copyText": "Install:\nclaude mcp add --transport http workato YOUR_WORKATO_MCP_URL && claude mcp list\n\nConfig:\n{\n  \"workato\": {\n    \"url\": \"https://your-workspace.workato.com/mcp\",\n    \"transport\": \"http\"\n  }\n}\n\nUsage:\n{\n  \"workato\": {\n    \"url\": \"https://your-workspace.workato.com/mcp\",\n    \"transport\": \"http\"\n  }\n}",
+  "detailMarkdown": "# Workato MCP Server for Claude\n\nAccess any application, workflows, or data via Workato's integration platform\n\n## Install\n```bash\nclaude mcp add --transport http workato YOUR_WORKATO_MCP_URL && claude mcp list\n```\n\n## Config\n```json\n{\n  \"workato\": {\n    \"url\": \"https://your-workspace.workato.com/mcp\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Usage\nclaude mcp add --transport http workato YOUR_WORKATO_MCP_URL && claude mcp list",
+  "webUrl": "https://heyclau.de/mcp/workato-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/workato-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/workato-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/workato-mcp-server",
+  "seoTitle": "Workato MCP Server for Claude",
+  "seoDescription": "Access any application, workflows, or data via Workato's integration platform Discover tools for AI development. HeyClaude adds source links, install steps,...",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.workato.com/mcp.html"
+}

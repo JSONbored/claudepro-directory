@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:cursor",
+  "category": "tools",
+  "slug": "cursor",
+  "title": "Cursor",
+  "author": "Cursor",
+  "brandName": "Cursor",
+  "brandDomain": "cursor.com",
+  "brandIconUrl": "/api/brand-assets/icon/cursor.com",
+  "brandAssetSource": "brandfetch",
+  "copyText": "## Editorial notes\n\nCursor is a strong fit for teams that want codebase-aware AI workflows inside an editor rather than a separate chat surface.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Cursor\n\nAI-native code editor for codebase-aware chat, agent-assisted edits, and software development workflows.",
+  "webUrl": "https://heyclau.de/tools/cursor",
+  "canonicalUrl": "https://heyclau.de/tools/cursor",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/cursor.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/cursor",
+  "seoTitle": "Cursor AI code editor for Claude-native teams",
+  "seoDescription": "Cursor is an AI-native code editor for codebase-aware chat, agent edits, and developer workflows. HeyClaude adds source links, install steps, compatibility,...",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.cursor.com"
+}

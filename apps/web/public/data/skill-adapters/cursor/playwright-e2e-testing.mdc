@@ -1,0 +1,14 @@
+---
+description: "Automate end-to-end testing with Playwright - the modern browser automation framework that supports Chromium, Firefox, and WebKit with a..."
+globs:
+alwaysApply: false
+---
+# Playwright E2E Testing Automation Skill
+Automate end-to-end testing with Playwright - the modern browser automation framework that supports Chromium, Firefox, and WebKit with a single API.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+npx playwright install --with-deps
+```
+## Source
+https://heyclau.de/downloads/skills/playwright-e2e-testing.zip

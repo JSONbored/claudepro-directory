@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "key": "tools:aider",
+  "entry": {
+    "category": "tools",
+    "slug": "aider",
+    "title": "Aider",
+    "description": "Open-source terminal coding assistant that edits files in Git repositories using chat-driven development loops.",
+    "seoTitle": "Aider terminal AI coding assistant",
+    "seoDescription": "Aider is an open-source terminal coding assistant that edits files in Git repositories through chat workflows. HeyClaude adds source links, install steps,...",
+    "author": "Aider",
+    "dateAdded": "2026-04-27",
+    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+    "tags": [
+      "terminal-agent",
+      "open-source"
+    ],
+    "keywords": [
+      "terminal coding agent",
+      "git ai assistant",
+      "terminal-agent",
+      "open-source",
+      "tools",
+      "claude",
+      "heyclaude",
+      "aider"
+    ],
+    "documentationUrl": "https://aider.chat/docs",
+    "websiteUrl": "https://aider.chat",
+    "brandName": "Aider",
+    "brandDomain": "aider.chat",
+    "brandIconUrl": "/api/brand-assets/icon/aider.chat",
+    "brandAssetSource": "brandfetch",
+    "pricingModel": "open-source",
+    "disclosure": "editorial",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "macOS, Windows, Linux",
+    "cardDescription": "Terminal AI coding assistant for Git repositories.",
+    "installable": false,
+    "hasPrerequisites": false,
+    "hasTroubleshooting": false,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Editorial notes\n\nAider is a practical option for developers who want tight Git-centered AI editing without adopting a new editor.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+    "sections": [
+      {
+        "title": "Editorial notes",
+        "id": "editorial-notes",
+        "markdown": "Aider is a practical option for developers who want tight Git-centered AI editing without adopting a new editor.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Disclosure",
+        "id": "disclosure",
+        "markdown": "Editorial listing. No paid placement or affiliate link is used.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Editorial notes",
+        "id": "editorial-notes"
+      },
+      {
+        "depth": 2,
+        "text": "Disclosure",
+        "id": "disclosure"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/tools/aider.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/aider.mdx",
+    "repoUrl": "https://github.com/Aider-AI/aider",
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 4,
+    "sourceUrls": [
+      "https://aider.chat/docs",
+      "https://github.com/Aider-AI/aider",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/aider.mdx",
+      "https://aider.chat"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

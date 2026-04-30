@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "mcp:github-mcp-server",
+  "category": "mcp",
+  "slug": "github-mcp-server",
+  "title": "GitHub MCP Server for Claude",
+  "author": "GitHub",
+  "brandName": "GitHub",
+  "brandDomain": "github.com",
+  "brandIconUrl": "/api/brand-assets/icon/github.com",
+  "brandAssetSource": "brandfetch",
+  "copyText": "Install:\nclaude mcp add github --env GITHUB_PERSONAL_ACCESS_TOKEN=YOUR_TOKEN -- npx -y @modelcontextprotocol/server-github && claude mcp list\n\nConfig:\n{\n  \"github\": {\n    \"env\": {\n      \"GITHUB_PERSONAL_ACCESS_TOKEN\": \"${GITHUB_PERSONAL_ACCESS_TOKEN}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-github\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n\nUsage:\n{\n  \"github\": {\n    \"env\": {\n      \"GITHUB_PERSONAL_ACCESS_TOKEN\": \"${GITHUB_PERSONAL_ACCESS_TOKEN}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-github\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
+  "detailMarkdown": "# GitHub MCP Server for Claude\n\nOfficial GitHub MCP server providing comprehensive GitHub API access for repository management, file operations, and search functionality\n\n## Install\n```bash\nclaude mcp add github --env GITHUB_PERSONAL_ACCESS_TOKEN=YOUR_TOKEN -- npx -y @modelcontextprotocol/server-github && claude mcp list\n```\n\n## Config\n```json\n{\n  \"github\": {\n    \"env\": {\n      \"GITHUB_PERSONAL_ACCESS_TOKEN\": \"${GITHUB_PERSONAL_ACCESS_TOKEN}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-github\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n```\n\n## Usage\nclaude mcp add github --env GITHUB_PERSONAL_ACCESS_TOKEN=YOUR_TOKEN -- npx -y @modelcontextprotocol/server-github && claude mcp list",
+  "webUrl": "https://heyclau.de/mcp/github-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/github-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/github-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/github-mcp-server",
+  "seoTitle": "GitHub MCP Server for Claude",
+  "seoDescription": "Official GitHub MCP server providing comprehensive GitHub API access for repository management, file operations, and search functionality Discover tools for ...",
+  "repoUrl": "",
+  "documentationUrl": "https://www.npmjs.com/package/@modelcontextprotocol/server-github"
+}

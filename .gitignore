@@ -5,11 +5,23 @@ node_modules
 .DS_Store
 dist
 coverage
+reports
+test-results
+.build-content-index.lock/
+TASKS.md
+.internal/
 .dev.vars
 .dev.vars.*
+.env.local
+.env.*.local
 AGENTS.md
 docs/jobs-listings-private-flow.md
+integrations/raycast/package.json.dev-backup
 
 # Ensure first-party package assets remain tracked even if a global ignore has *.zip
 !content/skills/*.zip
 !content/mcp/*.mcpb
+
+# D1 schema migrations must stay tracked even if a global ignore has *.sql
+!apps/web/migrations/
+!apps/web/migrations/*.sql

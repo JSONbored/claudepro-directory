@@ -1,0 +1,28 @@
+# Cloudflare Agents SDK
+URL: https://heyclau.de/tools/cloudflare-agents-sdk
+Category: tools
+Author: Cloudflare
+Date added: 2026-04-27
+Documentation: https://developers.cloudflare.com/agents/
+Repository: https://github.com/cloudflare/agents
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/cloudflare-agents-sdk.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/tools/cloudflare-agents-sdk
+- Source URLs: https://developers.cloudflare.com/agents/, https://github.com/cloudflare/agents, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/cloudflare-agents-sdk.mdx
+- Brand: Cloudflare
+- Brand domain: developers.cloudflare.com
+- Brand asset source: brandfetch
+- Author: Cloudflare
+- Last verified: 2026-04-26T23:21:14-06:00
+- Robots: indexable
+## Summary
+Cloudflare framework for building, deploying, and running AI agents on Workers with durable platform primitives.
+## Tags
+- agent-framework
+- cloudflare
+## Content
+## Editorial notes
+Cloudflare Agents SDK is relevant for teams that want agent runtimes close to edge compute, durable objects, and serverless deployment.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

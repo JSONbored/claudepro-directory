@@ -1,0 +1,100 @@
+# Unraid API v2 Capability Pack Skill
+URL: https://heyclau.de/skills/unraid-api-v2-capability-pack
+Category: skills
+Author: JSONbored
+Date added: 2026-04-10
+Documentation: https://docs.unraid.net/API/
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/unraid-api-v2-capability-pack.mdx
+Download: /downloads/skills/unraid-api-v2-capability-pack.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/unraid-api-v2-capability-pack
+- Source URLs: https://docs.unraid.net/API/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/unraid-api-v2-capability-pack.mdx
+- Package URL: /downloads/skills/unraid-api-v2-capability-pack.zip
+- Package SHA256: f1b76482519832597daed36f244bfe502df781fd2491b895ec246d4e0859ecea
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-10
+- Robots: indexable
+## Summary
+Deep, version-pinned Unraid API capability skill covering auth, schema patterns, safe mutations, and operational automation design.
+## Tags
+- unraid
+- api
+- homelab
+- automation
+- capability-pack
+## Content
+## Knowledge Freshness
+This capability pack is pinned to documentation verified on **2026-04-10**.
+When upstream docs change, refresh endpoint contracts, examples, and constraints before using this skill for production changes.
+
+## Retrieval Sources
+- https://docs.unraid.net/API/
+- https://docs.unraid.net/API/how-to-use-the-api/
+- https://docs.unraid.net/category/release-notes/
+
+Always prefer direct retrieval from official docs/API references over model memory for limits, endpoint signatures, and behavior guarantees.
+
+## Core Workflow
+1. Confirm target version/runtime and pull latest official docs for the task scope.
+2. Build an execution plan with explicit read-only discovery before any mutation.
+3. Validate contracts, permissions, and safety constraints before applying changes.
+4. Execute with deterministic checkpoints and rollback criteria.
+5. Produce a verification report with evidence, caveats, and next actions.
+
+## Overview
+This is an expert-level capability skill for Unraid API operations. It is intended to teach an agent the practical details needed to build correct, safe automations against the current API surface.
+
+## Capability Scope
+- Authentication and session/token model
+- Endpoint family classification (read-only vs state-changing)
+- Data model assumptions and schema normalization
+- Mutation safety and confirmation workflows
+- Error handling, retries, idempotency, and rollback constraints
+
+## Compatibility
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Core Operating Model
+1. Discover current state before any write operations.
+2. Validate preconditions and maintenance window constraints.
+3. Execute minimal mutation set with explicit verification checkpoints.
+4. Emit an operation report with before/after snapshots and rollback notes.
+
+## Production Rules
+- Never run destructive actions without explicit confirmation.
+- Require idempotency strategy for retryable writes.
+- Separate health/read telemetry from mutation workflows.
+- Keep credentials scoped and rotated.
+
+## Troubleshooting
+**Issue:** Same automation works on one server but fails on another  
+**Fix:** Capture and compare API version/capability differences before execution.
+
+**Issue:** Partial state updates on retries  
+**Fix:** Introduce operation IDs and idempotent guard checks.
+
+**Issue:** Difficult post-mortem analysis  
+**Fix:** Add structured execution logs with endpoint, payload hash, and result metadata.
+
+## Output Contract
+1. Provide an implementation plan ordered by risk and dependency.
+2. Provide exact production-ready config/commands with no placeholders.
+3. Call out secrets, permissions, and least-privilege requirements.
+4. Include rollback and recovery guidance for each risky step.
+
+## Validation Checklist
+- Verify all referenced docs/versions before applying changes.
+- Run regression checks for core user flow and error paths.
+- Confirm observability/logging is enabled for changed components.
+- Confirm security controls (auth, rate limits, input validation) still pass.
+- Record final known limitations and follow-up actions.

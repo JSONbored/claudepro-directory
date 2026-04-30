@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 2,
+  "key": "skills:vite-build-optimization",
+  "category": "skills",
+  "slug": "vite-build-optimization",
+  "title": "Vite Frontend Build Performance Optimization Skill",
+  "author": "JSONbored",
+  "copyText": "Install:\nnpm create vite@latest my-app\n\nUsage:\nnpm create vite@latest my-app\n\nAsset:\nimport { defineConfig } from 'vite';\nimport react from '@vitejs/plugin-react';\nimport { visualizer } from 'rollup-plugin-visualizer';\n\nexport default defineConfig({\n  plugins: [\n    react(),\n    visualizer({ open: true, filename: 'dist/stats.html' }),\n  ],\n  build: {\n    target: 'es2020',\n    sourcemap: 'hidden',\n    rollupOptions: {\n      output: {\n        manualChunks: (id) => {\n          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {\n            return 'vendor-react';\n          }\n          if (id.includes('node_modules/@mui') || id.includes('node_modules/@emotion')) {\n            return 'vendor-ui';\n          }\n          if (id.includes('node_modules/lodash') || id.includes('node_modules/date-fns')) {\n            return 'vendor-utils';\n          }\n        },\n      },\n    },\n    cssCodeSplit: true,\n    minify: 'terser',\n    terserOptions: {\n      compress: {\n        drop_console: true,\n        drop_debugger: true,\n      },\n    },\n  },\n  optimizeDeps: {\n    include: ['react', 'react-dom'],\n  },\n});",
+  "detailMarkdown": "# Vite Frontend Build Performance Optimization Skill\n\nOptimize frontend build performance with Vite's lightning-fast HMR, code splitting, and tree-shaking. Modern build tooling that has replaced Webpack as the developer favorite.\n\n## Install\n```bash\nnpm create vite@latest my-app\n```\n\n## Usage\nnpm create vite@latest my-app",
+  "webUrl": "https://heyclau.de/skills/vite-build-optimization",
+  "canonicalUrl": "https://heyclau.de/skills/vite-build-optimization",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/vite-build-optimization.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/vite-build-optimization",
+  "seoTitle": "Vite Frontend Build Performance Optimization Skill",
+  "seoDescription": "Optimize frontend build performance with Vite's lightning-fast HMR, code splitting, and tree-shaking. Modern build tooling that has replaced Webpack as the d...",
+  "repoUrl": "",
+  "documentationUrl": "https://vitejs.dev/"
+}

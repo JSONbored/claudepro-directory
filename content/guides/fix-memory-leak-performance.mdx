@@ -13,8 +13,8 @@ seoDescription: >-
   Resolve crashes, session freezes, and slow performance with proven fix
   methods.
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-27'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-27"
 installable: false
 usageSnippet: >-
   **Quick Fix:** Claude Code processes can consume 120GB RAM within 60 minutes.
@@ -28,7 +28,11 @@ tags:
   - optimization
   - debugging
   - context-window
-keywords: []
+keywords:
+  - claude performance troubleshooting
+  - memory leak fix
+  - mcp performance
+  - ai workflow performance
 readingTime: 4
 difficultyScore: 67
 hasTroubleshooting: false
@@ -37,12 +41,13 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## TL;DR
 
 **Quick Fix:** Claude Code processes can consume 120GB RAM within 60 minutes. Clear context with `/clear` every 40 messages. Configure memory limits to 4096MB. Monitor RAM usage actively. Keep CLAUDE.md files under 5KB for optimal performance.
 
 > **Critical Performance Issue**
-> 
+>
 > Claude Code experiences severe memory leaks causing system crashes. RAM usage grows from 300MB to 120GB within one hour. This affects macOS, Linux, and WSL2 environments. Immediate action prevents complete system failure.
 
 ## Identifying the Problem
@@ -56,16 +61,12 @@ Performance degradation follows three distinct phases. Initial phase shows minor
 ## Step-by-Step Solutions
 
 1. **Stop All Claude Processes**
-   
 
 2. **Configure Memory Limits**
-   
 
 3. **Restart Claude With Limits**
-   
 
 4. **Monitor Resource Usage**
-   
 
 ## Context Window Optimization
 
@@ -100,11 +101,11 @@ Complex issues require systematic diagnostic approaches. Performance problems of
 ## Prevention Strategies
 
 > **Prevent Future Occurrences**
-> 
+>
 > **Proactive Context Management:** Run /compact every 40 messages systematically - Reduces memory usage by 60%
-> 
+>
 > **Session Hygiene:** Clear context between unrelated tasks immediately - Prevents 70% of overflow issues
-> 
+>
 > **Resource Monitoring:** Track RAM usage with htop continuously - Early detection prevents system crashes
 
 ## Alternative Solutions
@@ -134,11 +135,11 @@ Real-time monitoring prevents catastrophic failures effectively. Claude-Code-Usa
 ---
 
 > **Issue Resolved?**
-> 
+>
 > **Problem solved?** Great! Implement daily /compact routines to prevent recurrence.
-> 
+>
 > **Still having issues?** Join our [community](/community) for additional support or check Anthropic's status page.
-> 
+>
 > **Found a new solution?** Share it with the community to help others facing the same issue.
 
-*Last updated: September 2025 | Solutions verified against Claude 4 documentation | Found this helpful? Bookmark for future reference and explore more [troubleshooting guides](/guides/troubleshooting).*
+_Last updated: September 2025 | Solutions verified against Claude 4 documentation | Found this helpful? Bookmark for future reference and explore more [troubleshooting guides](/guides/troubleshooting)._

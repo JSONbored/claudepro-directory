@@ -1,0 +1,432 @@
+# Real Time Activity Tracker - Hooks
+URL: https://heyclau.de/hooks/real-time-activity-tracker
+Category: hooks
+Author: JSONbored
+Date added: 2025-09-19
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/real-time-activity-tracker.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/hooks/real-time-activity-tracker
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/real-time-activity-tracker.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
+## Summary
+Tracks all Claude Code activities in real-time and logs them for monitoring and debugging.
+## Tags
+- monitoring
+- logging
+- notification
+- real-time
+- debugging
+## Content
+## Features
+- Real-time activity logging including activity detection (real-time activity detection with immediate notification, activity event capture with tool usage tracking, activity timestamp recording with ISO-8601 format, activity context collection with file paths and actions), activity logging (structured activity logging with JSON format, human-readable activity logging with text format, activity log rotation with daily rotation, activity log archival with weekly/monthly archives), activity monitoring (real-time activity monitoring with immediate feedback, activity pattern detection with usage patterns, activity trend analysis with historical trends, activity anomaly detection with unusual patterns), and activity reporting (activity summary reporting with daily summaries, activity statistics reporting with usage statistics, activity export with JSON/CSV formats, activity visualization with charts and graphs)
+- Structured activity records including activity data structure (structured activity records with JSON format, activity metadata with timestamps and session IDs, activity context with file paths and tool names, activity actions with tool actions and operations), activity indexing (activity record indexing for fast retrieval, activity record search with full-text search, activity record filtering with date/tool/action filters, activity record aggregation with statistics), activity storage (activity record storage with efficient storage, activity record compression with log rotation, activity record backup with archival, activity record retention with configurable retention), and activity analysis (activity record analysis with pattern detection, activity record correlation with related activities, activity record visualization with charts, activity record export with multiple formats)
+- Daily log rotation including log rotation (daily log rotation with date-based naming, log file management with automatic cleanup, log file archival with weekly/monthly archives, log file retention with configurable retention), log management (log file size management with size limits, log file count management with count limits, log file cleanup with automatic cleanup, log file organization with directory structure), log archival (log file archival with weekly/monthly archives, log file compression with gzip compression, log file backup with backup storage, log file restoration with restore capability), and log retention (log file retention policies with configurable policies, log file deletion with automatic deletion, log file preservation with long-term storage, log file compliance with data retention requirements)
+- Tool usage tracking including tool tracking (tool usage tracking with comprehensive tracking, tool usage statistics with usage counts, tool usage patterns with usage patterns, tool usage trends with historical trends), tool analysis (tool usage analysis with detailed analysis, tool usage correlation with related tools, tool usage optimization with recommendations, tool usage reporting with usage reports), tool monitoring (tool usage monitoring with real-time monitoring, tool usage alerts with threshold alerts, tool usage dashboards with visual dashboards, tool usage metrics with performance metrics), and tool reporting (tool usage reporting with comprehensive reports, tool usage export with JSON/CSV formats, tool usage visualization with charts, tool usage insights with actionable insights)
+- File operation monitoring including file monitoring (file operation monitoring with comprehensive monitoring, file modification tracking with change tracking, file access tracking with access logging, file creation tracking with creation logging), file analysis (file operation analysis with detailed analysis, file operation patterns with usage patterns, file operation trends with historical trends, file operation correlation with related operations), file statistics (file operation statistics with usage statistics, file operation metrics with performance metrics, file operation reporting with usage reports, file operation insights with actionable insights), and file reporting (file operation reporting with comprehensive reports, file operation export with JSON/CSV formats, file operation visualization with charts, file operation alerts with threshold alerts)
+- Debug information collection including debug collection (debug information collection with comprehensive collection, debug context collection with full context, debug state collection with application state, debug trace collection with execution traces), debug storage (debug information storage with efficient storage, debug information indexing with fast retrieval, debug information search with full-text search, debug information filtering with date/type filters), debug analysis (debug information analysis with pattern detection, debug information correlation with related events, debug information visualization with charts, debug information export with multiple formats), and debug reporting (debug information reporting with comprehensive reports, debug information export with JSON/CSV formats, debug information visualization with charts, debug information insights with actionable insights)
+- Activity statistics and reporting including activity statistics (activity count statistics with daily/weekly/monthly counts, activity type statistics with tool/action type distribution, activity pattern statistics with usage patterns, activity trend statistics with historical trends), activity reporting (activity summary reports with daily summaries, activity detailed reports with comprehensive details, activity export reports with JSON/CSV formats, activity visualization reports with charts), activity insights (activity pattern insights with usage patterns, activity optimization insights with recommendations, activity anomaly insights with unusual patterns, activity performance insights with performance metrics), and activity dashboards (activity visual dashboards with charts and graphs, activity real-time dashboards with live updates, activity historical dashboards with trend analysis, activity interactive dashboards with filtering and search)
+- Development workflow integration including continuous monitoring (real-time activity monitoring on all activities, immediate activity logging on activity detection, automatic activity tracking on tool usage, seamless activity integration with development workflow), workflow automation (automated activity tracking without manual intervention, activity logging automation with automatic logging, activity reporting automation with automatic reports), and workflow optimization (activity change detection with change tracking, incremental activity tracking with optimization, activity consistency maintenance with consistency checks)
+
+## Use Cases
+- Monitor Claude Code tool usage in real-time automatically tracking all tool usage, providing real-time activity monitoring, and generating comprehensive usage statistics
+- Debug development workflow issues automatically collecting debug information, providing activity context for troubleshooting, and enabling detailed workflow analysis
+- Track file modification patterns automatically monitoring file operations, detecting file modification patterns, and analyzing file usage trends
+- Audit development activities automatically logging all development activities, providing activity audit trails, and enabling compliance reporting
+- Analyze Claude decision-making process automatically tracking tool selection patterns, analyzing decision-making workflows, and providing insights into AI behavior
+- Development workflow integration seamlessly integrating activity tracking into development workflows without manual monitoring or logging
+
+## Installation
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/real-time-activity-tracker.sh
+3. Make executable: chmod +x .claude/hooks/real-time-activity-tracker.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- jq (optional, for JSON parsing and manipulation)
+- flock (optional, for file locking on Linux)
+- uuidgen (optional, for UUID generation)
+
+## Hook Configuration
+```json
+{
+  "hooks": {
+    "notification": {
+      "script": "./.claude/hooks/real-time-activity-tracker.sh",
+      "matchers": ["*"]
+    }
+  }
+}
+```
+```json
+{
+  "hooks": {
+    "notification": {
+      "script": "./.claude/hooks/real-time-activity-tracker.sh",
+      "matchers": ["*"]
+    }
+  }
+}
+```
+
+## Hook Script
+```bash
+#!/bin/bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+TOOL_ACTION=$(echo "$INPUT" | jq -r '.tool_action // "unknown"')
+
+echo "📊 Real-time Activity Tracker - Logging activity..."
+
+# Create .claude directory if it doesn't exist
+mkdir -p .claude
+
+# Create daily activity log
+ACTIVITY_LOG=".claude/activity-$(date +%Y%m%d).log"
+ACTIVITY_JSON=".claude/activity-$(date +%Y%m%d).json"
+
+# Current timestamp
+TIMESTAMP=$(date --iso-8601=seconds 2>/dev/null || date -Iseconds 2>/dev/null || date)
+
+# Log in human-readable format
+echo "[$TIMESTAMP] Tool: $TOOL_NAME | File: $FILE_PATH | Action: $TOOL_ACTION" >> "$ACTIVITY_LOG"
+
+# Log in JSON format for programmatic analysis
+cat >> "$ACTIVITY_JSON" << EOF
+{
+  "timestamp": "$TIMESTAMP",
+  "tool_name": "$TOOL_NAME",
+  "file_path": "$FILE_PATH",
+  "action": "$TOOL_ACTION",
+  "session_id": "$(date +%Y%m%d_%H%M%S)_$$"
+},
+EOF
+
+# Keep only last 100 entries in activity log to prevent it from growing too large
+if [ -f "$ACTIVITY_LOG" ]; then
+    tail -n 100 "$ACTIVITY_LOG" > "$ACTIVITY_LOG.tmp" && mv "$ACTIVITY_LOG.tmp" "$ACTIVITY_LOG"
+fi
+
+# Keep only last 100 entries in JSON log
+if [ -f "$ACTIVITY_JSON" ]; then
+    tail -n 100 "$ACTIVITY_JSON" > "$ACTIVITY_JSON.tmp" && mv "$ACTIVITY_JSON.tmp" "$ACTIVITY_JSON"
+fi
+
+# Activity statistics
+if [ -f "$ACTIVITY_LOG" ]; then
+    TOTAL_ACTIVITIES=$(wc -l < "$ACTIVITY_LOG")
+    echo "📈 Session Activity Count: $TOTAL_ACTIVITIES"
+
+    # Show recent activity summary
+    echo "🕒 Recent Activities:"
+    tail -n 3 "$ACTIVITY_LOG" | while read -r line; do
+        echo "  • $line"
+    done
+
+    # File operation summary
+    WRITE_COUNT=$(grep -c "Write\|Edit" "$ACTIVITY_LOG" 2>/dev/null || echo 0)
+    read_COUNT=$(grep -c "Read" "$ACTIVITY_LOG" 2>/dev/null || echo 0)
+
+    echo "📊 Today's Summary:"
+    echo "  • Write/Edit operations: $WRITE_COUNT"
+    echo "  • Read operations: $READ_COUNT"
+fi
+
+# Weekly activity archive (every Sunday)
+if [ "$(date +%u)" = "7" ]; then
+    ARCHIVE_DIR=".claude/archive/$(date +%Y-%m)"
+    mkdir -p "$ARCHIVE_DIR"
+
+    # Move old logs to archive
+    find .claude -name "activity-*.log" -mtime +7 -exec mv {} "$ARCHIVE_DIR/" \;
+    find .claude -name "activity-*.json" -mtime +7 -exec mv {} "$ARCHIVE_DIR/" \;
+
+    echo "📦 Weekly archive created in $ARCHIVE_DIR"
+fi
+
+echo "✅ Activity logged to $ACTIVITY_LOG"
+
+exit 0
+```
+```bash
+#!/bin/bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+TOOL_ACTION=$(echo "$INPUT" | jq -r '.tool_action // "unknown"')
+
+echo "📊 Real-time Activity Tracker - Logging activity..."
+
+# Create .claude directory if it doesn't exist
+mkdir -p .claude
+
+# Create daily activity log
+ACTIVITY_LOG=".claude/activity-$(date +%Y%m%d).log"
+ACTIVITY_JSON=".claude/activity-$(date +%Y%m%d).json"
+
+# Current timestamp
+TIMESTAMP=$(date --iso-8601=seconds 2>/dev/null || date -Iseconds 2>/dev/null || date)
+
+# Log in human-readable format
+echo "[$TIMESTAMP] Tool: $TOOL_NAME | File: $FILE_PATH | Action: $TOOL_ACTION" >> "$ACTIVITY_LOG"
+
+# Log in JSON format for programmatic analysis
+cat >> "$ACTIVITY_JSON" << EOF
+{
+  "timestamp": "$TIMESTAMP",
+  "tool_name": "$TOOL_NAME",
+  "file_path": "$FILE_PATH",
+  "action": "$TOOL_ACTION",
+  "session_id": "$(date +%Y%m%d_%H%M%S)_$$"
+},
+EOF
+
+# Keep only last 100 entries in activity log to prevent it from growing too large
+if [ -f "$ACTIVITY_LOG" ]; then
+    tail -n 100 "$ACTIVITY_LOG" > "$ACTIVITY_LOG.tmp" && mv "$ACTIVITY_LOG.tmp" "$ACTIVITY_LOG"
+fi
+
+# Keep only last 100 entries in JSON log
+if [ -f "$ACTIVITY_JSON" ]; then
+    tail -n 100 "$ACTIVITY_JSON" > "$ACTIVITY_JSON.tmp" && mv "$ACTIVITY_JSON.tmp" "$ACTIVITY_JSON"
+fi
+
+# Activity statistics
+if [ -f "$ACTIVITY_LOG" ]; then
+    TOTAL_ACTIVITIES=$(wc -l < "$ACTIVITY_LOG")
+    echo "📈 Session Activity Count: $TOTAL_ACTIVITIES"
+
+    # Show recent activity summary
+    echo "🕒 Recent Activities:"
+    tail -n 3 "$ACTIVITY_LOG" | while read -r line; do
+        echo "  • $line"
+    done
+
+    # File operation summary
+    WRITE_COUNT=$(grep -c "Write\|Edit" "$ACTIVITY_LOG" 2>/dev/null || echo 0)
+    read_COUNT=$(grep -c "Read" "$ACTIVITY_LOG" 2>/dev/null || echo 0)
+
+    echo "📊 Today's Summary:"
+    echo "  • Write/Edit operations: $WRITE_COUNT"
+    echo "  • Read operations: $READ_COUNT"
+fi
+
+# Weekly activity archive (every Sunday)
+if [ "$(date +%u)" = "7" ]; then
+    ARCHIVE_DIR=".claude/archive/$(date +%Y-%m)"
+    mkdir -p "$ARCHIVE_DIR"
+
+    # Move old logs to archive
+    find .claude -name "activity-*.log" -mtime +7 -exec mv {} "$ARCHIVE_DIR/" \;
+    find .claude -name "activity-*.json" -mtime +7 -exec mv {} "$ARCHIVE_DIR/" \;
+
+    echo "📦 Weekly archive created in $ARCHIVE_DIR"
+fi
+
+echo "✅ Activity logged to $ACTIVITY_LOG"
+
+exit 0
+```
+
+## Examples
+### Real-Time Activity Tracker Hook Script
+
+Complete hook script that tracks Claude Code activities in real-time
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+ACTIVITY_LOG=".claude/activity-$(date +%Y%m%d).log"
+ACTIVITY_JSON=".claude/activity-$(date +%Y%m%d).json"
+mkdir -p .claude
+echo "[$TIMESTAMP] Tool: $TOOL_NAME | File: $FILE_PATH" >> "$ACTIVITY_LOG"
+cat >> "$ACTIVITY_JSON" << EOF
+{
+  "timestamp": "$TIMESTAMP",
+  "tool_name": "$TOOL_NAME",
+  "file_path": "$FILE_PATH"
+}
+EOF
+exit 0
+```
+
+### Hook Configuration
+
+Complete hook configuration for .claude/settings.json to enable real-time activity tracking
+
+```json
+{
+  "hooks": {
+    "notification": {
+      "script": "./.claude/hooks/real-time-activity-tracker.sh",
+      "matchers": ["*"]
+    }
+  }
+}
+```
+
+### Structured JSON Logging with jq
+
+Enhanced hook script with proper JSON array handling using jq
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+ACTIVITY_LOG=".claude/activity-$(date +%Y%m%d).log"
+ACTIVITY_JSON=".claude/activity-$(date +%Y%m%d).json"
+mkdir -p .claude
+if [ ! -f "$ACTIVITY_JSON" ]; then
+  echo '[' > "$ACTIVITY_JSON"
+fi
+jq -s '. + [{"timestamp": "'$TIMESTAMP'", "tool_name": "'$TOOL_NAME'", "file_path": "'$FILE_PATH'"}]' "$ACTIVITY_JSON" > "$ACTIVITY_JSON.tmp" && mv "$ACTIVITY_JSON.tmp" "$ACTIVITY_JSON"
+exit 0
+```
+
+### Thread-Safe Logging with flock
+
+Enhanced hook script with file locking for concurrent writes
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+ACTIVITY_LOG=".claude/activity-$(date +%Y%m%d).log"
+mkdir -p .claude
+(flock -x 200; echo "[$TIMESTAMP] Tool: $TOOL_NAME" >> "$ACTIVITY_LOG"; ) 200>.claude/activity.lock
+exit 0
+```
+
+### Activity Tracker Configuration
+
+Example configuration for activity tracker settings
+
+```json
+{
+  "activity_log": ".claude/activity-20251206.log",
+  "activity_json": ".claude/activity-20251206.json",
+  "retention_days": 30,
+  "max_log_size_mb": 10,
+  "archive_enabled": true,
+  "archive_directory": ".claude/archive"
+}
+```
+```bash
+#!/bin/bash
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+ACTIVITY_LOG=".claude/activity-$(date +%Y%m%d).log"
+ACTIVITY_JSON=".claude/activity-$(date +%Y%m%d).json"
+mkdir -p .claude
+echo "[$TIMESTAMP] Tool: $TOOL_NAME | File: $FILE_PATH" >> "$ACTIVITY_LOG"
+cat >> "$ACTIVITY_JSON" << EOF
+{
+  "timestamp": "$TIMESTAMP",
+  "tool_name": "$TOOL_NAME",
+  "file_path": "$FILE_PATH"
+}
+EOF
+exit 0
+```
+```json
+{
+  "hooks": {
+    "notification": {
+      "script": "./.claude/hooks/real-time-activity-tracker.sh",
+      "matchers": ["*"]
+    }
+  }
+}
+```
+```bash
+#!/bin/bash
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+ACTIVITY_LOG=".claude/activity-$(date +%Y%m%d).log"
+ACTIVITY_JSON=".claude/activity-$(date +%Y%m%d).json"
+mkdir -p .claude
+if [ ! -f "$ACTIVITY_JSON" ]; then
+  echo '[' > "$ACTIVITY_JSON"
+fi
+jq -s '. + [{"timestamp": "'$TIMESTAMP'", "tool_name": "'$TOOL_NAME'", "file_path": "'$FILE_PATH'"}]' "$ACTIVITY_JSON" > "$ACTIVITY_JSON.tmp" && mv "$ACTIVITY_JSON.tmp" "$ACTIVITY_JSON"
+exit 0
+```
+```bash
+#!/bin/bash
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+ACTIVITY_LOG=".claude/activity-$(date +%Y%m%d).log"
+mkdir -p .claude
+(flock -x 200; echo "[$TIMESTAMP] Tool: $TOOL_NAME" >> "$ACTIVITY_LOG"; ) 200>.claude/activity.lock
+exit 0
+```
+```json
+{
+  "activity_log": ".claude/activity-20251206.log",
+  "activity_json": ".claude/activity-20251206.json",
+  "retention_days": 30,
+  "max_log_size_mb": 10,
+  "archive_enabled": true,
+  "archive_directory": ".claude/archive"
+}
+```
+
+## Troubleshooting
+### Activity logs show incorrect timestamps or 'unknown' dates
+
+ISO-8601 date varies by platform. Replace 'date --iso-8601=seconds' with portable: 'date -u +"%Y-%m-%dT%H:%M:%SZ"'. Works on both Linux and macOS without fallback. Verify date command. Test with various date formats.
+
+### JSON activity log is malformed with trailing commas
+
+Each append adds trailing comma creating invalid JSON. Wrap in array: initialize with '[', append without trailing comma, close ']' on end. Or rebuild: 'jq -s . file.json'. Verify JSON structure. Test with various JSON formats.
+
+### Weekly archive triggers fail on macOS (date +%u returns wrong day)
+
+macOS date lacks %u for weekday. Replace with: 'if [ "$(date +%w)" = "0" ]; then' (Sunday=0). Or use portable: '[ $(date +%A) = "Sunday" ]' for name-based check. Verify date command. Test with various date formats.
+
+### Session IDs duplicate when multiple Claude instances run simultaneously
+
+Current session*id uses timestamp+PID but PID can conflict. Add random suffix: "$(date +%Y%m%d*%H%M%S)_$$_$RANDOM" or use UUID: "$(uuidgen 2>/dev/null || echo $RANDOM$RANDOM)". Verify session ID generation. Test with various session scenarios.
+
+### Log files locked causing permission denied errors on write
+
+Concurrent writes from parallel Claude sessions. Use flock: '(flock -x 200; echo ".." >> log; ) 200>/var/lock/activity.lock' for atomic append operations. Verify file locking. Test with various concurrent scenarios.
+
+### Activity logs grow too large consuming disk space
+
+Implement log rotation with size limits and automatic cleanup. Use tail -n 100 to keep only recent entries. Configure log retention policies. Archive old logs. Verify log rotation. Test with various log sizes.
+
+### Activity tracking slows down Claude Code operations
+
+Optimize logging operations with asynchronous logging or buffering. Use efficient file operations. Minimize JSON parsing overhead. Consider background logging. Verify performance. Test with various activity volumes.
+
+### Activity logs missing some activities or incomplete data
+
+Verify notification hook matchers include all activities (\* matcher). Check file write permissions. Ensure activity data is properly captured. Verify hook execution. Test with various activity types.

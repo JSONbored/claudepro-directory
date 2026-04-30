@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 2,
+  "key": "skills:agent-evals-regression-gate",
+  "category": "skills",
+  "slug": "agent-evals-regression-gate",
+  "title": "Agent Evals Regression Gate Skill",
+  "author": "JSONbored",
+  "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/agent-evals-regression-gate.zip -o agent-evals-regression-gate.zip && unzip -o agent-evals-regression-gate.zip -d ./agent-evals-regression-gate\n\nUsage:\nUse this skill to define eval datasets, objective scoring, and pass/fail quality gates for agent updates.\n\nAsset:\n# Trigger\n\"Run the agent evals regression gate skill on this project and produce a\nmerge-blocking quality report.\"\n\n# Required output\n1) Eval dataset design (happy path + adversarial + edge cases)\n2) Scoring rubric with explicit pass thresholds\n3) Baseline vs candidate comparison with deltas\n4) Merge decision with release risk summary",
+  "detailMarkdown": "# Agent Evals Regression Gate Skill\n\nBuild repeatable eval suites that catch quality regressions in AI agent behavior before merge or release.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/agent-evals-regression-gate.zip -o agent-evals-regression-gate.zip && unzip -o agent-evals-regression-gate.zip -d ./agent-evals-regression-gate\n```\n\n## Usage\nUse this skill to define eval datasets, objective scoring, and pass/fail quality gates for agent updates.",
+  "webUrl": "https://heyclau.de/skills/agent-evals-regression-gate",
+  "canonicalUrl": "https://heyclau.de/skills/agent-evals-regression-gate",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/agent-evals-regression-gate.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/agent-evals-regression-gate",
+  "seoTitle": "Agent Evals Regression Gate Skill for AI Workflows",
+  "seoDescription": "Reusable AI skill for building agent eval harnesses with regression thresholds, CI checks, and stable scoring. HeyClaude adds source links, install steps,...",
+  "repoUrl": "",
+  "documentationUrl": "https://openai.com/index/new-tools-and-features-in-the-responses-api/"
+}

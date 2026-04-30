@@ -1,0 +1,14 @@
+---
+description: "Build full-stack web apps with Svelte and SvelteKit. Minimal runtime overhead, reactive components, and server-side rendering."
+globs:
+alwaysApply: false
+---
+# Svelte SvelteKit Full-Stack Development Skill
+Build full-stack web apps with Svelte and SvelteKit. Minimal runtime overhead, reactive components, and server-side rendering. The most admired frontend framework of 2025. Svelte compiles components to vanilla JavaScript at build time, resulting in zero runtime overhead and exceptional performance.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+npm create svelte@latest my-app
+```
+## Source
+https://heyclau.de/downloads/skills/svelte-sveltekit-fullstack.zip

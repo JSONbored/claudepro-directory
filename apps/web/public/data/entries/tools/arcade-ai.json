@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "key": "tools:arcade-ai",
+  "entry": {
+    "category": "tools",
+    "slug": "arcade-ai",
+    "title": "Arcade",
+    "description": "Tool-calling platform for AI agents with authenticated actions, user approvals, and external service integrations.",
+    "seoTitle": "Arcade tool calling for AI agents",
+    "seoDescription": "Arcade supports authenticated tool calls, user approvals, and external service integrations for AI agents. HeyClaude adds source links, install steps,...",
+    "author": "Arcade",
+    "dateAdded": "2026-04-27",
+    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+    "tags": [
+      "tool-calling",
+      "agents"
+    ],
+    "keywords": [
+      "agent tool calling",
+      "authenticated actions",
+      "tool-calling",
+      "agents",
+      "tools",
+      "claude",
+      "heyclaude",
+      "arcade"
+    ],
+    "documentationUrl": "https://docs.arcade.dev",
+    "websiteUrl": "https://www.arcade.dev",
+    "brandName": "Arcade",
+    "brandDomain": "arcade.dev",
+    "brandIconUrl": "/api/brand-assets/icon/arcade.dev",
+    "brandAssetSource": "brandfetch",
+    "pricingModel": "freemium",
+    "disclosure": "editorial",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Web",
+    "cardDescription": "Authenticated tool-calling platform for agents.",
+    "installable": false,
+    "hasPrerequisites": false,
+    "hasTroubleshooting": false,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Editorial notes\n\nArcade fits agent builders that need explicit auth, user approvals, and reliable action execution across services.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+    "sections": [
+      {
+        "title": "Editorial notes",
+        "id": "editorial-notes",
+        "markdown": "Arcade fits agent builders that need explicit auth, user approvals, and reliable action execution across services.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Disclosure",
+        "id": "disclosure",
+        "markdown": "Editorial listing. No paid placement or affiliate link is used.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Editorial notes",
+        "id": "editorial-notes"
+      },
+      {
+        "depth": 2,
+        "text": "Disclosure",
+        "id": "disclosure"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/tools/arcade-ai.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/arcade-ai.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 3,
+    "sourceUrls": [
+      "https://docs.arcade.dev",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/arcade-ai.mdx",
+      "https://www.arcade.dev"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

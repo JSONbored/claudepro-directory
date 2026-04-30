@@ -1,0 +1,386 @@
+{
+  "schemaVersion": 1,
+  "key": "commands:security-audit",
+  "entry": {
+    "category": "commands",
+    "slug": "security-audit",
+    "title": "/security-audit - Security Scanner Command for Claude Code",
+    "description": "Deploy 100 specialized sub-agents for comprehensive enterprise-grade security, performance, and optimization audit of production codebase",
+    "seoTitle": "/security-audit - Security Scanner Command for Claude Code",
+    "seoDescription": "Deploy 100 specialized sub-agents for comprehensive enterprise-grade security, performance, and optimization audit of production codebase Discover tools for ...",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2025-10-25",
+    "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+    "tags": [
+      "security-audit",
+      "enterprise",
+      "performance",
+      "optimization",
+      "production",
+      "comprehensive-analysis",
+      "sub-agents",
+      "architecture",
+      "scalability",
+      "code-quality"
+    ],
+    "keywords": [
+      "architecture",
+      "audit",
+      "claude",
+      "code-quality",
+      "commands",
+      "comprehensive-analysis",
+      "development",
+      "enterprise",
+      "optimization",
+      "performance",
+      "production",
+      "scalability"
+    ],
+    "readingTime": 7,
+    "difficultyScore": 100,
+    "documentationUrl": "https://docs.claude.ai/commands/security-audit",
+    "cardDescription": "Deploy 100 specialized sub-agents for comprehensive enterprise-grade security, performance, and optimization audit of production codebase",
+    "installable": true,
+    "installCommand": "/security-audit [scope]",
+    "usageSnippet": "/security-audit [scope]",
+    "copySnippet": "/security-audit [scope]",
+    "commandSyntax": "/security-audit [scope]",
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "The `/security-audit` command deploys 100 specialized virtual sub-agents to conduct a comprehensive enterprise-grade audit of your entire codebase. Each agent operates as a world-class expert in their domain, examining every line of code with the mindset that hostile actors have full visibility to your public repository.\n\n## Features\n\n- **100 Specialized Sub-Agents**: Each agent is an expert in specific security, performance, and optimization domains\n- **Enterprise-Grade Analysis**: Line-by-line examination assuming hostile actor visibility\n- **Comprehensive Scoring**: 0-100 scores across 10+ major categories with detailed justification\n- **Resource Optimization**: Maximizes free tier usage (Upstash Redis, Arcjet, Vercel) without reducing functionality\n- **Prioritized Recommendations**: Critical, High, Medium, and Low priority actionable items\n- **Implementation Roadmap**: Quick wins, short-term, medium-term, and long-term improvement plans\n\n## Usage\n\n```\n/security-audit [scope]\n```\n\n### Parameters\n\n- `scope` (optional): Specific focus area - defaults to \"all\"\n  - `all` - Full comprehensive audit (default)\n  - `security` - Focus on security specialists\n  - `performance` - Focus on performance optimization\n\n## Sub-Agent Categories\n\n### Security Specialists (15 agents)\n\n- Authentication Security\n- Content Security Policy\n- Input Validation\n- API Security\n- Dependency Security\n- Environment Security\n- Transport Security\n- Client-Side Security\n- Server Security\n- Third-Party Security\n- Bot Protection\n- DDoS Protection\n- Information Disclosure\n- Access Control\n- Cryptographic Security\n\n### Performance Specialists (12 agents)\n\n- Core Web Vitals\n- Bundle Optimization\n- Image Optimization\n- Font Optimization\n- CSS Performance\n- JavaScript Performance\n- Caching Strategy\n- Database Performance\n- Network Performance\n- Rendering Performance\n- Memory Management\n- Mobile Performance\n\n### Code Quality Specialists (10 agents)\n\n- TypeScript Excellence\n- React Best Practices\n- Code Architecture\n- Error Handling\n- Testing Coverage\n- Code Consistency\n- Documentation Quality\n- Maintainability\n- Accessibility Compliance\n- Refactoring Opportunities\n\n### SEO & Content Specialists (8 agents)\n\n- Technical SEO\n- Page Speed SEO\n- Content Structure\n- Schema Markup\n- Sitemap Optimization\n- Internal Linking\n- Mobile SEO\n- International SEO\n\n### Infrastructure Specialists (10 agents)\n\n- Vercel Optimization\n- Redis Utilization\n- CDN Strategy\n- Build Process\n- Environment Management\n- Monitoring & Observability\n- Backup & Recovery\n- Scalability Planning\n- Resource Allocation\n- Deployment Strategy\n\n### Business Logic Specialists (8 agents)\n\n- Data Flow Architecture\n- API Design\n- User Experience Flow\n- Content Management\n- Search Functionality\n- Analytics Integration\n- Third-Party Integrations\n- Feature Flag Management\n\n### Compliance & Standards Specialists (7 agents)\n\n- Privacy Compliance\n- Web Standards\n- Browser Compatibility\n- Progressive Web App\n- Internationalization\n- Content Security\n- Legal Compliance\n\n### Optimization Specialists (10 agents)\n\n- Asset Optimization\n- Database Query Optimization\n- Memory Optimization\n- Network Optimization\n- Storage Optimization\n- Computational Optimization\n- Resource Loading\n- Third-Party Optimization\n- Mobile Optimization\n- Accessibility Optimization\n\n### Maintenance & Operations Specialists (8 agents)\n\n- Dependency Management\n- Code Organization\n- Configuration Management\n- Logging & Debugging\n- Health Monitoring\n- Backup Strategies\n- Documentation Maintenance\n- Version Control\n\n### Specialized Audit Agents (12 agents)\n\n- Dead Code Detection\n- Performance Regression\n- Security Vulnerability Scanning\n- Lighthouse Audit\n- Bundle Analysis\n- Accessibility Audit\n- SEO Technical Audit\n- Mobile Audit\n- Loading Performance\n- Code Duplication\n- Configuration Audit\n- Overall Architecture Review\n\n## Examples\n\n### Full Comprehensive Audit\n\n```bash\n/security-audit\n# Deploys all 100 sub-agents for complete analysis\n```\n\n### Security-Focused Audit\n\n```bash\n/security-audit security\n# Focuses on 15 security specialists + related infrastructure agents\n```\n\n### Performance-Focused Audit\n\n```bash\n/security-audit performance\n# Focuses on 12 performance specialists + optimization agents\n```\n\n## Audit Deliverables\n\n### Executive Summary\n\n- Overall assessment and critical findings\n- Risk assessment and impact analysis\n- Strategic recommendations overview\n\n### Category Scores (0-100 scale)\n\n- **Security Score**: Vulnerability breakdown by type\n- **Performance Score**: Core Web Vitals and optimization analysis\n- **Code Quality Score**: Maintainability and technical debt metrics\n- **SEO Score**: Technical SEO compliance assessment\n- **Scalability Score**: Resource efficiency and scaling readiness\n- **Accessibility Score**: WCAG compliance level evaluation\n- **Infrastructure Score**: Cloud optimization and deployment assessment\n- **Compliance Score**: Standards adherence and regulatory compliance\n- **Maintainability Score**: Technical debt and code organization\n- **Optimization Score**: Resource utilization efficiency\n\n### Prioritized Recommendations\n\n#### Critical Issues (Immediate Action Required)\n\n- Security vulnerabilities with high CVSS scores\n- Performance blockers affecting Core Web Vitals\n- Compliance violations with legal implications\n\n#### High Priority (Significant Impact)\n\n- Architecture improvements for scalability\n- Security hardening recommendations\n- Performance optimizations with measurable impact\n\n#### Medium Priority (Notable Optimizations)\n\n- Code quality improvements\n- SEO enhancements\n- Resource utilization optimizations\n\n#### Low Priority (Minor Enhancements)\n\n- Documentation improvements\n- Code style consistency\n- Development workflow optimizations\n\n### Resource Optimization Plan\n\n#### Redis Utilization (Upstash Free Tier)\n\n- Caching strategies to maximize free tier\n- Memory optimization techniques\n- Connection pooling recommendations\n\n#### Arcjet Optimization (500k requests/month free)\n\n- Enhanced security within free limits\n- Rate limiting optimization\n- Bot protection configuration\n\n#### Vercel Efficiency (Preparation for Free Tier)\n\n- Build optimization for faster deployments\n- Function optimization for reduced execution time\n- Bandwidth optimization strategies\n\n### Implementation Roadmap\n\n#### Quick Wins (0-1 week)\n\n- Configuration adjustments\n- Security header implementations\n- Basic performance optimizations\n\n#### Short Term (1-4 weeks)\n\n- Code refactoring projects\n- Infrastructure improvements\n- Testing implementation\n\n#### Medium Term (1-3 months)\n\n- Architecture modernization\n- Advanced security implementations\n- Performance monitoring setup\n\n#### Long Term (Strategic)\n\n- Scalability architecture\n- Advanced compliance implementation\n- Enterprise feature development\n\n## Audit Methodology\n\n### Analysis Depth\n\n- **Line-by-line examination** of entire codebase\n- **Configuration review** of all deployment and build settings\n- **Dependency analysis** for security and performance implications\n- **Architecture assessment** for scalability and maintainability\n\n### Security Mindset\n\n- Assumes hostile actors have full repository visibility\n- Evaluates every public code line for potential exploitation\n- Tests for OWASP Top 10 and emerging threat vectors\n- Assesses supply chain security and dependency risks\n\n### Resource Optimization Focus\n\n- Maximizes free tier efficiency across all services\n- Identifies opportunities to reduce paid service usage\n- Optimizes for cost-effective scaling strategies\n- Maintains all existing functionality during optimization\n\n### Scoring System\n\n- **0-100 scale** with detailed justification for each score\n- **Industry benchmarks** comparison for context\n- **Weighted scoring** based on security and business impact\n- **Trend analysis** for performance regression detection\n\n## Technical Stack Context\n\n### Current Technology Stack\n\n- **Framework**: Next.js 15.5.4 with React Compiler\n- **Language**: TypeScript with strict mode\n- **Styling**: TailwindCSS with custom design system\n- **UI Library**: shadcn/ui + Radix UI components\n- **Security**: Arcjet middleware (500k requests/month free tier)\n- **Cache**: Upstash Redis (free tier via Vercel Marketplace)\n- **Hosting**: Vercel (currently paid, planning free tier migration)\n- **Content**: MDX-based content management system\n- **Database**: Static generation with optional dynamic content\n\n### Deployment Constraints\n\n- **Public Repository**: Every line visible to potential attackers\n- **Resource Limits**: Must optimize for free tier usage\n- **Performance Requirements**: Core Web Vitals compliance\n- **Security Standards**: Enterprise-grade for open-source project\n- **Scalability**: Prepared for traffic growth within free tiers\n\nThis comprehensive audit ensures your production codebase meets enterprise security standards while optimizing for maximum efficiency within free tier constraints.",
+    "sections": [
+      {
+        "title": "Overview",
+        "id": "overview",
+        "markdown": "The `/security-audit` command deploys 100 specialized virtual sub-agents to conduct a comprehensive enterprise-grade audit of your entire codebase. Each agent operates as a world-class expert in their domain, examining every line of code with the mindset that hostile actors have full visibility to your public repository.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- **100 Specialized Sub-Agents**: Each agent is an expert in specific security, performance, and optimization domains\n- **Enterprise-Grade Analysis**: Line-by-line examination assuming hostile actor visibility\n- **Comprehensive Scoring**: 0-100 scores across 10+ major categories with detailed justification\n- **Resource Optimization**: Maximizes free tier usage (Upstash Redis, Arcjet, Vercel) without reducing functionality\n- **Prioritized Recommendations**: Critical, High, Medium, and Low priority actionable items\n- **Implementation Roadmap**: Quick wins, short-term, medium-term, and long-term improvement plans",
+        "codeBlocks": []
+      },
+      {
+        "title": "Usage",
+        "id": "usage",
+        "markdown": "```\n/security-audit [scope]\n```\n\n### Parameters\n\n- `scope` (optional): Specific focus area - defaults to \"all\"\n  - `all` - Full comprehensive audit (default)\n  - `security` - Focus on security specialists\n  - `performance` - Focus on performance optimization",
+        "codeBlocks": [
+          {
+            "language": "text",
+            "code": "/security-audit [scope]"
+          }
+        ]
+      },
+      {
+        "title": "Sub-Agent Categories",
+        "id": "sub-agent-categories",
+        "markdown": "### Security Specialists (15 agents)\n\n- Authentication Security\n- Content Security Policy\n- Input Validation\n- API Security\n- Dependency Security\n- Environment Security\n- Transport Security\n- Client-Side Security\n- Server Security\n- Third-Party Security\n- Bot Protection\n- DDoS Protection\n- Information Disclosure\n- Access Control\n- Cryptographic Security\n\n### Performance Specialists (12 agents)\n\n- Core Web Vitals\n- Bundle Optimization\n- Image Optimization\n- Font Optimization\n- CSS Performance\n- JavaScript Performance\n- Caching Strategy\n- Database Performance\n- Network Performance\n- Rendering Performance\n- Memory Management\n- Mobile Performance\n\n### Code Quality Specialists (10 agents)\n\n- TypeScript Excellence\n- React Best Practices\n- Code Architecture\n- Error Handling\n- Testing Coverage\n- Code Consistency\n- Documentation Quality\n- Maintainability\n- Accessibility Compliance\n- Refactoring Opportunities\n\n### SEO & Content Specialists (8 agents)\n\n- Technical SEO\n- Page Speed SEO\n- Content Structure\n- Schema Markup\n- Sitemap Optimization\n- Internal Linking\n- Mobile SEO\n- International SEO\n\n### Infrastructure Specialists (10 agents)\n\n- Vercel Optimization\n- Redis Utilization\n- CDN Strategy\n- Build Process\n- Environment Management\n- Monitoring & Observability\n- Backup & Recovery\n- Scalability Planning\n- Resource Allocation\n- Deployment Strategy\n\n### Business Logic Specialists (8 agents)\n\n- Data Flow Architecture\n- API Design\n- User Experience Flow\n- Content Management\n- Search Functionality\n- Analytics Integration\n- Third-Party Integrations\n- Feature Flag Management\n\n### Compliance & Standards Specialists (7 agents)\n\n- Privacy Compliance\n- Web Standards\n- Browser Compatibility\n- Progressive Web App\n- Internationalization\n- Content Security\n- Legal Compliance\n\n### Optimization Specialists (10 agents)\n\n- Asset Optimization\n- Database Query Optimization\n- Memory Optimization\n- Network Optimization\n- Storage Optimization\n- Computational Optimization\n- Resource Loading\n- Third-Party Optimization\n- Mobile Optimization\n- Accessibility Optimization\n\n### Maintenance & Operations Specialists (8 agents)\n\n- Dependency Management\n- Code Organization\n- Configuration Management\n- Logging & Debugging\n- Health Monitoring\n- Backup Strategies\n- Documentation Maintenance\n- Version Control\n\n### Specialized Audit Agents (12 agents)\n\n- Dead Code Detection\n- Performance Regression\n- Security Vulnerability Scanning\n- Lighthouse Audit\n- Bundle Analysis\n- Accessibility Audit\n- SEO Technical Audit\n- Mobile Audit\n- Loading Performance\n- Code Duplication\n- Configuration Audit\n- Overall Architecture Review",
+        "codeBlocks": []
+      },
+      {
+        "title": "Examples",
+        "id": "examples",
+        "markdown": "### Full Comprehensive Audit\n\n```bash\n/security-audit\n# Deploys all 100 sub-agents for complete analysis\n```\n\n### Security-Focused Audit\n\n```bash\n/security-audit security\n# Focuses on 15 security specialists + related infrastructure agents\n```\n\n### Performance-Focused Audit\n\n```bash\n/security-audit performance\n# Focuses on 12 performance specialists + optimization agents\n```",
+        "codeBlocks": [
+          {
+            "language": "bash",
+            "code": "/security-audit\n# Deploys all 100 sub-agents for complete analysis"
+          },
+          {
+            "language": "bash",
+            "code": "/security-audit security\n# Focuses on 15 security specialists + related infrastructure agents"
+          },
+          {
+            "language": "bash",
+            "code": "/security-audit performance\n# Focuses on 12 performance specialists + optimization agents"
+          }
+        ]
+      },
+      {
+        "title": "Audit Deliverables",
+        "id": "audit-deliverables",
+        "markdown": "### Executive Summary\n\n- Overall assessment and critical findings\n- Risk assessment and impact analysis\n- Strategic recommendations overview\n\n### Category Scores (0-100 scale)\n\n- **Security Score**: Vulnerability breakdown by type\n- **Performance Score**: Core Web Vitals and optimization analysis\n- **Code Quality Score**: Maintainability and technical debt metrics\n- **SEO Score**: Technical SEO compliance assessment\n- **Scalability Score**: Resource efficiency and scaling readiness\n- **Accessibility Score**: WCAG compliance level evaluation\n- **Infrastructure Score**: Cloud optimization and deployment assessment\n- **Compliance Score**: Standards adherence and regulatory compliance\n- **Maintainability Score**: Technical debt and code organization\n- **Optimization Score**: Resource utilization efficiency\n\n### Prioritized Recommendations\n\n#### Critical Issues (Immediate Action Required)\n\n- Security vulnerabilities with high CVSS scores\n- Performance blockers affecting Core Web Vitals\n- Compliance violations with legal implications\n\n#### High Priority (Significant Impact)\n\n- Architecture improvements for scalability\n- Security hardening recommendations\n- Performance optimizations with measurable impact\n\n#### Medium Priority (Notable Optimizations)\n\n- Code quality improvements\n- SEO enhancements\n- Resource utilization optimizations\n\n#### Low Priority (Minor Enhancements)\n\n- Documentation improvements\n- Code style consistency\n- Development workflow optimizations\n\n### Resource Optimization Plan\n\n#### Redis Utilization (Upstash Free Tier)\n\n- Caching strategies to maximize free tier\n- Memory optimization techniques\n- Connection pooling recommendations\n\n#### Arcjet Optimization (500k requests/month free)\n\n- Enhanced security within free limits\n- Rate limiting optimization\n- Bot protection configuration\n\n#### Vercel Efficiency (Preparation for Free Tier)\n\n- Build optimization for faster deployments\n- Function optimization for reduced execution time\n- Bandwidth optimization strategies\n\n### Implementation Roadmap\n\n#### Quick Wins (0-1 week)\n\n- Configuration adjustments\n- Security header implementations\n- Basic performance optimizations\n\n#### Short Term (1-4 weeks)\n\n- Code refactoring projects\n- Infrastructure improvements\n- Testing implementation\n\n#### Medium Term (1-3 months)\n\n- Architecture modernization\n- Advanced security implementations\n- Performance monitoring setup\n\n#### Long Term (Strategic)\n\n- Scalability architecture\n- Advanced compliance implementation\n- Enterprise feature development",
+        "codeBlocks": []
+      },
+      {
+        "title": "Audit Methodology",
+        "id": "audit-methodology",
+        "markdown": "### Analysis Depth\n\n- **Line-by-line examination** of entire codebase\n- **Configuration review** of all deployment and build settings\n- **Dependency analysis** for security and performance implications\n- **Architecture assessment** for scalability and maintainability\n\n### Security Mindset\n\n- Assumes hostile actors have full repository visibility\n- Evaluates every public code line for potential exploitation\n- Tests for OWASP Top 10 and emerging threat vectors\n- Assesses supply chain security and dependency risks\n\n### Resource Optimization Focus\n\n- Maximizes free tier efficiency across all services\n- Identifies opportunities to reduce paid service usage\n- Optimizes for cost-effective scaling strategies\n- Maintains all existing functionality during optimization\n\n### Scoring System\n\n- **0-100 scale** with detailed justification for each score\n- **Industry benchmarks** comparison for context\n- **Weighted scoring** based on security and business impact\n- **Trend analysis** for performance regression detection",
+        "codeBlocks": []
+      },
+      {
+        "title": "Technical Stack Context",
+        "id": "technical-stack-context",
+        "markdown": "### Current Technology Stack\n\n- **Framework**: Next.js 15.5.4 with React Compiler\n- **Language**: TypeScript with strict mode\n- **Styling**: TailwindCSS with custom design system\n- **UI Library**: shadcn/ui + Radix UI components\n- **Security**: Arcjet middleware (500k requests/month free tier)\n- **Cache**: Upstash Redis (free tier via Vercel Marketplace)\n- **Hosting**: Vercel (currently paid, planning free tier migration)\n- **Content**: MDX-based content management system\n- **Database**: Static generation with optional dynamic content\n\n### Deployment Constraints\n\n- **Public Repository**: Every line visible to potential attackers\n- **Resource Limits**: Must optimize for free tier usage\n- **Performance Requirements**: Core Web Vitals compliance\n- **Security Standards**: Enterprise-grade for open-source project\n- **Scalability**: Prepared for traffic growth within free tiers\n\nThis comprehensive audit ensures your production codebase meets enterprise security standards while optimizing for maximum efficiency within free tier constraints.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Usage",
+        "id": "usage"
+      },
+      {
+        "depth": 3,
+        "text": "Parameters",
+        "id": "parameters"
+      },
+      {
+        "depth": 2,
+        "text": "Sub-Agent Categories",
+        "id": "sub-agent-categories"
+      },
+      {
+        "depth": 3,
+        "text": "Security Specialists (15 agents)",
+        "id": "security-specialists-15-agents"
+      },
+      {
+        "depth": 3,
+        "text": "Performance Specialists (12 agents)",
+        "id": "performance-specialists-12-agents"
+      },
+      {
+        "depth": 3,
+        "text": "Code Quality Specialists (10 agents)",
+        "id": "code-quality-specialists-10-agents"
+      },
+      {
+        "depth": 3,
+        "text": "SEO & Content Specialists (8 agents)",
+        "id": "seo-content-specialists-8-agents"
+      },
+      {
+        "depth": 3,
+        "text": "Infrastructure Specialists (10 agents)",
+        "id": "infrastructure-specialists-10-agents"
+      },
+      {
+        "depth": 3,
+        "text": "Business Logic Specialists (8 agents)",
+        "id": "business-logic-specialists-8-agents"
+      },
+      {
+        "depth": 3,
+        "text": "Compliance & Standards Specialists (7 agents)",
+        "id": "compliance-standards-specialists-7-agents"
+      },
+      {
+        "depth": 3,
+        "text": "Optimization Specialists (10 agents)",
+        "id": "optimization-specialists-10-agents"
+      },
+      {
+        "depth": 3,
+        "text": "Maintenance & Operations Specialists (8 agents)",
+        "id": "maintenance-operations-specialists-8-agents"
+      },
+      {
+        "depth": 3,
+        "text": "Specialized Audit Agents (12 agents)",
+        "id": "specialized-audit-agents-12-agents"
+      },
+      {
+        "depth": 2,
+        "text": "Examples",
+        "id": "examples"
+      },
+      {
+        "depth": 3,
+        "text": "Full Comprehensive Audit",
+        "id": "full-comprehensive-audit"
+      },
+      {
+        "depth": 3,
+        "text": "Security-Focused Audit",
+        "id": "security-focused-audit"
+      },
+      {
+        "depth": 3,
+        "text": "Performance-Focused Audit",
+        "id": "performance-focused-audit"
+      },
+      {
+        "depth": 2,
+        "text": "Audit Deliverables",
+        "id": "audit-deliverables"
+      },
+      {
+        "depth": 3,
+        "text": "Executive Summary",
+        "id": "executive-summary"
+      },
+      {
+        "depth": 3,
+        "text": "Category Scores (0-100 scale)",
+        "id": "category-scores-0-100-scale"
+      },
+      {
+        "depth": 3,
+        "text": "Prioritized Recommendations",
+        "id": "prioritized-recommendations"
+      },
+      {
+        "depth": 4,
+        "text": "Critical Issues (Immediate Action Required)",
+        "id": "critical-issues-immediate-action-required"
+      },
+      {
+        "depth": 4,
+        "text": "High Priority (Significant Impact)",
+        "id": "high-priority-significant-impact"
+      },
+      {
+        "depth": 4,
+        "text": "Medium Priority (Notable Optimizations)",
+        "id": "medium-priority-notable-optimizations"
+      },
+      {
+        "depth": 4,
+        "text": "Low Priority (Minor Enhancements)",
+        "id": "low-priority-minor-enhancements"
+      },
+      {
+        "depth": 3,
+        "text": "Resource Optimization Plan",
+        "id": "resource-optimization-plan"
+      },
+      {
+        "depth": 4,
+        "text": "Redis Utilization (Upstash Free Tier)",
+        "id": "redis-utilization-upstash-free-tier"
+      },
+      {
+        "depth": 4,
+        "text": "Arcjet Optimization (500k requests/month free)",
+        "id": "arcjet-optimization-500k-requestsmonth-free"
+      },
+      {
+        "depth": 4,
+        "text": "Vercel Efficiency (Preparation for Free Tier)",
+        "id": "vercel-efficiency-preparation-for-free-tier"
+      },
+      {
+        "depth": 3,
+        "text": "Implementation Roadmap",
+        "id": "implementation-roadmap"
+      },
+      {
+        "depth": 4,
+        "text": "Quick Wins (0-1 week)",
+        "id": "quick-wins-0-1-week"
+      },
+      {
+        "depth": 4,
+        "text": "Short Term (1-4 weeks)",
+        "id": "short-term-1-4-weeks"
+      },
+      {
+        "depth": 4,
+        "text": "Medium Term (1-3 months)",
+        "id": "medium-term-1-3-months"
+      },
+      {
+        "depth": 4,
+        "text": "Long Term (Strategic)",
+        "id": "long-term-strategic"
+      },
+      {
+        "depth": 2,
+        "text": "Audit Methodology",
+        "id": "audit-methodology"
+      },
+      {
+        "depth": 3,
+        "text": "Analysis Depth",
+        "id": "analysis-depth"
+      },
+      {
+        "depth": 3,
+        "text": "Security Mindset",
+        "id": "security-mindset"
+      },
+      {
+        "depth": 3,
+        "text": "Resource Optimization Focus",
+        "id": "resource-optimization-focus"
+      },
+      {
+        "depth": 3,
+        "text": "Scoring System",
+        "id": "scoring-system"
+      },
+      {
+        "depth": 2,
+        "text": "Technical Stack Context",
+        "id": "technical-stack-context"
+      },
+      {
+        "depth": 3,
+        "text": "Current Technology Stack",
+        "id": "current-technology-stack"
+      },
+      {
+        "depth": 3,
+        "text": "Deployment Constraints",
+        "id": "deployment-constraints"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "text",
+        "code": "/security-audit [scope]"
+      },
+      {
+        "language": "bash",
+        "code": "/security-audit\n# Deploys all 100 sub-agents for complete analysis"
+      },
+      {
+        "language": "bash",
+        "code": "/security-audit security\n# Focuses on 15 security specialists + related infrastructure agents"
+      },
+      {
+        "language": "bash",
+        "code": "/security-audit performance\n# Focuses on 12 performance specialists + optimization agents"
+      }
+    ],
+    "filePath": "content/commands/security-audit.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/security-audit.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://docs.claude.ai/commands/security-audit",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/security-audit.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

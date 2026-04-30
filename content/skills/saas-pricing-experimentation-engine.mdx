@@ -2,17 +2,17 @@
 title: SaaS Pricing Experimentation Engine Skill
 slug: saas-pricing-experimentation-engine
 category: skills
-description: 'Run low-risk SaaS pricing experiments with clear hypotheses, segment-aware metrics, and decision-safe rollout controls.'
+description: "Run low-risk SaaS pricing experiments with clear hypotheses, segment-aware metrics, and decision-safe rollout controls."
 cardDescription: Revenue optimization skill for designing and evaluating pricing experiments without corrupting core business metrics.
 seoTitle: SaaS Pricing Experimentation Engine Skill
-seoDescription: 'Reusable AI skill for SaaS pricing experiments, including hypothesis design, guardrail metrics, and rollout decision frameworks.'
+seoDescription: "Reusable AI skill for SaaS pricing experiments, including hypothesis design, guardrail metrics, and rollout decision frameworks."
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2026-04-10'
-documentationUrl: 'https://stripe.com/docs'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2026-04-10"
+documentationUrl: "https://stripe.com/docs"
 downloadUrl: /downloads/skills/saas-pricing-experimentation-engine.zip
 installable: true
-installCommand: 'curl -L https://heyclau.de/downloads/skills/saas-pricing-experimentation-engine.zip -o saas-pricing-experimentation-engine.zip && unzip -o saas-pricing-experimentation-engine.zip -d ./saas-pricing-experimentation-engine'
+installCommand: "curl -L https://heyclau.de/downloads/skills/saas-pricing-experimentation-engine.zip -o saas-pricing-experimentation-engine.zip && unzip -o saas-pricing-experimentation-engine.zip -d ./saas-pricing-experimentation-engine"
 usageSnippet: Use this skill to structure pricing tests that improve revenue signals while protecting retention and trust.
 copySnippet: |-
   # Trigger
@@ -26,9 +26,9 @@ copySnippet: |-
 skillType: general
 skillLevel: advanced
 verificationStatus: draft
-verifiedAt: '2026-04-10'
+verifiedAt: "2026-04-10"
 retrievalSources:
-  - 'https://stripe.com/docs'
+  - "https://stripe.com/docs"
 testedPlatforms:
   - Claude
   - Codex
@@ -60,6 +60,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Overview
 
 This skill helps AI agents run pricing experiments that are rigorous and operationally safe. It avoids vanity wins by enforcing guardrails for retention, support burden, and customer trust.
@@ -73,7 +74,9 @@ This skill helps AI agents run pricing experiments that are rigorous and operati
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 

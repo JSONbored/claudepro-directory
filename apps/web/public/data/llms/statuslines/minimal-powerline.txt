@@ -1,0 +1,455 @@
+# Minimal Powerline - Statuslines
+URL: https://heyclau.de/statuslines/minimal-powerline
+Category: statuslines
+Author: JSONbored
+Date added: 2025-10-01
+Documentation: https://github.com/powerline/powerline
+Repository: https://github.com/powerline/powerline
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/minimal-powerline.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/statuslines/minimal-powerline
+- Source URLs: https://github.com/powerline/powerline, https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/minimal-powerline.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
+## Summary
+Clean, performance-optimized statusline with Powerline glyphs showing model, directory, and token count
+## Tags
+- powerline
+- minimal
+- performance
+- bash
+- lightweight
+## Content
+## Features
+- Powerline-style separators and glyphs
+- Displays current AI model in use
+- Shows workspace directory with home shortening
+- Real-time token count tracking
+- Low performance impact with minimal processing
+- 256-color terminal support
+- Requires jq for JSON parsing
+- Optional Git branch display when in repository
+
+## Use Cases
+- Quick overview of current session context
+- Minimal distraction with essential information only
+- Performance-conscious users with slow terminals
+- Teams standardizing on Powerline aesthetic
+- SSH sessions requiring lightweight statusline
+- Resource-constrained environments with minimal overhead
+
+## Requirements
+- Claude Code CLI installed and configured
+- Bash shell available (bash 4.0+ recommended for string manipulation and arithmetic operations)
+- jq command-line JSON processor (jq 1.6+ recommended for safe extraction with // defaults)
+- Terminal with 256-color support (xterm-256color or screen-256color recommended for proper color display)
+- Powerline-patched font or Nerd Font installed (required for Powerline separator glyphs U+E0B0-U+E0B3 to display correctly)
+- Terminal font configured to use Powerline/Nerd Font (font must be set in terminal preferences)
+
+## Configuration
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/minimal-powerline.sh",
+    "refreshInterval": 500
+  }
+}
+```
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/minimal-powerline.sh",
+    "refreshInterval": 500
+  }
+}
+```
+
+## Examples
+### Enhanced Minimal Powerline with Git Branch
+
+Extended version including git branch information
+
+```bash
+#!/usr/bin/env bash
+
+# Enhanced Minimal Powerline with Git Branch
+
+input=$(cat)
+
+model=$(echo "$input" | jq -r '.model.display_name // .model.id // "unknown"' | sed 's/claude-//')
+dir=$(echo "$input" | jq -r '.workspace.current_dir // .workspace.project_dir // "~"' | sed "s|$HOME|~|")
+tokens=$(echo "$input" | jq -r '.cost.total_tokens // .session.totalTokens // 0')
+
+if [ "$tokens" -gt 1000 ]; then
+  tokens_formatted=$(printf "%'d" $tokens 2>/dev/null || echo $tokens)
+else
+  tokens_formatted=$tokens
+fi
+
+# Get git branch if in git repository
+cd "$dir" 2>/dev/null || cd .
+git_branch=""
+if git rev-parse --git-dir > /dev/null 2>&1; then
+  git_branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "(detached)")
+fi
+
+SEP="\ue0b0"
+
+MODEL_BG="\033[48;5;111m"
+MODEL_FG="\033[38;5;111m"
+DIR_BG="\033[48;5;246m"
+DIR_FG="\033[38;5;246m"
+GIT_BG="\033[48;5;28m"
+GIT_FG="\033[38;5;28m"
+TOKEN_BG="\033[48;5;214m"
+TOKEN_FG="\033[38;5;214m"
+RESET="\033[0m"
+
+# Build statusline
+statusline="${MODEL_BG} ${model} ${RESET}${MODEL_FG}${SEP}${RESET} ${DIR_BG} ${dir} ${RESET}"
+
+if [ -n "$git_branch" ]; then
+  statusline="${statusline}${DIR_FG}${SEP}${RESET} ${GIT_BG} ${git_branch} ${RESET}${GIT_FG}${SEP}${RESET}"
+fi
+
+statusline="${statusline} ${TOKEN_BG} ${tokens_formatted} ${RESET}${TOKEN_FG}${SEP}${RESET}"
+
+echo -e "$statusline"
+```
+
+### Minimal Powerline with Custom Colors
+
+Version with configurable color scheme via environment variables
+
+```bash
+#!/usr/bin/env bash
+
+# Minimal Powerline with Custom Colors
+
+# Configurable colors (default: powerline-default)
+MODEL_BG_COLOR=${POWERLINE_MODEL_BG:-111}
+MODEL_FG_COLOR=${POWERLINE_MODEL_FG:-111}
+DIR_BG_COLOR=${POWERLINE_DIR_BG:-246}
+DIR_FG_COLOR=${POWERLINE_DIR_FG:-246}
+TOKEN_BG_COLOR=${POWERLINE_TOKEN_BG:-214}
+TOKEN_FG_COLOR=${POWERLINE_TOKEN_FG:-214}
+
+input=$(cat)
+
+model=$(echo "$input" | jq -r '.model.display_name // .model.id // "unknown"' | sed 's/claude-//')
+dir=$(echo "$input" | jq -r '.workspace.current_dir // .workspace.project_dir // "~"' | sed "s|$HOME|~|")
+tokens=$(echo "$input" | jq -r '.cost.total_tokens // .session.totalTokens // 0')
+
+if [ "$tokens" -gt 1000 ]; then
+  tokens_formatted=$(printf "%'d" $tokens 2>/dev/null || echo $tokens)
+else
+  tokens_formatted=$tokens
+fi
+
+SEP="\ue0b0"
+
+MODEL_BG="\033[48;5;${MODEL_BG_COLOR}m"
+MODEL_FG="\033[38;5;${MODEL_FG_COLOR}m"
+DIR_BG="\033[48;5;${DIR_BG_COLOR}m"
+DIR_FG="\033[38;5;${DIR_FG_COLOR}m"
+TOKEN_BG="\033[48;5;${TOKEN_BG_COLOR}m"
+TOKEN_FG="\033[38;5;${TOKEN_FG_COLOR}m"
+RESET="\033[0m"
+
+echo -e "${MODEL_BG} ${model} ${RESET}${MODEL_FG}${SEP}${RESET} ${DIR_BG} ${dir} ${RESET}${DIR_FG}${SEP}${RESET} ${TOKEN_BG} ${tokens_formatted} ${RESET}${TOKEN_FG}${SEP}${RESET}"
+```
+
+### Minimal Powerline Statusline Installation Example
+
+Complete setup script with Powerline font verification and color testing
+
+```bash
+#!/bin/bash
+# Installation script for Minimal Powerline Statusline
+
+# Check for jq (required for JSON parsing)
+if ! command -v jq &> /dev/null; then
+    echo "Installing jq for JSON parsing..."
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        brew install jq
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        sudo apt-get install -y jq || sudo yum install -y jq
+    else
+        echo "Please install jq manually: https://stedolan.github.io/jq/"
+    fi
+fi
+
+# Check terminal color support
+color_count=$(tput colors 2>/dev/null || echo "8")
+if [ "$color_count" -lt 256 ]; then
+    echo "Warning: Terminal may not support 256 colors"
+    echo "Set TERM=xterm-256color: export TERM=xterm-256color"
+    echo "For tmux/screen: export TERM=screen-256color"
+else
+    echo "Terminal supports $color_count colors"
+fi
+
+# Test Powerline separator
+if echo -e '\ue0b0' &> /dev/null; then
+    echo "Powerline separator test: $(echo -e '\ue0b0')"
+    echo "If separator shows as box/question mark, install Powerline-patched font:"
+    echo "  - Nerd Fonts: https://www.nerdfonts.com/"
+    echo "  - Powerline Fonts: https://github.com/powerline/fonts"
+else
+    echo "Warning: Powerline separator may not be supported"
+fi
+
+mkdir -p .claude/statuslines
+
+cat > .claude/statuslines/minimal-powerline.sh << 'SCRIPT_EOF'
+#!/usr/bin/env bash
+
+# Minimal Powerline Statusline for Claude Code
+# Displays: Model | Directory | Token Count
+
+read -r input
+
+model=$(echo "$input" | jq -r '.model.display_name // .model.id // "unknown"' | sed 's/claude-//')
+dir=$(echo "$input" | jq -r '.workspace.current_dir // .workspace.project_dir // "~"' | sed "s|$HOME|~|")
+tokens=$(echo "$input" | jq -r '.cost.total_tokens // .session.totalTokens // 0')
+
+if [ "$tokens" -gt 1000 ]; then
+  tokens_formatted=$(printf "%'d" $tokens 2>/dev/null || echo $tokens)
+else
+  tokens_formatted=$tokens
+fi
+
+SEP="\ue0b0"
+
+MODEL_BG="\033[48;5;111m"
+MODEL_FG="\033[38;5;111m"
+DIR_BG="\033[48;5;246m"
+DIR_FG="\033[38;5;246m"
+TOKEN_BG="\033[48;5;214m"
+TOKEN_FG="\033[38;5;214m"
+RESET="\033[0m"
+
+echo -e "${MODEL_BG} ${model} ${RESET}${MODEL_FG}${SEP}${RESET} ${DIR_BG} ${dir} ${RESET}${DIR_FG}${SEP}${RESET} ${TOKEN_BG} ${tokens_formatted} ${RESET}${TOKEN_FG}${SEP}${RESET}"
+SCRIPT_EOF
+
+chmod +x .claude/statuslines/minimal-powerline.sh
+
+# Add to settings.json
+if [ ! -f .claude/settings.json ]; then
+    echo '{"statusLine":{"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/minimal-powerline.sh","refreshInterval":500}}' > .claude/settings.json
+else
+    jq '.statusLine = {"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/minimal-powerline.sh","refreshInterval":500}' .claude/settings.json > .claude/settings.json.tmp
+    mv .claude/settings.json.tmp .claude/settings.json
+fi
+
+echo "Minimal Powerline Statusline installed successfully!"
+echo "Note: Install Powerline-patched font or Nerd Font for proper separator display"
+echo "  - Nerd Fonts: https://www.nerdfonts.com/"
+echo "  - Powerline Fonts: https://github.com/powerline/fonts"
+echo "Customize colors: export POWERLINE_MODEL_BG=111 POWERLINE_DIR_BG=246"
+```
+```bash
+#!/usr/bin/env bash
+
+# Enhanced Minimal Powerline with Git Branch
+
+input=$(cat)
+
+model=$(echo "$input" | jq -r '.model.display_name // .model.id // "unknown"' | sed 's/claude-//')
+dir=$(echo "$input" | jq -r '.workspace.current_dir // .workspace.project_dir // "~"' | sed "s|$HOME|~|")
+tokens=$(echo "$input" | jq -r '.cost.total_tokens // .session.totalTokens // 0')
+
+if [ "$tokens" -gt 1000 ]; then
+  tokens_formatted=$(printf "%'d" $tokens 2>/dev/null || echo $tokens)
+else
+  tokens_formatted=$tokens
+fi
+
+# Get git branch if in git repository
+cd "$dir" 2>/dev/null || cd .
+git_branch=""
+if git rev-parse --git-dir > /dev/null 2>&1; then
+  git_branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "(detached)")
+fi
+
+SEP="\ue0b0"
+
+MODEL_BG="\033[48;5;111m"
+MODEL_FG="\033[38;5;111m"
+DIR_BG="\033[48;5;246m"
+DIR_FG="\033[38;5;246m"
+GIT_BG="\033[48;5;28m"
+GIT_FG="\033[38;5;28m"
+TOKEN_BG="\033[48;5;214m"
+TOKEN_FG="\033[38;5;214m"
+RESET="\033[0m"
+
+# Build statusline
+statusline="${MODEL_BG} ${model} ${RESET}${MODEL_FG}${SEP}${RESET} ${DIR_BG} ${dir} ${RESET}"
+
+if [ -n "$git_branch" ]; then
+  statusline="${statusline}${DIR_FG}${SEP}${RESET} ${GIT_BG} ${git_branch} ${RESET}${GIT_FG}${SEP}${RESET}"
+fi
+
+statusline="${statusline} ${TOKEN_BG} ${tokens_formatted} ${RESET}${TOKEN_FG}${SEP}${RESET}"
+
+echo -e "$statusline"
+```
+```bash
+#!/usr/bin/env bash
+
+# Minimal Powerline with Custom Colors
+
+# Configurable colors (default: powerline-default)
+MODEL_BG_COLOR=${POWERLINE_MODEL_BG:-111}
+MODEL_FG_COLOR=${POWERLINE_MODEL_FG:-111}
+DIR_BG_COLOR=${POWERLINE_DIR_BG:-246}
+DIR_FG_COLOR=${POWERLINE_DIR_FG:-246}
+TOKEN_BG_COLOR=${POWERLINE_TOKEN_BG:-214}
+TOKEN_FG_COLOR=${POWERLINE_TOKEN_FG:-214}
+
+input=$(cat)
+
+model=$(echo "$input" | jq -r '.model.display_name // .model.id // "unknown"' | sed 's/claude-//')
+dir=$(echo "$input" | jq -r '.workspace.current_dir // .workspace.project_dir // "~"' | sed "s|$HOME|~|")
+tokens=$(echo "$input" | jq -r '.cost.total_tokens // .session.totalTokens // 0')
+
+if [ "$tokens" -gt 1000 ]; then
+  tokens_formatted=$(printf "%'d" $tokens 2>/dev/null || echo $tokens)
+else
+  tokens_formatted=$tokens
+fi
+
+SEP="\ue0b0"
+
+MODEL_BG="\033[48;5;${MODEL_BG_COLOR}m"
+MODEL_FG="\033[38;5;${MODEL_FG_COLOR}m"
+DIR_BG="\033[48;5;${DIR_BG_COLOR}m"
+DIR_FG="\033[38;5;${DIR_FG_COLOR}m"
+TOKEN_BG="\033[48;5;${TOKEN_BG_COLOR}m"
+TOKEN_FG="\033[38;5;${TOKEN_FG_COLOR}m"
+RESET="\033[0m"
+
+echo -e "${MODEL_BG} ${model} ${RESET}${MODEL_FG}${SEP}${RESET} ${DIR_BG} ${dir} ${RESET}${DIR_FG}${SEP}${RESET} ${TOKEN_BG} ${tokens_formatted} ${RESET}${TOKEN_FG}${SEP}${RESET}"
+```
+```bash
+#!/bin/bash
+# Installation script for Minimal Powerline Statusline
+
+# Check for jq (required for JSON parsing)
+if ! command -v jq &> /dev/null; then
+    echo "Installing jq for JSON parsing..."
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        brew install jq
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        sudo apt-get install -y jq || sudo yum install -y jq
+    else
+        echo "Please install jq manually: https://stedolan.github.io/jq/"
+    fi
+fi
+
+# Check terminal color support
+color_count=$(tput colors 2>/dev/null || echo "8")
+if [ "$color_count" -lt 256 ]; then
+    echo "Warning: Terminal may not support 256 colors"
+    echo "Set TERM=xterm-256color: export TERM=xterm-256color"
+    echo "For tmux/screen: export TERM=screen-256color"
+else
+    echo "Terminal supports $color_count colors"
+fi
+
+# Test Powerline separator
+if echo -e '\ue0b0' &> /dev/null; then
+    echo "Powerline separator test: $(echo -e '\ue0b0')"
+    echo "If separator shows as box/question mark, install Powerline-patched font:"
+    echo "  - Nerd Fonts: https://www.nerdfonts.com/"
+    echo "  - Powerline Fonts: https://github.com/powerline/fonts"
+else
+    echo "Warning: Powerline separator may not be supported"
+fi
+
+mkdir -p .claude/statuslines
+
+cat > .claude/statuslines/minimal-powerline.sh << 'SCRIPT_EOF'
+#!/usr/bin/env bash
+
+# Minimal Powerline Statusline for Claude Code
+# Displays: Model | Directory | Token Count
+
+read -r input
+
+model=$(echo "$input" | jq -r '.model.display_name // .model.id // "unknown"' | sed 's/claude-//')
+dir=$(echo "$input" | jq -r '.workspace.current_dir // .workspace.project_dir // "~"' | sed "s|$HOME|~|")
+tokens=$(echo "$input" | jq -r '.cost.total_tokens // .session.totalTokens // 0')
+
+if [ "$tokens" -gt 1000 ]; then
+  tokens_formatted=$(printf "%'d" $tokens 2>/dev/null || echo $tokens)
+else
+  tokens_formatted=$tokens
+fi
+
+SEP="\ue0b0"
+
+MODEL_BG="\033[48;5;111m"
+MODEL_FG="\033[38;5;111m"
+DIR_BG="\033[48;5;246m"
+DIR_FG="\033[38;5;246m"
+TOKEN_BG="\033[48;5;214m"
+TOKEN_FG="\033[38;5;214m"
+RESET="\033[0m"
+
+echo -e "${MODEL_BG} ${model} ${RESET}${MODEL_FG}${SEP}${RESET} ${DIR_BG} ${dir} ${RESET}${DIR_FG}${SEP}${RESET} ${TOKEN_BG} ${tokens_formatted} ${RESET}${TOKEN_FG}${SEP}${RESET}"
+SCRIPT_EOF
+
+chmod +x .claude/statuslines/minimal-powerline.sh
+
+# Add to settings.json
+if [ ! -f .claude/settings.json ]; then
+    echo '{"statusLine":{"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/minimal-powerline.sh","refreshInterval":500}}' > .claude/settings.json
+else
+    jq '.statusLine = {"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/minimal-powerline.sh","refreshInterval":500}' .claude/settings.json > .claude/settings.json.tmp
+    mv .claude/settings.json.tmp .claude/settings.json
+fi
+
+echo "Minimal Powerline Statusline installed successfully!"
+echo "Note: Install Powerline-patched font or Nerd Font for proper separator display"
+echo "  - Nerd Fonts: https://www.nerdfonts.com/"
+echo "  - Powerline Fonts: https://github.com/powerline/fonts"
+echo "Customize colors: export POWERLINE_MODEL_BG=111 POWERLINE_DIR_BG=246"
+```
+
+## Troubleshooting
+### Powerline separators showing as boxes or question marks
+
+Install a Nerd Font (e.g., FiraCode Nerd Font, Hack Nerd Font) or Powerline-patched font and configure your terminal to use it. Verify with: echo -e '\ue0b0'. Download fonts: https://www.nerdfonts.com/ or https://github.com/powerline/fonts. For VS Code: Set 'terminal.integrated.fontFamily' to your Nerd Font. For iTerm2: Preferences > Profiles > Text > Font > Select Nerd Font.
+
+### Colors not displaying correctly
+
+Ensure terminal supports 256 colors. Test with: tput colors (should return 256). Set TERM=xterm-256color if needed: export TERM=xterm-256color. For tmux/screen use: export TERM=screen-256color. Add to ~/.bashrc or ~/.zshrc for persistence. Verify color codes work: echo -e '\033[48;5;111mTEST\033[0m' (should show colored background).
+
+### jq command not found error
+
+Install jq: macOS (brew install jq), Linux (sudo apt-get install jq or sudo yum install jq), or download from https://jqlang.github.io/jq/. Verify installation: which jq. Test jq: echo '{"test":123}' | jq .test (should return 123). Check jq version: jq --version (should be 1.6+).
+
+### tput colors shows 8 but terminal supports 256 colors
+
+Set TERM explicitly: export TERM=xterm-256color. Test: env TERM=xterm-256color tput colors (should show 256). For tmux/screen use TERM=screen-256color. Add to shell profile (~/.bashrc or ~/.zshrc) for persistence. Check terminal emulator settings - some require explicit 256-color mode. Restart terminal after setting TERM.
+
+### Powerline separators misaligned or cut off at edges
+
+Install Powerline-patched font from github.com/powerline/fonts. U+E0B0-U+E0B3 require patched fonts. For VS Code, enable GPU acceleration for better rendering. Check terminal font size and line height settings. Verify font is monospace and properly configured. Test separator: echo -e '\ue0b0' (should show right-pointing triangle).
+
+### Model name not displaying or showing 'unknown'
+
+Check JSON input: echo '$input' | jq .model. Verify model.display_name exists: echo '$input' | jq .model.display_name. Check alternative: echo '$input' | jq .model.id. Verify sed command works: echo 'claude-sonnet-4.5' | sed 's/claude-//' (should return sonnet-4.5). Check model field structure in Claude Code JSON output.
+
+### Directory path not shortening home directory
+
+Verify HOME environment variable: echo $HOME. Check sed replacement: echo '/Users/username/project' | sed "s|$HOME|~|". Verify workspace path extraction: echo '$input' | jq '.workspace.current_dir'. Check path format - script expects absolute paths. Verify directory exists: ls -d "$dir".
+
+### Token count not displaying or showing 0
+
+Check JSON input structure: echo '$input' | jq .. Verify cost.total_tokens exists: echo '$input' | jq .cost.total_tokens. Check alternative field: echo '$input' | jq .session.totalTokens. Verify jq is installed: which jq. Test with sample JSON: echo '{"cost":{"total_tokens":1234}}' | jq -r '.cost.total_tokens // 0' (should return 1234). Check thousands separator: printf '%'d 1234 (should return 1,234 on systems with locale support).

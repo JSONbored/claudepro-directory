@@ -1,0 +1,590 @@
+# Python Linter Integration - Hooks
+URL: https://heyclau.de/hooks/python-linter-integration
+Category: hooks
+Author: JSONbored
+Date added: 2025-09-19
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/python-linter-integration.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/hooks/python-linter-integration
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/python-linter-integration.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
+## Summary
+Automatically runs pylint on Python files after editing to enforce code quality standards.
+## Tags
+- python
+- linting
+- code-quality
+- pylint
+## Content
+## Features
+- Automatic linter execution including pylint integration (pylint command execution with comprehensive code analysis, code quality scoring with 0-10 rating system, error and warning detection with detailed reporting, code complexity analysis with cyclomatic complexity metrics), flake8 integration (flake8 command execution with PEP 8 style checking, error detection with E/F/W error codes, import checking with unused import detection, line length checking with configurable max-line-length), ruff integration (ruff check command execution with fast Rust-based linting, comprehensive rule coverage with 500+ rules, auto-fix capabilities with ruff check --fix, import sorting with ruff check --select I), and pycodestyle integration (pycodestyle command execution with PEP 8 compliance checking, style error detection with detailed reporting, line length checking with configurable settings)
+- Code quality assessment and scoring including code quality scoring (pylint scoring system with 0-10 rating, code quality metrics with maintainability index, code quality reporting with detailed analysis, code quality trends with historical tracking), code complexity analysis (cyclomatic complexity analysis with complexity metrics, function complexity detection with complexity thresholds, code complexity reporting with detailed breakdown, code complexity recommendations with optimization suggestions), code maintainability (maintainability index calculation with maintainability metrics, code maintainability reporting with detailed analysis, code maintainability recommendations with improvement suggestions), and code quality metrics (code quality metrics collection with comprehensive metrics, code quality metrics reporting with detailed statistics, code quality metrics trends with historical analysis)
+- PEP 8 compliance checking including PEP 8 style checking (PEP 8 style validation with comprehensive checking, PEP 8 compliance reporting with detailed analysis, PEP 8 violation detection with specific violations, PEP 8 compliance scoring with compliance metrics), style error detection (style error identification with detailed reporting, style error categorization with error types, style error severity with severity levels, style error recommendations with fix suggestions), line length checking (line length validation with configurable thresholds, line length violation detection with specific lines, line length reporting with detailed analysis, line length recommendations with formatting suggestions), and import style checking (import style validation with PEP 8 standards, import style compliance with style checking, import style reporting with detailed analysis, import style recommendations with optimization suggestions)
+- Error and warning detection including error detection (error identification with detailed reporting, error categorization with error types, error severity with severity levels, error recommendations with fix suggestions), warning detection (warning identification with detailed reporting, warning categorization with warning types, warning severity with severity levels, warning recommendations with optimization suggestions), code issue detection (code issue identification with comprehensive analysis, code issue categorization with issue types, code issue severity with severity levels, code issue recommendations with fix suggestions), and code quality issues (code quality issue detection with comprehensive checking, code quality issue reporting with detailed analysis, code quality issue recommendations with improvement suggestions)
+- Code complexity analysis including cyclomatic complexity (cyclomatic complexity calculation with complexity metrics, cyclomatic complexity reporting with detailed breakdown, cyclomatic complexity thresholds with configurable limits, cyclomatic complexity recommendations with refactoring suggestions), function complexity (function complexity analysis with complexity metrics, function complexity reporting with detailed breakdown, function complexity thresholds with configurable limits, function complexity recommendations with optimization suggestions), code complexity metrics (code complexity metrics collection with comprehensive metrics, code complexity metrics reporting with detailed statistics, code complexity metrics trends with historical analysis), and complexity recommendations (complexity reduction recommendations with refactoring suggestions, complexity optimization with code improvements, complexity best practices with coding standards)
+- Configurable linting rules including rule configuration (linting rule customization with configurable rules, linting rule disabling with --disable flags, linting rule enabling with --enable flags, linting rule configuration files with .pylintrc/.flake8), rule profiles (linting rule profiles with predefined configurations, linting rule profile selection with profile options, linting rule profile customization with custom profiles, linting rule profile management with profile files), rule severity (linting rule severity configuration with severity levels, linting rule severity customization with custom severities, linting rule severity reporting with detailed analysis, linting rule severity recommendations with optimization suggestions), and rule management (linting rule management with comprehensive configuration, linting rule documentation with rule descriptions, linting rule best practices with coding standards, linting rule integration with development workflow)
+- Multi-linter support including linter fallback (automatic linter detection with fallback support, linter availability checking with command detection, linter fallback chain with pylint/flake8/pycodestyle, linter fallback reporting with fallback notifications), linter comparison (linter output comparison with side-by-side analysis, linter rule comparison with rule coverage, linter performance comparison with execution time, linter accuracy comparison with error detection), linter integration (multiple linter integration with comprehensive checking, linter output aggregation with unified reporting, linter configuration management with unified config, linter workflow integration with development tools), and linter selection (linter selection based on project needs, linter selection based on performance, linter selection based on rule coverage, linter selection based on integration requirements)
+- Development workflow integration including continuous linting (real-time linting on file changes, immediate code quality feedback on file updates, automatic linting on file modifications), workflow automation (automated linting without manual intervention, linting automation with automatic execution, code quality automation with automatic checking), and workflow optimization (linting change detection with change tracking, incremental linting with optimization, code quality consistency maintenance with consistency checks)
+
+## Use Cases
+- Enforce Python coding standards automatically running pylint/flake8/ruff on file changes, detecting code quality issues with comprehensive analysis, and maintaining consistent code quality across projects
+- Catch potential bugs and code issues early detecting errors and warnings with detailed reporting, identifying code quality issues with comprehensive analysis, and providing immediate feedback on code changes
+- Maintain consistent code quality across projects enforcing coding standards with configurable rules, ensuring code consistency with PEP 8 compliance, and maintaining project-wide code quality standards
+- Provide immediate feedback on code changes running linters automatically on file modifications, providing code quality scoring with 0-10 rating, and offering code quality recommendations with optimization suggestions
+- Monitor code complexity and maintainability analyzing code complexity with cyclomatic complexity metrics, tracking code maintainability with maintainability index, and providing complexity reduction recommendations
+- Development workflow integration seamlessly integrating Python linting into development workflows without manual linter execution or code quality checking
+
+## Installation
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/python-linter-integration.sh
+3. Make executable: chmod +x .claude/hooks/python-linter-integration.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- Python 3.8+ installed
+- pylint installed (pip install pylint, recommended)
+- flake8 installed (optional, pip install flake8, fallback)
+- ruff installed (optional, pip install ruff, fast alternative)
+- pycodestyle installed (optional, pip install pycodestyle, basic fallback)
+- jq (optional, for JSON parsing)
+
+## Hook Configuration
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/python-linter-integration.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/python-linter-integration.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+
+## Hook Script
+```bash
+#!/bin/bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Check if this is a Python file
+if [[ "$FILE_PATH" == *.py ]]; then
+    echo "🔍 Python Linter Integration - Analyzing code quality..."
+    echo "📄 File: $FILE_PATH"
+
+    # Check if file exists
+    if [ ! -f "$FILE_PATH" ]; then
+        echo "⚠️ File not found: $FILE_PATH"
+        exit 1
+    fi
+
+    # Check if pylint is available
+    if command -v pylint >/dev/null 2>&1; then
+        echo "🔍 Running pylint analysis..."
+
+        # Run pylint with custom formatting
+        PYLINT_OUTPUT=$(pylint "$FILE_PATH" --score=yes --reports=no --msg-template="{line:3d},{column:2d}: {category}: {msg} ({symbol})" 2>/dev/null)
+        PYLINT_EXIT_CODE=$?
+
+        if [ $PYLINT_EXIT_CODE -eq 0 ]; then
+            echo "✅ Pylint analysis passed - No issues found"
+        else
+            echo "📋 Pylint Analysis Results:"
+            echo "$PYLINT_OUTPUT" | head -20  # Limit output to first 20 lines
+
+            # Show summary if there are many issues
+            ISSUE_COUNT=$(echo "$PYLINT_OUTPUT" | wc -l)
+            if [ "$ISSUE_COUNT" -gt 20 ]; then
+                echo "... and $((ISSUE_COUNT - 20)) more issues"
+            fi
+
+            # Extract score if available
+            SCORE=$(echo "$PYLINT_OUTPUT" | grep "Your code has been rated" | grep -o '[0-9]\+\.[0-9]\+' | head -1)
+            if [ -n "$SCORE" ]; then
+                echo "📊 Code Quality Score: $SCORE/10"
+            fi
+        fi
+
+    elif command -v flake8 >/dev/null 2>&1; then
+        echo "🔍 Running flake8 analysis (fallback)..."
+
+        if flake8 "$FILE_PATH" --max-line-length=88; then
+            echo "✅ Flake8 analysis passed - No style issues found"
+        else
+            echo "⚠️ Flake8 found style issues (non-blocking)"
+        fi
+
+    elif command -v pycodestyle >/dev/null 2>&1; then
+        echo "🔍 Running pycodestyle analysis (fallback)..."
+
+        if pycodestyle "$FILE_PATH" --max-line-length=88; then
+            echo "✅ Pycodestyle analysis passed - No style issues found"
+        else
+            echo "⚠️ Pycodestyle found style issues (non-blocking)"
+        fi
+
+    else
+        echo "⚠️ No Python linters found"
+        echo "💡 Install options:"
+        echo "  • pip install pylint (recommended)"
+        echo "  • pip install flake8 (lightweight)"
+        echo "  • pip install pycodestyle (basic)"
+    fi
+
+    # Additional code quality checks
+    echo ""
+    echo "📊 Quick Code Analysis:"
+
+    # Count lines of code (excluding comments and empty lines)
+    LOC=$(grep -v '^[[:space:]]*#' "$FILE_PATH" | grep -v '^[[:space:]]*$' | wc -l)
+    echo "  • Lines of Code: $LOC"
+
+    # Check for potential issues
+    if grep -q "print(" "$FILE_PATH"; then
+        echo "  • 💡 Consider using logging instead of print statements"
+    fi
+
+    if grep -q "TODO\|FIXME\|XXX" "$FILE_PATH"; then
+        echo "  • 📝 TODOs/FIXMEs found - consider addressing them"
+    fi
+
+    # Check function complexity (rough estimate)
+    FUNCTION_COUNT=$(grep -c "^def " "$FILE_PATH")
+    if [ "$FUNCTION_COUNT" -gt 0 ]; then
+        AVG_LINES_PER_FUNC=$((LOC / FUNCTION_COUNT))
+        echo "  • Functions: $FUNCTION_COUNT (avg ~$AVG_LINES_PER_FUNC lines each)"
+
+        if [ "$AVG_LINES_PER_FUNC" -gt 20 ]; then
+            echo "  • 💡 Consider breaking down large functions"
+        fi
+    fi
+
+    echo ""
+    echo "💡 Python Code Quality Tips:"
+    echo "  • Follow PEP 8 style guidelines"
+    echo "  • Use meaningful variable and function names"
+    echo "  • Add docstrings to functions and classes"
+    echo "  • Keep functions small and focused"
+    echo "  • Use type hints for better code clarity"
+
+    echo ""
+    echo "🎯 Code quality analysis complete!"
+
+else
+    echo "ℹ️ File is not a Python file: $FILE_PATH"
+fi
+
+exit 0
+```
+```bash
+#!/bin/bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Check if this is a Python file
+if [[ "$FILE_PATH" == *.py ]]; then
+    echo "🔍 Python Linter Integration - Analyzing code quality..."
+    echo "📄 File: $FILE_PATH"
+
+    # Check if file exists
+    if [ ! -f "$FILE_PATH" ]; then
+        echo "⚠️ File not found: $FILE_PATH"
+        exit 1
+    fi
+
+    # Check if pylint is available
+    if command -v pylint >/dev/null 2>&1; then
+        echo "🔍 Running pylint analysis..."
+
+        # Run pylint with custom formatting
+        PYLINT_OUTPUT=$(pylint "$FILE_PATH" --score=yes --reports=no --msg-template="{line:3d},{column:2d}: {category}: {msg} ({symbol})" 2>/dev/null)
+        PYLINT_EXIT_CODE=$?
+
+        if [ $PYLINT_EXIT_CODE -eq 0 ]; then
+            echo "✅ Pylint analysis passed - No issues found"
+        else
+            echo "📋 Pylint Analysis Results:"
+            echo "$PYLINT_OUTPUT" | head -20  # Limit output to first 20 lines
+
+            # Show summary if there are many issues
+            ISSUE_COUNT=$(echo "$PYLINT_OUTPUT" | wc -l)
+            if [ "$ISSUE_COUNT" -gt 20 ]; then
+                echo "... and $((ISSUE_COUNT - 20)) more issues"
+            fi
+
+            # Extract score if available
+            SCORE=$(echo "$PYLINT_OUTPUT" | grep "Your code has been rated" | grep -o '[0-9]\+\.[0-9]\+' | head -1)
+            if [ -n "$SCORE" ]; then
+                echo "📊 Code Quality Score: $SCORE/10"
+            fi
+        fi
+
+    elif command -v flake8 >/dev/null 2>&1; then
+        echo "🔍 Running flake8 analysis (fallback)..."
+
+        if flake8 "$FILE_PATH" --max-line-length=88; then
+            echo "✅ Flake8 analysis passed - No style issues found"
+        else
+            echo "⚠️ Flake8 found style issues (non-blocking)"
+        fi
+
+    elif command -v pycodestyle >/dev/null 2>&1; then
+        echo "🔍 Running pycodestyle analysis (fallback)..."
+
+        if pycodestyle "$FILE_PATH" --max-line-length=88; then
+            echo "✅ Pycodestyle analysis passed - No style issues found"
+        else
+            echo "⚠️ Pycodestyle found style issues (non-blocking)"
+        fi
+
+    else
+        echo "⚠️ No Python linters found"
+        echo "💡 Install options:"
+        echo "  • pip install pylint (recommended)"
+        echo "  • pip install flake8 (lightweight)"
+        echo "  • pip install pycodestyle (basic)"
+    fi
+
+    # Additional code quality checks
+    echo ""
+    echo "📊 Quick Code Analysis:"
+
+    # Count lines of code (excluding comments and empty lines)
+    LOC=$(grep -v '^[[:space:]]*#' "$FILE_PATH" | grep -v '^[[:space:]]*$' | wc -l)
+    echo "  • Lines of Code: $LOC"
+
+    # Check for potential issues
+    if grep -q "print(" "$FILE_PATH"; then
+        echo "  • 💡 Consider using logging instead of print statements"
+    fi
+
+    if grep -q "TODO\|FIXME\|XXX" "$FILE_PATH"; then
+        echo "  • 📝 TODOs/FIXMEs found - consider addressing them"
+    fi
+
+    # Check function complexity (rough estimate)
+    FUNCTION_COUNT=$(grep -c "^def " "$FILE_PATH")
+    if [ "$FUNCTION_COUNT" -gt 0 ]; then
+        AVG_LINES_PER_FUNC=$((LOC / FUNCTION_COUNT))
+        echo "  • Functions: $FUNCTION_COUNT (avg ~$AVG_LINES_PER_FUNC lines each)"
+
+        if [ "$AVG_LINES_PER_FUNC" -gt 20 ]; then
+            echo "  • 💡 Consider breaking down large functions"
+        fi
+    fi
+
+    echo ""
+    echo "💡 Python Code Quality Tips:"
+    echo "  • Follow PEP 8 style guidelines"
+    echo "  • Use meaningful variable and function names"
+    echo "  • Add docstrings to functions and classes"
+    echo "  • Keep functions small and focused"
+    echo "  • Use type hints for better code clarity"
+
+    echo ""
+    echo "🎯 Code quality analysis complete!"
+
+else
+    echo "ℹ️ File is not a Python file: $FILE_PATH"
+fi
+
+exit 0
+```
+
+## Examples
+### Python Linter Integration Hook Script
+
+Complete hook script that performs Python linting with pylint
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+if [[ "$FILE_PATH" == *.py ]]; then
+  echo "🔍 Python Linter Integration - Analyzing code quality..."
+  if command -v pylint >/dev/null 2>&1; then
+    echo "🔍 Running pylint analysis..."
+    PYLINT_OUTPUT=$(pylint "$FILE_PATH" --score=yes --reports=no --msg-template="{line:3d},{column:2d}: {category}: {msg} ({symbol})" 2>/dev/null)
+    PYLINT_EXIT_CODE=$?
+    if [ $PYLINT_EXIT_CODE -eq 0 ]; then
+      echo "✅ Pylint analysis passed - No issues found"
+    else
+      echo "📋 Pylint Analysis Results:"
+      echo "$PYLINT_OUTPUT" | head -20
+      SCORE=$(echo "$PYLINT_OUTPUT" | grep "Your code has been rated" | grep -o '[0-9]\+\.[0-9]\+' | head -1)
+      if [ -n "$SCORE" ]; then
+        echo "📊 Code Quality Score: $SCORE/10"
+      fi
+    fi
+  fi
+fi
+exit 0
+```
+
+### Hook Configuration
+
+Complete hook configuration for .claude/settings.json to enable Python linting
+
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/python-linter-integration.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+
+### Multi-Linter Support with Fallback
+
+Enhanced hook script with multi-linter support and automatic fallback
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.py ]]; then
+  if command -v pylint >/dev/null 2>&1; then
+    echo "🔍 Running pylint analysis..."
+    pylint "$FILE_PATH" --score=yes --reports=no
+  elif command -v flake8 >/dev/null 2>&1; then
+    echo "🔍 Running flake8 analysis (fallback)..."
+    flake8 "$FILE_PATH" --max-line-length=88
+  elif command -v ruff >/dev/null 2>&1; then
+    echo "🔍 Running ruff analysis (fallback)..."
+    ruff check "$FILE_PATH"
+  elif command -v pycodestyle >/dev/null 2>&1; then
+    echo "🔍 Running pycodestyle analysis (fallback)..."
+    pycodestyle "$FILE_PATH" --max-line-length=88
+  else
+    echo "⚠️ No Python linters found"
+  fi
+fi
+exit 0
+```
+
+### Code Quality Scoring and Statistics
+
+Enhanced hook script with code quality scoring and code statistics
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.py ]]; then
+  if command -v pylint >/dev/null 2>&1; then
+    echo "🔍 Running pylint analysis..."
+    PYLINT_OUTPUT=$(pylint "$FILE_PATH" --score=yes --reports=no --msg-template="{line:3d},{column:2d}: {category}: {msg} ({symbol})" 2>/dev/null)
+    echo "$PYLINT_OUTPUT" | head -20
+    SCORE=$(echo "$PYLINT_OUTPUT" | grep "Your code has been rated" | grep -o '[0-9]\+\.[0-9]\+' | head -1)
+    if [ -n "$SCORE" ]; then
+      echo "📊 Code Quality Score: $SCORE/10"
+    fi
+    LOC=$(grep -v '^[[:space:]]*#' "$FILE_PATH" | grep -v '^[[:space:]]*$' | wc -l)
+    FUNCTION_COUNT=$(grep -c "^def " "$FILE_PATH")
+    echo "📊 Quick Code Analysis:"
+    echo "  • Lines of Code: $LOC"
+    echo "  • Functions: $FUNCTION_COUNT"
+    if [ "$FUNCTION_COUNT" -gt 0 ]; then
+      AVG_LINES_PER_FUNC=$((LOC / FUNCTION_COUNT))
+      echo "  • Avg Lines per Function: ~$AVG_LINES_PER_FUNC"
+    fi
+  fi
+fi
+exit 0
+```
+
+### pyproject.toml Linter Configuration
+
+Example pyproject.toml configuration for multiple Python linters
+
+```toml
+[tool.pylint.messages_control]
+disable = ["C0103", "R0903"]
+
+[tool.pylint.format]
+max-line-length = 88
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203", "E266"]
+
+[tool.ruff]
+line-length = 88
+select = ["E", "F", "I", "N", "W"]
+ignore = ["E501"]
+```
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+if [[ "$FILE_PATH" == *.py ]]; then
+  echo "🔍 Python Linter Integration - Analyzing code quality..."
+  if command -v pylint >/dev/null 2>&1; then
+    echo "🔍 Running pylint analysis..."
+    PYLINT_OUTPUT=$(pylint "$FILE_PATH" --score=yes --reports=no --msg-template="{line:3d},{column:2d}: {category}: {msg} ({symbol})" 2>/dev/null)
+    PYLINT_EXIT_CODE=$?
+    if [ $PYLINT_EXIT_CODE -eq 0 ]; then
+      echo "✅ Pylint analysis passed - No issues found"
+    else
+      echo "📋 Pylint Analysis Results:"
+      echo "$PYLINT_OUTPUT" | head -20
+      SCORE=$(echo "$PYLINT_OUTPUT" | grep "Your code has been rated" | grep -o '[0-9]\+\.[0-9]\+' | head -1)
+      if [ -n "$SCORE" ]; then
+        echo "📊 Code Quality Score: $SCORE/10"
+      fi
+    fi
+  fi
+fi
+exit 0
+```
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/python-linter-integration.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.py ]]; then
+  if command -v pylint >/dev/null 2>&1; then
+    echo "🔍 Running pylint analysis..."
+    pylint "$FILE_PATH" --score=yes --reports=no
+  elif command -v flake8 >/dev/null 2>&1; then
+    echo "🔍 Running flake8 analysis (fallback)..."
+    flake8 "$FILE_PATH" --max-line-length=88
+  elif command -v ruff >/dev/null 2>&1; then
+    echo "🔍 Running ruff analysis (fallback)..."
+    ruff check "$FILE_PATH"
+  elif command -v pycodestyle >/dev/null 2>&1; then
+    echo "🔍 Running pycodestyle analysis (fallback)..."
+    pycodestyle "$FILE_PATH" --max-line-length=88
+  else
+    echo "⚠️ No Python linters found"
+  fi
+fi
+exit 0
+```
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.py ]]; then
+  if command -v pylint >/dev/null 2>&1; then
+    echo "🔍 Running pylint analysis..."
+    PYLINT_OUTPUT=$(pylint "$FILE_PATH" --score=yes --reports=no --msg-template="{line:3d},{column:2d}: {category}: {msg} ({symbol})" 2>/dev/null)
+    echo "$PYLINT_OUTPUT" | head -20
+    SCORE=$(echo "$PYLINT_OUTPUT" | grep "Your code has been rated" | grep -o '[0-9]\+\.[0-9]\+' | head -1)
+    if [ -n "$SCORE" ]; then
+      echo "📊 Code Quality Score: $SCORE/10"
+    fi
+    LOC=$(grep -v '^[[:space:]]*#' "$FILE_PATH" | grep -v '^[[:space:]]*$' | wc -l)
+    FUNCTION_COUNT=$(grep -c "^def " "$FILE_PATH")
+    echo "📊 Quick Code Analysis:"
+    echo "  • Lines of Code: $LOC"
+    echo "  • Functions: $FUNCTION_COUNT"
+    if [ "$FUNCTION_COUNT" -gt 0 ]; then
+      AVG_LINES_PER_FUNC=$((LOC / FUNCTION_COUNT))
+      echo "  • Avg Lines per Function: ~$AVG_LINES_PER_FUNC"
+    fi
+  fi
+fi
+exit 0
+```
+```toml
+[tool.pylint.messages_control]
+disable = ["C0103", "R0903"]
+
+[tool.pylint.format]
+max-line-length = 88
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203", "E266"]
+
+[tool.ruff]
+line-length = 88
+select = ["E", "F", "I", "N", "W"]
+ignore = ["E501"]
+```
+
+## Troubleshooting
+### Hook reports no linters found despite installation
+
+Ensure linters are in your PATH. Use 'which pylint' or 'which flake8' to verify. Install globally with 'pip install pylint' or activate your virtual environment before running hooks. Verify Python environment and PATH. Test with various Python environments.
+
+### Pylint output is truncated showing only first 20 lines
+
+This is intentional to prevent overwhelming output. For full analysis, run 'pylint <file>' directly. The hook shows summary statistics including total issue count and quality score. Adjust head -20 limit if needed. Test with various file sizes.
+
+### Hook shows warnings but doesn't block file operations
+
+This is by design - linting runs post-modification as feedback. To block writes, move the hook to preToolUse and add 'exit 1' for failing scores. Consider your workflow before enforcing strict blocks. Verify hook configuration. Test with various linting scenarios.
+
+### False positives or style conflicts with project standards
+
+Create a .pylintrc or .flake8 config file in your project root to customize rules. Use '--disable=<rule>' for specific suppressions. The hook respects project-level configuration files. Verify configuration files. Test with various rule configurations.
+
+### Virtual environment packages cause import errors in pylint
+
+Ensure the hook runs in the same environment where Python packages are installed. Set 'export VIRTUAL_ENV=/path/to/venv' or activate venv before Claude Code session starts. Verify virtual environment activation. Test with various virtual environment configurations.
+
+### Pylint is too slow on large Python files
+
+Consider using ruff as a faster alternative (ruff check). Configure pylint with --jobs=0 for parallel processing. Exclude large files or use incremental linting. Verify file size limits. Test with various file sizes.
+
+### Multiple linters show conflicting results
+
+Different linters have different rule sets and philosophies. Choose one primary linter (pylint recommended) and use others as fallbacks. Configure linters consistently with project standards. Verify linter configurations. Test with various linter combinations.
+
+### Code quality score is low but code works correctly
+
+Pylint scoring considers maintainability, not just correctness. Review specific issues and address high-priority ones. Use --disable flags for false positives. Focus on improving maintainability over time. Verify code quality metrics. Test with various code quality scenarios.

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "mcp:linear-mcp-server",
+  "category": "mcp",
+  "slug": "linear-mcp-server",
+  "title": "Linear MCP Server for Claude",
+  "author": "Linear",
+  "brandName": "Linear",
+  "brandDomain": "linear.app",
+  "brandIconUrl": "/api/brand-assets/icon/linear.app",
+  "brandAssetSource": "brandfetch",
+  "copyText": "Install:\nclaude mcp list && claude mcp status linear\n\nConfig:\n{\n  \"linear\": {\n    \"url\": \"https://mcp.linear.app/sse\",\n    \"transport\": \"sse\"\n  }\n}\n\nUsage:\n{\n  \"linear\": {\n    \"url\": \"https://mcp.linear.app/sse\",\n    \"transport\": \"sse\"\n  }\n}",
+  "detailMarkdown": "# Linear MCP Server for Claude\n\nIntegrate with Linear's issue tracking and project management system\n\n## Install\n```bash\nclaude mcp list && claude mcp status linear\n```\n\n## Config\n```json\n{\n  \"linear\": {\n    \"url\": \"https://mcp.linear.app/sse\",\n    \"transport\": \"sse\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status linear",
+  "webUrl": "https://heyclau.de/mcp/linear-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/linear-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/linear-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/linear-mcp-server",
+  "seoTitle": "Linear MCP Server for Claude",
+  "seoDescription": "Integrate with Linear's issue tracking and project management system Discover tools for AI development. HeyClaude adds source links, install steps,...",
+  "repoUrl": "",
+  "documentationUrl": "https://linear.app/docs/mcp"
+}

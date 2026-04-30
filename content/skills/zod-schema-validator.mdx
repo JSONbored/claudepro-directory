@@ -2,14 +2,14 @@
 title: Zod Schema Validation Skill
 slug: zod-schema-validator
 category: skills
-description: 'Build type-safe runtime validation with Zod for APIs, forms, and data pipelines with TypeScript 5.5+ integration and automatic type inference.'
-cardDescription: 'Build type-safe runtime validation with Zod for APIs, forms, and data pipelines with TypeScript 5.5+ integration and automatic type infer...'
+description: "Build type-safe runtime validation with Zod for APIs, forms, and data pipelines with TypeScript 5.5+ integration and automatic type inference."
+cardDescription: "Build type-safe runtime validation with Zod for APIs, forms, and data pipelines with TypeScript 5.5+ integration and automatic type infer..."
 seoTitle: Zod Schema Validation Skill
-seoDescription: 'Build type-safe runtime validation with Zod for APIs, forms, and data pipelines with TypeScript 5.5+ integration and automatic type inference. Zod is a TypeS...'
+seoDescription: "Build type-safe runtime validation with Zod for APIs, forms, and data pipelines with TypeScript 5.5+ integration and automatic type inference. Zod is a TypeS..."
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-16'
-documentationUrl: 'https://zod.dev/'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-16"
+documentationUrl: "https://zod.dev/"
 downloadUrl: /downloads/skills/zod-schema-validator.zip
 installable: true
 installCommand: npm install zod
@@ -56,9 +56,9 @@ copySnippet: |-
 skillType: general
 skillLevel: advanced
 verificationStatus: draft
-verifiedAt: '2025-10-16'
+verifiedAt: "2025-10-16"
 retrievalSources:
-  - 'https://zod.dev/'
+  - "https://zod.dev/"
 testedPlatforms:
   - Claude
   - Codex
@@ -72,7 +72,7 @@ prerequisites:
   - Node.js 18+ or modern browser
   - Basic TypeScript knowledge
   - TypeScript 4.5+ (recommended 5.0+) for full type inference and compile-time type safety with Zod schemas
-  - 'Runtime environment: Node.js 18+ for server-side validation or modern browser with ES2020+ support for client-side validation'
+  - "Runtime environment: Node.js 18+ for server-side validation or modern browser with ES2020+ support for client-side validation"
 tags:
   - zod
   - validation
@@ -99,6 +99,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 Build type-safe runtime validation with Zod for APIs, forms, and data pipelines with TypeScript 5.5+ integration and automatic type inference. Zod is a TypeScript-first schema validation library that provides runtime validation matching compile-time types, enabling you to validate untrusted data (API inputs, user forms, external integrations) while maintaining end-to-end type safety. With zero dependencies, 8kb minified bundle size, and automatic type inference, Zod eliminates the gap between static types and runtime reality. Features include composable schemas with .extend() and .merge(), custom validation with .refine() and async support, discriminated unions for efficient type narrowing, transforms for data coercion, and seamless integration with React Hook Form, tRPC, and Express.
 
 ## Content
@@ -118,18 +119,21 @@ Claude can build comprehensive validation schemas using Zod, the TypeScript-firs
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
-
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 
 **Required:**
+
 - Claude Pro subscription or Claude Code CLI
 - TypeScript 5.0+ (5.5+ recommended)
 - Node.js 18+ or modern browser
 - Basic TypeScript knowledge
 
 **What Claude handles automatically:**
+
 - Writing Zod schemas with proper validators
 - Inferring TypeScript types from schemas
 - Adding custom validation logic with refinements
@@ -146,6 +150,7 @@ Claude can build comprehensive validation schemas using Zod, the TypeScript-firs
 **Prompt:** "Create Zod schemas for a user registration API that validates email, password (min 8 chars, requires number and special char), age (18-100), and optional phone number."
 
 Claude will:
+
 1. Write Zod schema with proper validators
 2. Add regex patterns for email and password
 3. Include range validation for age
@@ -159,6 +164,7 @@ Claude will:
 **Prompt:** "Build a React form with Zod validation for: name, email, address (street, city, state, zip), and checkbox for terms acceptance. Integrate with React Hook Form and show field-level errors."
 
 Claude will:
+
 1. Create nested Zod schema for address
 2. Set up React Hook Form with zodResolver
 3. Add real-time validation on blur
@@ -172,6 +178,7 @@ Claude will:
 **Prompt:** "Create Zod schemas for a REST API with request validation and response parsing. Include pagination parameters, filters, and error handling."
 
 Claude will:
+
 1. Define request body schemas
 2. Create query parameter validators
 3. Add response schema with safeParse
@@ -185,6 +192,7 @@ Claude will:
 **Prompt:** "Build a Zod schema for order validation where: if payment method is 'credit_card', require card details; if 'paypal', require email; shipping date must be after today; total must match items sum."
 
 Claude will:
+
 1. Use discriminated unions for payment methods
 2. Add conditional validation with refine()
 3. Implement cross-field validation
@@ -210,6 +218,7 @@ Claude will:
 ## Common Workflows
 
 ### E-Commerce Checkout Validation
+
 ```
 "Create complete Zod validation for checkout flow:
 1. Customer info: email, phone, billing address
@@ -222,6 +231,7 @@ Claude will:
 ```
 
 ### API Gateway Validation Layer
+
 ```
 "Build API validation middleware with Zod:
 1. Validate request headers (auth token, content-type)
@@ -234,6 +244,7 @@ Claude will:
 ```
 
 ### Database Input Sanitization
+
 ```
 "Create Zod schemas for database operations:
 1. User input sanitization before INSERT
@@ -246,6 +257,7 @@ Claude will:
 ```
 
 ### File Upload Validation
+
 ```
 "Build file upload validator with Zod:
 1. Validate MIME types (images: PNG, JPG, WebP)

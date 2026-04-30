@@ -1,0 +1,14 @@
+---
+description: "Create validated HeyClaude submission drafts with MCP-assisted schema checks, brand metadata, source URLs, SEO fields, and issue-first review notes."
+globs:
+alwaysApply: false
+---
+# HeyClaude Content Submission Factory
+Prepare complete, source-backed HeyClaude content submissions for agents, MCP servers, tools, skills, rules, commands, hooks, guides, collections, and statuslines.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/heyclaude-content-submission-factory.zip -o heyclaude-content-submission-factory.zip && unzip -o heyclaude-content-submission-factory.zip -d ./heyclaude-content-submission-factory
+```
+## Source
+https://heyclau.de/downloads/skills/heyclaude-content-submission-factory.zip

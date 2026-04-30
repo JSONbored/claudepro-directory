@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 import matter from "gray-matter";
+import prettier from "prettier";
 
 import {
   CATEGORY_SCHEMAS,
@@ -10,8 +11,8 @@ import {
   inferSectionBooleans,
   inferStructuredFields,
   normalizeBody,
-  validateEntry
-} from "./content-schema.mjs";
+  validateEntry,
+} from "@heyclaude/registry/content-schema";
 
 const repoRoot = process.cwd();
 const contentRoot = path.join(repoRoot, "content");
@@ -30,7 +31,11 @@ for (const category of Object.keys(CATEGORY_SCHEMAS)) {
     const source = fs.readFileSync(filePath, "utf8");
     const parsed = matter(source);
     const normalizedBody = normalizeBody(parsed.content, category);
-    const inferred = inferStructuredFields(parsed.data, normalizedBody, category);
+    const inferred = inferStructuredFields(
+      parsed.data,
+      normalizedBody,
+      category,
+    );
     const validation = validateEntry(category, parsed.data, inferred);
     const sectionFlags = inferSectionBooleans(normalizedBody);
     const issues = [];
@@ -43,7 +48,33 @@ for (const category of Object.keys(CATEGORY_SCHEMAS)) {
       issues.push("description_too_long");
     }
 
-    if (parsed.data.category && String(parsed.data.category).trim() !== category) {
+    if (!String(parsed.data.seoTitle ?? "").trim()) {
+      issues.push("missing_seoTitle");
+    }
+
+    if (!String(parsed.data.seoDescription ?? "").trim()) {
+      issues.push("missing_seoDescription");
+    }
+
+    if (
+      !Array.isArray(parsed.data.keywords) ||
+      parsed.data.keywords.length === 0
+    ) {
+      issues.push("missing_keywords");
+    }
+
+    if (/claudepro\.directory|Claude Pro Directory/i.test(source)) {
+      issues.push("old_brand_or_domain_reference");
+    }
+
+    if (/\[Script content from first example\]/.test(source)) {
+      issues.push("placeholder_script_marker");
+    }
+
+    if (
+      parsed.data.category &&
+      String(parsed.data.category).trim() !== category
+    ) {
       issues.push("category_mismatch");
     }
 
@@ -69,11 +100,17 @@ for (const category of Object.keys(CATEGORY_SCHEMAS)) {
       issues.push("collection_copy_snippet_present");
     }
 
-    if (parsed.data.hasPrerequisites === false && sectionFlags.hasPrerequisites) {
+    if (
+      parsed.data.hasPrerequisites === false &&
+      sectionFlags.hasPrerequisites
+    ) {
       issues.push("hasPrerequisites_false_but_section_exists");
     }
 
-    if (parsed.data.hasTroubleshooting === false && sectionFlags.hasTroubleshooting) {
+    if (
+      parsed.data.hasTroubleshooting === false &&
+      sectionFlags.hasTroubleshooting
+    ) {
       issues.push("hasTroubleshooting_false_but_section_exists");
     }
 
@@ -81,18 +118,30 @@ for (const category of Object.keys(CATEGORY_SCHEMAS)) {
       category,
       filePath: path.relative(repoRoot, filePath),
       slug: String(parsed.data.slug ?? fileName.replace(/\.mdx$/, "")),
+      sourceType:
+        String(parsed.data.repoUrl ?? "").trim() ||
+        String(parsed.data.documentationUrl ?? "").trim()
+          ? "external"
+          : "first_party",
       metadataOnly: !normalizedBody.trim(),
       missingRequired: validation.missingRequired,
       missingRecommended: validation.missingRecommended,
-      issues
+      issues,
     });
   }
 }
 
-fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`);
+fs.writeFileSync(
+  reportPath,
+  await prettier.format(JSON.stringify(report), { parser: "json" }),
+);
 
-const requiredIssues = report.filter((item) => item.missingRequired.length > 0).length;
-const recommendedIssues = report.filter((item) => item.missingRecommended.length > 0).length;
+const requiredIssues = report.filter(
+  (item) => item.missingRequired.length > 0,
+).length;
+const recommendedIssues = report.filter(
+  (item) => item.missingRecommended.length > 0,
+).length;
 const metadataOnly = report.filter((item) => item.metadataOnly).length;
 const semanticIssues = report.filter((item) => item.issues.length > 0).length;
 

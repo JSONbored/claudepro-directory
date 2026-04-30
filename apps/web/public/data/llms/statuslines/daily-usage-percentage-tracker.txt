@@ -1,0 +1,508 @@
+# Daily Usage Percentage Tracker - Statuslines
+URL: https://heyclau.de/statuslines/daily-usage-percentage-tracker
+Category: statuslines
+Author: JSONbored
+Date added: 2025-10-25
+Documentation: https://docs.claude.com/en/docs/claude-code/statusline
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/daily-usage-percentage-tracker.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/statuslines/daily-usage-percentage-tracker
+- Source URLs: https://docs.claude.com/en/docs/claude-code/statusline, https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/daily-usage-percentage-tracker.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
+## Summary
+Claude Code daily usage quota tracker showing percentage of daily limit consumed with visual progress bar, time remaining, and budget pacing indicators.
+## Tags
+- daily-limit
+- quota-tracking
+- usage-percentage
+- budget-pacing
+- limit-monitoring
+## Content
+## Features
+- Daily usage quota tracking against configurable budget limit (default $10/day)
+- Percentage of daily limit consumed with visual 20-char progress bar
+- Remaining budget calculation updated in real-time
+- Budget pacing indicator comparing actual vs expected usage by hour
+- Automatic daily reset at midnight (date-based tracking files)
+- Color-coded status (green <50%, yellow 50-80%, orange 80-100%, red >100%)
+- Overflow detection and warnings when exceeding daily budget
+- Persistent usage storage per day in ~/.claude-code-usage
+
+## Use Cases
+- Budget management for daily Claude Code spending limits
+- Preventing unexpected overspending with real-time alerts
+- Tracking usage pacing throughout the day
+- Setting and monitoring daily cost budgets
+- Team cost allocation per developer per day
+- Identifying days with abnormally high usage for analysis
+
+## Requirements
+- Claude Code CLI installed and configured
+- Bash shell available (bash 4.0+ recommended for arithmetic operations)
+- jq command-line JSON processor (jq 1.6+ recommended for safe extraction with // defaults)
+- bc calculator (bc 1.07+ required for floating point calculations - script will fail without bc)
+- Terminal with ANSI color code support (256-color mode recommended for color-coded usage indicators)
+- Write access to home directory (~/.claude-code-usage) for persistent daily usage tracking files
+
+## Configuration
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/daily-usage-percentage-tracker.sh",
+    "refreshInterval": 2000
+  }
+}
+```
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/daily-usage-percentage-tracker.sh",
+    "refreshInterval": 2000
+  }
+}
+```
+
+## Examples
+### Enhanced Daily Usage Tracker with Session Deduplication
+
+Extended version with session ID tracking to prevent duplicate cost additions
+
+```bash
+#!/usr/bin/env bash
+
+# Enhanced Daily Usage Tracker with Session Deduplication
+
+input=$(cat)
+
+session_cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
+session_id=$(echo "$input" | jq -r '.session_id // ""')
+
+USAGE_DIR="${HOME}/.claude-code-usage"
+mkdir -p "$USAGE_DIR"
+
+current_date=$(date +%Y-%m-%d)
+USAGE_FILE="${USAGE_DIR}/daily-${current_date}.usage"
+SESSION_FILE="${USAGE_DIR}/daily-${current_date}.sessions"
+
+# Initialize files if don't exist
+if [ ! -f "$USAGE_FILE" ]; then
+  echo "0" > "$USAGE_FILE"
+fi
+
+if [ ! -f "$SESSION_FILE" ]; then
+  touch "$SESSION_FILE"
+fi
+
+# Check if session already tracked
+if [ -n "$session_id" ] && grep -q "^$session_id:" "$SESSION_FILE" 2>/dev/null; then
+  # Session already tracked, don't add again
+  daily_usage=$(cat "$USAGE_FILE")
+else
+  # New session, add cost and track session
+  daily_usage=$(cat "$USAGE_FILE")
+  updated_usage=$(echo "$daily_usage + $session_cost" | bc 2>/dev/null || echo "$daily_usage")
+  echo "$updated_usage" > "$USAGE_FILE"
+
+  if [ -n "$session_id" ]; then
+    echo "$session_id:$session_cost" >> "$SESSION_FILE"
+  fi
+fi
+
+DAILY_LIMIT=${DAILY_USAGE_LIMIT:-10.00}
+
+if (( $(echo "$DAILY_LIMIT > 0" | bc -l 2>/dev/null || echo "0") )); then
+  usage_percentage=$(echo "scale=1; ($daily_usage * 100) / $DAILY_LIMIT" | bc 2>/dev/null || echo "0")
+else
+  usage_percentage=0
+fi
+
+usage_percentage_int=$(echo "$usage_percentage / 1" | bc 2>/dev/null || echo "0")
+
+if [ $usage_percentage_int -lt 50 ]; then
+  USAGE_COLOR="\033[38;5;46m"
+  USAGE_ICON="✓"
+elif [ $usage_percentage_int -lt 80 ]; then
+  USAGE_COLOR="\033[38;5;226m"
+  USAGE_ICON="⚠"
+elif [ $usage_percentage_int -lt 100 ]; then
+  USAGE_COLOR="\033[38;5;208m"
+  USAGE_ICON="⏰"
+else
+  USAGE_COLOR="\033[38;5;196m"
+  USAGE_ICON="✗"
+fi
+
+bar_filled=$((usage_percentage_int / 5))
+bar_empty=$((20 - bar_filled))
+
+if [ $bar_filled -gt 0 ]; then
+  bar=$(printf "█%.0s" $(seq 1 $bar_filled))$(printf "░%.0s" $(seq 1 $bar_empty))
+else
+  bar="░░░░░░░░░░░░░░░░░░░░"
+fi
+
+remaining=$(echo "$DAILY_LIMIT - $daily_usage" | bc 2>/dev/null || echo "$DAILY_LIMIT")
+
+if (( $(echo "$remaining > 0" | bc -l 2>/dev/null || echo "0") )); then
+  remaining_display="$${remaining} left"
+else
+  remaining_display="$0.00 left"
+fi
+
+RESET="\033[0m"
+
+echo -e "${USAGE_ICON} Daily: ${USAGE_COLOR}${bar}${RESET} ${usage_percentage}% | ${remaining_display}"
+```
+
+### Daily Usage Tracker with Custom Budget Limit
+
+Configurable daily budget limit via environment variable
+
+```bash
+#!/usr/bin/env bash
+
+# Daily Usage Tracker with Custom Budget Limit
+
+DAILY_LIMIT=${DAILY_USAGE_LIMIT:-10.00}
+
+input=$(cat)
+
+session_cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
+
+USAGE_DIR="${HOME}/.claude-code-usage"
+mkdir -p "$USAGE_DIR"
+
+current_date=$(date +%Y-%m-%d)
+USAGE_FILE="${USAGE_DIR}/daily-${current_date}.usage"
+
+if [ ! -f "$USAGE_FILE" ]; then
+  echo "0" > "$USAGE_FILE"
+fi
+
+daily_usage=$(cat "$USAGE_FILE" 2>/dev/null || echo "0")
+updated_usage=$(echo "$daily_usage + $session_cost" | bc 2>/dev/null || echo "$daily_usage")
+echo "$updated_usage" > "$USAGE_FILE"
+
+if (( $(echo "$DAILY_LIMIT > 0" | bc -l 2>/dev/null || echo "0") )); then
+  usage_percentage=$(echo "scale=1; ($updated_usage * 100) / $DAILY_LIMIT" | bc 2>/dev/null || echo "0")
+else
+  usage_percentage=0
+fi
+
+usage_percentage_int=$(echo "$usage_percentage / 1" | bc 2>/dev/null || echo "0")
+
+if [ $usage_percentage_int -lt 50 ]; then
+  USAGE_COLOR="\033[38;5;46m"
+  USAGE_ICON="✓"
+elif [ $usage_percentage_int -lt 80 ]; then
+  USAGE_COLOR="\033[38;5;226m"
+  USAGE_ICON="⚠"
+elif [ $usage_percentage_int -lt 100 ]; then
+  USAGE_COLOR="\033[38;5;208m"
+  USAGE_ICON="⏰"
+else
+  USAGE_COLOR="\033[38;5;196m"
+  USAGE_ICON="✗"
+fi
+
+bar_filled=$((usage_percentage_int / 5))
+bar_empty=$((20 - bar_filled))
+
+if [ $bar_filled -gt 0 ]; then
+  bar=$(printf "█%.0s" $(seq 1 $bar_filled))$(printf "░%.0s" $(seq 1 $bar_empty))
+else
+  bar="░░░░░░░░░░░░░░░░░░░░"
+fi
+
+remaining=$(echo "$DAILY_LIMIT - $updated_usage" | bc 2>/dev/null || echo "$DAILY_LIMIT")
+
+if (( $(echo "$remaining > 0" | bc -l 2>/dev/null || echo "0") )); then
+  remaining_display="$${remaining} left"
+else
+  remaining_display="$0.00 left"
+fi
+
+RESET="\033[0m"
+
+echo -e "${USAGE_ICON} Daily: ${USAGE_COLOR}${bar}${RESET} ${usage_percentage}% | ${remaining_display} (limit: $${DAILY_LIMIT})"
+```
+
+### Daily Usage Percentage Tracker Installation Example
+
+Complete setup script with usage directory creation and bc verification
+
+```bash
+#!/bin/bash
+# Installation script for Daily Usage Percentage Tracker
+
+mkdir -p .claude/statuslines
+
+# Check for bc (required for floating point calculations)
+if ! command -v bc &> /dev/null; then
+  echo "Installing bc for floating point calculations..."
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    brew install bc
+  elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    sudo apt-get install -y bc || sudo yum install -y bc
+  else
+    echo "Please install bc manually: https://www.gnu.org/software/bc/"
+  fi
+fi
+
+# Create usage directory
+mkdir -p ~/.claude-code-usage
+
+echo "Usage directory created: ~/.claude-code-usage"
+
+cat > .claude/statuslines/daily-usage-percentage-tracker.sh << 'SCRIPT_EOF'
+#!/usr/bin/env bash
+# Paste the full statusline script from the primary example above before running this installer.
+SCRIPT_EOF
+
+chmod +x .claude/statuslines/daily-usage-percentage-tracker.sh
+
+# Add to settings.json
+if [ ! -f .claude/settings.json ]; then
+  echo '{"statusLine":{"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/daily-usage-percentage-tracker.sh","refreshInterval":2000}}' > .claude/settings.json
+else
+  jq '.statusLine = {"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/daily-usage-percentage-tracker.sh","refreshInterval":2000}' .claude/settings.json > .claude/settings.json.tmp
+  mv .claude/settings.json.tmp .claude/settings.json
+fi
+
+echo "Daily Usage Percentage Tracker installed successfully!"
+echo "Note: Set custom daily limit: export DAILY_USAGE_LIMIT=25.00 (default: $10/day)"
+echo "Usage files stored in: ~/.claude-code-usage/"
+```
+```bash
+#!/usr/bin/env bash
+
+# Enhanced Daily Usage Tracker with Session Deduplication
+
+input=$(cat)
+
+session_cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
+session_id=$(echo "$input" | jq -r '.session_id // ""')
+
+USAGE_DIR="${HOME}/.claude-code-usage"
+mkdir -p "$USAGE_DIR"
+
+current_date=$(date +%Y-%m-%d)
+USAGE_FILE="${USAGE_DIR}/daily-${current_date}.usage"
+SESSION_FILE="${USAGE_DIR}/daily-${current_date}.sessions"
+
+# Initialize files if don't exist
+if [ ! -f "$USAGE_FILE" ]; then
+  echo "0" > "$USAGE_FILE"
+fi
+
+if [ ! -f "$SESSION_FILE" ]; then
+  touch "$SESSION_FILE"
+fi
+
+# Check if session already tracked
+if [ -n "$session_id" ] && grep -q "^$session_id:" "$SESSION_FILE" 2>/dev/null; then
+  # Session already tracked, don't add again
+  daily_usage=$(cat "$USAGE_FILE")
+else
+  # New session, add cost and track session
+  daily_usage=$(cat "$USAGE_FILE")
+  updated_usage=$(echo "$daily_usage + $session_cost" | bc 2>/dev/null || echo "$daily_usage")
+  echo "$updated_usage" > "$USAGE_FILE"
+
+  if [ -n "$session_id" ]; then
+    echo "$session_id:$session_cost" >> "$SESSION_FILE"
+  fi
+fi
+
+DAILY_LIMIT=${DAILY_USAGE_LIMIT:-10.00}
+
+if (( $(echo "$DAILY_LIMIT > 0" | bc -l 2>/dev/null || echo "0") )); then
+  usage_percentage=$(echo "scale=1; ($daily_usage * 100) / $DAILY_LIMIT" | bc 2>/dev/null || echo "0")
+else
+  usage_percentage=0
+fi
+
+usage_percentage_int=$(echo "$usage_percentage / 1" | bc 2>/dev/null || echo "0")
+
+if [ $usage_percentage_int -lt 50 ]; then
+  USAGE_COLOR="\033[38;5;46m"
+  USAGE_ICON="✓"
+elif [ $usage_percentage_int -lt 80 ]; then
+  USAGE_COLOR="\033[38;5;226m"
+  USAGE_ICON="⚠"
+elif [ $usage_percentage_int -lt 100 ]; then
+  USAGE_COLOR="\033[38;5;208m"
+  USAGE_ICON="⏰"
+else
+  USAGE_COLOR="\033[38;5;196m"
+  USAGE_ICON="✗"
+fi
+
+bar_filled=$((usage_percentage_int / 5))
+bar_empty=$((20 - bar_filled))
+
+if [ $bar_filled -gt 0 ]; then
+  bar=$(printf "█%.0s" $(seq 1 $bar_filled))$(printf "░%.0s" $(seq 1 $bar_empty))
+else
+  bar="░░░░░░░░░░░░░░░░░░░░"
+fi
+
+remaining=$(echo "$DAILY_LIMIT - $daily_usage" | bc 2>/dev/null || echo "$DAILY_LIMIT")
+
+if (( $(echo "$remaining > 0" | bc -l 2>/dev/null || echo "0") )); then
+  remaining_display="$${remaining} left"
+else
+  remaining_display="$0.00 left"
+fi
+
+RESET="\033[0m"
+
+echo -e "${USAGE_ICON} Daily: ${USAGE_COLOR}${bar}${RESET} ${usage_percentage}% | ${remaining_display}"
+```
+```bash
+#!/usr/bin/env bash
+
+# Daily Usage Tracker with Custom Budget Limit
+
+DAILY_LIMIT=${DAILY_USAGE_LIMIT:-10.00}
+
+input=$(cat)
+
+session_cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
+
+USAGE_DIR="${HOME}/.claude-code-usage"
+mkdir -p "$USAGE_DIR"
+
+current_date=$(date +%Y-%m-%d)
+USAGE_FILE="${USAGE_DIR}/daily-${current_date}.usage"
+
+if [ ! -f "$USAGE_FILE" ]; then
+  echo "0" > "$USAGE_FILE"
+fi
+
+daily_usage=$(cat "$USAGE_FILE" 2>/dev/null || echo "0")
+updated_usage=$(echo "$daily_usage + $session_cost" | bc 2>/dev/null || echo "$daily_usage")
+echo "$updated_usage" > "$USAGE_FILE"
+
+if (( $(echo "$DAILY_LIMIT > 0" | bc -l 2>/dev/null || echo "0") )); then
+  usage_percentage=$(echo "scale=1; ($updated_usage * 100) / $DAILY_LIMIT" | bc 2>/dev/null || echo "0")
+else
+  usage_percentage=0
+fi
+
+usage_percentage_int=$(echo "$usage_percentage / 1" | bc 2>/dev/null || echo "0")
+
+if [ $usage_percentage_int -lt 50 ]; then
+  USAGE_COLOR="\033[38;5;46m"
+  USAGE_ICON="✓"
+elif [ $usage_percentage_int -lt 80 ]; then
+  USAGE_COLOR="\033[38;5;226m"
+  USAGE_ICON="⚠"
+elif [ $usage_percentage_int -lt 100 ]; then
+  USAGE_COLOR="\033[38;5;208m"
+  USAGE_ICON="⏰"
+else
+  USAGE_COLOR="\033[38;5;196m"
+  USAGE_ICON="✗"
+fi
+
+bar_filled=$((usage_percentage_int / 5))
+bar_empty=$((20 - bar_filled))
+
+if [ $bar_filled -gt 0 ]; then
+  bar=$(printf "█%.0s" $(seq 1 $bar_filled))$(printf "░%.0s" $(seq 1 $bar_empty))
+else
+  bar="░░░░░░░░░░░░░░░░░░░░"
+fi
+
+remaining=$(echo "$DAILY_LIMIT - $updated_usage" | bc 2>/dev/null || echo "$DAILY_LIMIT")
+
+if (( $(echo "$remaining > 0" | bc -l 2>/dev/null || echo "0") )); then
+  remaining_display="$${remaining} left"
+else
+  remaining_display="$0.00 left"
+fi
+
+RESET="\033[0m"
+
+echo -e "${USAGE_ICON} Daily: ${USAGE_COLOR}${bar}${RESET} ${usage_percentage}% | ${remaining_display} (limit: $${DAILY_LIMIT})"
+```
+```bash
+#!/bin/bash
+# Installation script for Daily Usage Percentage Tracker
+
+mkdir -p .claude/statuslines
+
+# Check for bc (required for floating point calculations)
+if ! command -v bc &> /dev/null; then
+  echo "Installing bc for floating point calculations..."
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    brew install bc
+  elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    sudo apt-get install -y bc || sudo yum install -y bc
+  else
+    echo "Please install bc manually: https://www.gnu.org/software/bc/"
+  fi
+fi
+
+# Create usage directory
+mkdir -p ~/.claude-code-usage
+
+echo "Usage directory created: ~/.claude-code-usage"
+
+cat > .claude/statuslines/daily-usage-percentage-tracker.sh << 'SCRIPT_EOF'
+#!/usr/bin/env bash
+# Paste the full statusline script from the primary example above before running this installer.
+SCRIPT_EOF
+
+chmod +x .claude/statuslines/daily-usage-percentage-tracker.sh
+
+# Add to settings.json
+if [ ! -f .claude/settings.json ]; then
+  echo '{"statusLine":{"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/daily-usage-percentage-tracker.sh","refreshInterval":2000}}' > .claude/settings.json
+else
+  jq '.statusLine = {"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/daily-usage-percentage-tracker.sh","refreshInterval":2000}' .claude/settings.json > .claude/settings.json.tmp
+  mv .claude/settings.json.tmp .claude/settings.json
+fi
+
+echo "Daily Usage Percentage Tracker installed successfully!"
+echo "Note: Set custom daily limit: export DAILY_USAGE_LIMIT=25.00 (default: $10/day)"
+echo "Usage files stored in: ~/.claude-code-usage/"
+```
+
+## Troubleshooting
+### Usage percentage not updating or stuck at 0%
+
+Verify cost.total_cost_usd field exists: echo '$input' | jq .cost.total_cost_usd. Check usage file exists: cat ~/.claude-code-usage/daily-$(date +%Y-%m-%d).usage. Ensure bc is installed: which bc. Script uses simple addition - may need session deduplication for accuracy across multiple statusline updates. Verify file is writable: touch ~/.claude-code-usage/test && rm ~/.claude-code-usage/test.
+
+### Daily limit showing OVER BUDGET when under actual budget
+
+Default DAILY_LIMIT is $10.00. Configure your actual limit in script: DAILY_LIMIT=25.00 (for $25/day budget) or export DAILY_USAGE_LIMIT=25.00. Verify limit calculation: usage_percentage = (updated_usage * 100) / DAILY_LIMIT. Check usage file value matches expected spending: cat ~/.claude-code-usage/daily-$(date +%Y-%m-%d).usage.
+
+### Usage not resetting at midnight
+
+Script uses date-based filenames: daily-YYYY-MM-DD.usage. Each new day creates new file automatically. Old files remain for history. Check current file: ls ~/.claude-code-usage/daily-\*.usage. If date command timezone incorrect, reset may occur at wrong time. Verify: date +%Y-%m-%d. Check system timezone: timedatectl (Linux) or systemsetup -gettimezone (macOS).
+
+### Pacing indicator showing incorrect ahead/below pace status
+
+Pacing compares actual usage % vs expected % based on hours elapsed. Formula: expected = (24 - hours_remaining) \* 100 / 24. At noon (12 hours), expected is 50%. If actual usage is 40%, shows 'below pace'. Adjust logic if you have non-24-hour daily windows. Verify current_hour calculation: date +%H. Check hours_remaining calculation: hours_remaining=$((24 - current_hour)).
+
+### Remaining budget showing negative or incorrect values
+
+Remaining = DAILY_LIMIT - updated_usage. If negative, script displays '$0.00 left' and OVER BUDGET status. Verify DAILY_LIMIT setting matches your actual budget. Check updated_usage calculation: cat ~/.claude-code-usage/daily-$(date +%Y-%m-%d).usage. bc arithmetic: echo '$DAILY_LIMIT - $updated_usage' | bc. Ensure bc is working: echo '10.00 - 4.50' | bc (should return 5.50).
+
+### Multiple sessions causing duplicate cost additions
+
+Script adds session_cost every update - can over-count if same session updates multiple times. For accuracy, track by unique session_id and update (don't add) session totals. Use enhanced version with session deduplication. Alternative: integrate with official usage API if available. Current implementation optimized for real-time awareness, not perfect accounting. Check session_id exists: echo '$input' | jq .session_id.
+
+### Progress bar showing all filled or all empty incorrectly
+
+Verify usage_percentage calculation: usage_percentage=$(echo "scale=1; ($updated_usage \* 100) / $DAILY_LIMIT" | bc). Check bar_filled calculation: bar_filled=$((usage_percentage_int / 5)) (each char = 5%). Test: usage=50%; bar_filled=$((50 / 5)); echo $bar_filled (should be 10). Verify Unicode block characters work: echo '█░'.
+
+### Usage file not being created or permission denied
+
+Check home directory writable: touch ~/test && rm ~/test. Verify ~/.claude-code-usage directory exists: mkdir -p ~/.claude-code-usage. Check directory permissions: ls -ld ~/.claude-code-usage. Ensure script has permission to create files: touch ~/.claude-code-usage/test && rm ~/.claude-code-usage/test. Check disk space: df -h ~.

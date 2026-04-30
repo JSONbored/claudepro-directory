@@ -2,7 +2,7 @@
 name: Submit entry
 about: Propose a new tool, MCP server, skill, agent, rule, guide, hook, command, collection, or statusline for HeyClaude.
 title: "Submit: "
-labels: ["submission"]
+labels: ["content-submission"]
 assignees: []
 ---
 
@@ -13,7 +13,7 @@ assignees: []
 - GitHub URL:
 - Docs URL:
 - Install / usage:
-- Contact email:
+- Public contact:
 - Tags:
 
 ## What it does

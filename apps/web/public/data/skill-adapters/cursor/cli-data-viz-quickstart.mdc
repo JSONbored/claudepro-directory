@@ -1,0 +1,14 @@
+---
+description: "Create publication-ready charts and visualizations from CSV, JSON, and Excel data using Python (matplotlib/seaborn) or Node.js (vega/vega..."
+globs:
+alwaysApply: false
+---
+# CLI Data Visualization Quickstart Skill
+Create publication-ready charts and visualizations from CSV, JSON, and Excel data using Python (matplotlib/seaborn) or Node.js (vega/vega-lite). Generate bar charts, line plots, scatter plots, heatmaps, and statistical visualizations with custom styling.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+npm i vega vega-lite
+```
+## Source
+https://heyclau.de/downloads/skills/cli-data-viz-quickstart.zip

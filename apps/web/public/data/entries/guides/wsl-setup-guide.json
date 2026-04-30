@@ -1,0 +1,236 @@
+{
+  "schemaVersion": 1,
+  "key": "guides:wsl-setup-guide",
+  "entry": {
+    "category": "guides",
+    "slug": "wsl-setup-guide",
+    "title": "Claude Code WSL Setup 2025",
+    "description": "Complete Claude Code WSL2 installation tutorial in 30 minutes. Configure Node.js, resolve PATH conflicts, and optimize Windows development performance.",
+    "seoTitle": "Claude Code WSL Setup 2025",
+    "seoDescription": "Complete Claude Code WSL2 installation tutorial in 30 minutes. Configure Node.js, resolve PATH conflicts, and optimize Windows development performance.",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2025-10-27",
+    "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+    "tags": [
+      "tutorial",
+      "intermediate",
+      "wsl",
+      "windows"
+    ],
+    "keywords": [
+      "claude wsl setup",
+      "windows claude code",
+      "wsl developer setup",
+      "claude windows workflow",
+      "tutorial",
+      "intermediate",
+      "wsl",
+      "windows",
+      "guides",
+      "claude",
+      "heyclaude",
+      "claude code wsl setup 2025"
+    ],
+    "readingTime": 3,
+    "difficultyScore": 60,
+    "cardDescription": "Complete Claude Code WSL2 installation tutorial in 30 minutes.",
+    "installable": false,
+    "usageSnippet": "This tutorial teaches you to configure Claude Code on Windows Subsystem for Linux in 30 minutes. You'll learn WSL2 installation, Node.js environment setup, and PATH conflict resolution. Perfect for Windows developers who want optimal Claude Code performance without switching operating systems.",
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## TL;DR\n\nThis tutorial teaches you to configure Claude Code on Windows Subsystem for Linux in 30 minutes. You'll learn WSL2 installation, Node.js environment setup, and PATH conflict resolution. Perfect for Windows developers who want optimal Claude Code performance without switching operating systems.\n\n**Key Points:**\n\n- WSL2 setup with Ubuntu 22.04 LTS - reduces errors by 80%\n- Node.js configuration through NVM - eliminates permission issues\n- PATH management strategies - improves performance by 3-5x\n- 30 minutes total with 8 hands-on configuration steps\n\nMaster Claude Code installation on Windows through proper WSL2 configuration. By completion, you'll have a fully functional Claude Code environment with optimized performance. This guide includes 5 practical examples, 12 code samples, and 4 real-world troubleshooting scenarios.\n\n> **Prerequisites Check**\n>\n> Windows 10 Build 18362.1049+ or Windows 11, 8GB RAM minimum, virtualization enabled in BIOS, administrator access for installation. Verify requirements before starting.\n\n## What You'll Achieve\n\n<!-- Section type: feature_grid -->\n\n## Step 1: Install and Configure WSL2\n\n1. **Enable Virtualization in BIOS**\n\n2. **Install WSL2 with Ubuntu**\n\n3. **Configure WSL2 Settings**\n\n4. **Create Memory Configuration**\n\n> **Common Installation Error**\n>\n> **Error: WslRegisterDistribution failed with error: 0x80370114**  \n> **Solution:** Enable Virtual Machine Platform feature. Run `dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart` in PowerShell as Administrator.\n\n## Step 2: Configure Node.js Environment\n\n1. **Install NVM in Ubuntu**\n\n2. **Install Node.js 20 LTS**\n\n3. **Configure NPM Global Directory**\n\n4. **Install Build Tools**\n\n## Step 3: Install Claude Code\n\n1. **Install Claude Code Package**\n\n2. **Run Diagnostic Check**\n\n3. **Configure Authentication**\n\n## Step 4: Configure IDE Integration\n\n<!-- Section type: tabs -->\n\n## Step 5: Optimize Performance\n\n1. **Configure Windows Defender Exclusions**\n\n2. **Optimize File System Usage**\n\n3. **Configure Git for Dual Systems**\n\n## Troubleshooting Common Issues\n\n<!-- Section type: accordion -->\n\n## Verification Checklist\n\n> **Installation Verification Steps**\n>\n> Run these commands to confirm successful setup. All should complete without errors.\n\n<!-- Section type: code_group -->\n\n## Best Practices Summary\n\n<!-- Section type: quick_reference -->\n\n## Advanced Techniques\n\n> **Professional Tips**\n>\n> **Performance Optimization:** Use Linux filesystem exclusively for 20x speed improvement. Projects in ~/dev run faster than /mnt/c/.\n>\n> **Security Best Practice:** Always configure npm to use user directories. Never use sudo with npm installations.\n>\n> **Scalability Pattern:** For teams, create shared .wslconfig templates. Standardize configurations across developer machines.\n\n## Next Steps\n\n<!-- Section type: tabs -->\n\n## Frequently Asked Questions\n\n## Quick Reference\n\n<!-- Section type: quick_reference -->\n\n## Related Learning Resources\n\n<!-- Section type: related_content -->\n\n> **Tutorial Complete!**\n>\n> **Congratulations!** You've mastered Claude Code WSL setup and can now develop efficiently on Windows.\n>\n> **What you achieved:**\n>\n> - ✅ WSL2 with Ubuntu 22.04 fully configured\n> - ✅ Node.js environment with proper permissions\n> - ✅ Claude Code running at optimal performance\n>\n> **Ready for more?** Explore our [tutorials collection](/guides/tutorials) or join our [community](/community) to share your setup and get help with advanced configurations.\n\n_Last updated: September 2025 | Found this helpful? Share it with your team and explore more [Claude tutorials](/guides/tutorials)._",
+    "sections": [
+      {
+        "title": "TL;DR",
+        "id": "tldr",
+        "markdown": "This tutorial teaches you to configure Claude Code on Windows Subsystem for Linux in 30 minutes. You'll learn WSL2 installation, Node.js environment setup, and PATH conflict resolution. Perfect for Windows developers who want optimal Claude Code performance without switching operating systems.\n\n**Key Points:**\n\n- WSL2 setup with Ubuntu 22.04 LTS - reduces errors by 80%\n- Node.js configuration through NVM - eliminates permission issues\n- PATH management strategies - improves performance by 3-5x\n- 30 minutes total with 8 hands-on configuration steps\n\nMaster Claude Code installation on Windows through proper WSL2 configuration. By completion, you'll have a fully functional Claude Code environment with optimized performance. This guide includes 5 practical examples, 12 code samples, and 4 real-world troubleshooting scenarios.\n\n> **Prerequisites Check**\n>\n> Windows 10 Build 18362.1049+ or Windows 11, 8GB RAM minimum, virtualization enabled in BIOS, administrator access for installation. Verify requirements before starting.",
+        "codeBlocks": []
+      },
+      {
+        "title": "What You'll Achieve",
+        "id": "what-youll-achieve",
+        "markdown": "<!-- Section type: feature_grid -->",
+        "codeBlocks": []
+      },
+      {
+        "title": "Step 1: Install and Configure WSL2",
+        "id": "step-1-install-and-configure-wsl2",
+        "markdown": "1. **Enable Virtualization in BIOS**\n\n2. **Install WSL2 with Ubuntu**\n\n3. **Configure WSL2 Settings**\n\n4. **Create Memory Configuration**\n\n> **Common Installation Error**\n>\n> **Error: WslRegisterDistribution failed with error: 0x80370114**  \n> **Solution:** Enable Virtual Machine Platform feature. Run `dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart` in PowerShell as Administrator.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Step 2: Configure Node.js Environment",
+        "id": "step-2-configure-nodejs-environment",
+        "markdown": "1. **Install NVM in Ubuntu**\n\n2. **Install Node.js 20 LTS**\n\n3. **Configure NPM Global Directory**\n\n4. **Install Build Tools**",
+        "codeBlocks": []
+      },
+      {
+        "title": "Step 3: Install Claude Code",
+        "id": "step-3-install-claude-code",
+        "markdown": "1. **Install Claude Code Package**\n\n2. **Run Diagnostic Check**\n\n3. **Configure Authentication**",
+        "codeBlocks": []
+      },
+      {
+        "title": "Step 4: Configure IDE Integration",
+        "id": "step-4-configure-ide-integration",
+        "markdown": "<!-- Section type: tabs -->",
+        "codeBlocks": []
+      },
+      {
+        "title": "Step 5: Optimize Performance",
+        "id": "step-5-optimize-performance",
+        "markdown": "1. **Configure Windows Defender Exclusions**\n\n2. **Optimize File System Usage**\n\n3. **Configure Git for Dual Systems**",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting Common Issues",
+        "id": "troubleshooting-common-issues",
+        "markdown": "<!-- Section type: accordion -->",
+        "codeBlocks": []
+      },
+      {
+        "title": "Verification Checklist",
+        "id": "verification-checklist",
+        "markdown": "> **Installation Verification Steps**\n>\n> Run these commands to confirm successful setup. All should complete without errors.\n\n<!-- Section type: code_group -->",
+        "codeBlocks": []
+      },
+      {
+        "title": "Best Practices Summary",
+        "id": "best-practices-summary",
+        "markdown": "<!-- Section type: quick_reference -->",
+        "codeBlocks": []
+      },
+      {
+        "title": "Advanced Techniques",
+        "id": "advanced-techniques",
+        "markdown": "> **Professional Tips**\n>\n> **Performance Optimization:** Use Linux filesystem exclusively for 20x speed improvement. Projects in ~/dev run faster than /mnt/c/.\n>\n> **Security Best Practice:** Always configure npm to use user directories. Never use sudo with npm installations.\n>\n> **Scalability Pattern:** For teams, create shared .wslconfig templates. Standardize configurations across developer machines.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Next Steps",
+        "id": "next-steps",
+        "markdown": "<!-- Section type: tabs -->",
+        "codeBlocks": []
+      },
+      {
+        "title": "Quick Reference",
+        "id": "quick-reference",
+        "markdown": "<!-- Section type: quick_reference -->",
+        "codeBlocks": []
+      },
+      {
+        "title": "Related Learning Resources",
+        "id": "related-learning-resources",
+        "markdown": "<!-- Section type: related_content -->\n\n> **Tutorial Complete!**\n>\n> **Congratulations!** You've mastered Claude Code WSL setup and can now develop efficiently on Windows.\n>\n> **What you achieved:**\n>\n> - ✅ WSL2 with Ubuntu 22.04 fully configured\n> - ✅ Node.js environment with proper permissions\n> - ✅ Claude Code running at optimal performance\n>\n> **Ready for more?** Explore our [tutorials collection](/guides/tutorials) or join our [community](/community) to share your setup and get help with advanced configurations.\n\n_Last updated: September 2025 | Found this helpful? Share it with your team and explore more [Claude tutorials](/guides/tutorials)._",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "TL;DR",
+        "id": "tldr"
+      },
+      {
+        "depth": 2,
+        "text": "What You'll Achieve",
+        "id": "what-youll-achieve"
+      },
+      {
+        "depth": 2,
+        "text": "Step 1: Install and Configure WSL2",
+        "id": "step-1-install-and-configure-wsl2"
+      },
+      {
+        "depth": 2,
+        "text": "Step 2: Configure Node.js Environment",
+        "id": "step-2-configure-nodejs-environment"
+      },
+      {
+        "depth": 2,
+        "text": "Step 3: Install Claude Code",
+        "id": "step-3-install-claude-code"
+      },
+      {
+        "depth": 2,
+        "text": "Step 4: Configure IDE Integration",
+        "id": "step-4-configure-ide-integration"
+      },
+      {
+        "depth": 2,
+        "text": "Step 5: Optimize Performance",
+        "id": "step-5-optimize-performance"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting Common Issues",
+        "id": "troubleshooting-common-issues"
+      },
+      {
+        "depth": 2,
+        "text": "Verification Checklist",
+        "id": "verification-checklist"
+      },
+      {
+        "depth": 2,
+        "text": "Best Practices Summary",
+        "id": "best-practices-summary"
+      },
+      {
+        "depth": 2,
+        "text": "Advanced Techniques",
+        "id": "advanced-techniques"
+      },
+      {
+        "depth": 2,
+        "text": "Next Steps",
+        "id": "next-steps"
+      },
+      {
+        "depth": 2,
+        "text": "Frequently Asked Questions",
+        "id": "frequently-asked-questions"
+      },
+      {
+        "depth": 2,
+        "text": "Quick Reference",
+        "id": "quick-reference"
+      },
+      {
+        "depth": 2,
+        "text": "Related Learning Resources",
+        "id": "related-learning-resources"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/guides/wsl-setup-guide.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/wsl-setup-guide.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 1,
+    "sourceUrls": [
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/wsl-setup-guide.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

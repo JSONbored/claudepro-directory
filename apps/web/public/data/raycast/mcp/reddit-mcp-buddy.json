@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "mcp:reddit-mcp-buddy",
+  "category": "mcp",
+  "slug": "reddit-mcp-buddy",
+  "title": "Reddit MCP Buddy for Claude",
+  "author": "karanb192",
+  "brandName": "Reddit",
+  "brandDomain": "reddit.com",
+  "brandIconUrl": "/api/brand-assets/icon/reddit.com",
+  "brandAssetSource": "brandfetch",
+  "copyText": "Install:\nclaude mcp add reddit-buddy -- npx reddit-mcp-buddy && claude mcp list\n\nConfig:\n{\n  \"reddit\": {\n    \"args\": [\n      \"reddit-mcp-buddy\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n\nUsage:\n{\n  \"reddit\": {\n    \"args\": [\n      \"reddit-mcp-buddy\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
+  "detailMarkdown": "# Reddit MCP Buddy for Claude\n\nBrowse Reddit, search posts, and analyze user activity directly from Claude - no API keys required\n\n## Install\n```bash\nclaude mcp add reddit-buddy -- npx reddit-mcp-buddy && claude mcp list\n```\n\n## Config\n```json\n{\n  \"reddit\": {\n    \"args\": [\n      \"reddit-mcp-buddy\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n```\n\n## Usage\nclaude mcp add reddit-buddy -- npx reddit-mcp-buddy && claude mcp list",
+  "webUrl": "https://heyclau.de/mcp/reddit-mcp-buddy",
+  "canonicalUrl": "https://heyclau.de/mcp/reddit-mcp-buddy",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/reddit-mcp-buddy.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/reddit-mcp-buddy",
+  "seoTitle": "Reddit MCP Buddy for Claude",
+  "seoDescription": "Browse Reddit, search posts, and analyze user activity directly from Claude - no API keys required Discover tools for AI development.",
+  "repoUrl": "https://github.com/karanb192/reddit-mcp-buddy",
+  "documentationUrl": "https://github.com/karanb192/reddit-mcp-buddy"
+}

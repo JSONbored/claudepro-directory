@@ -13,9 +13,9 @@ seoDescription: >-
   Real-time coding velocity monitor tracking lines added/removed per minute with
   productivity scoring and daily output projection for Claude Code sessions.
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-25'
-documentationUrl: 'https://docs.claude.com/en/docs/claude-code/statusline'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-25"
+documentationUrl: "https://docs.claude.com/en/docs/claude-code/statusline"
 installable: true
 usageSnippet: "\U0001F680 HIGH: 45.3 L/min | +38.2 -7.1 | Net: +150 (growth) | \U0001F4C5 21,600 L/day"
 copySnippet: |-
@@ -77,6 +77,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Features
 
 - Real-time lines per minute calculation for added, removed, and net changes
@@ -119,8 +120,11 @@ robotsFollow: true
 ```
 
 ## Examples
+
 ### Enhanced Lines Per Minute Tracker with Session History
+
 Extended version tracking velocity trends across multiple sessions
+
 ```bash
 #!/usr/bin/env bash
 
@@ -206,8 +210,11 @@ fi
 
 echo -e "${PROD_ICON} ${PROD_RATING}: ${PROD_COLOR}${total_per_min} L/min${RESET} (avg: ${avg_total_per_min}) | +${added_per_min} -${removed_per_min} | Net: ${net_display} ${net_label} | 📅 ${daily_projection} L/day"
 ```
+
 ### Lines Per Minute Tracker with Custom Productivity Thresholds
+
 Configurable productivity thresholds for different coding styles
+
 ```bash
 #!/usr/bin/env bash
 
@@ -277,8 +284,11 @@ fi
 
 echo -e "${PROD_ICON} ${PROD_RATING}: ${PROD_COLOR}${total_per_min} L/min${RESET} | +${added_per_min} -${removed_per_min} | Net: ${net_display} ${net_label} | 📅 ${daily_projection} L/day"
 ```
+
 ### Lines Per Minute Tracker Installation Example
+
 Complete setup script with bc verification and Unicode character testing
+
 ```bash
 #!/bin/bash
 # Installation script for Lines Per Minute Tracker
@@ -405,27 +415,35 @@ echo "Customize thresholds: export LPM_HIGH_THRESHOLD=60 LPM_MED_THRESHOLD=25"
 ```
 
 ## Troubleshooting
+
 ### Lines per minute showing 0 despite active coding
 
 Verify cost.total_lines_added and cost.total_lines_removed fields exist: echo '$input' | jq .cost. Ensure bc is installed: which bc. Check duration_minutes calculation: should be total_duration_ms / 60000. Very short sessions may show 0 until threshold reached. Verify bc is working: echo '10.5 / 2' | bc (should return 5.25).
+
 ### Daily projection seems unrealistically high
 
-Daily projection assumes CONTINUOUS coding at current velocity for 8 hours (480 minutes). This is intentional for productivity goal-setting. Actual daily output will be lower with breaks, meetings, etc. Adjust multiplier from 480 to expected active coding minutes per day. Formula: daily_projection = net_per_min * active_minutes_per_day.
+Daily projection assumes CONTINUOUS coding at current velocity for 8 hours (480 minutes). This is intentional for productivity goal-setting. Actual daily output will be lower with breaks, meetings, etc. Adjust multiplier from 480 to expected active coding minutes per day. Formula: daily_projection = net_per_min \* active_minutes_per_day.
+
 ### Net lines showing negative (refactoring) when expecting growth
 
 Negative net lines means total_lines_removed > total_lines_added. This is EXPECTED for refactoring/cleanup sessions. Script correctly labels as '(refactoring)'. If unexpected, verify you're looking at correct session - multi-file refactors often have more deletions than additions. Check line counts: echo '$input' | jq '.cost | {added: .total_lines_added, removed: .total_lines_removed}'.
+
 ### Productivity rating stuck at LOW despite high activity
 
 Productivity rating is based on TOTAL changes (added + removed), not net lines. Thresholds: <20 L/min = LOW, 20-50 = MED, >50 = HIGH. Check total_per_min calculation: (lines_added + lines_removed) / duration_minutes. Adjust thresholds if your baseline velocity differs: export LPM_HIGH_THRESHOLD=60 LPM_MED_THRESHOLD=25. Verify bc comparison works: echo '25 > 20' | bc (should return 1).
+
 ### bc: command not found when calculating velocity
 
 Install bc: brew install bc (macOS), apt install bc (Linux), yum install bc (RHEL/CentOS). Alternative: use integer math with awk: awk -v added=$lines_added -v dur=$duration_minutes 'BEGIN {print added/dur}' - loses decimal precision but works without bc. Verify installation: which bc. Test bc: echo '10.5 / 2' | bc (should return 5.25).
+
 ### Velocity calculations showing incorrect decimal precision
 
 Verify bc scale setting: duration_minutes=$(echo "scale=2; $total_duration_ms / 60000" | bc). Check scale for per-minute calculations: added_per_min=$(echo "scale=1; $lines_added / $duration_minutes" | bc). Ensure bc is using correct precision: echo 'scale=1; 10/3' | bc (should return 3.3). Adjust scale if needed for more/less precision.
+
 ### Productivity thresholds not matching expected ratings
 
 Verify threshold values: HIGH_THRESHOLD=50, MED_THRESHOLD=20. Check bc comparison: echo '45 > 50' | bc (should return 0 for false). Test with known values: total_per_min=45 should be MED (between 20-50). Customize thresholds: export LPM_HIGH_THRESHOLD=60 LPM_MED_THRESHOLD=25. Verify script is using environment variables: echo $LPM_HIGH_THRESHOLD.
+
 ### Statusline not updating or stuck at 0 L/min
 
 Check JSON input is being read: echo '$input' | jq .. Verify cost fields exist: echo '$input' | jq .cost.total_lines_added. Check jq is installed: which jq. Verify duration calculation: duration_minutes=$(echo "scale=2; $total_duration_ms / 60000" | bc). Test with sample JSON: echo '{"cost":{"total_lines_added":100,"total_lines_removed":10,"total_duration_ms":120000}}' | jq -r '.cost.total_lines_added // 0' (should return 100). Check refreshInterval in settings.json is set to 1000ms or lower.

@@ -1,0 +1,14 @@
+---
+description: "Design production-ready browser agent workflows with reliable selectors, guardrails, and replayable runbooks."
+globs:
+alwaysApply: false
+---
+# Browser Agent Workflow Automation Skill
+Build robust browser automation workflows for AI agents with deterministic selectors, retries, and safe action boundaries.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/browser-agent-workflow-automation.zip -o browser-agent-workflow-automation.zip && unzip -o browser-agent-workflow-automation.zip -d ./browser-agent-workflow-automation
+```
+## Source
+https://heyclau.de/downloads/skills/browser-agent-workflow-automation.zip

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:langgraph",
+  "category": "tools",
+  "slug": "langgraph",
+  "title": "LangGraph",
+  "author": "LangChain",
+  "brandName": "LangGraph",
+  "brandDomain": "langchain.com",
+  "brandIconUrl": "/api/brand-assets/icon/langchain.com",
+  "brandAssetSource": "brandfetch",
+  "copyText": "## Editorial notes\n\nLangGraph is a strong fit for teams building non-trivial agent workflows that need state, branching, and controllable execution.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# LangGraph\n\nAgent orchestration framework for building stateful, controllable, multi-step LLM and agent workflows.",
+  "webUrl": "https://heyclau.de/tools/langgraph",
+  "canonicalUrl": "https://heyclau.de/tools/langgraph",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/langgraph.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/langgraph",
+  "seoTitle": "LangGraph agent orchestration framework",
+  "seoDescription": "LangGraph helps build stateful, controllable, multi-step LLM and agent workflows with graph-based orchestration. HeyClaude adds source links, install steps,...",
+  "repoUrl": "https://github.com/langchain-ai/langgraph",
+  "documentationUrl": "https://langchain-ai.github.io/langgraph/"
+}

@@ -15,13 +15,13 @@ seoDescription: >-
   lifecycle points for deterministic control over formatting, testing, linting,
   and ...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-25'
-documentationUrl: 'https://docs.claude.com/en/docs/claude-code/hooks'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-25"
+documentationUrl: "https://docs.claude.com/en/docs/claude-code/hooks"
 installable: true
-installCommand: '/hooks-generator [hook-type] [options]'
-usageSnippet: '/hooks-generator [hook-type] [options]'
-copySnippet: '/hooks-generator [hook-type] [options]'
+installCommand: "/hooks-generator [hook-type] [options]"
+usageSnippet: "/hooks-generator [hook-type] [options]"
+copySnippet: "/hooks-generator [hook-type] [options]"
 tags:
   - hooks
   - automation
@@ -48,8 +48,9 @@ hasPrerequisites: false
 hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
-commandSyntax: '/hooks-generator [hook-type] [options]'
+commandSyntax: "/hooks-generator [hook-type] [options]"
 ---
+
 The `/hooks-generator` command creates automated lifecycle hooks in Claude Code that execute shell commands at specific trigger points, providing deterministic control over development workflows.
 
 ## Features
@@ -72,16 +73,19 @@ The `/hooks-generator` command creates automated lifecycle hooks in Claude Code 
 ### Hook Types
 
 **Tool Lifecycle:**
+
 - `--pre-tool` - Execute before Claude runs a tool
 - `--post-tool` - Execute after a tool completes
 - `--tool-error` - Execute when a tool fails
 
 **Session Lifecycle:**
+
 - `--session-start` - Execute when Claude Code session begins
 - `--session-end` - Execute when session ends
 - `--stop` - Execute when task completes
 
 **File Operations:**
+
 - `--pre-edit` - Before file is edited
 - `--post-edit` - After file is edited (most common)
 - `--pre-write` - Before new file is written
@@ -108,11 +112,13 @@ The `/hooks-generator` command creates automated lifecycle hooks in Claude Code 
 ### Auto-Format Hook (Most Common)
 
 **Command:**
+
 ```bash
 /hooks-generator --auto-format --tool=edit_file
 ```
 
 **Generated Hook:**
+
 ```json
 // .claude/hooks/post-edit-format.json
 {
@@ -126,6 +132,7 @@ The `/hooks-generator` command creates automated lifecycle hooks in Claude Code 
 ```
 
 **Behavior:**
+
 ```bash
 User: "Fix the login function in auth.service.ts"
 
@@ -143,11 +150,13 @@ User sees:
 ### Auto-Test Hook
 
 **Command:**
+
 ```bash
 /hooks-generator --auto-test --path="src/**/*.ts" --async
 ```
 
 **Generated Hook:**
+
 ```json
 {
   "name": "auto-test",
@@ -161,6 +170,7 @@ User sees:
 ```
 
 **Workflow:**
+
 ```bash
 User: "Refactor the user service"
 
@@ -179,11 +189,13 @@ Background:
 ### TypeScript Type-Check Hook
 
 **Command:**
+
 ```bash
 /hooks-generator --auto-typecheck --path="**/*.ts" --tool=edit_file,write_file
 ```
 
 **Generated Hook:**
+
 ```json
 {
   "name": "typecheck",
@@ -198,6 +210,7 @@ Background:
 ```
 
 **Behavior with Errors:**
+
 ```bash
 Claude: Edits src/utils/helpers.ts
 
@@ -219,11 +232,13 @@ Claude: "Type errors resolved."
 ### Notification Hook (Task Completion)
 
 **Command:**
+
 ```bash
 /hooks-generator --notify-completion --trigger=Stop
 ```
 
 **Generated Hook (macOS):**
+
 ```json
 {
   "name": "notify-complete",
@@ -235,6 +250,7 @@ Claude: "Type errors resolved."
 ```
 
 **Generated Hook (Linux):**
+
 ```json
 {
   "name": "notify-complete",
@@ -245,6 +261,7 @@ Claude: "Type errors resolved."
 ```
 
 **Workflow:**
+
 ```bash
 User: "Implement the payment processing feature"
 
@@ -262,11 +279,13 @@ Claude: "Payment processing feature complete."
 ### Git Auto-Stage Hook
 
 **Command:**
+
 ```bash
 /hooks-generator --git-stage --trigger=PostToolUse --tool=edit_file,write_file
 ```
 
 **Generated Hook:**
+
 ```json
 {
   "name": "git-auto-stage",
@@ -279,6 +298,7 @@ Claude: "Payment processing feature complete."
 ```
 
 **Combined with Stop Hook for Commit:**
+
 ```json
 {
   "name": "git-auto-commit",
@@ -292,11 +312,13 @@ Claude: "Payment processing feature complete."
 ### Multi-Hook Workflow (Format + Test + TypeCheck)
 
 **Command:**
+
 ```bash
 /hooks-generator --auto-format --auto-test --auto-typecheck
 ```
 
 **Generated Hooks:**
+
 ```json
 // .claude/hooks/post-edit-format.json
 {
@@ -329,6 +351,7 @@ Claude: "Payment processing feature complete."
 ```
 
 **Execution Order:**
+
 ```bash
 Claude: Edits src/services/payment.service.ts
 
@@ -345,11 +368,13 @@ Claude: Edits src/services/payment.service.ts
 ### Conditional Hook (Only for Production Files)
 
 **Command:**
+
 ```bash
 /hooks-generator --custom
 ```
 
 **Interactive Setup:**
+
 ```
 Claude: "What should this hook do?"
 User: "Run security audit on production files"
@@ -362,6 +387,7 @@ User: "npm audit"
 ```
 
 **Generated Hook:**
+
 ```json
 {
   "name": "security-audit",
@@ -379,11 +405,13 @@ User: "npm audit"
 ### Session Start Hook (Environment Setup)
 
 **Command:**
+
 ```bash
 /hooks-generator --trigger=SessionStart
 ```
 
 **Generated Hook:**
+
 ```json
 {
   "name": "session-setup",
@@ -400,6 +428,7 @@ User: "npm audit"
 ```
 
 **Execution:**
+
 ```bash
 $ claude
 
@@ -416,11 +445,13 @@ Claude: "Ready to help! What would you like to work on?"
 ### Pre-Tool Hook (Validation)
 
 **Command:**
+
 ```bash
 /hooks-generator --trigger=PreToolUse --tool=bash
 ```
 
 **Generated Hook:**
+
 ```json
 {
   "name": "bash-validation",
@@ -436,6 +467,7 @@ Claude: "Ready to help! What would you like to work on?"
 ```
 
 **Behavior:**
+
 ```bash
 Claude: About to run: rm -rf node_modules
 
@@ -509,22 +541,26 @@ Confirm execution? (y/n): y
 ## Available Variables
 
 ### File Operation Variables
+
 - `$FILE_PATH` - Full path to file being operated on
 - `$FILE_NAME` - Name of file (without path)
 - `$FILE_EXT` - File extension
 - `$FILE_DIR` - Directory containing file
 
 ### Tool Variables
+
 - `$TOOL_NAME` - Name of tool being executed
 - `$TOOL_ARGS` - Arguments passed to tool
 - `$TOOL_RESULT` - Result from tool execution (PostToolUse only)
 
 ### Session Variables
+
 - `$SESSION_ID` - Unique session identifier
 - `$TASK_DESCRIPTION` - User's original task request
 - `$CWD` - Current working directory
 
 ### Git Variables
+
 - `$GIT_BRANCH` - Current git branch
 - `$GIT_COMMIT` - Current commit SHA
 - `$GIT_STATUS` - Git status output
@@ -532,6 +568,7 @@ Confirm execution? (y/n): y
 ## Hook Configuration
 
 ### Project Hooks (Team-Shared)
+
 ```bash
 # Location: .claude/hooks/*.json
 # Committed to git
@@ -539,6 +576,7 @@ Confirm execution? (y/n): y
 ```
 
 ### User Hooks (Personal)
+
 ```bash
 # Location: ~/.config/claude/hooks/*.json
 # Personal preferences
@@ -546,10 +584,11 @@ Confirm execution? (y/n): y
 ```
 
 ### Hook Priority
+
 ```json
 {
   "name": "critical-hook",
-  "priority": 1,  // Lower number = higher priority
+  "priority": 1, // Lower number = higher priority
   "trigger": "PostToolUse"
 }
 ```
@@ -557,11 +596,13 @@ Confirm execution? (y/n): y
 ## Debugging Hooks
 
 ### Enable Debug Logging
+
 ```bash
 /hooks-generator --debug
 ```
 
 **Output:**
+
 ```
 [Hook Debug] Loaded hooks:
   - auto-format (PostToolUse, edit_file)
@@ -577,11 +618,13 @@ Confirm execution? (y/n): y
 ```
 
 ### Disable All Hooks
+
 ```bash
 /hooks-generator --disable-all
 ```
 
 ### Disable Specific Hook
+
 ```bash
 /hooks-generator --disable=auto-test
 ```
@@ -600,6 +643,7 @@ Confirm execution? (y/n): y
 ## Common Workflows
 
 ### React/Next.js Project
+
 ```bash
 /hooks-generator \
   --auto-format \
@@ -609,6 +653,7 @@ Confirm execution? (y/n): y
 ```
 
 ### Node.js Backend
+
 ```bash
 /hooks-generator \
   --auto-format \
@@ -619,6 +664,7 @@ Confirm execution? (y/n): y
 ```
 
 ### Python Project
+
 ```bash
 /hooks-generator --custom
 # Format: black $FILE_PATH
@@ -627,6 +673,7 @@ Confirm execution? (y/n): y
 ```
 
 ### Notification-Heavy Workflow
+
 ```bash
 /hooks-generator \
   --notify-completion \

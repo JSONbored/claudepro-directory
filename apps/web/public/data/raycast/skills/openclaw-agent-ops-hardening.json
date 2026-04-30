@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 2,
+  "key": "skills:openclaw-agent-ops-hardening",
+  "category": "skills",
+  "slug": "openclaw-agent-ops-hardening",
+  "title": "OpenClaw Agent Ops Hardening Skill",
+  "author": "JSONbored",
+  "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/openclaw-agent-ops-hardening.zip -o openclaw-agent-ops-hardening.zip && unzip -o openclaw-agent-ops-hardening.zip -d ./openclaw-agent-ops-hardening\n\nUsage:\nUse this skill to move OpenClaw agents from prototype state to secure and monitorable production operation.\n\nAsset:\n# Trigger\n\"Run the OpenClaw ops hardening skill for this deployment.\"\n\n# Required output\n1) Threat model and trust boundaries\n2) Permission matrix for tools/actions\n3) Runtime hardening changes\n4) Incident response checklist",
+  "detailMarkdown": "# OpenClaw Agent Ops Hardening Skill\n\nHarden OpenClaw agent environments with secure defaults, policy boundaries, tool governance, and incident response playbooks.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/openclaw-agent-ops-hardening.zip -o openclaw-agent-ops-hardening.zip && unzip -o openclaw-agent-ops-hardening.zip -d ./openclaw-agent-ops-hardening\n```\n\n## Usage\nUse this skill to move OpenClaw agents from prototype state to secure and monitorable production operation.",
+  "webUrl": "https://heyclau.de/skills/openclaw-agent-ops-hardening",
+  "canonicalUrl": "https://heyclau.de/skills/openclaw-agent-ops-hardening",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/openclaw-agent-ops-hardening.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/openclaw-agent-ops-hardening",
+  "seoTitle": "OpenClaw Agent Ops Hardening Skill",
+  "seoDescription": "AI operations skill for OpenClaw environments focused on policy enforcement, secure runtime design, and operational resilience.",
+  "repoUrl": "https://github.com/openclaw/openclaw",
+  "documentationUrl": "https://github.com/openclaw/openclaw"
+}

@@ -14,10 +14,10 @@ seoDescription: >-
   segments, and Git integration for Claude Code Discover tools for AI
   development.
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-16'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-16"
 installable: true
-usageSnippet: ' snnt  156k  main '
+usageSnippet: " snnt  156k  main "
 copySnippet: |-
   {
     "statusLine": {
@@ -130,6 +130,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Features
 
 - Starship-inspired modular design
@@ -172,8 +173,11 @@ robotsFollow: true
 ```
 
 ## Examples
+
 ### Enhanced Starship Powerline with Cost Display
+
 Extended version showing cost alongside tokens and git status
+
 ```bash
 #!/usr/bin/env bash
 
@@ -195,7 +199,7 @@ fi
 
 if git rev-parse --git-dir > /dev/null 2>&1; then
   branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "detached")
-  
+
   if [ -z "$(git status --porcelain 2>/dev/null)" ]; then
     git_icon=""
     git_color="\033[32m"
@@ -203,7 +207,7 @@ if git rev-parse --git-dir > /dev/null 2>&1; then
     git_icon=""
     git_color="\033[33m"
   fi
-  
+
   git_segment="${git_color}  ${branch} ${git_icon}\033[0m"
 else
   git_segment=""
@@ -241,8 +245,11 @@ else
   echo -e "${model_segment} ${token_segment} ${cost_segment}${RESET}"
 fi
 ```
+
 ### Starship Powerline with Custom Model Abbreviations
+
 Version with configurable model name abbreviations via environment variables
+
 ```bash
 #!/usr/bin/env bash
 
@@ -285,7 +292,7 @@ fi
 
 if git rev-parse --git-dir > /dev/null 2>&1; then
   branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "detached")
-  
+
   if [ -z "$(git status --porcelain 2>/dev/null)" ]; then
     git_icon=""
     git_color="\033[32m"
@@ -293,7 +300,7 @@ if git rev-parse --git-dir > /dev/null 2>&1; then
     git_icon=""
     git_color="\033[33m"
   fi
-  
+
   git_segment="${git_color}  ${branch} ${git_icon}\033[0m"
 else
   git_segment=""
@@ -322,8 +329,11 @@ else
   echo -e "${model_segment} ${token_segment}${RESET}"
 fi
 ```
+
 ### Starship Powerline Installation Example
+
 Complete setup script with Nerd Font verification and Git command testing
+
 ```bash
 #!/bin/bash
 # Installation script for Starship Powerline Theme
@@ -355,7 +365,7 @@ if command -v git &> /dev/null; then
     else
         echo "Not in a git repository (git segment will be empty)"
     fi
-    
+
     if git status --porcelain &> /dev/null 2>&1; then
         echo "Git status command working"
     else
@@ -417,7 +427,7 @@ fi
 
 if git rev-parse --git-dir > /dev/null 2>&1; then
   branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "detached")
-  
+
   if [ -z "$(git status --porcelain 2>/dev/null)" ]; then
     git_icon=""
     git_color="\033[32m"
@@ -425,7 +435,7 @@ if git rev-parse --git-dir > /dev/null 2>&1; then
     git_icon=""
     git_color="\033[33m"
   fi
-  
+
   git_segment="${git_color}  ${branch} ${git_icon}\033[0m"
 else
   git_segment=""
@@ -470,27 +480,35 @@ echo "Test: echo -e '  ' (should display branch icons, not boxes)"
 ```
 
 ## Troubleshooting
+
 ### Nerd Font glyphs showing as boxes or missing symbols
 
-Install Nerd Font and configure terminal. Test: echo -e '  ' (should display branch icons, not boxes). Set font to 'FiraCode Nerd Font Mono' or 'MesloLGS NF'. Run fc-cache -fv to refresh font cache. Verify font installation: fc-list | grep -i nerd (should list Nerd Fonts). For VS Code: Add to settings.json: "terminal.integrated.fontFamily": "'FiraCode Nerd Font Mono'". Restart terminal after font change. If still showing boxes, terminal may not support Unicode - use no-nerd-font version.
+Install Nerd Font and configure terminal. Test: echo -e ' ' (should display branch icons, not boxes). Set font to 'FiraCode Nerd Font Mono' or 'MesloLGS NF'. Run fc-cache -fv to refresh font cache. Verify font installation: fc-list | grep -i nerd (should list Nerd Fonts). For VS Code: Add to settings.json: "terminal.integrated.fontFamily": "'FiraCode Nerd Font Mono'". Restart terminal after font change. If still showing boxes, terminal may not support Unicode - use no-nerd-font version.
+
 ### Git status shows '(detached)' instead of branch name
 
 You're in detached HEAD state (normal for commit checkouts). Run git branch -q to see state. Checkout branch: git checkout main or create: git checkout -b feature-name. Verify branch: git symbolic-ref --short HEAD (should return branch name, not 'detached'). Check git state: git rev-parse --git-dir (should return .git path). If in detached state, script shows 'detached' - this is expected behavior. To fix: Checkout a branch or create new branch from current commit.
+
 ### Git icons not rendering correctly in VS Code terminal
 
-Add to settings.json: "terminal.integrated.fontFamily": "'FiraCode Nerd Font Mono'". Restart VS Code. If issues persist, install: sudo apt install fonts-symbola (Linux) or use system font installer (macOS). Verify font in VS Code: Open terminal, check font settings. Alternative: Use no-nerd-font version if Nerd Fonts unavailable. Test glyphs: echo -e '  ' (should display icons, not boxes). Check VS Code terminal settings: File > Preferences > Settings > Terminal > Integrated > Font Family.
+Add to settings.json: "terminal.integrated.fontFamily": "'FiraCode Nerd Font Mono'". Restart VS Code. If issues persist, install: sudo apt install fonts-symbola (Linux) or use system font installer (macOS). Verify font in VS Code: Open terminal, check font settings. Alternative: Use no-nerd-font version if Nerd Fonts unavailable. Test glyphs: echo -e ' ' (should display icons, not boxes). Check VS Code terminal settings: File > Preferences > Settings > Terminal > Integrated > Font Family.
+
 ### Statusline displays incorrectly after git operations
 
 Increase refreshInterval if statusline lags git state. Use git status --porcelain for reliable scripting. Verify read access: test -r .git && echo OK. Check git command execution: git status --porcelain (should return empty or file list). Test git branch: git symbolic-ref --short HEAD (should return branch name). If statusline not updating, increase refreshInterval in settings.json: {"refreshInterval": 2000} (2 seconds). Verify git repository: git rev-parse --git-dir (should return .git path, not error).
+
 ### Model name abbreviation too aggressive or unclear
 
 Modify sed patterns to preserve model info. Script shortens 'claude-sonnet-4-5' to 'snnt'. Keep full name by removing: | sed 's/sonnet/snnt/' line. Customize abbreviations: Set environment variables STARSHIP_SONNET_ABBR, STARSHIP_OPUS_ABBR, etc. Test abbreviation: echo 'claude-sonnet-4-5' | sed 's/claude-//' | sed 's/sonnet/snnt/' | sed 's/-4-5//' (should return 'snnt'). Adjust sed patterns: Add more patterns to preserve version numbers or model details. Check current abbreviation: echo "$model" (should show abbreviated name).
+
 ### Token count always showing 0k or incorrect value
 
 Check token extraction: echo '$input' | jq '.cost.total_lines_added' (should return number). Try alternative: echo '$input' | jq '.session.totalTokens'. Verify calculation: token_k=$((tokens / 1000)) (should calculate thousands). Test with sample: tokens=12345; echo $((tokens / 1000)) (should return 12). Check if tokens is zero: echo $tokens (should be > 0). Verify JSON structure: echo '$input' | jq .cost (should show cost object with total_lines_added). If still 0k, JSON structure may have changed - update jq extraction path.
+
 ### Colors not displaying or showing wrong colors
 
 Verify terminal supports ANSI colors: echo -e '\033[36mCyan\033[0m' (should display cyan text). Check color codes: Model (\033[36m cyan), Tokens (\033[35m magenta), Git clean (\033[32m green), Git dirty (\033[33m yellow). Test colors: echo -e '\033[36mCyan \033[35mMagenta \033[32mGreen \033[33mYellow\033[0m'. Verify RESET code: echo -e '\033[0m' (should reset colors). If colors not working, terminal may only support 16 colors - modify color codes to use standard ANSI: \033[36m for cyan, \033[35m for magenta, etc. Check terminal color support: echo $TERM (should show terminal type).
+
 ### Directory change fails or script errors on cd command
 
 Check workspace path: echo '$input' | jq '.workspace.current_dir' (should return valid path). Verify path exists: test -d "$workdir" && echo "Directory exists" || echo "Directory not found". Test cd with error handling: cd "$workdir" 2>/dev/null || cd . (should not error). Check permissions: test -r "$workdir" && echo "Readable" || echo "Not readable". If path is empty or invalid, script defaults to current directory (cd .). Verify workspace extraction: workdir=$(echo '$input' | jq -r '.workspace.current_dir // .workspace.project_dir // .cwd // "."'). Test with sample: cd /tmp 2>/dev/null && echo "Success" || echo "Failed".

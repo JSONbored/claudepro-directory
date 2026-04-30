@@ -15,8 +15,8 @@ seoDescription: >-
   ends using AWS S3, Google Cloud Storage, or rclone for universal cloud
   provide...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-09-19'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-09-19"
 installable: true
 installCommand: >-
   mkdir -p .claude/hooks && touch .claude/hooks/cloud-backup-on-session-stop.sh
@@ -69,6 +69,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Features
 
 - Automatic cloud backup when Claude session ends using Stop hook with intelligent session detection
@@ -186,6 +187,7 @@ exit 1
 ```
 
 ## Examples
+
 ### Cloud Backup On Session Stop Hook Script
 
 Complete hook script that backs up modified files to cloud storage when session ends using AWS S3, GCS, or rclone
@@ -208,6 +210,7 @@ if command -v aws >/dev/null 2>&1 && [[ -n "$AWS_BACKUP_BUCKET" ]]; then
 fi
 exit 1
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable cloud backup when session stops
@@ -228,6 +231,7 @@ Complete hook configuration for .claude/settings.json to enable cloud backup whe
   }
 }
 ```
+
 ### Rclone Universal Backup Hook
 
 Hook script using rclone for universal cloud provider support with progress reporting
@@ -246,6 +250,7 @@ if command -v rclone >/dev/null 2>&1; then
 fi
 exit 0
 ```
+
 ### AWS S3 Backup with Storage Class
 
 Enhanced hook script that uses S3 Infrequent Access storage class for cost optimization
@@ -267,6 +272,7 @@ if command -v aws >/dev/null 2>&1 && [[ -n "$AWS_BACKUP_BUCKET" ]]; then
 fi
 exit 1
 ```
+
 ### Backup with Timeout and File Limit
 
 Hook script with timeout protection and file count limit to prevent hanging on large backups
@@ -288,27 +294,35 @@ exit 1
 ```
 
 ## Troubleshooting
+
 ### Stop hook not triggering when Claude session ends
 
 Verify hook script is executable with chmod +x and registered in .claude/settings.json. Check hook script path matches config. Ensure session ends cleanly without force quit. Test hook manually: bash hook-script.sh. Verify Stop hook type is correct in configuration.
+
 ### AWS S3 backup fails with permission denied error
 
 Configure AWS_BACKUP_BUCKET environment variable in .env file. Verify AWS credentials with aws s3 ls. Check IAM permissions allow s3:PutObject action on target bucket. Verify bucket exists: aws s3 ls s3://bucket-name. Check AWS region configuration: aws configure get region.
+
 ### Git diff returns no modified files despite changes
 
 Ensure files are tracked by git. Run git status to verify changes exist. Stage files with git add if needed. Check hook runs after file operations complete, not during. Use git diff --name-only --diff-filter=ACMR to include all modified files.
+
 ### Backup archive creation hangs on large file sets
 
 Use .gitignore to exclude node_modules and build artifacts from git tracking. Consider implementing file size filtering in hook script. Add timeout parameter to tar command: timeout 60s tar. Limit file count: git diff --name-only | head -100. Use rclone with --max-size option.
+
 ### Multiple cloud providers configured but rclone used
 
 Hook tries AWS S3 first, then Google Cloud, then rclone. Check AWS_BACKUP_BUCKET and GCS_BACKUP_BUCKET variables are set. Verify aws or gcloud CLI tools are in PATH and authenticated. Check exit codes: aws s3 cp returns 0 on success. Review error messages without 2>&1 redirection.
+
 ### Backup succeeds but files are corrupted or incomplete
 
 Verify tar archive integrity: tar -tzf backup.tar.gz. Check network connectivity during upload. Use checksum verification: rclone copy --checksum. Test with small file set first. Verify cloud storage provider supports streaming uploads. Check disk space on /tmp for temporary archives.
+
 ### rclone backup fails with authentication error
 
 Configure rclone remote: rclone config. Verify remote configuration: rclone listremotes. Test connection: rclone lsd remote:. Check credentials are valid: rclone about remote:. Use rclone config show remote to verify settings.
+
 ### Backup takes too long causing session end delay
 
-Add timeout wrapper: timeout 30s backup-command. Limit files backed up: git diff --name-only | head -50. Use compression level: tar -czf with gzip -1 for faster compression. Consider async backup: run backup in background. Exclude large files: --exclude "*.log" --exclude "node_modules".
+Add timeout wrapper: timeout 30s backup-command. Limit files backed up: git diff --name-only | head -50. Use compression level: tar -czf with gzip -1 for faster compression. Consider async backup: run backup in background. Exclude large files: --exclude "\*.log" --exclude "node_modules".

@@ -1,0 +1,862 @@
+# Team Summary Email Generator - Hooks
+URL: https://heyclau.de/hooks/team-summary-email-generator
+Category: hooks
+Author: JSONbored
+Date added: 2025-09-19
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/team-summary-email-generator.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/hooks/team-summary-email-generator
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/team-summary-email-generator.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
+## Summary
+Generates and sends a comprehensive summary email to the team when session ends.
+## Tags
+- email
+- team
+- stop-hook
+- summary
+- communication
+## Content
+## Features
+- Comprehensive session summary generation including session summary generation (automatic session summary generation on session end, session data collection with data gathering, session analysis with session analysis, session reporting with summary reporting), summary optimization (summary performance with fast generation, summary reliability with reliable generation, summary efficiency with efficient processing, summary reporting with generation status), summary validation (summary content validation with content verification, summary format validation with format checking, summary completeness validation with completeness checking, summary accuracy validation with accuracy verification), and summary reporting (summary generation reporting with generation status, summary delivery reporting with delivery status, summary statistics with summary metrics, summary analytics with summary analytics)
+- HTML-formatted email reports including HTML formatting (HTML email formatting with rich formatting, email template generation with template support, email styling with CSS styling, email layout with responsive layout), formatting options (email format configuration with format settings, email template configuration with template settings, email style configuration with style settings, email content configuration with content settings), formatting management (formatting rules with formatting configuration, formatting templates with template management, formatting customization with custom formatting, formatting updates with format updates), and formatting reporting (formatting status reporting with formatting status, formatting usage reporting with usage statistics, formatting effectiveness reporting with effectiveness metrics, formatting analytics with formatting analytics)
+- Multiple email service integrations including email service integration (SendGrid API integration with SendGrid support, SMTP integration with SMTP support, system mail integration with mail command support, email service configuration with service settings), service management (email service selection with service detection, email service configuration with service settings, email service fallback with fallback handling, email service monitoring with service tracking), service optimization (email delivery optimization with delivery improvement, email reliability optimization with reliability improvement, email performance optimization with performance improvement, email analytics with email metrics), and service reporting (email service reporting with service status, email delivery reporting with delivery status, email performance reporting with performance metrics, email analytics with email statistics)
+- Git change analysis and statistics including Git analysis (Git repository analysis with repository detection, Git change detection with change identification, Git statistics collection with statistics gathering, Git commit analysis with commit tracking), analysis management (Git analysis configuration with analysis settings, Git analysis customization with custom analysis, Git analysis filtering with analysis filtering, Git analysis updates with analysis updates), analysis optimization (Git analysis performance with fast analysis, Git analysis accuracy with accurate analysis, Git analysis completeness with complete analysis, Git analysis reporting with analysis status), and analysis reporting (Git analysis reporting with analysis status, Git statistics reporting with statistics status, Git change reporting with change status, Git analytics with Git metrics)
+- Test results and build status inclusion including test integration (test result collection with test execution, test status detection with status identification, test result analysis with result analysis, test result reporting with test reporting), build integration (build status detection with build execution, build result collection with result gathering, build status analysis with status analysis, build result reporting with build reporting), integration management (test integration configuration with test settings, build integration configuration with build settings, integration customization with custom integration, integration updates with integration updates), and integration reporting (test integration reporting with test status, build integration reporting with build status, integration statistics with integration metrics, integration analytics with integration statistics)
+- Automatic team communication including communication automation (automatic email generation with automatic generation, automatic email delivery with automatic delivery, automatic team notification with automatic notifications, automatic communication with automatic messaging), communication management (communication configuration with communication settings, communication customization with custom communication, communication scheduling with scheduling support, communication updates with communication updates), communication optimization (communication performance with fast communication, communication reliability with reliable communication, communication efficiency with efficient communication, communication analytics with communication metrics), and communication reporting (communication automation reporting with automation status, communication delivery reporting with delivery status, communication effectiveness reporting with effectiveness metrics, communication analytics with communication statistics)
+- Session metadata and context enrichment including session metadata (session ID generation with unique identification, session timestamp tracking with time tracking, session user information with user context, session host information with host context), context enrichment (project context with project information, repository context with repo information, branch context with branch information, environment context with environment information), context management (context configuration with context settings, context customization with custom context, context filtering with context filtering, context updates with context updates), and context reporting (context enrichment reporting with context status, context usage reporting with usage statistics, context effectiveness reporting with effectiveness metrics, context analytics with context analytics)
+- Development workflow integration including continuous communication (automatic email generation on session end, immediate email delivery on session completion, automatic team notification on session end, seamless email integration with development workflow), workflow automation (automated team communication without manual intervention, communication automation with automatic delivery, team awareness automation with automatic awareness), and workflow optimization (session tracking with session monitoring, communication optimization with optimization, team coordination maintenance with coordination checks)
+
+## Use Cases
+- Send detailed session summaries to development team automatically generating comprehensive session summaries, formatting HTML emails, and delivering to team members
+- Create automated progress reports after work sessions automatically collecting session data, analyzing Git changes, and generating progress reports
+- Document code changes and accomplishments automatically tracking file modifications, analyzing Git statistics, and documenting development activities
+- Notify team of test results and build status automatically running tests and builds, collecting results, and including in email summaries
+- Maintain project communication and transparency automatically generating session summaries, sending team notifications, and maintaining communication
+- Development workflow integration seamlessly integrating email summaries into development workflows without manual communication or team coordination
+
+## Installation
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/team-summary-email-generator.sh
+3. Make executable: chmod +x .claude/hooks/team-summary-email-generator.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- Email service configured (SendGrid API key or system mail command)
+- jq (optional, for JSON generation with SendGrid)
+- curl (for SendGrid API requests)
+- Git installed (optional, for Git analysis)
+- Node.js/npm (optional, for test and build checks)
+
+## Hook Configuration
+```json
+{
+  "hooks": {
+    "stop": {
+      "script": "./.claude/hooks/team-summary-email-generator.sh",
+      "matchers": ["*"]
+    }
+  }
+}
+```
+```json
+{
+  "hooks": {
+    "stop": {
+      "script": "./.claude/hooks/team-summary-email-generator.sh",
+      "matchers": ["*"]
+    }
+  }
+}
+```
+
+## Hook Script
+```bash
+#!/bin/bash
+
+echo "📧 Team Summary Email Generator - Preparing session summary..."
+echo "⏰ Session ended: $(date)"
+
+# Check if email configuration is available
+if [ -z "$TEAM_EMAIL" ]; then
+    echo "ℹ️ TEAM_EMAIL not configured - skipping email summary"
+    echo "💡 Set TEAM_EMAIL environment variable to enable team notifications"
+    exit 0
+fi
+
+echo "📬 Team email configured: $TEAM_EMAIL"
+
+# Check for email service configuration
+EMAIL_METHOD="none"
+if [ -n "$SENDGRID_API_KEY" ]; then
+    EMAIL_METHOD="sendgrid"
+    echo "📨 Using SendGrid API for email delivery"
+elif command -v mail >/dev/null 2>&1; then
+    EMAIL_METHOD="mail"
+    echo "📮 Using system mail command for email delivery"
+elif command -v sendmail >/dev/null 2>&1; then
+    EMAIL_METHOD="sendmail"
+    echo "📫 Using sendmail for email delivery"
+else
+    echo "⚠️ No email service available - install mail command or configure SendGrid"
+    echo "💡 Install: apt-get install mailutils (Ubuntu) or brew install mailutils (macOS)"
+    exit 0
+fi
+
+echo "🔍 Analyzing session data..."
+
+# Session metadata
+SESSION_END=$(date)
+SESSION_ID=$(date +%Y%m%d_%H%M%S)
+USER=$(whoami 2>/dev/null || echo "developer")
+HOST=$(hostname 2>/dev/null || echo "unknown")
+WORKDIR=$(pwd)
+PROJECT_NAME=$(basename "$WORKDIR" 2>/dev/null || echo "project")
+
+# Git analysis
+if git rev-parse --git-dir >/dev/null 2>&1; then
+    echo "📊 Analyzing git changes..."
+
+    BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
+    FILES_CHANGED=$(git diff --name-only 2>/dev/null | wc -l | tr -d ' ')
+    FILES_LIST=$(git diff --name-only 2>/dev/null | head -10)
+
+    # Get detailed diff stats
+    DIFF_STATS=$(git diff --stat 2>/dev/null)
+    INSERTIONS=$(echo "$DIFF_STATS" | tail -1 | grep -oE '[0-9]+ insertion' | grep -oE '[0-9]+' || echo "0")
+    DELETIONS=$(echo "$DIFF_STATS" | tail -1 | grep -oE '[0-9]+ deletion' | grep -oE '[0-9]+' || echo "0")
+
+    # Recent commits
+    RECENT_COMMITS=$(git log --oneline -5 2>/dev/null || echo "No recent commits")
+else
+    echo "ℹ️ Not a git repository - skipping git analysis"
+    BRANCH="N/A"
+    FILES_CHANGED="0"
+    FILES_LIST="No git repository"
+    INSERTIONS="0"
+    DELETIONS="0"
+    RECENT_COMMITS="No git repository"
+fi
+
+# Test results analysis
+echo "🧪 Checking test results..."
+TEST_RESULTS="No test results available"
+if [ -f "package.json" ] && grep -q '"test"' package.json 2>/dev/null; then
+    echo "  • Running npm test..."
+    if timeout 30 npm test -- --silent --passWithNoTests 2>/dev/null; then
+        TEST_RESULTS="✅ All tests passed"
+    else
+        TEST_RESULTS="❌ Some tests failed - check logs"
+    fi
+elif command -v pytest >/dev/null 2>&1; then
+    echo "  • Running pytest..."
+    if timeout 30 pytest --tb=no -q 2>/dev/null; then
+        TEST_RESULTS="✅ All Python tests passed"
+    else
+        TEST_RESULTS="❌ Some Python tests failed"
+    fi
+elif [ -f "Cargo.toml" ]; then
+    echo "  • Running cargo test..."
+    if timeout 30 cargo test --quiet 2>/dev/null; then
+        TEST_RESULTS="✅ All Rust tests passed"
+    else
+        TEST_RESULTS="❌ Some Rust tests failed"
+    fi
+fi
+
+# Build status analysis
+echo "🏗️ Checking build status..."
+BUILD_STATUS="No build configuration found"
+if [ -f "package.json" ] && grep -q '"build"' package.json 2>/dev/null; then
+    echo "  • Running npm build..."
+    if timeout 60 npm run build >/dev/null 2>&1; then
+        BUILD_STATUS="✅ Build successful"
+    else
+        BUILD_STATUS="❌ Build failed"
+    fi
+elif [ -f "Cargo.toml" ]; then
+    echo "  • Running cargo build..."
+    if timeout 60 cargo build --quiet 2>/dev/null; then
+        BUILD_STATUS="✅ Cargo build successful"
+    else
+        BUILD_STATUS="❌ Cargo build failed"
+    fi
+fi
+
+# Generate HTML email content
+echo "📝 Generating email content..."
+
+HTML_CONTENT=$(cat <<EOF
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .header { background: #f4f4f4; padding: 20px; border-radius: 5px; }
+        .section { margin: 20px 0; padding: 15px; border-left: 4px solid #007cba; }
+        .stats { background: #f9f9f9; padding: 10px; border-radius: 3px; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .info { color: #17a2b8; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🤖 Claude Code Session Summary</h1>
+        <p><strong>Project:</strong> $PROJECT_NAME</p>
+        <p><strong>Session ID:</strong> $SESSION_ID</p>
+        <p><strong>Completed:</strong> $SESSION_END</p>
+        <p><strong>User:</strong> $USER@$HOST</p>
+    </div>
+
+    <div class="section">
+        <h2>📊 Development Statistics</h2>
+        <div class="stats">
+            <ul>
+                <li><strong>Branch:</strong> $BRANCH</li>
+                <li><strong>Files Modified:</strong> $FILES_CHANGED</li>
+                <li><strong>Lines Added:</strong> $INSERTIONS</li>
+                <li><strong>Lines Removed:</strong> $DELETIONS</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📁 Modified Files</h2>
+        <pre>$FILES_LIST</pre>
+    </div>
+
+    <div class="section">
+        <h2>🧪 Test Results</h2>
+        <p>$TEST_RESULTS</p>
+    </div>
+
+    <div class="section">
+        <h2>🏗️ Build Status</h2>
+        <p>$BUILD_STATUS</p>
+    </div>
+
+    <div class="section">
+        <h2>📝 Recent Commits</h2>
+        <pre>$RECENT_COMMITS</pre>
+    </div>
+
+    <div class="section">
+        <h2>💡 Next Steps</h2>
+        <ul>
+            <li>Review changes and test thoroughly</li>
+            <li>Update documentation if needed</li>
+            <li>Consider code review for significant changes</li>
+            <li>Merge changes when ready</li>
+        </ul>
+    </div>
+
+    <hr>
+    <p><small>Generated automatically by Claude Code Team Summary Hook</small></p>
+</body>
+</html>
+EOF
+)
+
+# Send email based on available method
+SUBJECT="Claude Code Session Summary - $PROJECT_NAME ($SESSION_END)"
+
+echo "📤 Sending email via $EMAIL_METHOD..."
+
+case "$EMAIL_METHOD" in
+    "sendgrid")
+        SENDGRID_PAYLOAD=$(cat <<EOF
+{
+  "personalizations": [{
+    "to": [{"email": "$TEAM_EMAIL"}]
+  }],
+  "from": {"email": "claude@yourdomain.com", "name": "Claude Code"},
+  "subject": "$SUBJECT",
+  "content": [{
+    "type": "text/html",
+    "value": "$(echo "$HTML_CONTENT" | sed 's/"/\\"'/g')"
+  }]
+}
+EOF
+        )
+
+        if curl -X POST \
+             -H "Authorization: Bearer $SENDGRID_API_KEY" \
+             -H "Content-Type: application/json" \
+             -d "$SENDGRID_PAYLOAD" \
+             "https://api.sendgrid.com/v3/mail/send" \
+             --silent --show-error 2>/dev/null; then
+            echo "✅ Email sent successfully via SendGrid"
+        else
+            echo "❌ Failed to send email via SendGrid"
+        fi
+        ;;
+    "mail")
+        echo "$HTML_CONTENT" | mail -s "$SUBJECT" -a "Content-Type: text/html" "$TEAM_EMAIL"
+        echo "✅ Email sent via system mail command"
+        ;;
+    "sendmail")
+        {
+            echo "To: $TEAM_EMAIL"
+            echo "Subject: $SUBJECT"
+            echo "Content-Type: text/html"
+            echo ""
+            echo "$HTML_CONTENT"
+        } | sendmail "$TEAM_EMAIL"
+        echo "✅ Email sent via sendmail"
+        ;;
+esac
+
+echo ""
+echo "💡 Email Configuration Tips:"
+echo "  • Set TEAM_EMAIL environment variable"
+echo "  • For SendGrid: Set SENDGRID_API_KEY"
+echo "  • For system mail: Install mailutils package"
+echo "  • Configure SMTP settings in your system"
+
+echo ""
+echo "🎯 Team summary email generation complete!"
+
+exit 0
+```
+```bash
+#!/bin/bash
+
+echo "📧 Team Summary Email Generator - Preparing session summary..."
+echo "⏰ Session ended: $(date)"
+
+# Check if email configuration is available
+if [ -z "$TEAM_EMAIL" ]; then
+    echo "ℹ️ TEAM_EMAIL not configured - skipping email summary"
+    echo "💡 Set TEAM_EMAIL environment variable to enable team notifications"
+    exit 0
+fi
+
+echo "📬 Team email configured: $TEAM_EMAIL"
+
+# Check for email service configuration
+EMAIL_METHOD="none"
+if [ -n "$SENDGRID_API_KEY" ]; then
+    EMAIL_METHOD="sendgrid"
+    echo "📨 Using SendGrid API for email delivery"
+elif command -v mail >/dev/null 2>&1; then
+    EMAIL_METHOD="mail"
+    echo "📮 Using system mail command for email delivery"
+elif command -v sendmail >/dev/null 2>&1; then
+    EMAIL_METHOD="sendmail"
+    echo "📫 Using sendmail for email delivery"
+else
+    echo "⚠️ No email service available - install mail command or configure SendGrid"
+    echo "💡 Install: apt-get install mailutils (Ubuntu) or brew install mailutils (macOS)"
+    exit 0
+fi
+
+echo "🔍 Analyzing session data..."
+
+# Session metadata
+SESSION_END=$(date)
+SESSION_ID=$(date +%Y%m%d_%H%M%S)
+USER=$(whoami 2>/dev/null || echo "developer")
+HOST=$(hostname 2>/dev/null || echo "unknown")
+WORKDIR=$(pwd)
+PROJECT_NAME=$(basename "$WORKDIR" 2>/dev/null || echo "project")
+
+# Git analysis
+if git rev-parse --git-dir >/dev/null 2>&1; then
+    echo "📊 Analyzing git changes..."
+
+    BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
+    FILES_CHANGED=$(git diff --name-only 2>/dev/null | wc -l | tr -d ' ')
+    FILES_LIST=$(git diff --name-only 2>/dev/null | head -10)
+
+    # Get detailed diff stats
+    DIFF_STATS=$(git diff --stat 2>/dev/null)
+    INSERTIONS=$(echo "$DIFF_STATS" | tail -1 | grep -oE '[0-9]+ insertion' | grep -oE '[0-9]+' || echo "0")
+    DELETIONS=$(echo "$DIFF_STATS" | tail -1 | grep -oE '[0-9]+ deletion' | grep -oE '[0-9]+' || echo "0")
+
+    # Recent commits
+    RECENT_COMMITS=$(git log --oneline -5 2>/dev/null || echo "No recent commits")
+else
+    echo "ℹ️ Not a git repository - skipping git analysis"
+    BRANCH="N/A"
+    FILES_CHANGED="0"
+    FILES_LIST="No git repository"
+    INSERTIONS="0"
+    DELETIONS="0"
+    RECENT_COMMITS="No git repository"
+fi
+
+# Test results analysis
+echo "🧪 Checking test results..."
+TEST_RESULTS="No test results available"
+if [ -f "package.json" ] && grep -q '"test"' package.json 2>/dev/null; then
+    echo "  • Running npm test..."
+    if timeout 30 npm test -- --silent --passWithNoTests 2>/dev/null; then
+        TEST_RESULTS="✅ All tests passed"
+    else
+        TEST_RESULTS="❌ Some tests failed - check logs"
+    fi
+elif command -v pytest >/dev/null 2>&1; then
+    echo "  • Running pytest..."
+    if timeout 30 pytest --tb=no -q 2>/dev/null; then
+        TEST_RESULTS="✅ All Python tests passed"
+    else
+        TEST_RESULTS="❌ Some Python tests failed"
+    fi
+elif [ -f "Cargo.toml" ]; then
+    echo "  • Running cargo test..."
+    if timeout 30 cargo test --quiet 2>/dev/null; then
+        TEST_RESULTS="✅ All Rust tests passed"
+    else
+        TEST_RESULTS="❌ Some Rust tests failed"
+    fi
+fi
+
+# Build status analysis
+echo "🏗️ Checking build status..."
+BUILD_STATUS="No build configuration found"
+if [ -f "package.json" ] && grep -q '"build"' package.json 2>/dev/null; then
+    echo "  • Running npm build..."
+    if timeout 60 npm run build >/dev/null 2>&1; then
+        BUILD_STATUS="✅ Build successful"
+    else
+        BUILD_STATUS="❌ Build failed"
+    fi
+elif [ -f "Cargo.toml" ]; then
+    echo "  • Running cargo build..."
+    if timeout 60 cargo build --quiet 2>/dev/null; then
+        BUILD_STATUS="✅ Cargo build successful"
+    else
+        BUILD_STATUS="❌ Cargo build failed"
+    fi
+fi
+
+# Generate HTML email content
+echo "📝 Generating email content..."
+
+HTML_CONTENT=$(cat <<EOF
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .header { background: #f4f4f4; padding: 20px; border-radius: 5px; }
+        .section { margin: 20px 0; padding: 15px; border-left: 4px solid #007cba; }
+        .stats { background: #f9f9f9; padding: 10px; border-radius: 3px; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .info { color: #17a2b8; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🤖 Claude Code Session Summary</h1>
+        <p><strong>Project:</strong> $PROJECT_NAME</p>
+        <p><strong>Session ID:</strong> $SESSION_ID</p>
+        <p><strong>Completed:</strong> $SESSION_END</p>
+        <p><strong>User:</strong> $USER@$HOST</p>
+    </div>
+
+    <div class="section">
+        <h2>📊 Development Statistics</h2>
+        <div class="stats">
+            <ul>
+                <li><strong>Branch:</strong> $BRANCH</li>
+                <li><strong>Files Modified:</strong> $FILES_CHANGED</li>
+                <li><strong>Lines Added:</strong> $INSERTIONS</li>
+                <li><strong>Lines Removed:</strong> $DELETIONS</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📁 Modified Files</h2>
+        <pre>$FILES_LIST</pre>
+    </div>
+
+    <div class="section">
+        <h2>🧪 Test Results</h2>
+        <p>$TEST_RESULTS</p>
+    </div>
+
+    <div class="section">
+        <h2>🏗️ Build Status</h2>
+        <p>$BUILD_STATUS</p>
+    </div>
+
+    <div class="section">
+        <h2>📝 Recent Commits</h2>
+        <pre>$RECENT_COMMITS</pre>
+    </div>
+
+    <div class="section">
+        <h2>💡 Next Steps</h2>
+        <ul>
+            <li>Review changes and test thoroughly</li>
+            <li>Update documentation if needed</li>
+            <li>Consider code review for significant changes</li>
+            <li>Merge changes when ready</li>
+        </ul>
+    </div>
+
+    <hr>
+    <p><small>Generated automatically by Claude Code Team Summary Hook</small></p>
+</body>
+</html>
+EOF
+)
+
+# Send email based on available method
+SUBJECT="Claude Code Session Summary - $PROJECT_NAME ($SESSION_END)"
+
+echo "📤 Sending email via $EMAIL_METHOD..."
+
+case "$EMAIL_METHOD" in
+    "sendgrid")
+        SENDGRID_PAYLOAD=$(cat <<EOF
+{
+  "personalizations": [{
+    "to": [{"email": "$TEAM_EMAIL"}]
+  }],
+  "from": {"email": "claude@yourdomain.com", "name": "Claude Code"},
+  "subject": "$SUBJECT",
+  "content": [{
+    "type": "text/html",
+    "value": "$(echo "$HTML_CONTENT" | sed 's/"/\\"'/g')"
+  }]
+}
+EOF
+        )
+
+        if curl -X POST \
+             -H "Authorization: Bearer $SENDGRID_API_KEY" \
+             -H "Content-Type: application/json" \
+             -d "$SENDGRID_PAYLOAD" \
+             "https://api.sendgrid.com/v3/mail/send" \
+             --silent --show-error 2>/dev/null; then
+            echo "✅ Email sent successfully via SendGrid"
+        else
+            echo "❌ Failed to send email via SendGrid"
+        fi
+        ;;
+    "mail")
+        echo "$HTML_CONTENT" | mail -s "$SUBJECT" -a "Content-Type: text/html" "$TEAM_EMAIL"
+        echo "✅ Email sent via system mail command"
+        ;;
+    "sendmail")
+        {
+            echo "To: $TEAM_EMAIL"
+            echo "Subject: $SUBJECT"
+            echo "Content-Type: text/html"
+            echo ""
+            echo "$HTML_CONTENT"
+        } | sendmail "$TEAM_EMAIL"
+        echo "✅ Email sent via sendmail"
+        ;;
+esac
+
+echo ""
+echo "💡 Email Configuration Tips:"
+echo "  • Set TEAM_EMAIL environment variable"
+echo "  • For SendGrid: Set SENDGRID_API_KEY"
+echo "  • For system mail: Install mailutils package"
+echo "  • Configure SMTP settings in your system"
+
+echo ""
+echo "🎯 Team summary email generation complete!"
+
+exit 0
+```
+
+## Examples
+### Team Summary Email Generator Hook Script
+
+Complete hook script that generates and sends team summary emails on session end
+
+```bash
+#!/bin/bash
+echo "📧 Team Summary Email Generator - Preparing session summary..."
+SESSION_END=$(date)
+SESSION_ID=$(date +%Y%m%d_%H%M%S)
+if [ -z "$TEAM_EMAIL" ]; then
+  exit 0
+fi
+if [ -n "$SENDGRID_API_KEY" ]; then
+  EMAIL_METHOD="sendgrid"
+elif command -v mail >/dev/null 2>&1; then
+  EMAIL_METHOD="mail"
+else
+  exit 0
+fi
+PROJECT_NAME=$(basename "$(pwd)" 2>/dev/null || echo 'project')
+BRANCH=$(git branch --show-current 2>/dev/null || echo 'unknown')
+FILES_CHANGED=$(git diff --name-only 2>/dev/null | wc -l | tr -d ' ')
+HTML_CONTENT="<!DOCTYPE html><html><head><style>body{font-family:Arial,sans-serif;line-height:1.6;color:#333;}.header{background:#f4f4f4;padding:20px;border-radius:5px;}.section{margin:20px 0;padding:15px;border-left:4px solid #007cba;}</style></head><body><div class=\"header\"><h1>🤖 Claude Code Session Summary</h1><p><strong>Project:</strong> $PROJECT_NAME</p><p><strong>Session ID:</strong> $SESSION_ID</p><p><strong>Completed:</strong> $SESSION_END</p></div><div class=\"section\"><h2>📊 Development Statistics</h2><p><strong>Branch:</strong> $BRANCH</p><p><strong>Files Modified:</strong> $FILES_CHANGED</p></div></body></html>"
+SUBJECT="Claude Code Session Summary - $PROJECT_NAME ($SESSION_END)"
+if [ "$EMAIL_METHOD" = "sendgrid" ]; then
+  jq -n --arg to "$TEAM_EMAIL" --arg subject "$SUBJECT" --arg html "$HTML_CONTENT" '{"personalizations":[{"to":[{"email":$to}]}],"from":{"email":"claude@yourdomain.com","name":"Claude Code"},"subject":$subject,"content":[{"type":"text/html","value":$html}]}' | curl -X POST -H "Authorization: Bearer $SENDGRID_API_KEY" -H "Content-Type: application/json" -d @- "https://api.sendgrid.com/v3/mail/send" --silent >/dev/null 2>&1
+elif [ "$EMAIL_METHOD" = "mail" ]; then
+  echo "$HTML_CONTENT" | mail -s "$SUBJECT" -a "Content-Type: text/html" "$TEAM_EMAIL"
+fi
+echo "🎯 Team summary email generation complete!"
+exit 0
+```
+
+### Hook Configuration
+
+Complete hook configuration for .claude/settings.json to enable team summary emails
+
+```json
+{
+  "hooks": {
+    "stop": {
+      "script": "./.claude/hooks/team-summary-email-generator.sh",
+      "matchers": ["*"]
+    }
+  }
+}
+```
+
+### Enhanced Team Summary with Git and Test Analysis
+
+Enhanced hook script with comprehensive Git analysis, test results, and build status
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+SESSION_END=$(date)
+SESSION_ID=$(date +%Y%m%d_%H%M%S)
+PROJECT_NAME=$(basename "$(pwd)" 2>/dev/null || echo 'project')
+BRANCH=$(git branch --show-current 2>/dev/null || echo 'unknown')
+FILES_CHANGED=$(git diff --name-only 2>/dev/null | wc -l | tr -d ' ')
+DIFF_STATS=$(git diff --stat 2>/dev/null)
+INSERTIONS=$(echo "$DIFF_STATS" | tail -1 | grep -oE '[0-9]+ insertion' | grep -oE '[0-9]+' || echo "0")
+DELETIONS=$(echo "$DIFF_STATS" | tail -1 | grep -oE '[0-9]+ deletion' | grep -oE '[0-9]+' || echo "0")
+RECENT_COMMITS=$(git log --oneline -5 2>/dev/null || echo "No recent commits")
+TEST_RESULTS="No test results available"
+if [ -f "package.json" ] && grep -q '"test"' package.json 2>/dev/null; then
+  if timeout 30 npm test -- --silent --passWithNoTests 2>/dev/null; then
+    TEST_RESULTS="✅ All tests passed"
+  else
+    TEST_RESULTS="❌ Some tests failed"
+  fi
+fi
+BUILD_STATUS="No build configuration found"
+if [ -f "package.json" ] && grep -q '"build"' package.json 2>/dev/null; then
+  if timeout 60 npm run build >/dev/null 2>&1; then
+    BUILD_STATUS="✅ Build successful"
+  else
+    BUILD_STATUS="❌ Build failed"
+  fi
+fi
+HTML_CONTENT="<!DOCTYPE html><html><head><style>body{font-family:Arial,sans-serif;line-height:1.6;color:#333;}.header{background:#f4f4f4;padding:20px;border-radius:5px;}.section{margin:20px 0;padding:15px;border-left:4px solid #007cba;}.stats{background:#f9f9f9;padding:10px;border-radius:3px;}</style></head><body><div class=\"header\"><h1>🤖 Claude Code Session Summary</h1><p><strong>Project:</strong> $PROJECT_NAME</p><p><strong>Session ID:</strong> $SESSION_ID</p><p><strong>Completed:</strong> $SESSION_END</p></div><div class=\"section\"><h2>📊 Development Statistics</h2><div class=\"stats\"><ul><li><strong>Branch:</strong> $BRANCH</li><li><strong>Files Modified:</strong> $FILES_CHANGED</li><li><strong>Lines Added:</strong> $INSERTIONS</li><li><strong>Lines Removed:</strong> $DELETIONS</li></ul></div></div><div class=\"section\"><h2>🧪 Test Results</h2><p>$TEST_RESULTS</p></div><div class=\"section\"><h2>🏗️ Build Status</h2><p>$BUILD_STATUS</p></div><div class=\"section\"><h2>📝 Recent Commits</h2><pre>$RECENT_COMMITS</pre></div></body></html>"
+SUBJECT="Claude Code Session Summary - $PROJECT_NAME ($SESSION_END)"
+if [ -n "$SENDGRID_API_KEY" ] && [ -n "$TEAM_EMAIL" ]; then
+  jq -n --arg to "$TEAM_EMAIL" --arg subject "$SUBJECT" --arg html "$HTML_CONTENT" '{"personalizations":[{"to":[{"email":$to}]}],"from":{"email":"claude@yourdomain.com","name":"Claude Code"},"subject":$subject,"content":[{"type":"text/html","value":$html}]}' | curl -X POST -H "Authorization: Bearer $SENDGRID_API_KEY" -H "Content-Type: application/json" -d @- "https://api.sendgrid.com/v3/mail/send" --silent >/dev/null 2>&1
+  echo "✅ Email sent successfully via SendGrid"
+elif command -v mail >/dev/null 2>&1 && [ -n "$TEAM_EMAIL" ]; then
+  echo "$HTML_CONTENT" | mail -s "$SUBJECT" -a "Content-Type: text/html" "$TEAM_EMAIL"
+  echo "✅ Email sent via system mail command"
+fi
+exit 0
+```
+
+### Responsive HTML Email Template
+
+Enhanced hook script with responsive HTML email template and modern styling
+
+```bash
+#!/bin/bash
+SESSION_END=$(date)
+SESSION_ID=$(date +%Y%m%d_%H%M%S)
+PROJECT_NAME=$(basename "$(pwd)" 2>/dev/null || echo 'project')
+USER=$(whoami 2>/dev/null || echo 'developer')
+HOST=$(hostname 2>/dev/null || echo 'unknown')
+BRANCH=$(git branch --show-current 2>/dev/null || git rev-parse --short HEAD 2>/dev/null || echo 'unknown')
+FILES_LIST=$(git diff --name-only 2>/dev/null | head -10 | tr '\n' ',' | sed 's/,$//')
+HTML_CONTENT="<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><style>body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;line-height:1.6;color:#333;max-width:800px;margin:0 auto;padding:20px;}.header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;padding:30px;border-radius:8px;margin-bottom:20px;}.section{background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:20px;margin-bottom:15px;box-shadow:0 2px 4px rgba(0,0,0,0.1);}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;margin-top:15px;}.stat-item{background:#f8f9fa;padding:15px;border-radius:6px;text-align:center;}.stat-value{font-size:24px;font-weight:bold;color:#667eea;}.stat-label{font-size:12px;color:#666;margin-top:5px;}</style></head><body><div class=\"header\"><h1>🤖 Claude Code Session Summary</h1><p>Project: $PROJECT_NAME | Session: $SESSION_ID</p><p>Completed: $SESSION_END | User: $USER@$HOST</p></div><div class=\"section\"><h2>📊 Development Statistics</h2><div class=\"stats\"><div class=\"stat-item\"><div class=\"stat-value\">$BRANCH</div><div class=\"stat-label\">Branch</div></div></div><p><strong>Modified Files:</strong> $FILES_LIST</p></div></body></html>"
+SUBJECT="Claude Code Session Summary - $PROJECT_NAME"
+if [ -n "$SENDGRID_API_KEY" ] && [ -n "$TEAM_EMAIL" ]; then
+  jq -n --arg to "$TEAM_EMAIL" --arg subject "$SUBJECT" --arg html "$HTML_CONTENT" '{"personalizations":[{"to":[{"email":$to}]}],"from":{"email":"claude@yourdomain.com","name":"Claude Code"},"subject":$subject,"content":[{"type":"text/html","value":$html}]}' | curl -X POST -H "Authorization: Bearer $SENDGRID_API_KEY" -H "Content-Type: application/json" -d @- "https://api.sendgrid.com/v3/mail/send" --silent >/dev/null 2>&1
+fi
+exit 0
+```
+
+### Team Summary Email Generator Configuration Example
+
+Example team summary email generator configuration for customizing email behavior
+
+```json
+{
+  "email": {
+    "team_email": "$TEAM_EMAIL",
+    "sendgrid_api_key": "$SENDGRID_API_KEY",
+    "from_email": "claude@yourdomain.com",
+    "from_name": "Claude Code",
+    "include_git_stats": true,
+    "include_test_results": true,
+    "include_build_status": true,
+    "test_timeout_seconds": 30,
+    "build_timeout_seconds": 60,
+    "max_files_listed": 10,
+    "recent_commits_count": 5
+  }
+}
+```
+```bash
+#!/bin/bash
+echo "📧 Team Summary Email Generator - Preparing session summary..."
+SESSION_END=$(date)
+SESSION_ID=$(date +%Y%m%d_%H%M%S)
+if [ -z "$TEAM_EMAIL" ]; then
+  exit 0
+fi
+if [ -n "$SENDGRID_API_KEY" ]; then
+  EMAIL_METHOD="sendgrid"
+elif command -v mail >/dev/null 2>&1; then
+  EMAIL_METHOD="mail"
+else
+  exit 0
+fi
+PROJECT_NAME=$(basename "$(pwd)" 2>/dev/null || echo 'project')
+BRANCH=$(git branch --show-current 2>/dev/null || echo 'unknown')
+FILES_CHANGED=$(git diff --name-only 2>/dev/null | wc -l | tr -d ' ')
+HTML_CONTENT="<!DOCTYPE html><html><head><style>body{font-family:Arial,sans-serif;line-height:1.6;color:#333;}.header{background:#f4f4f4;padding:20px;border-radius:5px;}.section{margin:20px 0;padding:15px;border-left:4px solid #007cba;}</style></head><body><div class=\"header\"><h1>🤖 Claude Code Session Summary</h1><p><strong>Project:</strong> $PROJECT_NAME</p><p><strong>Session ID:</strong> $SESSION_ID</p><p><strong>Completed:</strong> $SESSION_END</p></div><div class=\"section\"><h2>📊 Development Statistics</h2><p><strong>Branch:</strong> $BRANCH</p><p><strong>Files Modified:</strong> $FILES_CHANGED</p></div></body></html>"
+SUBJECT="Claude Code Session Summary - $PROJECT_NAME ($SESSION_END)"
+if [ "$EMAIL_METHOD" = "sendgrid" ]; then
+  jq -n --arg to "$TEAM_EMAIL" --arg subject "$SUBJECT" --arg html "$HTML_CONTENT" '{"personalizations":[{"to":[{"email":$to}]}],"from":{"email":"claude@yourdomain.com","name":"Claude Code"},"subject":$subject,"content":[{"type":"text/html","value":$html}]}' | curl -X POST -H "Authorization: Bearer $SENDGRID_API_KEY" -H "Content-Type: application/json" -d @- "https://api.sendgrid.com/v3/mail/send" --silent >/dev/null 2>&1
+elif [ "$EMAIL_METHOD" = "mail" ]; then
+  echo "$HTML_CONTENT" | mail -s "$SUBJECT" -a "Content-Type: text/html" "$TEAM_EMAIL"
+fi
+echo "🎯 Team summary email generation complete!"
+exit 0
+```
+```json
+{
+  "hooks": {
+    "stop": {
+      "script": "./.claude/hooks/team-summary-email-generator.sh",
+      "matchers": ["*"]
+    }
+  }
+}
+```
+```bash
+#!/bin/bash
+INPUT=$(cat)
+SESSION_END=$(date)
+SESSION_ID=$(date +%Y%m%d_%H%M%S)
+PROJECT_NAME=$(basename "$(pwd)" 2>/dev/null || echo 'project')
+BRANCH=$(git branch --show-current 2>/dev/null || echo 'unknown')
+FILES_CHANGED=$(git diff --name-only 2>/dev/null | wc -l | tr -d ' ')
+DIFF_STATS=$(git diff --stat 2>/dev/null)
+INSERTIONS=$(echo "$DIFF_STATS" | tail -1 | grep -oE '[0-9]+ insertion' | grep -oE '[0-9]+' || echo "0")
+DELETIONS=$(echo "$DIFF_STATS" | tail -1 | grep -oE '[0-9]+ deletion' | grep -oE '[0-9]+' || echo "0")
+RECENT_COMMITS=$(git log --oneline -5 2>/dev/null || echo "No recent commits")
+TEST_RESULTS="No test results available"
+if [ -f "package.json" ] && grep -q '"test"' package.json 2>/dev/null; then
+  if timeout 30 npm test -- --silent --passWithNoTests 2>/dev/null; then
+    TEST_RESULTS="✅ All tests passed"
+  else
+    TEST_RESULTS="❌ Some tests failed"
+  fi
+fi
+BUILD_STATUS="No build configuration found"
+if [ -f "package.json" ] && grep -q '"build"' package.json 2>/dev/null; then
+  if timeout 60 npm run build >/dev/null 2>&1; then
+    BUILD_STATUS="✅ Build successful"
+  else
+    BUILD_STATUS="❌ Build failed"
+  fi
+fi
+HTML_CONTENT="<!DOCTYPE html><html><head><style>body{font-family:Arial,sans-serif;line-height:1.6;color:#333;}.header{background:#f4f4f4;padding:20px;border-radius:5px;}.section{margin:20px 0;padding:15px;border-left:4px solid #007cba;}.stats{background:#f9f9f9;padding:10px;border-radius:3px;}</style></head><body><div class=\"header\"><h1>🤖 Claude Code Session Summary</h1><p><strong>Project:</strong> $PROJECT_NAME</p><p><strong>Session ID:</strong> $SESSION_ID</p><p><strong>Completed:</strong> $SESSION_END</p></div><div class=\"section\"><h2>📊 Development Statistics</h2><div class=\"stats\"><ul><li><strong>Branch:</strong> $BRANCH</li><li><strong>Files Modified:</strong> $FILES_CHANGED</li><li><strong>Lines Added:</strong> $INSERTIONS</li><li><strong>Lines Removed:</strong> $DELETIONS</li></ul></div></div><div class=\"section\"><h2>🧪 Test Results</h2><p>$TEST_RESULTS</p></div><div class=\"section\"><h2>🏗️ Build Status</h2><p>$BUILD_STATUS</p></div><div class=\"section\"><h2>📝 Recent Commits</h2><pre>$RECENT_COMMITS</pre></div></body></html>"
+SUBJECT="Claude Code Session Summary - $PROJECT_NAME ($SESSION_END)"
+if [ -n "$SENDGRID_API_KEY" ] && [ -n "$TEAM_EMAIL" ]; then
+  jq -n --arg to "$TEAM_EMAIL" --arg subject "$SUBJECT" --arg html "$HTML_CONTENT" '{"personalizations":[{"to":[{"email":$to}]}],"from":{"email":"claude@yourdomain.com","name":"Claude Code"},"subject":$subject,"content":[{"type":"text/html","value":$html}]}' | curl -X POST -H "Authorization: Bearer $SENDGRID_API_KEY" -H "Content-Type: application/json" -d @- "https://api.sendgrid.com/v3/mail/send" --silent >/dev/null 2>&1
+  echo "✅ Email sent successfully via SendGrid"
+elif command -v mail >/dev/null 2>&1 && [ -n "$TEAM_EMAIL" ]; then
+  echo "$HTML_CONTENT" | mail -s "$SUBJECT" -a "Content-Type: text/html" "$TEAM_EMAIL"
+  echo "✅ Email sent via system mail command"
+fi
+exit 0
+```
+```bash
+#!/bin/bash
+SESSION_END=$(date)
+SESSION_ID=$(date +%Y%m%d_%H%M%S)
+PROJECT_NAME=$(basename "$(pwd)" 2>/dev/null || echo 'project')
+USER=$(whoami 2>/dev/null || echo 'developer')
+HOST=$(hostname 2>/dev/null || echo 'unknown')
+BRANCH=$(git branch --show-current 2>/dev/null || git rev-parse --short HEAD 2>/dev/null || echo 'unknown')
+FILES_LIST=$(git diff --name-only 2>/dev/null | head -10 | tr '\n' ',' | sed 's/,$//')
+HTML_CONTENT="<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><style>body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;line-height:1.6;color:#333;max-width:800px;margin:0 auto;padding:20px;}.header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;padding:30px;border-radius:8px;margin-bottom:20px;}.section{background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:20px;margin-bottom:15px;box-shadow:0 2px 4px rgba(0,0,0,0.1);}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;margin-top:15px;}.stat-item{background:#f8f9fa;padding:15px;border-radius:6px;text-align:center;}.stat-value{font-size:24px;font-weight:bold;color:#667eea;}.stat-label{font-size:12px;color:#666;margin-top:5px;}</style></head><body><div class=\"header\"><h1>🤖 Claude Code Session Summary</h1><p>Project: $PROJECT_NAME | Session: $SESSION_ID</p><p>Completed: $SESSION_END | User: $USER@$HOST</p></div><div class=\"section\"><h2>📊 Development Statistics</h2><div class=\"stats\"><div class=\"stat-item\"><div class=\"stat-value\">$BRANCH</div><div class=\"stat-label\">Branch</div></div></div><p><strong>Modified Files:</strong> $FILES_LIST</p></div></body></html>"
+SUBJECT="Claude Code Session Summary - $PROJECT_NAME"
+if [ -n "$SENDGRID_API_KEY" ] && [ -n "$TEAM_EMAIL" ]; then
+  jq -n --arg to "$TEAM_EMAIL" --arg subject "$SUBJECT" --arg html "$HTML_CONTENT" '{"personalizations":[{"to":[{"email":$to}]}],"from":{"email":"claude@yourdomain.com","name":"Claude Code"},"subject":$subject,"content":[{"type":"text/html","value":$html}]}' | curl -X POST -H "Authorization: Bearer $SENDGRID_API_KEY" -H "Content-Type: application/json" -d @- "https://api.sendgrid.com/v3/mail/send" --silent >/dev/null 2>&1
+fi
+exit 0
+```
+```json
+{
+  "email": {
+    "team_email": "$TEAM_EMAIL",
+    "sendgrid_api_key": "$SENDGRID_API_KEY",
+    "from_email": "claude@yourdomain.com",
+    "from_name": "Claude Code",
+    "include_git_stats": true,
+    "include_test_results": true,
+    "include_build_status": true,
+    "test_timeout_seconds": 30,
+    "build_timeout_seconds": 60,
+    "max_files_listed": 10,
+    "recent_commits_count": 5
+  }
+}
+```
+
+## Troubleshooting
+### Hook skips email sending with TEAM_EMAIL not configured
+
+Set the TEAM_EMAIL environment variable before starting Claude Code: export TEAM_EMAIL=team@example.com. Add to .bashrc or .zshrc for persistence across sessions. Verify environment variable. Test with echo $TEAM_EMAIL.
+
+### SendGrid API returns 401 unauthorized error
+
+Verify SENDGRID_API_KEY is valid and has Mail Send permissions. Create API keys at SendGrid dashboard. Test with curl command before troubleshooting hook. Check key is not expired or revoked. Verify API key format.
+
+### Email content shows HTML markup instead of formatted text
+
+Your email client may not support HTML rendering. The hook sends multipart emails with HTML content. Check spam folder, or configure email client to render HTML. Use plain text fallback in email settings. Verify Content-Type header.
+
+### Test and build checks timeout causing incomplete reports
+
+The hook uses 30-60 second timeouts to prevent hanging. For slower builds, adjust timeout values in the script or disable build checks. Results show 'No test results available' on timeout. Consider increasing timeout values. Test build duration separately.
+
+### Git statistics show zero changes despite file modifications
+
+The hook analyzes uncommitted changes using 'git diff'. Stage or commit changes to see them in git analysis. For committed work, check recent commits section which shows last 5 commits regardless of current diff. Verify Git repository state. Check git status.
+
+### System mail command fails with 'mail: command not found'
+
+Install mailutils package: apt-get install mailutils (Ubuntu/Debian) or brew install mailutils (macOS). Configure SMTP settings. Verify mail command availability. Test with: echo 'test' | mail -s 'Test' your@email.com.
+
+### SendGrid email delivery fails with rate limit errors
+
+SendGrid has rate limits based on plan. Check SendGrid dashboard for rate limit status. Implement retry logic with exponential backoff. Consider upgrading SendGrid plan. Monitor email sending frequency.
+
+### HTML email template rendering issues in email clients
+
+Use inline CSS instead of external stylesheets. Test email template in multiple email clients. Use email-safe HTML (avoid modern CSS features). Consider using email template frameworks. Verify HTML structure.

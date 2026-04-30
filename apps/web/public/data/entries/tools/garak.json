@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "key": "tools:garak",
+  "entry": {
+    "category": "tools",
+    "slug": "garak",
+    "title": "Garak",
+    "description": "Open-source LLM vulnerability scanner for probing model behavior, prompt attack surfaces, and safety failures.",
+    "seoTitle": "Garak LLM vulnerability scanner",
+    "seoDescription": "Garak is an open-source LLM vulnerability scanner for probing model behavior, prompt attacks, and safety risks. HeyClaude adds source links, install steps,...",
+    "author": "NVIDIA",
+    "dateAdded": "2026-04-27",
+    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+    "tags": [
+      "security",
+      "red-teaming"
+    ],
+    "keywords": [
+      "llm vulnerability scanner",
+      "ai security testing",
+      "security",
+      "red-teaming",
+      "tools",
+      "claude",
+      "heyclaude",
+      "garak"
+    ],
+    "documentationUrl": "https://github.com/NVIDIA/garak",
+    "websiteUrl": "https://github.com/NVIDIA/garak",
+    "brandName": "Garak",
+    "brandDomain": "github.com",
+    "brandIconUrl": "/api/brand-assets/icon/github.com",
+    "brandAssetSource": "brandfetch",
+    "pricingModel": "open-source",
+    "disclosure": "editorial",
+    "applicationCategory": "SecurityApplication",
+    "operatingSystem": "macOS, Windows, Linux",
+    "cardDescription": "Open-source LLM vulnerability scanner.",
+    "installable": false,
+    "hasPrerequisites": false,
+    "hasTroubleshooting": false,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Editorial notes\n\nGarak is useful for security teams that need repeatable checks for model, prompt, and application-level LLM risks.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+    "sections": [
+      {
+        "title": "Editorial notes",
+        "id": "editorial-notes",
+        "markdown": "Garak is useful for security teams that need repeatable checks for model, prompt, and application-level LLM risks.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Disclosure",
+        "id": "disclosure",
+        "markdown": "Editorial listing. No paid placement or affiliate link is used.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Editorial notes",
+        "id": "editorial-notes"
+      },
+      {
+        "depth": 2,
+        "text": "Disclosure",
+        "id": "disclosure"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/tools/garak.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/garak.mdx",
+    "repoUrl": "https://github.com/NVIDIA/garak",
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://github.com/NVIDIA/garak",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/garak.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

@@ -2,18 +2,18 @@
 title: Codex Plugin Creator Capability Pack Skill
 slug: codex-plugin-creator-capability-pack
 category: skills
-description: 'Expert Codex plugin capability pack for safe plugin scaffolding, manifest quality, MCP integration, and maintainable distribution.'
-cardDescription: 'Design and ship Codex plugins with clean manifests, bounded permissions, and reusable packaging standards.'
+description: "Expert Codex plugin capability pack for safe plugin scaffolding, manifest quality, MCP integration, and maintainable distribution."
+cardDescription: "Design and ship Codex plugins with clean manifests, bounded permissions, and reusable packaging standards."
 seoTitle: Codex Plugin Creator Capability Pack Skill
-seoDescription: 'Advanced AI skill for Codex plugin architecture, secure manifest authoring, and plugin lifecycle operations.'
+seoDescription: "Advanced AI skill for Codex plugin architecture, secure manifest authoring, and plugin lifecycle operations."
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2026-04-11'
-documentationUrl: 'https://github.com/openai/codex'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2026-04-11"
+documentationUrl: "https://github.com/openai/codex"
 downloadUrl: /downloads/skills/codex-plugin-creator-capability-pack.zip
 installable: true
-installCommand: 'curl -L https://heyclau.de/downloads/skills/codex-plugin-creator-capability-pack.zip -o codex-plugin-creator-capability-pack.zip && unzip -o codex-plugin-creator-capability-pack.zip -d ./codex-plugin-creator-capability-pack'
-usageSnippet: 'Use this skill to scaffold and harden Codex plugins with explicit capabilities and low operational risk.'
+installCommand: "curl -L https://heyclau.de/downloads/skills/codex-plugin-creator-capability-pack.zip -o codex-plugin-creator-capability-pack.zip && unzip -o codex-plugin-creator-capability-pack.zip -d ./codex-plugin-creator-capability-pack"
+usageSnippet: "Use this skill to scaffold and harden Codex plugins with explicit capabilities and low operational risk."
 copySnippet: |-
   # Trigger
   "Apply the Codex plugin creator capability pack."
@@ -26,11 +26,11 @@ copySnippet: |-
 skillType: capability-pack
 skillLevel: expert
 verificationStatus: validated
-verifiedAt: '2026-04-11'
+verifiedAt: "2026-04-11"
 retrievalSources:
-  - 'https://github.com/openai/codex'
-  - 'https://github.com/modelcontextprotocol'
-  - 'https://spec.modelcontextprotocol.io/specification/'
+  - "https://github.com/openai/codex"
+  - "https://github.com/modelcontextprotocol"
+  - "https://spec.modelcontextprotocol.io/specification/"
 testedPlatforms:
   - Claude
   - Codex
@@ -62,6 +62,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Knowledge Freshness
 
 This capability pack is pinned to documentation verified on **2026-04-11**.
@@ -76,7 +77,7 @@ This capability pack is pinned to documentation verified on **2026-04-11**.
 
 1. Define plugin scope, trust boundaries, and runtime dependencies.
 2. Build manifest with minimum required capabilities only.
-3. Validate tool behavior and failure paths with smoke tests.
+3. Validate tool behavior and failure paths with regression tests.
 4. Add observability and troubleshooting hooks.
 5. Publish with maintenance and compatibility policy.
 
@@ -101,7 +102,9 @@ This skill helps agents build practical plugins that stay secure and maintainabl
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Production Rules
 
@@ -125,5 +128,5 @@ This skill helps agents build practical plugins that stay secure and maintainabl
 
 1. Plugin plan with trust boundaries.
 2. Manifest with justification per permission.
-3. Validation and smoke-test protocol.
+3. Validation and regression-test protocol.
 4. Maintenance and deprecation plan.

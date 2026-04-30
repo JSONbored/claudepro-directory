@@ -1,0 +1,331 @@
+{
+  "schemaVersion": 1,
+  "key": "mcp:figma-mcp-server",
+  "entry": {
+    "category": "mcp",
+    "slug": "figma-mcp-server",
+    "title": "Figma MCP Server for Claude",
+    "description": "Access designs, export assets, and interact with Figma files through Claude",
+    "seoTitle": "Figma MCP Server for Claude",
+    "seoDescription": "Access designs, export assets, and interact with Figma files through Claude Discover tools for AI development. HeyClaude adds source links, install steps,...",
+    "author": "Figma",
+    "dateAdded": "2025-09-18",
+    "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+    "tags": [
+      "design",
+      "figma",
+      "ui-ux",
+      "assets",
+      "graphics"
+    ],
+    "keywords": [
+      "assets",
+      "claude",
+      "design",
+      "development",
+      "figma",
+      "graphics",
+      "mcp",
+      "mcp servers",
+      "server",
+      "tools",
+      "ui-ux",
+      "heyclaude"
+    ],
+    "readingTime": 1,
+    "difficultyScore": 0,
+    "documentationUrl": "https://help.figma.com/hc/en-us/articles/32132100833559",
+    "brandName": "Figma",
+    "brandDomain": "figma.com",
+    "brandIconUrl": "/api/brand-assets/icon/figma.com",
+    "brandAssetSource": "brandfetch",
+    "cardDescription": "Access designs, export assets, and interact with Figma files through Claude",
+    "installable": true,
+    "installCommand": "claude mcp list && claude mcp status figma",
+    "usageSnippet": "claude mcp list && claude mcp status figma",
+    "copySnippet": "{\n  \"figma\": {\n    \"url\": \"http://127.0.0.1:3845/mcp\",\n    \"transport\": \"http\"\n  }\n}",
+    "configSnippet": "{\n  \"figma\": {\n    \"url\": \"http://127.0.0.1:3845/mcp\",\n    \"transport\": \"http\"\n  }\n}",
+    "estimatedSetupTime": "2 minutes",
+    "difficulty": "beginner",
+    "prerequisites": [
+      "Figma Desktop application installed and running (download from https://www.figma.com/downloads/)",
+      "Figma Desktop Dev Mode MCP Server enabled (check Figma Desktop preferences/settings to enable)",
+      "Figma Desktop running with MCP Server active on local port 3845 (http://127.0.0.1:3845/mcp)",
+      "Internet connection (for initial Figma Desktop installation, though MCP server operates locally)",
+      "Claude Desktop 0.7.0+ or Claude Code with MCP support",
+      "Understanding of Figma design concepts (pages, frames, components, assets, design tokens)",
+      "HTTP transport support (local MCP server on 127.0.0.1:3845, not remote or stdio)",
+      "File permissions in Figma (appropriate access to files you want to interact with)",
+      "WSL users: Windows-native Claude Code installation or port forwarding (MCP binds to 127.0.0.1 which WSL cannot access directly)",
+      "Understanding that MCP Server can't serve assets directly from browser (access through Claude Code or configured MCP client)"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/mcp/figma-mcp-server.mcpb",
+    "downloadTrust": "first-party",
+    "downloadSha256": "0ff339ff6bb2328f6058233db30fe13eac93fd2805270f6817df9cf5ff1c2eee",
+    "body": "## Content\n\nEnable your AI assistants to seamlessly interact with Figma Desktop through the built-in Dev Mode MCP Server. Access design files in real-time, export assets in multiple formats, extract design tokens and specifications, and automate design-to-code workflows directly through natural language commands.\n\n## Features\n\n- Access and browse Figma designs in real-time\n- Export assets in various formats (PNG, SVG, PDF)\n- Read design specifications and properties\n- Navigate through pages and frames programmatically\n- Extract text content and style information\n- Advanced Figma design file and component management with team collaboration features, version control, and design system integration\n- Batch operations support for efficient bulk design operations, component updates, and asset management with automatic rate limit handling and retry logic\n- Real-time design synchronization capabilities with webhook integration support for monitoring design changes and triggering automated workflows\n\n## Use Cases\n\n- Export design assets for development implementation\n- Extract design tokens and specifications\n- Generate code from design components\n- Analyze design systems for consistency\n- Create design documentation automatically\n- Build automated design workflow systems that sync external systems with Figma for real-time design asset management and collaboration\n\n## Installation\n\n### Claude Code\n\n1. claude mcp add --transport http figma-dev-mode-mcp-server http://127.0.0.1:3845/mcp\n2. Verify installation: claude mcp list\n3. Test connection: claude mcp status figma\n\n### Claude Desktop\n\n1. Ensure Figma Desktop is running and open Figma Desktop preferences\n2. Enable Dev Mode MCP Server in Figma Desktop settings (verify it's active on port 3845)\n3. Open Claude Desktop configuration file\n4. Add the Figma server configuration pointing to http://127.0.0.1:3845/mcp with HTTP transport\n5. Restart Claude Desktop\n\n## Requirements\n\n- Figma Desktop application installed and running (download from https://www.figma.com/downloads/)\n- Figma Desktop Dev Mode MCP Server enabled (check Figma Desktop preferences/settings to enable)\n- Figma Desktop running with MCP Server active on local port 3845 (http://127.0.0.1:3845/mcp)\n- Internet connection (for initial Figma Desktop installation, though MCP server operates locally)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Understanding of Figma design concepts (pages, frames, components, assets, design tokens)\n- HTTP transport support (local MCP server on 127.0.0.1:3845, not remote or stdio)\n- File permissions in Figma (appropriate access to files you want to interact with)\n- WSL users: Windows-native Claude Code installation or port forwarding (MCP binds to 127.0.0.1 which WSL cannot access directly)\n- Understanding that MCP Server can't serve assets directly from browser (access through Claude Code or configured MCP client)\n\n## Configuration\n\n```json\n{\n  \"figma\": {\n    \"url\": \"http://127.0.0.1:3845/mcp\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Examples\n\n### Export all icons from the design system as SVG\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Export all icons from the design system as SVG\"\n```\n\n### Get the color palette from this Figma file\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Get the color palette from this Figma file\"\n```\n\n### Extract component specifications for developers\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Extract component specifications for developers\"\n```\n\n### List all text styles used in the design\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"List all text styles used in the design\"\n```\n\n### Get File Nodes\n\nRetrieve specific nodes from a Figma file with version control\n\n```typescript\n// Get Figma file nodes\nconst file = await figma.files.get({\n  file_key: \"file-key\",\n  version: \"latest\",\n  ids: [\"node-id-1\", \"node-id-2\"],\n});\n```\n\n## Security\n\n- Only works with local Figma Desktop instance\n- Requires appropriate file permissions in Figma\n- No external API keys or authentication needed\n- Figma API tokens and personal access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- Figma OAuth access tokens should be used for third-party integrations to ensure proper access control, token lifecycle management, and automatic token refresh\n- Figma file keys and node IDs may expose design structure and team information - ensure Figma resource identifiers are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Figma MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Figma webhook configurations and payloads may contain sensitive design metadata and component information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption\n- Figma Desktop MCP Server runs locally and binds to 127.0.0.1:3845 - ensure local network security and firewall rules prevent unauthorized access to the MCP server endpoint\n\n## Troubleshooting\n\n### Invalid sessionId error from MCP endpoint\n\nChange transport type from sse to http in MCP config. Remove old config: claude mcp remove figma-dev-mode-mcp-server, then re-add with http transport at http://127.0.0.1:3845/mcp.\n\n### HTTP 404 error: MCP server not responding\n\nEnsure Figma Desktop app is running and Dev Mode MCP Server is active. Check Figma preferences to verify MCP Server is enabled. Restart Figma Desktop if server doesn't appear.\n\n### Connection failed: invalid request body error\n\nVerify you're using http transport, not sse. Update config URL to http://127.0.0.1:3845/mcp. Check request format matches MCP protocol specification for initialize request.\n\n### Cannot access assets - 404 on asset requests\n\nMCP Server can't serve assets directly from browser. Access assets through Claude Code or configured MCP client. Verify file is open in Figma Desktop and permissions allow export.\n\n### WSL users cannot connect to local MCP server\n\nFigma MCP binds only to 127.0.0.1 which WSL can't access. Use Windows-native Claude Code installation or configure port forwarding from WSL to Windows host for 127.0.0.1:3845.\n\n### Figma MCP server authentication errors with API tokens\n\nVerify API token is valid and not expired. Check token permissions match required operations. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.\n\n### Figma rate limit errors when accessing large files\n\nImplement exponential backoff retry logic with jitter. Use Figma API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed file data. Figma allows 200 requests per minute per token.\n\n### Figma file or node access denied errors\n\nVerify API token has access to the file. Check file permissions and team membership. Ensure token has required permissions (file read, file write) for target operations.\n\n### Figma MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Figma API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+    "sections": [
+      {
+        "title": "Content",
+        "id": "content",
+        "markdown": "Enable your AI assistants to seamlessly interact with Figma Desktop through the built-in Dev Mode MCP Server. Access design files in real-time, export assets in multiple formats, extract design tokens and specifications, and automate design-to-code workflows directly through natural language commands.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Access and browse Figma designs in real-time\n- Export assets in various formats (PNG, SVG, PDF)\n- Read design specifications and properties\n- Navigate through pages and frames programmatically\n- Extract text content and style information\n- Advanced Figma design file and component management with team collaboration features, version control, and design system integration\n- Batch operations support for efficient bulk design operations, component updates, and asset management with automatic rate limit handling and retry logic\n- Real-time design synchronization capabilities with webhook integration support for monitoring design changes and triggering automated workflows",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Export design assets for development implementation\n- Extract design tokens and specifications\n- Generate code from design components\n- Analyze design systems for consistency\n- Create design documentation automatically\n- Build automated design workflow systems that sync external systems with Figma for real-time design asset management and collaboration",
+        "codeBlocks": []
+      },
+      {
+        "title": "Installation",
+        "id": "installation",
+        "markdown": "### Claude Code\n\n1. claude mcp add --transport http figma-dev-mode-mcp-server http://127.0.0.1:3845/mcp\n2. Verify installation: claude mcp list\n3. Test connection: claude mcp status figma\n\n### Claude Desktop\n\n1. Ensure Figma Desktop is running and open Figma Desktop preferences\n2. Enable Dev Mode MCP Server in Figma Desktop settings (verify it's active on port 3845)\n3. Open Claude Desktop configuration file\n4. Add the Figma server configuration pointing to http://127.0.0.1:3845/mcp with HTTP transport\n5. Restart Claude Desktop",
+        "codeBlocks": []
+      },
+      {
+        "title": "Requirements",
+        "id": "requirements",
+        "markdown": "- Figma Desktop application installed and running (download from https://www.figma.com/downloads/)\n- Figma Desktop Dev Mode MCP Server enabled (check Figma Desktop preferences/settings to enable)\n- Figma Desktop running with MCP Server active on local port 3845 (http://127.0.0.1:3845/mcp)\n- Internet connection (for initial Figma Desktop installation, though MCP server operates locally)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Understanding of Figma design concepts (pages, frames, components, assets, design tokens)\n- HTTP transport support (local MCP server on 127.0.0.1:3845, not remote or stdio)\n- File permissions in Figma (appropriate access to files you want to interact with)\n- WSL users: Windows-native Claude Code installation or port forwarding (MCP binds to 127.0.0.1 which WSL cannot access directly)\n- Understanding that MCP Server can't serve assets directly from browser (access through Claude Code or configured MCP client)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Configuration",
+        "id": "configuration",
+        "markdown": "```json\n{\n  \"figma\": {\n    \"url\": \"http://127.0.0.1:3845/mcp\",\n    \"transport\": \"http\"\n  }\n}\n```",
+        "codeBlocks": [
+          {
+            "language": "json",
+            "code": "{\n  \"figma\": {\n    \"url\": \"http://127.0.0.1:3845/mcp\",\n    \"transport\": \"http\"\n  }\n}"
+          }
+        ]
+      },
+      {
+        "title": "Examples",
+        "id": "examples",
+        "markdown": "### Export all icons from the design system as SVG\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Export all icons from the design system as SVG\"\n```\n\n### Get the color palette from this Figma file\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Get the color palette from this Figma file\"\n```\n\n### Extract component specifications for developers\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Extract component specifications for developers\"\n```\n\n### List all text styles used in the design\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"List all text styles used in the design\"\n```\n\n### Get File Nodes\n\nRetrieve specific nodes from a Figma file with version control\n\n```typescript\n// Get Figma file nodes\nconst file = await figma.files.get({\n  file_key: \"file-key\",\n  version: \"latest\",\n  ids: [\"node-id-1\", \"node-id-2\"],\n});\n```",
+        "codeBlocks": [
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Export all icons from the design system as SVG\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Get the color palette from this Figma file\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Extract component specifications for developers\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"List all text styles used in the design\""
+          },
+          {
+            "language": "typescript",
+            "code": "// Get Figma file nodes\nconst file = await figma.files.get({\n  file_key: \"file-key\",\n  version: \"latest\",\n  ids: [\"node-id-1\", \"node-id-2\"],\n});"
+          }
+        ]
+      },
+      {
+        "title": "Security",
+        "id": "security",
+        "markdown": "- Only works with local Figma Desktop instance\n- Requires appropriate file permissions in Figma\n- No external API keys or authentication needed\n- Figma API tokens and personal access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- Figma OAuth access tokens should be used for third-party integrations to ensure proper access control, token lifecycle management, and automatic token refresh\n- Figma file keys and node IDs may expose design structure and team information - ensure Figma resource identifiers are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Figma MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Figma webhook configurations and payloads may contain sensitive design metadata and component information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption\n- Figma Desktop MCP Server runs locally and binds to 127.0.0.1:3845 - ensure local network security and firewall rules prevent unauthorized access to the MCP server endpoint",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "### Invalid sessionId error from MCP endpoint\n\nChange transport type from sse to http in MCP config. Remove old config: claude mcp remove figma-dev-mode-mcp-server, then re-add with http transport at http://127.0.0.1:3845/mcp.\n\n### HTTP 404 error: MCP server not responding\n\nEnsure Figma Desktop app is running and Dev Mode MCP Server is active. Check Figma preferences to verify MCP Server is enabled. Restart Figma Desktop if server doesn't appear.\n\n### Connection failed: invalid request body error\n\nVerify you're using http transport, not sse. Update config URL to http://127.0.0.1:3845/mcp. Check request format matches MCP protocol specification for initialize request.\n\n### Cannot access assets - 404 on asset requests\n\nMCP Server can't serve assets directly from browser. Access assets through Claude Code or configured MCP client. Verify file is open in Figma Desktop and permissions allow export.\n\n### WSL users cannot connect to local MCP server\n\nFigma MCP binds only to 127.0.0.1 which WSL can't access. Use Windows-native Claude Code installation or configure port forwarding from WSL to Windows host for 127.0.0.1:3845.\n\n### Figma MCP server authentication errors with API tokens\n\nVerify API token is valid and not expired. Check token permissions match required operations. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.\n\n### Figma rate limit errors when accessing large files\n\nImplement exponential backoff retry logic with jitter. Use Figma API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed file data. Figma allows 200 requests per minute per token.\n\n### Figma file or node access denied errors\n\nVerify API token has access to the file. Check file permissions and team membership. Ensure token has required permissions (file read, file write) for target operations.\n\n### Figma MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Figma API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Content",
+        "id": "content"
+      },
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      },
+      {
+        "depth": 2,
+        "text": "Installation",
+        "id": "installation"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Code",
+        "id": "claude-code"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Desktop",
+        "id": "claude-desktop"
+      },
+      {
+        "depth": 2,
+        "text": "Requirements",
+        "id": "requirements"
+      },
+      {
+        "depth": 2,
+        "text": "Configuration",
+        "id": "configuration"
+      },
+      {
+        "depth": 2,
+        "text": "Examples",
+        "id": "examples"
+      },
+      {
+        "depth": 3,
+        "text": "Export all icons from the design system as SVG",
+        "id": "export-all-icons-from-the-design-system-as-svg"
+      },
+      {
+        "depth": 3,
+        "text": "Get the color palette from this Figma file",
+        "id": "get-the-color-palette-from-this-figma-file"
+      },
+      {
+        "depth": 3,
+        "text": "Extract component specifications for developers",
+        "id": "extract-component-specifications-for-developers"
+      },
+      {
+        "depth": 3,
+        "text": "List all text styles used in the design",
+        "id": "list-all-text-styles-used-in-the-design"
+      },
+      {
+        "depth": 3,
+        "text": "Get File Nodes",
+        "id": "get-file-nodes"
+      },
+      {
+        "depth": 2,
+        "text": "Security",
+        "id": "security"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 3,
+        "text": "Invalid sessionId error from MCP endpoint",
+        "id": "invalid-sessionid-error-from-mcp-endpoint"
+      },
+      {
+        "depth": 3,
+        "text": "HTTP 404 error: MCP server not responding",
+        "id": "http-404-error-mcp-server-not-responding"
+      },
+      {
+        "depth": 3,
+        "text": "Connection failed: invalid request body error",
+        "id": "connection-failed-invalid-request-body-error"
+      },
+      {
+        "depth": 3,
+        "text": "Cannot access assets - 404 on asset requests",
+        "id": "cannot-access-assets---404-on-asset-requests"
+      },
+      {
+        "depth": 3,
+        "text": "WSL users cannot connect to local MCP server",
+        "id": "wsl-users-cannot-connect-to-local-mcp-server"
+      },
+      {
+        "depth": 3,
+        "text": "Figma MCP server authentication errors with API tokens",
+        "id": "figma-mcp-server-authentication-errors-with-api-tokens"
+      },
+      {
+        "depth": 3,
+        "text": "Figma rate limit errors when accessing large files",
+        "id": "figma-rate-limit-errors-when-accessing-large-files"
+      },
+      {
+        "depth": 3,
+        "text": "Figma file or node access denied errors",
+        "id": "figma-file-or-node-access-denied-errors"
+      },
+      {
+        "depth": 3,
+        "text": "Figma MCP server connection timeouts or network errors",
+        "id": "figma-mcp-server-connection-timeouts-or-network-errors"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "json",
+        "code": "{\n  \"figma\": {\n    \"url\": \"http://127.0.0.1:3845/mcp\",\n    \"transport\": \"http\"\n  }\n}"
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Export all icons from the design system as SVG\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Get the color palette from this Figma file\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Extract component specifications for developers\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"List all text styles used in the design\""
+      },
+      {
+        "language": "typescript",
+        "code": "// Get Figma file nodes\nconst file = await figma.files.get({\n  file_key: \"file-key\",\n  version: \"latest\",\n  ids: [\"node-id-1\", \"node-id-2\"],\n});"
+      }
+    ],
+    "filePath": "content/mcp/figma-mcp-server.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/figma-mcp-server.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": true,
+    "packageTrust": "first-party",
+    "packageChecksum": "0ff339ff6bb2328f6058233db30fe13eac93fd2805270f6817df9cf5ff1c2eee",
+    "checksumPresent": true,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://help.figma.com/hc/en-us/articles/32132100833559",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/figma-mcp-server.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

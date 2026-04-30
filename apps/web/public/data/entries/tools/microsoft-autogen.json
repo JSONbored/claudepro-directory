@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "key": "tools:microsoft-autogen",
+  "entry": {
+    "category": "tools",
+    "slug": "microsoft-autogen",
+    "title": "Microsoft AutoGen",
+    "description": "Open-source framework for building multi-agent AI applications, conversations, workflows, and autonomous systems.",
+    "seoTitle": "Microsoft AutoGen multi-agent AI framework",
+    "seoDescription": "Microsoft AutoGen is an open-source framework for multi-agent AI applications, workflows, and autonomous systems. HeyClaude adds source links, install...",
+    "author": "Microsoft",
+    "dateAdded": "2026-04-27",
+    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+    "tags": [
+      "agent-framework",
+      "multi-agent"
+    ],
+    "keywords": [
+      "autogen",
+      "multi-agent ai",
+      "agent-framework",
+      "multi-agent",
+      "tools",
+      "claude",
+      "heyclaude",
+      "microsoft autogen"
+    ],
+    "documentationUrl": "https://microsoft.github.io/autogen/",
+    "websiteUrl": "https://microsoft.github.io/autogen/",
+    "brandName": "Microsoft",
+    "brandDomain": "microsoft.github.io",
+    "brandIconUrl": "/api/brand-assets/icon/microsoft.github.io",
+    "brandAssetSource": "brandfetch",
+    "pricingModel": "open-source",
+    "disclosure": "editorial",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "macOS, Windows, Linux",
+    "cardDescription": "Open-source framework for multi-agent AI applications.",
+    "installable": false,
+    "hasPrerequisites": false,
+    "hasTroubleshooting": false,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Editorial notes\n\nAutoGen is a useful reference for multi-agent application patterns, especially where conversation loops and coordination matter.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+    "sections": [
+      {
+        "title": "Editorial notes",
+        "id": "editorial-notes",
+        "markdown": "AutoGen is a useful reference for multi-agent application patterns, especially where conversation loops and coordination matter.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Disclosure",
+        "id": "disclosure",
+        "markdown": "Editorial listing. No paid placement or affiliate link is used.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Editorial notes",
+        "id": "editorial-notes"
+      },
+      {
+        "depth": 2,
+        "text": "Disclosure",
+        "id": "disclosure"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/tools/microsoft-autogen.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/microsoft-autogen.mdx",
+    "repoUrl": "https://github.com/microsoft/autogen",
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 3,
+    "sourceUrls": [
+      "https://microsoft.github.io/autogen/",
+      "https://github.com/microsoft/autogen",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/microsoft-autogen.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

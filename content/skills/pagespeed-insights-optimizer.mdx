@@ -3,16 +3,16 @@ title: PageSpeed Insights Optimization Skill for AI Agents
 slug: pagespeed-insights-optimizer
 category: skills
 description: Structured optimization workflow for PageSpeed Insights and Lighthouse that improves Core Web Vitals without changing UI/UX.
-cardDescription: 'Improve PSI/Lighthouse scores with a strict workflow for LCP, render-blocking resources, and unused JS/CSS while preserving design and behavior.'
+cardDescription: "Improve PSI/Lighthouse scores with a strict workflow for LCP, render-blocking resources, and unused JS/CSS while preserving design and behavior."
 seoTitle: PageSpeed Insights Optimization Skill for AI Agents
-seoDescription: 'Reusable AI skill for PageSpeed Insights optimization focused on Core Web Vitals, practical remediation, and regression-safe performance improvements.'
+seoDescription: "Reusable AI skill for PageSpeed Insights optimization focused on Core Web Vitals, practical remediation, and regression-safe performance improvements."
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2026-04-10'
-documentationUrl: 'https://web.dev/articles/vitals'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2026-04-10"
+documentationUrl: "https://web.dev/articles/vitals"
 downloadUrl: /downloads/skills/pagespeed-insights-optimizer.zip
 installable: true
-installCommand: 'curl -L https://heyclau.de/downloads/skills/pagespeed-insights-optimizer.zip -o pagespeed-insights-optimizer.zip && unzip -o pagespeed-insights-optimizer.zip -d ./pagespeed-insights-optimizer'
+installCommand: "curl -L https://heyclau.de/downloads/skills/pagespeed-insights-optimizer.zip -o pagespeed-insights-optimizer.zip && unzip -o pagespeed-insights-optimizer.zip -d ./pagespeed-insights-optimizer"
 usageSnippet: Use this skill whenever you need measurable PSI/Lighthouse improvements while keeping UI/UX unchanged.
 copySnippet: |-
   # Trigger
@@ -32,9 +32,9 @@ copySnippet: |-
 skillType: general
 skillLevel: advanced
 verificationStatus: draft
-verifiedAt: '2026-04-10'
+verifiedAt: "2026-04-10"
 retrievalSources:
-  - 'https://web.dev/articles/vitals'
+  - "https://web.dev/articles/vitals"
 testedPlatforms:
   - Claude
   - Codex
@@ -73,6 +73,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Overview
 
 This skill gives an AI agent a strict, repeatable process for improving PageSpeed Insights and Lighthouse results without changing your visual design or removing product functionality. It is built for real-world optimization work: isolate bottlenecks, apply minimum-safe fixes, re-measure, and stop once gains flatten.
@@ -86,13 +87,15 @@ This skill gives an AI agent a strict, repeatable process for improving PageSpee
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and other IDE agents**: use the same `SKILL.md` content as a workflow template or prompt file if native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and other IDE agents**: use the same `SKILL.md` content as a workflow template or prompt file if native skill import is unavailable.
 
 ## Prerequisites
 
 - A route to test (production, staging, or preview URL)
 - Baseline Lighthouse/PageSpeed run for **mobile and desktop**
-- Ability to run project checks after edits (`type-check`, `build`, smoke tests)
+- Ability to run project checks after edits (`type-check`, `build`, regression tests)
 - Access to deploy and re-test
 
 ## What This Skill Optimizes

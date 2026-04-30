@@ -9,9 +9,9 @@ seoDescription: >-
   Task management and project tracking with ClickUp integration Discover tools
   for AI development.
 author: hauptsacheNet
-dateAdded: '2025-09-18'
-repoUrl: 'https://github.com/hauptsacheNet/clickup-mcp'
-documentationUrl: 'https://github.com/hauptsacheNet/clickup-mcp'
+dateAdded: "2025-09-18"
+repoUrl: "https://github.com/hauptsacheNet/clickup-mcp"
+documentationUrl: "https://github.com/hauptsacheNet/clickup-mcp"
 downloadUrl: /downloads/mcp/clickup-mcp-server.mcpb
 packageVerified: true
 installable: true
@@ -55,7 +55,7 @@ estimatedSetupTime: 2 minutes
 difficulty: beginner
 prerequisites:
   - ClickUp account with workspace access
-  - 'ClickUp Personal API Token from https://app.clickup.com/settings/apps'
+  - "ClickUp Personal API Token from https://app.clickup.com/settings/apps"
   - ClickUp Team ID (found in ClickUp workspace settings)
   - >-
     Node.js and npm/npx available for running the @hauptsache.net/clickup-mcp
@@ -64,8 +64,8 @@ prerequisites:
     Internet connection for accessing ClickUp API (https://api.clickup.com
     endpoints)
   - Claude Desktop 0.7.0+ or Claude Code with MCP support
-  - 'Rate limit awareness: 100 requests per minute per API token'
-  - 'Understanding of ClickUp workspace, spaces, lists, and tasks structure'
+  - "Rate limit awareness: 100 requests per minute per API token"
+  - "Understanding of ClickUp workspace, spaces, lists, and tasks structure"
   - >-
     Appropriate workspace permissions for target operations (read, write, delete
     as needed)
@@ -98,6 +98,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Content
 
 Manage ClickUp tasks and projects directly through Claude for comprehensive project management.
@@ -160,38 +161,50 @@ Manage ClickUp tasks and projects directly through Claude for comprehensive proj
       "CLICKUP_API_KEY": "${CLICKUP_API_KEY}",
       "CLICKUP_TEAM_ID": "${CLICKUP_TEAM_ID}"
     },
-    "args": [
-      "-y",
-      "@hauptsache.net/clickup-mcp"
-    ],
+    "args": ["-y", "@hauptsache.net/clickup-mcp"],
     "command": "npx"
   }
 }
 ```
 
 ## Examples
+
 ### Create a new task in the Development space
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Create a new task in the Development space"
 ```
+
 ### Update task CL-123 to completed
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Update task CL-123 to completed"
 ```
+
 ### List all my assigned tasks
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "List all my assigned tasks"
 ```
+
 ### Add time entry to current task
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Add time entry to current task"
 ```
+
 ### Create Task with Custom Fields
+
 Create a new ClickUp task with custom fields, assignees, and status
+
 ```typescript
 // Create ClickUp task with custom fields
 const task = await clickup.tasks.create({
@@ -200,10 +213,12 @@ const task = await clickup.tasks.create({
   description: "Task description",
   assignees: ["user-id"],
   status: "in progress",
-  custom_fields: [{
-    id: "custom-field-id",
-    value: "custom-value"
-  }]
+  custom_fields: [
+    {
+      id: "custom-field-id",
+      value: "custom-value",
+    },
+  ],
 });
 ```
 
@@ -220,27 +235,35 @@ const task = await clickup.tasks.create({
 - ClickUp webhook configurations and payloads may contain sensitive project and task data - ensure webhook endpoints are properly secured with authentication and HTTPS encryption
 
 ## Troubleshooting
+
 ### Getting HTTP 429 with rate limit exceeded errors
 
 ClickUp limits to 100 requests per minute per token. Check X-RateLimit-Reset header for reset time. Implement exponential backoff and wait specified seconds before retry.
+
 ### OAuth error: team not authorized for access token
 
 Re-authenticate to authorize workspace access. Verify OAuth scope includes required permissions and check if user revoked authorization. Generate new API token from ClickUp settings if needed.
+
 ### Authorization token missing in header error
 
 Add Authorization header with your API key to all requests. Format: Authorization: YOUR_API_KEY. Verify token is correctly copied from ClickUp API settings without extra spaces.
+
 ### Cannot access tasks or spaces - permission denied
 
 Verify your ClickUp account has access to target spaces and lists. Check workspace admin settings and ensure API token has necessary permissions for workspace and spaces.
+
 ### ClickUp MCP server authentication errors with API tokens
 
 Verify API token is valid and not expired. Check token permissions match required operations. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.
+
 ### ClickUp rate limit errors when managing large projects
 
 Implement exponential backoff retry logic with jitter. Use batch operations to reduce API calls. Cache frequently accessed data. Monitor rate limit headers and adjust request frequency accordingly. ClickUp allows 100 requests per minute per API token.
+
 ### ClickUp workspace or project access denied errors
 
 Verify API token has access to the workspace, space, and projects. Check workspace permissions and project sharing settings. Ensure OAuth scopes include required workspace and project access permissions.
+
 ### ClickUp MCP server connection timeouts or network errors
 
 Check network connectivity and firewall settings. Verify ClickUp API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

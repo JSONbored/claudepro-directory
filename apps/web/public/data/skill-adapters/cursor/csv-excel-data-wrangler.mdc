@@ -1,0 +1,14 @@
+---
+description: "Clean, filter, join, pivot, and export CSV/XLSX data reliably with reproducible steps."
+globs:
+alwaysApply: false
+---
+# CSV/Excel Data Wrangler Skill
+Clean, filter, join, pivot, and export CSV/XLSX data reliably with reproducible steps. Transform messy spreadsheets into production-ready datasets with pandas. Handle encoding issues, data type conversion, missing values, duplicates, and complex merges.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+pip install pandas openpyxl
+```
+## Source
+https://heyclau.de/downloads/skills/csv-excel-data-wrangler.zip

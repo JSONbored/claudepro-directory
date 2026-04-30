@@ -1,0 +1,28 @@
+# LangGraph
+URL: https://heyclau.de/tools/langgraph
+Category: tools
+Author: LangChain
+Date added: 2026-04-27
+Documentation: https://langchain-ai.github.io/langgraph/
+Repository: https://github.com/langchain-ai/langgraph
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/langgraph.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/tools/langgraph
+- Source URLs: https://langchain-ai.github.io/langgraph/, https://github.com/langchain-ai/langgraph, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/langgraph.mdx, https://www.langchain.com/langgraph
+- Brand: LangGraph
+- Brand domain: langchain.com
+- Brand asset source: brandfetch
+- Author: LangChain
+- Last verified: 2026-04-26T23:21:14-06:00
+- Robots: indexable
+## Summary
+Agent orchestration framework for building stateful, controllable, multi-step LLM and agent workflows.
+## Tags
+- agent-framework
+- orchestration
+## Content
+## Editorial notes
+LangGraph is a strong fit for teams building non-trivial agent workflows that need state, branching, and controllable execution.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

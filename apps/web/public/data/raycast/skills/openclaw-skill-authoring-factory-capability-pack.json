@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 2,
+  "key": "skills:openclaw-skill-authoring-factory-capability-pack",
+  "category": "skills",
+  "slug": "openclaw-skill-authoring-factory-capability-pack",
+  "title": "OpenClaw Skill Authoring Factory Capability Pack Skill",
+  "author": "JSONbored",
+  "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/openclaw-skill-authoring-factory-capability-pack.zip -o openclaw-skill-authoring-factory-capability-pack.zip && unzip -o openclaw-skill-authoring-factory-capability-pack.zip -d ./openclaw-skill-authoring-factory-capability-pack\n\nUsage:\nUse this skill to create, verify, and package OpenClaw-compatible skills at production quality.\n\nAsset:\n# Trigger\n\"Apply the OpenClaw skill authoring factory capability pack.\"\n\n# Required output\n1) Skill specification and success criteria\n2) Retrieval and freshness plan\n3) Packaging and validation output\n4) Distribution metadata checklist",
+  "detailMarkdown": "# OpenClaw Skill Authoring Factory Capability Pack Skill\n\nExpert OpenClaw skill-authoring capability pack for repeatable research, validation, packaging, and distribution workflows.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/openclaw-skill-authoring-factory-capability-pack.zip -o openclaw-skill-authoring-factory-capability-pack.zip && unzip -o openclaw-skill-authoring-factory-capability-pack.zip -d ./openclaw-skill-authoring-factory-capability-pack\n```\n\n## Usage\nUse this skill to create, verify, and package OpenClaw-compatible skills at production quality.",
+  "webUrl": "https://heyclau.de/skills/openclaw-skill-authoring-factory-capability-pack",
+  "canonicalUrl": "https://heyclau.de/skills/openclaw-skill-authoring-factory-capability-pack",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/openclaw-skill-authoring-factory-capability-pack.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/openclaw-skill-authoring-factory-capability-pack",
+  "seoTitle": "OpenClaw Skill Authoring Factory Capability Pack Skill",
+  "seoDescription": "Advanced AI skill for creating and maintaining production-grade OpenClaw skills with reliable packaging and validation. HeyClaude adds source links, install...",
+  "repoUrl": "https://github.com/openclaw/openclaw",
+  "documentationUrl": "https://github.com/openclaw/openclaw"
+}

@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "key": "tools:stagehand",
+  "entry": {
+    "category": "tools",
+    "slug": "stagehand",
+    "title": "Stagehand",
+    "description": "Open-source browser automation framework for combining code, Playwright-style control, and AI-assisted web actions.",
+    "seoTitle": "Stagehand AI browser automation",
+    "seoDescription": "Stagehand is an open-source browser automation framework for combining code, browser control, and AI actions. HeyClaude adds source links, install steps,...",
+    "author": "Browserbase",
+    "dateAdded": "2026-04-27",
+    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+    "tags": [
+      "browser-automation",
+      "open-source"
+    ],
+    "keywords": [
+      "ai browser automation",
+      "browser agents",
+      "browser-automation",
+      "open-source",
+      "tools",
+      "claude",
+      "heyclaude",
+      "stagehand"
+    ],
+    "documentationUrl": "https://docs.stagehand.dev",
+    "websiteUrl": "https://www.stagehand.dev",
+    "brandName": "Stagehand",
+    "brandDomain": "stagehand.dev",
+    "brandIconUrl": "/api/brand-assets/icon/stagehand.dev",
+    "brandAssetSource": "brandfetch",
+    "pricingModel": "open-source",
+    "disclosure": "heyclaude_pick",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "macOS, Windows, Linux",
+    "cardDescription": "AI-assisted browser automation framework.",
+    "installable": false,
+    "hasPrerequisites": false,
+    "hasTroubleshooting": false,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Editorial notes\n\nStagehand is a strong fit for agent workflows that need deterministic browser automation with optional AI assistance.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+    "sections": [
+      {
+        "title": "Editorial notes",
+        "id": "editorial-notes",
+        "markdown": "Stagehand is a strong fit for agent workflows that need deterministic browser automation with optional AI assistance.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Disclosure",
+        "id": "disclosure",
+        "markdown": "Editorial listing. No paid placement or affiliate link is used.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Editorial notes",
+        "id": "editorial-notes"
+      },
+      {
+        "depth": 2,
+        "text": "Disclosure",
+        "id": "disclosure"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/tools/stagehand.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/stagehand.mdx",
+    "repoUrl": "https://github.com/browserbase/stagehand",
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": true,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 4,
+    "sourceUrls": [
+      "https://docs.stagehand.dev",
+      "https://github.com/browserbase/stagehand",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/stagehand.mdx",
+      "https://www.stagehand.dev"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

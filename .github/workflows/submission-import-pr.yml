@@ -1,0 +1,158 @@
+name: Submission Import PR
+
+on:
+  issues:
+    types:
+      - labeled
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  import-submission:
+    if: github.event.action == 'labeled' && !github.event.issue.pull_request && contains(github.event.issue.labels.*.name, 'content-submission') && (github.event.label.name == 'accepted' || github.event.label.name == 'import-approved')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: submission-import-${{ github.event.issue.number }}
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@4f4305e1fe60ad818b8ae6fc4a697cc47eab0b2d
+
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Write issue payload
+        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553
+        with:
+          script: |
+            const fs = require("node:fs");
+            const issueNumber = context.payload.issue?.number;
+            if (!issueNumber) core.setFailed("Missing issue number");
+            const { data: issue } = await github.rest.issues.get({
+              ...context.repo,
+              issue_number: issueNumber
+            });
+            if (issue.pull_request) core.setFailed("Submission imports require an issue, not a pull request");
+            fs.mkdirSync(".github/tmp", { recursive: true });
+            fs.writeFileSync(
+              ".github/tmp/issue.json",
+              JSON.stringify(issue, null, 2),
+              "utf8"
+            );
+
+      - name: Validate submission issue
+        run: |
+          node scripts/validate-submission-issue.mjs \
+            --issue-json .github/tmp/issue.json \
+            --output .github/tmp/submission-validation.json
+
+      - name: Fail when submission issue is invalid
+        run: node scripts/ci/fail-invalid-submission-report.mjs
+
+      - name: Import accepted submission
+        run: |
+          node scripts/import-submission-issue.mjs \
+            --issue-json .github/tmp/issue.json
+
+      - name: Build registry artifacts
+        run: pnpm --filter web run prebuild
+
+      - name: Refresh README
+        run: pnpm generate:readme
+
+      - name: Validate imported content
+        run: |
+          pnpm validate:content:strict
+          pnpm validate:issue-templates
+          pnpm validate:packages
+          pnpm validate:raycast-feed
+          pnpm test:submission-intake
+          pnpm test:registry-artifacts
+          pnpm test:seo-jsonld
+
+      - name: Build PR metadata
+        id: metadata
+        run: |
+          node - <<'NODE' >> "$GITHUB_OUTPUT"
+          const fs = require("node:fs");
+          const issue = JSON.parse(fs.readFileSync(".github/tmp/issue.json", "utf8"));
+          const report = JSON.parse(fs.readFileSync(".github/tmp/submission-validation.json", "utf8"));
+          const category = report.category || "content";
+          const slug = report.fields?.slug || `issue-${issue.number}`;
+          const title = report.fields?.name || slug;
+          const issueAuthor = issue.user?.login || "";
+          const issueAuthorId = issue.user?.id || "";
+          console.log(`issue_number=${issue.number}`);
+          console.log(`issue_author=${issueAuthor}`);
+          console.log(`issue_author_id=${issueAuthorId}`);
+          console.log(`category=${category}`);
+          console.log(`slug=${slug}`);
+          console.log(`entry_title=${title}`);
+          console.log(`branch=automation/submission-${issue.number}-${slug}`);
+          console.log(`commit_title=feat(content): add ${category} ${slug}`);
+          console.log(`pr_title=feat(content): add ${category} ${slug}`);
+          NODE
+
+      - name: Create content import PR
+        id: cpr
+        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676
+        with:
+          branch: ${{ steps.metadata.outputs.branch }}
+          title: ${{ steps.metadata.outputs.pr_title }}
+          commit-message: |
+            ${{ steps.metadata.outputs.commit_title }}
+
+            Co-authored-by: ${{ steps.metadata.outputs.issue_author }} <${{ steps.metadata.outputs.issue_author_id }}+${{ steps.metadata.outputs.issue_author }}@users.noreply.github.com>
+          delete-branch: true
+          add-paths: |
+            content/**
+            apps/web/public/data/**
+            apps/web/src/generated/**
+            README.md
+          body: |
+            ## Summary
+            - Imports accepted submission #${{ steps.metadata.outputs.issue_number }} for `${{ steps.metadata.outputs.category }}/${{ steps.metadata.outputs.slug }}`
+
+            ## What changed
+            - Added the reviewed content file
+            - Regenerated registry artifacts and README output
+            - Preserved issue-first review before publication
+
+            ## Validation
+            - `pnpm validate:content:strict`
+            - `pnpm validate:issue-templates`
+            - `pnpm validate:packages`
+            - `pnpm validate:raycast-feed`
+            - `pnpm test:submission-intake`
+            - `pnpm test:registry-artifacts`
+            - `pnpm test:seo-jsonld`
+
+            ## Notes
+            - Closes #${{ steps.metadata.outputs.issue_number }} after merge.
+
+      - name: Link PR on submission issue
+        if: ${{ steps.cpr.outputs.pull-request-url != '' }}
+        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: Number("${{ steps.metadata.outputs.issue_number }}"),
+              body: `Maintainer-approved import PR opened: ${{ steps.cpr.outputs.pull-request-url }}`
+            });

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 2,
+  "key": "statuslines:five-hour-window-tracker",
+  "category": "statuslines",
+  "slug": "five-hour-window-tracker",
+  "title": "Five Hour Window Tracker - Statuslines",
+  "author": "JSONbored",
+  "copyText": "Claude config:\n{\n  \"statusLine\": {\n    \"type\": \"command\",\n    \"command\": \"$CLAUDE_PROJECT_DIR/.claude/statuslines/five-hour-window-tracker.sh\",\n    \"refreshInterval\": 1000\n  }\n}\n\nUsage:\n✓ 5H Window: ████████████░░░░░░░░ 60% | 2h 0m left\n\nAsset:\n#!/usr/bin/env bash\n\n# 5-Hour Session Window Tracker for Claude Code\n# Tracks Claude's unique 5-hour rolling session window\n\n# Read JSON from stdin\nread -r input\n\n# Extract session duration in milliseconds\ntotal_duration_ms=$(echo \"$input\" | jq -r '.cost.total_duration_ms // 0')\n\n# Convert to minutes and hours\nduration_minutes=$((total_duration_ms / 60000))\nduration_hours=$((duration_minutes / 60))\nremaining_minutes=$((duration_minutes % 60))\n\n# 5-hour window is 300 minutes\nWINDOW_LIMIT=300\ntime_remaining=$((WINDOW_LIMIT - duration_minutes))\n\n# Calculate percentage of window used\nif [ $duration_minutes -gt 0 ]; then\n  percentage_used=$(( (duration_minutes * 100) / WINDOW_LIMIT ))\nelse\n  percentage_used=0\nfi\n\n# Prevent overflow (sessions can continue beyond 5 hours in practice)\nif [ $percentage_used -gt 100 ]; then\n  percentage_used=100\n  time_remaining=0\nfi\n\n# Color coding based on window usage\nif [ $percentage_used -lt 50 ]; then\n  STATUS_COLOR=\"\\033[38;5;46m\"   # Green: < 50% used\n  STATUS_ICON=\"✓\"\nelif [ $percentage_used -lt 80 ]; then\n  STATUS_COLOR=\"\\033[38;5;226m\"  # Yellow: 50-80% used\n  STATUS_ICON=\"⚠\"\nelse\n  STATUS_COLOR=\"\\033[38;5;196m\"  # Red: > 80% used\n  STATUS_ICON=\"⏰\"\nfi\n\n# Build progress bar (20 characters wide)\nbar_filled=$(( percentage_used / 5 ))  # Each char = 5%\nbar_empty=$(( 20 - bar_filled ))\nbar=$(printf \"█%.0s\" $(seq 1 $bar_filled))$(printf \"░%.0s\" $(seq 1 $bar_empty))\n\n# Format time remaining\nif [ $time_remaining -gt 60 ]; then\n  remaining_hours=$((time_remaining / 60))\n  remaining_mins=$((time_remaining % 60))\n  time_display=\"${remaining_hours}h ${remaining_mins}m\"\nelif [ $time_remaining -gt 0 ]; then\n  time_display=\"${time_remaining}m\"\nelse\n  time_display=\"EXPIRED\"\nfi\n\nRESET=\"\\033[0m\"\n\n# Output statusline\necho -e \"${STATUS_ICON} 5H Window: ${STATUS_COLOR}${bar}${RESET} ${percentage_used}% | ${STATUS_COLOR}${time_display}${RESET} left\"",
+  "detailMarkdown": "# Five Hour Window Tracker - Statuslines\n\nClaude Code 5-hour rolling session window tracker with visual progress bar, time remaining countdown, and expiry warnings for usage management.\n\n## Config\n```json\n{\n  \"statusLine\": {\n    \"type\": \"command\",\n    \"command\": \"$CLAUDE_PROJECT_DIR/.claude/statuslines/five-hour-window-tracker.sh\",\n    \"refreshInterval\": 1000\n  }\n}\n```\n\n## Usage\n✓ 5H Window: ████████████░░░░░░░░ 60% | 2h 0m left",
+  "webUrl": "https://heyclau.de/statuslines/five-hour-window-tracker",
+  "canonicalUrl": "https://heyclau.de/statuslines/five-hour-window-tracker",
+  "llmsUrl": "https://heyclau.de/data/llms/statuslines/five-hour-window-tracker.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/statuslines/five-hour-window-tracker",
+  "seoTitle": "Five Hour Window Tracker - Statuslines",
+  "seoDescription": "Claude Code 5-hour rolling session window tracker with visual progress bar, time remaining countdown, and expiry warnings for usage management. Discover tool...",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.claude.com/en/docs/claude-code/statusline"
+}

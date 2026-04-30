@@ -2,14 +2,14 @@
 title: Supabase Realtime Database Builder Skill
 slug: supabase-realtime-database
 category: skills
-description: 'Build full-stack applications with Supabase Postgres, real-time subscriptions, Edge Functions, and pgvector AI integration for 4M+ developers.'
-cardDescription: 'Build full-stack applications with Supabase Postgres, real-time subscriptions, Edge Functions, and pgvector AI integration for 4M+ develo...'
+description: "Build full-stack applications with Supabase Postgres, real-time subscriptions, Edge Functions, and pgvector AI integration for 4M+ developers."
+cardDescription: "Build full-stack applications with Supabase Postgres, real-time subscriptions, Edge Functions, and pgvector AI integration for 4M+ develo..."
 seoTitle: Supabase Realtime Database Builder Skill
-seoDescription: 'Build full-stack applications with Supabase Postgres, real-time subscriptions, Edge Functions, and pgvector AI integration for 4M+ developers. Create complet...'
+seoDescription: "Build full-stack applications with Supabase Postgres, real-time subscriptions, Edge Functions, and pgvector AI integration for 4M+ developers. Create complet..."
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-16'
-documentationUrl: 'https://supabase.com/docs'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-16"
+documentationUrl: "https://supabase.com/docs"
 downloadUrl: /downloads/skills/supabase-realtime-database.zip
 installable: true
 installCommand: npm install @supabase/supabase-js
@@ -35,9 +35,9 @@ copySnippet: |-
 skillType: general
 skillLevel: advanced
 verificationStatus: draft
-verifiedAt: '2025-10-16'
+verifiedAt: "2025-10-16"
 retrievalSources:
-  - 'https://supabase.com/docs'
+  - "https://supabase.com/docs"
 testedPlatforms:
   - Claude
   - Codex
@@ -47,7 +47,7 @@ testedPlatforms:
   - Gemini
 prerequisites:
   - Supabase account (free tier available)
-  - '@supabase/supabase-js ^2.38.0'
+  - "@supabase/supabase-js ^2.38.0"
   - Node.js 18+
   - Supabase CLI for local development
   - Supabase project with Realtime enabled in project settings (Dashboard > Project Settings > API > Realtime)
@@ -78,6 +78,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 Build full-stack applications with Supabase Postgres, real-time subscriptions, Edge Functions, and pgvector AI integration for 4M+ developers. Create complete backend systems using Supabase - the open-source Firebase alternative with PostgreSQL database, real-time subscriptions via WebSockets (postgres_changes, broadcast, presence), built-in authentication with multiple providers, file storage with access control, and Edge Functions with Deno for custom business logic. Includes automatic REST and GraphQL APIs, Row Level Security (RLS) policies, TypeScript type generation, connection pooling, and pgvector for AI embeddings and similarity search.
 
 ## Content
@@ -97,18 +98,21 @@ Claude can build complete backend systems using Supabase, the open-source Fireba
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
-
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 
 **Required:**
+
 - Claude Pro subscription or Claude Code CLI
 - Supabase account (free tier available)
 - Node.js 18+ for client libraries
 - Basic SQL and JavaScript knowledge
 
 **What Claude handles automatically:**
+
 - Setting up Supabase project and database schema
 - Creating Row Level Security (RLS) policies
 - Generating TypeScript types from database
@@ -125,6 +129,7 @@ Claude can build complete backend systems using Supabase, the open-source Fireba
 **Prompt:** "Set up a Supabase project for a task management app with users, projects, tasks tables. Include RLS policies and TypeScript types."
 
 Claude will:
+
 1. Create database schema with foreign keys
 2. Set up RLS policies for multi-tenant data
 3. Generate migration files
@@ -138,6 +143,7 @@ Claude will:
 **Prompt:** "Build real-time chat functionality where users see messages instantly when posted. Include typing indicators and online presence."
 
 Claude will:
+
 1. Create messages table with indexes
 2. Set up real-time subscription channel
 3. Implement message broadcasting
@@ -151,6 +157,7 @@ Claude will:
 **Prompt:** "Create a semantic search system using pgvector. Store document embeddings from OpenAI and enable similarity search with cosine distance."
 
 Claude will:
+
 1. Enable pgvector extension
 2. Create table with vector column
 3. Generate embeddings with OpenAI
@@ -164,6 +171,7 @@ Claude will:
 **Prompt:** "Build Edge Functions that: send welcome emails on signup, process webhook from Stripe, and run nightly data aggregation job."
 
 Claude will:
+
 1. Create Deno Edge Functions
 2. Set up function triggers (database, HTTP, cron)
 3. Implement email sending with Resend
@@ -189,6 +197,7 @@ Claude will:
 ## Common Workflows
 
 ### Complete SaaS Backend
+
 ```
 "Build a SaaS backend with Supabase:
 1. Authentication with email, Google, GitHub OAuth
@@ -202,6 +211,7 @@ Claude will:
 ```
 
 ### Social Media Platform
+
 ```
 "Create social media backend:
 1. User profiles with avatars in Storage
@@ -215,6 +225,7 @@ Claude will:
 ```
 
 ### IoT Data Collection
+
 ```
 "Build IoT data collection system:
 1. Device registration and authentication
@@ -228,6 +239,7 @@ Claude will:
 ```
 
 ### AI-Powered Knowledge Base
+
 ```
 "Create knowledge base with AI:
 1. Document storage with chunking

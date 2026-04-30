@@ -1,0 +1,234 @@
+{
+  "schemaVersion": 1,
+  "key": "collections:debugging-troubleshooting-system",
+  "entry": {
+    "category": "collections",
+    "slug": "debugging-troubleshooting-system",
+    "title": "Debug & Troubleshoot",
+    "description": "Complete debugging toolkit for identifying, analyzing, and resolving complex software issues. Combines AI-assisted debugging with powerful diagnostic commands.",
+    "seoTitle": "Debug & Troubleshoot",
+    "seoDescription": "Complete debugging toolkit for identifying, analyzing, and resolving complex software issues. Combines AI-assisted debugging with powerful diagnostic commands.",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2025-10-02",
+    "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+    "tags": [
+      "debugging",
+      "troubleshooting",
+      "error-handling",
+      "diagnostics",
+      "problem-solving"
+    ],
+    "keywords": [
+      "claude",
+      "collections",
+      "debugging",
+      "development",
+      "diagnostics",
+      "error-handling",
+      "problem-solving",
+      "system",
+      "tools",
+      "troubleshooting",
+      "heyclaude",
+      "debug troubleshoot"
+    ],
+    "readingTime": 1,
+    "difficultyScore": 0,
+    "cardDescription": "Complete debugging toolkit for identifying, analyzing, and resolving complex software issues.",
+    "installable": false,
+    "usageSnippet": "Start with `debugging-assistant-agent` → `debug` → `explain`",
+    "items": [
+      {
+        "slug": "debugging-assistant-agent",
+        "category": "agents"
+      },
+      {
+        "slug": "debug",
+        "category": "commands"
+      },
+      {
+        "slug": "explain",
+        "category": "commands"
+      }
+    ],
+    "installationOrder": [
+      "debugging-assistant-agent",
+      "debug",
+      "explain"
+    ],
+    "estimatedSetupTime": "10 minutes",
+    "difficulty": "intermediate",
+    "prerequisites": [
+      "Basic debugging knowledge",
+      "Access to application logs",
+      "Development environment setup"
+    ],
+    "hasPrerequisites": true,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "Complete debugging toolkit for identifying, analyzing, and resolving complex software issues. Combines AI-assisted debugging with powerful diagnostic commands.\n\n## Features\n\n- AI-powered error analysis and resolution\n- Step-by-step debugging guidance\n- Root cause identification\n- Code explanation for complex bugs\n\n## Use Cases\n\n- Resolving production bugs quickly\n- Understanding unfamiliar codebase issues\n- Debugging complex asynchronous code\n- Training junior developers on debugging techniques\n\n## TL;DR\n\nA systematic debugging toolkit with error analysis patterns, logging strategies, and troubleshooting workflows. Reduce time spent debugging with Claude-powered root cause analysis.\n\n- Structured logging and error tracking configurations\n- Debug workflows for common error patterns\n- Performance profiling and optimization guides\n- Production incident response playbooks\n\nDebug faster and more systematically with this collection of logging frameworks, error analysis prompts, and troubleshooting workflows optimized for Claude-assisted debugging.\n\n## Collection Overview\n\n**Collection Type:** Development Tools\n**Focus Area:** Debugging & Performance\n**Skill Level:** All Levels\n**Time Saving:** 40-60% reduction in debugging time\n\n## What's Included\n\n## Collection Contents\n\nSystematic debugging and troubleshooting\n\n- **Structured Logging** (Logging): Winston, Pino, and structured logging configs with error context and trace IDs.\n- **Error Analysis** (Analysis): Claude prompts for stack trace analysis, root cause investigation, and solution generation.\n- **Performance Tools** (Profiling): CPU profiling, memory leak detection, and performance bottleneck identification workflows.\n- **Observability** (Monitoring): Sentry, DataDog, and APM integrations with alert configurations and dashboards.\n\n## Quick Start\n\nSet up structured logging first, then add error tracking and monitoring. Use Claude prompts to analyze errors and generate fixes systematically.\n\n## Prerequisites\n\n- Basic debugging knowledge\n- Access to application logs\n- Development environment setup\n\n## Recommended Order\n\n1. `debugging-assistant-agent`\n2. `debug`\n3. `explain`\n\n## Troubleshooting\n\n### Collection items fail to load with 'missing component' errors\n\nVerify all items exist in respective category folders (agents/, commands/). Install missing components individually first, then activate collection.\n\n### Prerequisites check passes but debugging features still unavailable\n\nEnsure application logs are accessible and readable. Check development environment PATH includes debugger tools. Restart IDE after installing dependencies.\n\n### Debugging agent and debug command conflict causing duplicate output\n\nUse agent for systematic analysis, command for quick fixes. Disable one component temporarily if conflicts persist. Check configuration.systemPrompt doesn't overlap.\n\n### Installation order not followed, components incompatible after setup\n\nRemove all collection items and reinstall in specified order: debugging-assistant-agent, debug, explain. Clear Claude cache between installations.",
+    "sections": [
+      {
+        "title": "Overview",
+        "id": "overview",
+        "markdown": "Complete debugging toolkit for identifying, analyzing, and resolving complex software issues. Combines AI-assisted debugging with powerful diagnostic commands.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- AI-powered error analysis and resolution\n- Step-by-step debugging guidance\n- Root cause identification\n- Code explanation for complex bugs",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Resolving production bugs quickly\n- Understanding unfamiliar codebase issues\n- Debugging complex asynchronous code\n- Training junior developers on debugging techniques",
+        "codeBlocks": []
+      },
+      {
+        "title": "TL;DR",
+        "id": "tldr",
+        "markdown": "A systematic debugging toolkit with error analysis patterns, logging strategies, and troubleshooting workflows. Reduce time spent debugging with Claude-powered root cause analysis.\n\n- Structured logging and error tracking configurations\n- Debug workflows for common error patterns\n- Performance profiling and optimization guides\n- Production incident response playbooks\n\nDebug faster and more systematically with this collection of logging frameworks, error analysis prompts, and troubleshooting workflows optimized for Claude-assisted debugging.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Collection Overview",
+        "id": "collection-overview",
+        "markdown": "**Collection Type:** Development Tools\n**Focus Area:** Debugging & Performance\n**Skill Level:** All Levels\n**Time Saving:** 40-60% reduction in debugging time",
+        "codeBlocks": []
+      },
+      {
+        "title": "Collection Contents",
+        "id": "collection-contents",
+        "markdown": "Systematic debugging and troubleshooting\n\n- **Structured Logging** (Logging): Winston, Pino, and structured logging configs with error context and trace IDs.\n- **Error Analysis** (Analysis): Claude prompts for stack trace analysis, root cause investigation, and solution generation.\n- **Performance Tools** (Profiling): CPU profiling, memory leak detection, and performance bottleneck identification workflows.\n- **Observability** (Monitoring): Sentry, DataDog, and APM integrations with alert configurations and dashboards.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Quick Start",
+        "id": "quick-start",
+        "markdown": "Set up structured logging first, then add error tracking and monitoring. Use Claude prompts to analyze errors and generate fixes systematically.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Prerequisites",
+        "id": "prerequisites",
+        "markdown": "- Basic debugging knowledge\n- Access to application logs\n- Development environment setup",
+        "codeBlocks": []
+      },
+      {
+        "title": "Recommended Order",
+        "id": "recommended-order",
+        "markdown": "1. `debugging-assistant-agent`\n2. `debug`\n3. `explain`",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "### Collection items fail to load with 'missing component' errors\n\nVerify all items exist in respective category folders (agents/, commands/). Install missing components individually first, then activate collection.\n\n### Prerequisites check passes but debugging features still unavailable\n\nEnsure application logs are accessible and readable. Check development environment PATH includes debugger tools. Restart IDE after installing dependencies.\n\n### Debugging agent and debug command conflict causing duplicate output\n\nUse agent for systematic analysis, command for quick fixes. Disable one component temporarily if conflicts persist. Check configuration.systemPrompt doesn't overlap.\n\n### Installation order not followed, components incompatible after setup\n\nRemove all collection items and reinstall in specified order: debugging-assistant-agent, debug, explain. Clear Claude cache between installations.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      },
+      {
+        "depth": 2,
+        "text": "TL;DR",
+        "id": "tldr"
+      },
+      {
+        "depth": 2,
+        "text": "Collection Overview",
+        "id": "collection-overview"
+      },
+      {
+        "depth": 2,
+        "text": "What's Included",
+        "id": "whats-included"
+      },
+      {
+        "depth": 2,
+        "text": "Collection Contents",
+        "id": "collection-contents"
+      },
+      {
+        "depth": 2,
+        "text": "Quick Start",
+        "id": "quick-start"
+      },
+      {
+        "depth": 2,
+        "text": "Prerequisites",
+        "id": "prerequisites"
+      },
+      {
+        "depth": 2,
+        "text": "Recommended Order",
+        "id": "recommended-order"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 3,
+        "text": "Collection items fail to load with 'missing component' errors",
+        "id": "collection-items-fail-to-load-with-missing-component-errors"
+      },
+      {
+        "depth": 3,
+        "text": "Prerequisites check passes but debugging features still unavailable",
+        "id": "prerequisites-check-passes-but-debugging-features-still-unavailable"
+      },
+      {
+        "depth": 3,
+        "text": "Debugging agent and debug command conflict causing duplicate output",
+        "id": "debugging-agent-and-debug-command-conflict-causing-duplicate-output"
+      },
+      {
+        "depth": 3,
+        "text": "Installation order not followed, components incompatible after setup",
+        "id": "installation-order-not-followed-components-incompatible-after-setup"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/collections/debugging-troubleshooting-system.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/debugging-troubleshooting-system.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 1,
+    "sourceUrls": [
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/debugging-troubleshooting-system.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

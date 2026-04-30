@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "key": "tools:bolt-new",
+  "entry": {
+    "category": "tools",
+    "slug": "bolt-new",
+    "title": "Bolt",
+    "description": "Browser-based AI app builder for creating, editing, running, and deploying web projects from prompts.",
+    "seoTitle": "Bolt browser AI app builder",
+    "seoDescription": "Bolt is a browser-based AI app builder for creating, editing, running, and deploying web projects from prompts. HeyClaude adds source links, install steps,...",
+    "author": "StackBlitz",
+    "dateAdded": "2026-04-27",
+    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+    "tags": [
+      "app-builder",
+      "prototyping"
+    ],
+    "keywords": [
+      "browser app builder",
+      "ai web development",
+      "app-builder",
+      "prototyping",
+      "tools",
+      "claude",
+      "heyclaude",
+      "bolt"
+    ],
+    "documentationUrl": "https://support.bolt.new",
+    "websiteUrl": "https://bolt.new",
+    "brandName": "Bolt",
+    "brandDomain": "bolt.new",
+    "brandIconUrl": "/api/brand-assets/icon/bolt.new",
+    "brandAssetSource": "brandfetch",
+    "pricingModel": "freemium",
+    "disclosure": "editorial",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Web",
+    "cardDescription": "Browser AI app builder for web projects.",
+    "installable": false,
+    "hasPrerequisites": false,
+    "hasTroubleshooting": false,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Editorial notes\n\nBolt is relevant for users who want prompt-to-running-app workflows in a browser environment with deployment-oriented iteration.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+    "sections": [
+      {
+        "title": "Editorial notes",
+        "id": "editorial-notes",
+        "markdown": "Bolt is relevant for users who want prompt-to-running-app workflows in a browser environment with deployment-oriented iteration.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Disclosure",
+        "id": "disclosure",
+        "markdown": "Editorial listing. No paid placement or affiliate link is used.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Editorial notes",
+        "id": "editorial-notes"
+      },
+      {
+        "depth": 2,
+        "text": "Disclosure",
+        "id": "disclosure"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/tools/bolt-new.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/bolt-new.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 3,
+    "sourceUrls": [
+      "https://support.bolt.new",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/bolt-new.mdx",
+      "https://bolt.new"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

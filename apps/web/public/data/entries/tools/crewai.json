@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "key": "tools:crewai",
+  "entry": {
+    "category": "tools",
+    "slug": "crewai",
+    "title": "CrewAI",
+    "description": "Framework and platform for building multi-agent workflows, role-based agents, process automation, and AI crews.",
+    "seoTitle": "CrewAI multi-agent workflow framework",
+    "seoDescription": "CrewAI helps build multi-agent workflows, role-based agents, process automation, and AI crew systems. HeyClaude adds source links, install steps,...",
+    "author": "CrewAI",
+    "dateAdded": "2026-04-27",
+    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+    "tags": [
+      "agent-framework",
+      "multi-agent"
+    ],
+    "keywords": [
+      "multi-agent framework",
+      "ai crews",
+      "agent-framework",
+      "multi-agent",
+      "tools",
+      "claude",
+      "heyclaude",
+      "crewai"
+    ],
+    "documentationUrl": "https://docs.crewai.com",
+    "websiteUrl": "https://www.crewai.com",
+    "brandName": "CrewAI",
+    "brandDomain": "crewai.com",
+    "brandIconUrl": "/api/brand-assets/icon/crewai.com",
+    "brandAssetSource": "brandfetch",
+    "pricingModel": "open-source",
+    "disclosure": "editorial",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "macOS, Windows, Linux, Web",
+    "cardDescription": "Multi-agent workflow framework and platform.",
+    "installable": false,
+    "hasPrerequisites": false,
+    "hasTroubleshooting": false,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Editorial notes\n\nCrewAI is relevant for users exploring role-based multi-agent systems and process automation patterns.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+    "sections": [
+      {
+        "title": "Editorial notes",
+        "id": "editorial-notes",
+        "markdown": "CrewAI is relevant for users exploring role-based multi-agent systems and process automation patterns.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Disclosure",
+        "id": "disclosure",
+        "markdown": "Editorial listing. No paid placement or affiliate link is used.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Editorial notes",
+        "id": "editorial-notes"
+      },
+      {
+        "depth": 2,
+        "text": "Disclosure",
+        "id": "disclosure"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/tools/crewai.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/crewai.mdx",
+    "repoUrl": "https://github.com/crewAIInc/crewAI",
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 4,
+    "sourceUrls": [
+      "https://docs.crewai.com",
+      "https://github.com/crewAIInc/crewAI",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/crewai.mdx",
+      "https://www.crewai.com"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

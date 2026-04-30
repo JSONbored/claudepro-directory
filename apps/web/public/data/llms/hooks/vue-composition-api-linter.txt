@@ -1,0 +1,1028 @@
+# Vue Composition API Linter - Hooks
+URL: https://heyclau.de/hooks/vue-composition-api-linter
+Category: hooks
+Author: JSONbored
+Date added: 2025-09-19
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/vue-composition-api-linter.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/hooks/vue-composition-api-linter
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/vue-composition-api-linter.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
+## Summary
+Lints Vue 3 components for Composition API best practices and common issues.
+## Tags
+- vue
+- vue3
+- composition-api
+- linting
+- best-practices
+## Content
+## Features
+- Vue 3 Composition API best practices validation including best practices validation (Vue 3 Composition API best practices validation with practice checking, Composition API pattern validation with pattern checking, best practices enforcement with practice enforcement, best practices reporting with practice status), validation management (validation configuration with validation settings, validation customization with custom validation, validation monitoring with validation tracking, validation updates with validation updates), validation optimization (validation performance optimization with performance improvement, validation accuracy optimization with accuracy improvement, validation completeness optimization with completeness improvement, validation analytics with validation statistics), and validation reporting (best practices reporting with practice status, Composition API pattern reporting with pattern status, best practices enforcement reporting with enforcement status, validation analytics with validation statistics)
+- Script setup syntax analysis and optimization including syntax analysis (script setup syntax analysis with syntax checking, script setup optimization with optimization checking, script setup validation with validation checking, syntax reporting with syntax status), analysis management (analysis configuration with analysis settings, analysis customization with custom analysis, analysis monitoring with analysis tracking, analysis updates with analysis updates), analysis optimization (analysis performance optimization with performance improvement, analysis accuracy optimization with accuracy improvement, analysis completeness optimization with completeness improvement, analysis analytics with analysis statistics), and analysis reporting (syntax analysis reporting with analysis status, script setup optimization reporting with optimization status, script setup validation reporting with validation status, analysis analytics with analysis statistics)
+- Reactivity pattern checking (ref, reactive, computed) including pattern checking (reactivity pattern checking with pattern validation, ref/reactive/computed usage validation with usage checking, reactivity pattern optimization with pattern optimization, pattern reporting with pattern status), pattern management (pattern configuration with pattern settings, pattern customization with custom patterns, pattern monitoring with pattern tracking, pattern updates with pattern updates), pattern optimization (pattern performance optimization with performance improvement, pattern accuracy optimization with accuracy improvement, pattern completeness optimization with completeness improvement, pattern analytics with pattern statistics), and pattern reporting (reactivity pattern reporting with pattern status, ref/reactive/computed usage reporting with usage status, reactivity pattern optimization reporting with optimization status, pattern analytics with pattern statistics)
+- Lifecycle hook usage validation including lifecycle validation (lifecycle hook usage validation with hook checking, lifecycle hook pattern validation with pattern checking, lifecycle hook optimization with hook optimization, lifecycle reporting with lifecycle status), lifecycle management (lifecycle configuration with lifecycle settings, lifecycle customization with custom lifecycle, lifecycle monitoring with lifecycle tracking, lifecycle updates with lifecycle updates), lifecycle optimization (lifecycle performance optimization with performance improvement, lifecycle accuracy optimization with accuracy improvement, lifecycle completeness optimization with completeness improvement, lifecycle analytics with lifecycle statistics), and lifecycle reporting (lifecycle hook reporting with hook status, lifecycle pattern reporting with pattern status, lifecycle optimization reporting with optimization status, lifecycle analytics with lifecycle statistics)
+- TypeScript support with vue-tsc integration including TypeScript support (TypeScript support with TypeScript checking, vue-tsc integration with vue-tsc validation, TypeScript type checking with type validation, TypeScript reporting with TypeScript status), support management (support configuration with support settings, support customization with custom support, support monitoring with support tracking, support updates with support updates), support optimization (support performance optimization with performance improvement, support accuracy optimization with accuracy improvement, support completeness optimization with completeness improvement, support analytics with support statistics), and support reporting (TypeScript support reporting with support status, vue-tsc integration reporting with integration status, TypeScript type checking reporting with type status, support analytics with support statistics)
+- Performance optimization suggestions including optimization suggestions (performance optimization suggestions with suggestion generation, optimization analysis with analysis generation, performance recommendations with recommendation generation, optimization reporting with optimization status), suggestion management (suggestion configuration with suggestion settings, suggestion customization with custom suggestions, suggestion monitoring with suggestion tracking, suggestion updates with suggestion updates), suggestion optimization (suggestion performance optimization with performance improvement, suggestion accuracy optimization with accuracy improvement, suggestion completeness optimization with completeness improvement, suggestion analytics with suggestion statistics), and suggestion reporting (optimization suggestions reporting with suggestion status, optimization analysis reporting with analysis status, performance recommendations reporting with recommendation status, suggestion analytics with suggestion statistics)
+- ESLint integration for Vue components including ESLint integration (ESLint integration with ESLint checking, Vue ESLint plugin integration with plugin validation, ESLint rule enforcement with rule enforcement, ESLint reporting with ESLint status), integration management (integration configuration with integration settings, integration customization with custom integration, integration monitoring with integration tracking, integration updates with integration updates), integration optimization (integration performance optimization with performance improvement, integration accuracy optimization with accuracy improvement, integration efficiency optimization with efficiency improvement, integration analytics with integration statistics), and integration reporting (ESLint integration reporting with integration status, Vue ESLint plugin reporting with plugin status, ESLint rule enforcement reporting with enforcement status, integration analytics with integration statistics)
+- Development workflow integration including continuous linting (automatic Vue Composition API linting on file changes, immediate best practices validation on component edits, automatic type checking on Vue component changes, seamless linting integration with development workflow), workflow automation (automated linting without manual intervention, linting automation with automatic linting, code quality automation with automatic quality checks), and workflow optimization (linting tracking with linting monitoring, code quality optimization with quality optimization, Vue best practices maintenance with practice checks)
+
+## Use Cases
+- Ensure proper Composition API usage in Vue 3 components automatically validating Composition API patterns, enforcing best practices, and maintaining code quality
+- Validate reactivity patterns and data flow automatically checking ref/reactive/computed usage, validating reactivity patterns, and ensuring proper data flow
+- Check for performance issues and optimization opportunities automatically analyzing component performance, identifying optimization opportunities, and providing performance suggestions
+- Enforce consistent component structure and practices automatically enforcing component structure, validating component patterns, and maintaining consistency
+- Detect common Vue 3 migration issues automatically detecting migration issues, identifying compatibility problems, and providing migration guidance
+- Development workflow integration seamlessly integrating Vue Composition API linting into development workflows without manual linting or code quality validation
+
+## Installation
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/vue-composition-api-linter.sh
+3. Make executable: chmod +x .claude/hooks/vue-composition-api-linter.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- Vue 3 project (or Vue 2 with @vue/composition-api)
+- Node.js and npm installed
+- ESLint (optional, for ESLint integration)
+- vue-tsc (optional, for TypeScript support)
+- jq (optional, for JSON parsing of tool input)
+
+## Hook Configuration
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/vue-composition-api-linter.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/vue-composition-api-linter.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+
+## Hook Script
+```bash
+#!/bin/bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Check if this is a Vue component file
+if [[ "$FILE_PATH" == *.vue ]]; then
+    echo "✨ Vue Composition API Linter - Analyzing Vue component..."
+    echo "📄 Component: $FILE_PATH"
+
+    # Check if file exists
+    if [ ! -f "$FILE_PATH" ]; then
+        echo "⚠️ Vue component file not found: $FILE_PATH"
+        exit 1
+    fi
+
+    # Detect Vue version and project setup
+    VUE_VERSION="unknown"
+    PROJECT_TYPE="vue"
+
+    if [ -f "package.json" ]; then
+        if grep -q '"vue".*"^3\.' package.json 2>/dev/null; then
+            VUE_VERSION="3"
+            echo "🎯 Vue 3 project detected"
+        elif grep -q '"vue".*"^2\.' package.json 2>/dev/null; then
+            VUE_VERSION="2"
+            echo "⚠️ Vue 2 project detected - Composition API available with @vue/composition-api"
+        fi
+
+        # Check for Nuxt
+        if grep -q '"nuxt"' package.json 2>/dev/null; then
+            PROJECT_TYPE="nuxt"
+            echo "🚀 Nuxt project detected"
+        fi
+
+        # Check for Vite
+        if grep -q '"vite"' package.json 2>/dev/null; then
+            echo "⚡ Vite build system detected"
+        fi
+    fi
+
+    # Component structure analysis
+    echo ""
+    echo "🔍 Analyzing component structure..."
+
+    # Check for script setup
+    SCRIPT_SETUP=false
+    if grep -q '<script setup' "$FILE_PATH" 2>/dev/null; then
+        SCRIPT_SETUP=true
+        echo "✅ Script setup syntax detected"
+
+        # Check for TypeScript
+        if grep -q '<script setup lang="ts">' "$FILE_PATH" 2>/dev/null; then
+            echo "📘 TypeScript script setup detected"
+        fi
+    elif grep -q '<script>' "$FILE_PATH" 2>/dev/null; then
+        echo "ℹ️ Traditional script syntax detected"
+        echo "💡 Consider migrating to <script setup> for better performance"
+    fi
+
+    # Check for template
+    if grep -q '<template>' "$FILE_PATH" 2>/dev/null; then
+        echo "✅ Template block found"
+    fi
+
+    # Check for styles
+    if grep -q '<style' "$FILE_PATH" 2>/dev/null; then
+        echo "✅ Style block found"
+
+        if grep -q '<style scoped' "$FILE_PATH" 2>/dev/null; then
+            echo "🎯 Scoped styles detected"
+        fi
+
+        if grep -q 'lang="scss"\|lang="sass"\|lang="less"' "$FILE_PATH" 2>/dev/null; then
+            echo "🎨 CSS preprocessor detected"
+        fi
+    fi
+
+    # Composition API analysis
+    echo ""
+    echo "🔍 Composition API Analysis:"
+
+    # Check for Composition API imports and usage
+    COMPOSABLES_USED=()
+
+    if grep -q 'ref(' "$FILE_PATH" 2>/dev/null; then
+        REF_COUNT=$(grep -c 'ref(' "$FILE_PATH" 2>/dev/null || echo 0)
+        echo "  • ref() usage: $REF_COUNT instances"
+        COMPOSABLES_USED+=("ref")
+    fi
+
+    if grep -q 'reactive(' "$FILE_PATH" 2>/dev/null; then
+        REACTIVE_COUNT=$(grep -c 'reactive(' "$FILE_PATH" 2>/dev/null || echo 0)
+        echo "  • reactive() usage: $REACTIVE_COUNT instances"
+        COMPOSABLES_USED+=("reactive")
+    fi
+
+    if grep -q 'computed(' "$FILE_PATH" 2>/dev/null; then
+        COMPUTED_COUNT=$(grep -c 'computed(' "$FILE_PATH" 2>/dev/null || echo 0)
+        echo "  • computed() usage: $COMPUTED_COUNT instances"
+        COMPOSABLES_USED+=("computed")
+    fi
+
+    if grep -q 'watch(' "$FILE_PATH" 2>/dev/null; then
+        WATCH_COUNT=$(grep -c 'watch(' "$FILE_PATH" 2>/dev/null || echo 0)
+        echo "  • watch() usage: $WATCH_COUNT instances"
+        COMPOSABLES_USED+=("watch")
+    fi
+
+    if grep -q 'watchEffect(' "$FILE_PATH" 2>/dev/null; then
+        WATCH_EFFECT_COUNT=$(grep -c 'watchEffect(' "$FILE_PATH" 2>/dev/null || echo 0)
+        echo "  • watchEffect() usage: $WATCH_EFFECT_COUNT instances"
+        COMPOSABLES_USED+=("watchEffect")
+    fi
+
+    # Lifecycle hooks
+    LIFECYCLE_HOOKS=("onMounted" "onUpdated" "onUnmounted" "onBeforeMount" "onBeforeUpdate" "onBeforeUnmount")
+    for hook in "${LIFECYCLE_HOOKS[@]}"; do
+        if grep -q "$hook(" "$FILE_PATH" 2>/dev/null; then
+            echo "  • 🔄 $hook lifecycle hook detected"
+        fi
+    done
+
+    # Props and emits analysis
+    if grep -q 'defineProps' "$FILE_PATH" 2>/dev/null; then
+        echo "  • 📥 defineProps() detected"
+    fi
+
+    if grep -q 'defineEmits' "$FILE_PATH" 2>/dev/null; then
+        echo "  • 📤 defineEmits() detected"
+    fi
+
+    if grep -q 'defineExpose' "$FILE_PATH" 2>/dev/null; then
+        echo "  • 🔗 defineExpose() detected"
+    fi
+
+    # ESLint analysis
+    echo ""
+    echo "🔍 Running ESLint analysis..."
+
+    ESLINT_AVAILABLE=false
+    if command -v npx >/dev/null 2>&1 && npx eslint --version >/dev/null 2>&1; then
+        ESLINT_AVAILABLE=true
+
+        # Try Vue-specific ESLint config first
+        if [ -f ".eslintrc.vue.js" ] || [ -f ".eslintrc.js" ] && grep -q 'vue' .eslintrc.js 2>/dev/null; then
+            echo "📋 Running ESLint with Vue configuration..."
+            if npx eslint "$FILE_PATH" --ext .vue 2>/dev/null; then
+                echo "✅ ESLint analysis passed"
+            else
+                echo "⚠️ ESLint found issues - review output above"
+            fi
+        else
+            echo "⚠️ No Vue-specific ESLint configuration found"
+            echo "💡 Install: npm install --save-dev eslint @vue/eslint-config-typescript"
+        fi
+    else
+        echo "⚠️ ESLint not available - install with: npm install --save-dev eslint"
+    fi
+
+    # Type checking with vue-tsc
+    echo ""
+    echo "📘 TypeScript Analysis:"
+
+    if grep -q 'lang="ts"' "$FILE_PATH" 2>/dev/null; then
+        echo "🔍 TypeScript component detected"
+
+        if command -v npx >/dev/null 2>&1 && npx vue-tsc --version >/dev/null 2>&1; then
+            echo "🔍 Running vue-tsc type checking..."
+            if npx vue-tsc --noEmit 2>/dev/null; then
+                echo "✅ TypeScript type checking passed"
+            else
+                echo "⚠️ TypeScript type errors detected"
+            fi
+        else
+            echo "⚠️ vue-tsc not available - install with: npm install --save-dev vue-tsc"
+        fi
+    else
+        echo "ℹ️ JavaScript component - consider TypeScript for better type safety"
+    fi
+
+    # Best practices analysis
+    echo ""
+    echo "💡 Best Practices Analysis:"
+
+    # Check for common issues
+    ISSUES_FOUND=0
+
+    if grep -q 'this\.' "$FILE_PATH" 2>/dev/null && [ "$SCRIPT_SETUP" = true ]; then
+        echo "  • ⚠️ 'this' usage detected in script setup - use direct variable access"
+        ISSUES_FOUND=$((ISSUES_FOUND + 1))
+    fi
+
+    if grep -q 'reactive(' "$FILE_PATH" 2>/dev/null && grep -q 'ref(' "$FILE_PATH" 2>/dev/null; then
+        echo "  • 💡 Both ref() and reactive() used - ensure consistent patterns"
+    fi
+
+    if ! grep -q 'const.*=' "$FILE_PATH" 2>/dev/null && [ "${#COMPOSABLES_USED[@]}" -gt 0 ]; then
+        echo "  • 💡 Consider using const for reactive declarations"
+    fi
+
+    if grep -q 'v-for.*:key' "$FILE_PATH" 2>/dev/null; then
+        echo "  • ✅ v-for with :key detected - good practice"
+    elif grep -q 'v-for' "$FILE_PATH" 2>/dev/null; then
+        echo "  • ⚠️ v-for without :key detected - add unique keys"
+        ISSUES_FOUND=$((ISSUES_FOUND + 1))
+    fi
+
+    if [ "$ISSUES_FOUND" -eq 0 ]; then
+        echo "  • ✅ No common issues detected"
+    fi
+
+    echo ""
+    echo "💡 Vue 3 Composition API Best Practices:"
+    echo "  • Use <script setup> for better performance and DX"
+    echo "  • Prefer ref() for primitive values, reactive() for objects"
+    echo "  • Use computed() for derived state"
+    echo "  • Implement proper TypeScript typing for better IntelliSense"
+    echo "  • Use defineProps/defineEmits for component interface"
+    echo "  • Organize composables into separate files for reusability"
+    echo "  • Use shallowRef/shallowReactive for performance optimization"
+
+    echo ""
+    echo "🎯 Vue component analysis complete!"
+
+else
+    echo "ℹ️ File is not a Vue component: $FILE_PATH"
+fi
+
+exit 0
+```
+```bash
+#!/bin/bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Check if this is a Vue component file
+if [[ "$FILE_PATH" == *.vue ]]; then
+    echo "✨ Vue Composition API Linter - Analyzing Vue component..."
+    echo "📄 Component: $FILE_PATH"
+
+    # Check if file exists
+    if [ ! -f "$FILE_PATH" ]; then
+        echo "⚠️ Vue component file not found: $FILE_PATH"
+        exit 1
+    fi
+
+    # Detect Vue version and project setup
+    VUE_VERSION="unknown"
+    PROJECT_TYPE="vue"
+
+    if [ -f "package.json" ]; then
+        if grep -q '"vue".*"^3\.' package.json 2>/dev/null; then
+            VUE_VERSION="3"
+            echo "🎯 Vue 3 project detected"
+        elif grep -q '"vue".*"^2\.' package.json 2>/dev/null; then
+            VUE_VERSION="2"
+            echo "⚠️ Vue 2 project detected - Composition API available with @vue/composition-api"
+        fi
+
+        # Check for Nuxt
+        if grep -q '"nuxt"' package.json 2>/dev/null; then
+            PROJECT_TYPE="nuxt"
+            echo "🚀 Nuxt project detected"
+        fi
+
+        # Check for Vite
+        if grep -q '"vite"' package.json 2>/dev/null; then
+            echo "⚡ Vite build system detected"
+        fi
+    fi
+
+    # Component structure analysis
+    echo ""
+    echo "🔍 Analyzing component structure..."
+
+    # Check for script setup
+    SCRIPT_SETUP=false
+    if grep -q '<script setup' "$FILE_PATH" 2>/dev/null; then
+        SCRIPT_SETUP=true
+        echo "✅ Script setup syntax detected"
+
+        # Check for TypeScript
+        if grep -q '<script setup lang="ts">' "$FILE_PATH" 2>/dev/null; then
+            echo "📘 TypeScript script setup detected"
+        fi
+    elif grep -q '<script>' "$FILE_PATH" 2>/dev/null; then
+        echo "ℹ️ Traditional script syntax detected"
+        echo "💡 Consider migrating to <script setup> for better performance"
+    fi
+
+    # Check for template
+    if grep -q '<template>' "$FILE_PATH" 2>/dev/null; then
+        echo "✅ Template block found"
+    fi
+
+    # Check for styles
+    if grep -q '<style' "$FILE_PATH" 2>/dev/null; then
+        echo "✅ Style block found"
+
+        if grep -q '<style scoped' "$FILE_PATH" 2>/dev/null; then
+            echo "🎯 Scoped styles detected"
+        fi
+
+        if grep -q 'lang="scss"\|lang="sass"\|lang="less"' "$FILE_PATH" 2>/dev/null; then
+            echo "🎨 CSS preprocessor detected"
+        fi
+    fi
+
+    # Composition API analysis
+    echo ""
+    echo "🔍 Composition API Analysis:"
+
+    # Check for Composition API imports and usage
+    COMPOSABLES_USED=()
+
+    if grep -q 'ref(' "$FILE_PATH" 2>/dev/null; then
+        REF_COUNT=$(grep -c 'ref(' "$FILE_PATH" 2>/dev/null || echo 0)
+        echo "  • ref() usage: $REF_COUNT instances"
+        COMPOSABLES_USED+=("ref")
+    fi
+
+    if grep -q 'reactive(' "$FILE_PATH" 2>/dev/null; then
+        REACTIVE_COUNT=$(grep -c 'reactive(' "$FILE_PATH" 2>/dev/null || echo 0)
+        echo "  • reactive() usage: $REACTIVE_COUNT instances"
+        COMPOSABLES_USED+=("reactive")
+    fi
+
+    if grep -q 'computed(' "$FILE_PATH" 2>/dev/null; then
+        COMPUTED_COUNT=$(grep -c 'computed(' "$FILE_PATH" 2>/dev/null || echo 0)
+        echo "  • computed() usage: $COMPUTED_COUNT instances"
+        COMPOSABLES_USED+=("computed")
+    fi
+
+    if grep -q 'watch(' "$FILE_PATH" 2>/dev/null; then
+        WATCH_COUNT=$(grep -c 'watch(' "$FILE_PATH" 2>/dev/null || echo 0)
+        echo "  • watch() usage: $WATCH_COUNT instances"
+        COMPOSABLES_USED+=("watch")
+    fi
+
+    if grep -q 'watchEffect(' "$FILE_PATH" 2>/dev/null; then
+        WATCH_EFFECT_COUNT=$(grep -c 'watchEffect(' "$FILE_PATH" 2>/dev/null || echo 0)
+        echo "  • watchEffect() usage: $WATCH_EFFECT_COUNT instances"
+        COMPOSABLES_USED+=("watchEffect")
+    fi
+
+    # Lifecycle hooks
+    LIFECYCLE_HOOKS=("onMounted" "onUpdated" "onUnmounted" "onBeforeMount" "onBeforeUpdate" "onBeforeUnmount")
+    for hook in "${LIFECYCLE_HOOKS[@]}"; do
+        if grep -q "$hook(" "$FILE_PATH" 2>/dev/null; then
+            echo "  • 🔄 $hook lifecycle hook detected"
+        fi
+    done
+
+    # Props and emits analysis
+    if grep -q 'defineProps' "$FILE_PATH" 2>/dev/null; then
+        echo "  • 📥 defineProps() detected"
+    fi
+
+    if grep -q 'defineEmits' "$FILE_PATH" 2>/dev/null; then
+        echo "  • 📤 defineEmits() detected"
+    fi
+
+    if grep -q 'defineExpose' "$FILE_PATH" 2>/dev/null; then
+        echo "  • 🔗 defineExpose() detected"
+    fi
+
+    # ESLint analysis
+    echo ""
+    echo "🔍 Running ESLint analysis..."
+
+    ESLINT_AVAILABLE=false
+    if command -v npx >/dev/null 2>&1 && npx eslint --version >/dev/null 2>&1; then
+        ESLINT_AVAILABLE=true
+
+        # Try Vue-specific ESLint config first
+        if [ -f ".eslintrc.vue.js" ] || [ -f ".eslintrc.js" ] && grep -q 'vue' .eslintrc.js 2>/dev/null; then
+            echo "📋 Running ESLint with Vue configuration..."
+            if npx eslint "$FILE_PATH" --ext .vue 2>/dev/null; then
+                echo "✅ ESLint analysis passed"
+            else
+                echo "⚠️ ESLint found issues - review output above"
+            fi
+        else
+            echo "⚠️ No Vue-specific ESLint configuration found"
+            echo "💡 Install: npm install --save-dev eslint @vue/eslint-config-typescript"
+        fi
+    else
+        echo "⚠️ ESLint not available - install with: npm install --save-dev eslint"
+    fi
+
+    # Type checking with vue-tsc
+    echo ""
+    echo "📘 TypeScript Analysis:"
+
+    if grep -q 'lang="ts"' "$FILE_PATH" 2>/dev/null; then
+        echo "🔍 TypeScript component detected"
+
+        if command -v npx >/dev/null 2>&1 && npx vue-tsc --version >/dev/null 2>&1; then
+            echo "🔍 Running vue-tsc type checking..."
+            if npx vue-tsc --noEmit 2>/dev/null; then
+                echo "✅ TypeScript type checking passed"
+            else
+                echo "⚠️ TypeScript type errors detected"
+            fi
+        else
+            echo "⚠️ vue-tsc not available - install with: npm install --save-dev vue-tsc"
+        fi
+    else
+        echo "ℹ️ JavaScript component - consider TypeScript for better type safety"
+    fi
+
+    # Best practices analysis
+    echo ""
+    echo "💡 Best Practices Analysis:"
+
+    # Check for common issues
+    ISSUES_FOUND=0
+
+    if grep -q 'this\.' "$FILE_PATH" 2>/dev/null && [ "$SCRIPT_SETUP" = true ]; then
+        echo "  • ⚠️ 'this' usage detected in script setup - use direct variable access"
+        ISSUES_FOUND=$((ISSUES_FOUND + 1))
+    fi
+
+    if grep -q 'reactive(' "$FILE_PATH" 2>/dev/null && grep -q 'ref(' "$FILE_PATH" 2>/dev/null; then
+        echo "  • 💡 Both ref() and reactive() used - ensure consistent patterns"
+    fi
+
+    if ! grep -q 'const.*=' "$FILE_PATH" 2>/dev/null && [ "${#COMPOSABLES_USED[@]}" -gt 0 ]; then
+        echo "  • 💡 Consider using const for reactive declarations"
+    fi
+
+    if grep -q 'v-for.*:key' "$FILE_PATH" 2>/dev/null; then
+        echo "  • ✅ v-for with :key detected - good practice"
+    elif grep -q 'v-for' "$FILE_PATH" 2>/dev/null; then
+        echo "  • ⚠️ v-for without :key detected - add unique keys"
+        ISSUES_FOUND=$((ISSUES_FOUND + 1))
+    fi
+
+    if [ "$ISSUES_FOUND" -eq 0 ]; then
+        echo "  • ✅ No common issues detected"
+    fi
+
+    echo ""
+    echo "💡 Vue 3 Composition API Best Practices:"
+    echo "  • Use <script setup> for better performance and DX"
+    echo "  • Prefer ref() for primitive values, reactive() for objects"
+    echo "  • Use computed() for derived state"
+    echo "  • Implement proper TypeScript typing for better IntelliSense"
+    echo "  • Use defineProps/defineEmits for component interface"
+    echo "  • Organize composables into separate files for reusability"
+    echo "  • Use shallowRef/shallowReactive for performance optimization"
+
+    echo ""
+    echo "🎯 Vue component analysis complete!"
+
+else
+    echo "ℹ️ File is not a Vue component: $FILE_PATH"
+fi
+
+exit 0
+```
+
+## Examples
+### Vue Composition API Linter Hook Script
+
+Complete hook script that automatically lints Vue 3 components for Composition API best practices
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+if [[ "$FILE_PATH" == *.vue ]]; then
+    echo "✨ Vue Composition API Linter - Analyzing Vue component..."
+    echo "📄 Component: $FILE_PATH"
+    if [ ! -f "$FILE_PATH" ]; then
+        echo "⚠️ Vue component file not found: $FILE_PATH"
+        exit 1
+    fi
+    if [ -f "package.json" ]; then
+        if grep -q '"vue".*"^3\.' package.json 2>/dev/null; then
+            echo "🎯 Vue 3 project detected"
+        fi
+    fi
+    SCRIPT_SETUP=false
+    if grep -q '<script setup' "$FILE_PATH" 2>/dev/null; then
+        SCRIPT_SETUP=true
+        echo "✅ Script setup syntax detected"
+    fi
+    if grep -q 'ref(' "$FILE_PATH" 2>/dev/null; then
+        REF_COUNT=$(grep -c 'ref(' "$FILE_PATH" 2>/dev/null || echo 0)
+        echo "  • ref() usage: $REF_COUNT instances"
+    fi
+    if grep -q 'computed(' "$FILE_PATH" 2>/dev/null; then
+        COMPUTED_COUNT=$(grep -c 'computed(' "$FILE_PATH" 2>/dev/null || echo 0)
+        echo "  • computed() usage: $COMPUTED_COUNT instances"
+    fi
+    if command -v npx >/dev/null 2>&1 && npx eslint --version >/dev/null 2>&1; then
+        if [ -f ".eslintrc.js" ] && grep -q 'vue' .eslintrc.js 2>/dev/null; then
+            if npx eslint "$FILE_PATH" 2>/dev/null; then
+                echo "✅ ESLint analysis passed"
+            else
+                echo "⚠️ ESLint found issues"
+            fi
+        fi
+    fi
+    if grep -q 'lang="ts"' "$FILE_PATH" 2>/dev/null; then
+        if command -v npx >/dev/null 2>&1 && npx vue-tsc --version >/dev/null 2>&1; then
+            if npx vue-tsc --noEmit 2>/dev/null; then
+                echo "✅ TypeScript type checking passed"
+            else
+                echo "⚠️ TypeScript type errors detected"
+            fi
+        fi
+    fi
+    echo "🎯 Vue component analysis complete!"
+else
+    echo "ℹ️ File is not a Vue component: $FILE_PATH"
+fi
+exit 0
+```
+
+### Hook Configuration
+
+Complete hook configuration for .claude/settings.json to enable automatic Vue Composition API linting
+
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/vue-composition-api-linter.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+
+### Enhanced Vue Composition API Linter with Best Practices Analysis
+
+Enhanced hook script with comprehensive Composition API analysis, lifecycle hooks, and best practices validation
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+if [[ "$FILE_PATH" == *.vue ]]; then
+    echo "✨ Vue Composition API Linter - Analyzing Vue component..."
+    SCRIPT_SETUP=false
+    if grep -q '<script setup' "$FILE_PATH" 2>/dev/null; then
+        SCRIPT_SETUP=true
+        echo "✅ Script setup syntax detected"
+        if grep -q '<script setup lang="ts">' "$FILE_PATH" 2>/dev/null; then
+            echo "📘 TypeScript script setup detected"
+        fi
+    else
+        echo "💡 Consider migrating to <script setup> for better performance"
+    fi
+    if grep -q 'ref(' "$FILE_PATH" 2>/dev/null; then
+        REF_COUNT=$(grep -c 'ref(' "$FILE_PATH" 2>/dev/null || echo 0)
+        echo "  • ref() usage: $REF_COUNT instances"
+    fi
+    if grep -q 'reactive(' "$FILE_PATH" 2>/dev/null; then
+        REACTIVE_COUNT=$(grep -c 'reactive(' "$FILE_PATH" 2>/dev/null || echo 0)
+        echo "  • reactive() usage: $REACTIVE_COUNT instances"
+    fi
+    if grep -q 'computed(' "$FILE_PATH" 2>/dev/null; then
+        COMPUTED_COUNT=$(grep -c 'computed(' "$FILE_PATH" 2>/dev/null || echo 0)
+        echo "  • computed() usage: $COMPUTED_COUNT instances"
+    fi
+    LIFECYCLE_HOOKS=("onMounted" "onUpdated" "onUnmounted")
+    for hook in "${LIFECYCLE_HOOKS[@]}"; do
+        if grep -q "$hook(" "$FILE_PATH" 2>/dev/null; then
+            echo "  • 🔄 $hook lifecycle hook detected"
+        fi
+    done
+    if grep -q 'defineProps' "$FILE_PATH" 2>/dev/null; then
+        echo "  • 📥 defineProps() detected"
+    fi
+    if grep -q 'defineEmits' "$FILE_PATH" 2>/dev/null; then
+        echo "  • 📤 defineEmits() detected"
+    fi
+    ISSUES_FOUND=0
+    if grep -q 'this\.' "$FILE_PATH" 2>/dev/null && [ "$SCRIPT_SETUP" = true ]; then
+        echo "  • ⚠️ 'this' usage detected in script setup - use direct variable access"
+        ISSUES_FOUND=$((ISSUES_FOUND + 1))
+    fi
+    if grep -q 'v-for' "$FILE_PATH" 2>/dev/null && ! grep -q 'v-for.*:key' "$FILE_PATH" 2>/dev/null; then
+        echo "  • ⚠️ v-for without :key detected - add unique keys"
+        ISSUES_FOUND=$((ISSUES_FOUND + 1))
+    fi
+    if [ "$ISSUES_FOUND" -eq 0 ]; then
+        echo "  • ✅ No common issues detected"
+    fi
+    echo "🎯 Vue component analysis complete!"
+fi
+exit 0
+```
+
+### Vue Composition API Linter with ESLint and vue-tsc Integration
+
+Enhanced hook script with ESLint and vue-tsc integration for comprehensive Vue component validation
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+if [[ "$FILE_PATH" == *.vue ]]; then
+    echo "✨ Vue Composition API Linter - Analyzing Vue component..."
+    if command -v npx >/dev/null 2>&1 && npx eslint --version >/dev/null 2>&1; then
+        if [ -f ".eslintrc.js" ] && grep -q 'vue' .eslintrc.js 2>/dev/null; then
+            echo "🔍 Running ESLint with Vue configuration..."
+            if npx eslint "$FILE_PATH" --ext .vue 2>/dev/null; then
+                echo "✅ ESLint analysis passed"
+            else
+                echo "⚠️ ESLint found issues - review output above"
+            fi
+        else
+            echo "⚠️ No Vue-specific ESLint configuration found"
+            echo "💡 Install: npm install --save-dev eslint @vue/eslint-config-typescript"
+        fi
+    fi
+    if grep -q 'lang="ts"' "$FILE_PATH" 2>/dev/null; then
+        echo "📘 TypeScript component detected"
+        if command -v npx >/dev/null 2>&1 && npx vue-tsc --version >/dev/null 2>&1; then
+            echo "🔍 Running vue-tsc type checking..."
+            if npx vue-tsc --noEmit --skipLibCheck 2>/dev/null; then
+                echo "✅ TypeScript type checking passed"
+            else
+                echo "⚠️ TypeScript type errors detected"
+            fi
+        else
+            echo "⚠️ vue-tsc not available - install with: npm install --save-dev vue-tsc"
+        fi
+    fi
+    echo "🎯 Vue component analysis complete!"
+fi
+exit 0
+```
+
+### Vue Composition API Linter Configuration Example
+
+Example Vue Composition API linter configuration for customizing linting behavior
+
+```json
+{
+  "vue_composition_api_linter": {
+    "enabled": true,
+    "script_setup_analysis": true,
+    "reactivity_pattern_checking": true,
+    "lifecycle_hook_validation": true,
+    "typescript_support": true,
+    "eslint_integration": true,
+    "performance_suggestions": true,
+    "frameworks": {
+      "vue": {
+        "version": "3.x",
+        "composition_api": true,
+        "script_setup": true
+      },
+      "nuxt": {
+        "detection": true,
+        "composition_api": true
+      }
+    },
+    "tools": {
+      "eslint": {
+        "plugin": "@vue/eslint-config-typescript",
+        "rules": [
+          "vue/component-api-style",
+          "vue/define-macros-order",
+          "vue/no-ref-as-operand"
+        ]
+      },
+      "vue-tsc": {
+        "command": "vue-tsc --noEmit",
+        "skip_lib_check": true
+      }
+    },
+    "file_extensions": [".vue"],
+    "exclude_patterns": ["**/node_modules/**", "**/dist/**", "**/build/**"]
+  }
+}
+```
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+if [[ "$FILE_PATH" == *.vue ]]; then
+    echo "✨ Vue Composition API Linter - Analyzing Vue component..."
+    echo "📄 Component: $FILE_PATH"
+    if [ ! -f "$FILE_PATH" ]; then
+        echo "⚠️ Vue component file not found: $FILE_PATH"
+        exit 1
+    fi
+    if [ -f "package.json" ]; then
+        if grep -q '"vue".*"^3\.' package.json 2>/dev/null; then
+            echo "🎯 Vue 3 project detected"
+        fi
+    fi
+    SCRIPT_SETUP=false
+    if grep -q '<script setup' "$FILE_PATH" 2>/dev/null; then
+        SCRIPT_SETUP=true
+        echo "✅ Script setup syntax detected"
+    fi
+    if grep -q 'ref(' "$FILE_PATH" 2>/dev/null; then
+        REF_COUNT=$(grep -c 'ref(' "$FILE_PATH" 2>/dev/null || echo 0)
+        echo "  • ref() usage: $REF_COUNT instances"
+    fi
+    if grep -q 'computed(' "$FILE_PATH" 2>/dev/null; then
+        COMPUTED_COUNT=$(grep -c 'computed(' "$FILE_PATH" 2>/dev/null || echo 0)
+        echo "  • computed() usage: $COMPUTED_COUNT instances"
+    fi
+    if command -v npx >/dev/null 2>&1 && npx eslint --version >/dev/null 2>&1; then
+        if [ -f ".eslintrc.js" ] && grep -q 'vue' .eslintrc.js 2>/dev/null; then
+            if npx eslint "$FILE_PATH" 2>/dev/null; then
+                echo "✅ ESLint analysis passed"
+            else
+                echo "⚠️ ESLint found issues"
+            fi
+        fi
+    fi
+    if grep -q 'lang="ts"' "$FILE_PATH" 2>/dev/null; then
+        if command -v npx >/dev/null 2>&1 && npx vue-tsc --version >/dev/null 2>&1; then
+            if npx vue-tsc --noEmit 2>/dev/null; then
+                echo "✅ TypeScript type checking passed"
+            else
+                echo "⚠️ TypeScript type errors detected"
+            fi
+        fi
+    fi
+    echo "🎯 Vue component analysis complete!"
+else
+    echo "ℹ️ File is not a Vue component: $FILE_PATH"
+fi
+exit 0
+```
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/vue-composition-api-linter.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+if [[ "$FILE_PATH" == *.vue ]]; then
+    echo "✨ Vue Composition API Linter - Analyzing Vue component..."
+    SCRIPT_SETUP=false
+    if grep -q '<script setup' "$FILE_PATH" 2>/dev/null; then
+        SCRIPT_SETUP=true
+        echo "✅ Script setup syntax detected"
+        if grep -q '<script setup lang="ts">' "$FILE_PATH" 2>/dev/null; then
+            echo "📘 TypeScript script setup detected"
+        fi
+    else
+        echo "💡 Consider migrating to <script setup> for better performance"
+    fi
+    if grep -q 'ref(' "$FILE_PATH" 2>/dev/null; then
+        REF_COUNT=$(grep -c 'ref(' "$FILE_PATH" 2>/dev/null || echo 0)
+        echo "  • ref() usage: $REF_COUNT instances"
+    fi
+    if grep -q 'reactive(' "$FILE_PATH" 2>/dev/null; then
+        REACTIVE_COUNT=$(grep -c 'reactive(' "$FILE_PATH" 2>/dev/null || echo 0)
+        echo "  • reactive() usage: $REACTIVE_COUNT instances"
+    fi
+    if grep -q 'computed(' "$FILE_PATH" 2>/dev/null; then
+        COMPUTED_COUNT=$(grep -c 'computed(' "$FILE_PATH" 2>/dev/null || echo 0)
+        echo "  • computed() usage: $COMPUTED_COUNT instances"
+    fi
+    LIFECYCLE_HOOKS=("onMounted" "onUpdated" "onUnmounted")
+    for hook in "${LIFECYCLE_HOOKS[@]}"; do
+        if grep -q "$hook(" "$FILE_PATH" 2>/dev/null; then
+            echo "  • 🔄 $hook lifecycle hook detected"
+        fi
+    done
+    if grep -q 'defineProps' "$FILE_PATH" 2>/dev/null; then
+        echo "  • 📥 defineProps() detected"
+    fi
+    if grep -q 'defineEmits' "$FILE_PATH" 2>/dev/null; then
+        echo "  • 📤 defineEmits() detected"
+    fi
+    ISSUES_FOUND=0
+    if grep -q 'this\.' "$FILE_PATH" 2>/dev/null && [ "$SCRIPT_SETUP" = true ]; then
+        echo "  • ⚠️ 'this' usage detected in script setup - use direct variable access"
+        ISSUES_FOUND=$((ISSUES_FOUND + 1))
+    fi
+    if grep -q 'v-for' "$FILE_PATH" 2>/dev/null && ! grep -q 'v-for.*:key' "$FILE_PATH" 2>/dev/null; then
+        echo "  • ⚠️ v-for without :key detected - add unique keys"
+        ISSUES_FOUND=$((ISSUES_FOUND + 1))
+    fi
+    if [ "$ISSUES_FOUND" -eq 0 ]; then
+        echo "  • ✅ No common issues detected"
+    fi
+    echo "🎯 Vue component analysis complete!"
+fi
+exit 0
+```
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+if [[ "$FILE_PATH" == *.vue ]]; then
+    echo "✨ Vue Composition API Linter - Analyzing Vue component..."
+    if command -v npx >/dev/null 2>&1 && npx eslint --version >/dev/null 2>&1; then
+        if [ -f ".eslintrc.js" ] && grep -q 'vue' .eslintrc.js 2>/dev/null; then
+            echo "🔍 Running ESLint with Vue configuration..."
+            if npx eslint "$FILE_PATH" --ext .vue 2>/dev/null; then
+                echo "✅ ESLint analysis passed"
+            else
+                echo "⚠️ ESLint found issues - review output above"
+            fi
+        else
+            echo "⚠️ No Vue-specific ESLint configuration found"
+            echo "💡 Install: npm install --save-dev eslint @vue/eslint-config-typescript"
+        fi
+    fi
+    if grep -q 'lang="ts"' "$FILE_PATH" 2>/dev/null; then
+        echo "📘 TypeScript component detected"
+        if command -v npx >/dev/null 2>&1 && npx vue-tsc --version >/dev/null 2>&1; then
+            echo "🔍 Running vue-tsc type checking..."
+            if npx vue-tsc --noEmit --skipLibCheck 2>/dev/null; then
+                echo "✅ TypeScript type checking passed"
+            else
+                echo "⚠️ TypeScript type errors detected"
+            fi
+        else
+            echo "⚠️ vue-tsc not available - install with: npm install --save-dev vue-tsc"
+        fi
+    fi
+    echo "🎯 Vue component analysis complete!"
+fi
+exit 0
+```
+```json
+{
+  "vue_composition_api_linter": {
+    "enabled": true,
+    "script_setup_analysis": true,
+    "reactivity_pattern_checking": true,
+    "lifecycle_hook_validation": true,
+    "typescript_support": true,
+    "eslint_integration": true,
+    "performance_suggestions": true,
+    "frameworks": {
+      "vue": {
+        "version": "3.x",
+        "composition_api": true,
+        "script_setup": true
+      },
+      "nuxt": {
+        "detection": true,
+        "composition_api": true
+      }
+    },
+    "tools": {
+      "eslint": {
+        "plugin": "@vue/eslint-config-typescript",
+        "rules": [
+          "vue/component-api-style",
+          "vue/define-macros-order",
+          "vue/no-ref-as-operand"
+        ]
+      },
+      "vue-tsc": {
+        "command": "vue-tsc --noEmit",
+        "skip_lib_check": true
+      }
+    },
+    "file_extensions": [".vue"],
+    "exclude_patterns": ["**/node_modules/**", "**/dist/**", "**/build/**"]
+  }
+}
+```
+
+## Troubleshooting
+### ESLint runs on entire project not just modified .vue file causing timeout
+
+Remove --ext .vue flag scanning all components. Replace: 'npx eslint "$FILE_PATH"' targeting single file. Or add: '--no-eslintrc --rule "vue/no-unused-vars": error' for quick checks only. Verify ESLint configuration. Check file path.
+
+### vue-tsc type checking shows errors from node_modules dependencies
+
+Missing tsconfig exclude pattern. Add: 'npx vue-tsc --noEmit --skipLibCheck' ignoring external types. Or create: 'tsconfig.vue.json' with '"exclude": ["node_modules"]'. Verify vue-tsc configuration. Check TypeScript version compatibility.
+
+### Hook incorrectly flags 'this' usage in <template> section as error
+
+grep matches template expressions not just script. Refine: 'grep "<script" -A 200 "$FILE_PATH" | grep "this\."' limiting to script blocks. Or exclude: 'grep -v "<template>" before checking. Verify script block detection. Check Vue component structure.
+
+### defineProps/defineEmits detection fails with TypeScript generic syntax
+
+Pattern 'defineProps(' misses generic form 'defineProps<Props>()'. Add: 'grep -E "defineProps(<|\\(" matching both. Or use: 'grep "defineProps" ignoring parentheses for broader match. Verify TypeScript syntax. Check Vue 3 Composition API version.
+
+### Reactive/ref count inflated by counting imports and comments
+
+grep matches 'import { ref }' and '// ref()' comments. Filter: 'grep -v "^\\s\*//" | grep -v "import" | grep -c "ref("' excluding non-usage. Or limit: 'grep "<script setup>" -A 100' to script body only. Verify grep patterns. Check component structure.
+
+### ESLint Vue plugin not found despite installation
+
+Verify ESLint Vue plugin installation: 'npm list eslint-plugin-vue' or 'npm list @vue/eslint-config-typescript'. Install: 'npm install --save-dev eslint-plugin-vue @vue/eslint-config-typescript'. Check ESLint configuration. Verify Vue project setup.
+
+### vue-tsc not found despite npm installation
+
+Verify vue-tsc installation: 'npm list vue-tsc' or 'npx vue-tsc --version'. Install: 'npm install --save-dev vue-tsc'. Check PATH. Verify Node.js version compatibility. Ensure TypeScript is installed.
+
+### Script setup detection fails with TypeScript lang attribute
+
+Pattern '<script setup' misses TypeScript variant '<script setup lang="ts">'. Add: 'grep -E "<script setup( lang=\"ts\")?" matching both. Or use: 'grep "<script setup" ignoring lang attribute. Verify Vue component syntax. Check Vue 3 version.

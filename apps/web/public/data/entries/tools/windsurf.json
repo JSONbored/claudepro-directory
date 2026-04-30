@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "key": "tools:windsurf",
+  "entry": {
+    "category": "tools",
+    "slug": "windsurf",
+    "title": "Windsurf",
+    "description": "Agentic coding environment focused on codebase context, multi-file edits, and AI-assisted development flow.",
+    "seoTitle": "Windsurf agentic coding environment",
+    "seoDescription": "Windsurf is an agentic coding environment for codebase context, multi-file edits, and AI development workflows. HeyClaude adds source links, install steps,...",
+    "author": "Windsurf",
+    "dateAdded": "2026-04-27",
+    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+    "tags": [
+      "ai-coding",
+      "agentic-editor"
+    ],
+    "keywords": [
+      "claude coding tools",
+      "agentic editor",
+      "ai-coding",
+      "tools",
+      "claude",
+      "heyclaude",
+      "windsurf"
+    ],
+    "documentationUrl": "https://docs.windsurf.com",
+    "websiteUrl": "https://windsurf.com",
+    "brandName": "Windsurf",
+    "brandDomain": "windsurf.com",
+    "brandIconUrl": "/api/brand-assets/icon/windsurf.com",
+    "brandAssetSource": "brandfetch",
+    "pricingModel": "freemium",
+    "disclosure": "editorial",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "macOS, Windows, Linux",
+    "cardDescription": "Agentic coding environment for multi-file AI development.",
+    "installable": false,
+    "hasPrerequisites": false,
+    "hasTroubleshooting": false,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Editorial notes\n\nWindsurf belongs in Claude-native tool stacks where the priority is editor-native agent flow and coordinated edits.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+    "sections": [
+      {
+        "title": "Editorial notes",
+        "id": "editorial-notes",
+        "markdown": "Windsurf belongs in Claude-native tool stacks where the priority is editor-native agent flow and coordinated edits.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Disclosure",
+        "id": "disclosure",
+        "markdown": "Editorial listing. No paid placement or affiliate link is used.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Editorial notes",
+        "id": "editorial-notes"
+      },
+      {
+        "depth": 2,
+        "text": "Disclosure",
+        "id": "disclosure"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/tools/windsurf.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/windsurf.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 3,
+    "sourceUrls": [
+      "https://docs.windsurf.com",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/windsurf.mdx",
+      "https://windsurf.com"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

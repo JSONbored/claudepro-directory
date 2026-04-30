@@ -14,8 +14,8 @@ seoDescription: >-
   tools, and performance metrics for Claude Code MCP integration Discover tools
   fo...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-16'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-16"
 installable: true
 usageSnippet: "\U0001F50C MCP 3 servers │ 12 tools │ filesystem,git,database"
 copySnippet: |-
@@ -79,6 +79,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Features
 
 - Real-time connected server count
@@ -121,8 +122,11 @@ robotsFollow: true
 ```
 
 ## Examples
+
 ### Enhanced MCP Server Status Monitor with Health Checks
+
 Extended version checking individual server health and connection status
+
 ```bash
 #!/usr/bin/env bash
 
@@ -142,9 +146,9 @@ if [ "$server_count" -gt 0 ]; then
     decoded=$(echo "$server" | base64 -d 2>/dev/null || echo "{}")
     tools=$(echo "$decoded" | jq '.tools | length // 0' 2>/dev/null || echo "0")
     status=$(echo "$decoded" | jq -r '.status // "unknown"' 2>/dev/null || echo "unknown")
-    
+
     active_tools=$((active_tools + tools))
-    
+
     if [ "$status" = "connected" ] || [ "$status" = "healthy" ]; then
       healthy_servers=$((healthy_servers + 1))
     else
@@ -177,7 +181,7 @@ if [ "$server_count" -gt 0 ]; then
   if [ "$unhealthy_servers" -gt 0 ]; then
     health_info=" (${unhealthy_servers} unhealthy)"
   fi
-  
+
   if [ -n "$server_names" ]; then
     echo -e "${icon} MCP ${color}${server_count}${RESET} servers${health_info} │ ${active_tools} tools │ ${server_names}"
   else
@@ -187,8 +191,11 @@ else
   echo -e "${icon} MCP ${color}disconnected${RESET}"
 fi
 ```
+
 ### MCP Server Status Monitor with Tool Categories
+
 Version grouping tools by category for better organization
+
 ```bash
 #!/usr/bin/env bash
 
@@ -207,9 +214,9 @@ if [ "$server_count" -gt 0 ]; then
     decoded=$(echo "$server" | base64 -d 2>/dev/null || echo "{}")
     tools=$(echo "$decoded" | jq '.tools | length // 0' 2>/dev/null || echo "0")
     server_name=$(echo "$decoded" | jq -r '.name // "unknown"' 2>/dev/null || echo "unknown")
-    
+
     active_tools=$((active_tools + tools))
-    
+
     # Categorize by server name prefix
     if [[ "$server_name" == *"filesystem"* ]] || [[ "$server_name" == *"file"* ]]; then
       tool_categories["filesystem"]=1
@@ -257,8 +264,11 @@ else
   echo -e "${icon} MCP ${color}disconnected${RESET}"
 fi
 ```
+
 ### MCP Server Status Monitor Installation Example
+
 Complete setup script with MCP configuration verification
+
 ```bash
 #!/bin/bash
 # Installation script for MCP Server Status Monitor
@@ -367,27 +377,35 @@ echo "Add MCP server: claude mcp add --transport stdio server-name command"
 ```
 
 ## Troubleshooting
+
 ### Statusline shows 'MCP disconnected' despite configured servers
 
 Verify servers are actually connected: run 'claude mcp list' to check server status. Ensure servers are properly configured in ~/.mcp.json and restart Claude Code if needed. Check MCP context is available in statusline JSON: echo '$input' | jq .mcp. Verify Claude Code version supports MCP statusline API. Check server startup logs for errors.
+
 ### Server count shows 0 but MCP servers are running in terminal
 
 Check that MCP context data is accessible. Verify Claude Code version supports MCP statusline API. Run 'claude mcp get [server-name]' to verify individual server status. Check if MCP context is exposed in statusline JSON: echo '$input' | jq .mcp.servers. Ensure servers are registered with Claude Code, not just running externally. Restart Claude Code to refresh MCP connections.
+
 ### Tool count incorrect or not updating
 
 This indicates silent tool registration failure. Run '/mcp' in Claude Code to verify tool registration. Restart connected servers if tools remain unavailable despite connection. Check tool count calculation: for each server, verify tools array exists. Verify base64 decoding works: echo 'test' | base64 | base64 -d. Check jq parsing: echo '$input' | jq '.mcp.servers[0].tools | length'.
+
 ### MCP server startup failures or connection timeouts
 
 Launch with --mcp-debug flag. Check logs: ~/Library/Logs/Claude/mcp.log (macOS) or ~/.local/share/claude/mcp.log (Linux). Verify server.connect() is called and transport listener is active. Check server configuration in ~/.mcp.json. Verify server command is executable: which [server-command]. Test server manually: [server-command] --help.
+
 ### JSON-RPC errors like 'Method not found' or invalid JSON
 
 Server may not support prompts/list or resources/list, or writes non-JSON to stdout. Ensure JSON-RPC 2.0 compliance. Use MCP Inspector for interactive testing. Check server implementation follows MCP protocol. Verify server stdout/stderr separation. Check for error messages in server logs.
+
 ### Server names not displaying or showing as empty
 
 Verify server name extraction: echo '$input' | jq '.mcp.servers[].name'. Check server name field exists in MCP context. Verify jq parsing works: echo '$input' | jq '.mcp.servers | length'. Check string truncation logic if names are too long. Verify tr and sed commands work: echo 'test\ntest' | tr '\n' ',' | sed 's/,$//'.
+
 ### Base64 decoding errors or script failures
 
 Verify base64 command is available: which base64. Test base64 encoding/decoding: echo 'test' | base64 | base64 -d (should return 'test'). Check base64 -d flag syntax (may vary by OS). Verify jq @base64 encoding works: echo '[{"name":"test"}]' | jq -r '.[] | @base64'. Add error handling for base64 decode failures.
+
 ### Statusline not updating or stuck at 'disconnected'
 
 Check JSON input is being read: echo '$input' | jq .. Verify mcp.servers field exists: echo '$input' | jq .mcp.servers. Check jq is installed: which jq. Verify MCP context is available in Claude Code statusline JSON (may require Claude Code version with MCP support). Check refreshInterval in settings.json is set to 2000ms or lower. Restart Claude Code to refresh MCP connections.

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 2,
+  "key": "skills:cursor-windsurf-ai-ide-setup",
+  "category": "skills",
+  "slug": "cursor-windsurf-ai-ide-setup",
+  "title": "Cursor Windsurf AI Code Editor Skill - Claude Code Skills",
+  "author": "JSONbored",
+  "brandName": "Windsurf",
+  "brandDomain": "windsurf.com",
+  "brandIconUrl": "/api/brand-assets/icon/windsurf.com",
+  "brandAssetSource": "brandfetch",
+  "brandVerifiedAt": "2025-10-23",
+  "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/cursor-windsurf-ai-ide-setup.zip -o cursor-windsurf-ai-ide-setup.zip && unzip -o cursor-windsurf-ai-ide-setup.zip -d ./cursor-windsurf-ai-ide-setup\n\nUsage:\nClaude can help you configure and optimize Cursor or Windsurf AI code editors for maximum productivity. Both editors provide AI-powered code completion, multi-file editing, and intelligent refactoring. Cursor excels with its Agent mode and Composer features, while Windsurf emphasizes collaborative flows and Cascade AI. From initial setup to advanced workflows, Claude handles IDE configuration and optimization.\n\nAsset:\n# Project: Next.js 15 SaaS Application\n\n## Tech Stack\n- Next.js 15.0+ (App Router, Server Actions)\n- React 19.0+\n- TypeScript 5.5+ (strict mode)\n- Tailwind CSS 4.0+\n- shadcn/ui components\n- Zod for validation\n- Prisma with PostgreSQL\n\n## Coding Conventions\n- Use named exports (no default exports except pages)\n- Prefix server actions with 'action'\n- All async functions must have error handling\n- Use Zod schemas for all form inputs\n- Components in PascalCase, files in kebab-case\n- Max function length: 50 lines\n- All props must have TypeScript interfaces\n\n## Patterns to Follow\n- Server Actions for mutations (no API routes)\n- React Server Components by default\n- Client components only when needed ('use client')\n- Parallel data fetching with Promise.all\n- Error boundaries for all async components\n- Loading states with Suspense\n- Form validation with Zod + React Hook Form\n\n## Patterns to Avoid\n- Don't use 'any' type (use 'unknown' if needed)\n- Don't fetch in client components (use server)\n- Don't bypass TypeScript with @ts-ignore\n- Don't create custom hooks without jsdoc\n- Don't use inline styles (use Tailwind)\n\n## Testing\n- Unit tests with Vitest\n- E2E tests with Playwright\n- Minimum 80% coverage\n- Test file naming: *.test.ts\n\n## Performance\n- Dynamic imports for heavy components\n- Image optimization with next/image\n- Font optimization with next/font\n- Metadata API for SEO",
+  "detailMarkdown": "# Cursor Windsurf AI Code Editor Skill - Claude Code Skills\n\nConfigure and optimize Cursor and Windsurf AI code editors for maximum productivity. Set up agent mode, composer features, keybindings, and AI-powered refactoring workflows. Customize with .cursorrules and .windsurfrules for project-specific guidance.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/cursor-windsurf-ai-ide-setup.zip -o cursor-windsurf-ai-ide-setup.zip && unzip -o cursor-windsurf-ai-ide-setup.zip -d ./cursor-windsurf-ai-ide-setup\n```\n\n## Usage\nClaude can help you configure and optimize Cursor or Windsurf AI code editors for maximum productivity. Both editors provide AI-powered code completion, multi-file editing, and intelligent refactoring. Cursor excels with its Agent mode and Composer features, while Windsurf emphasizes collaborative flows and Cascade AI. From initial setup to advanced workflows, Claude handles IDE configuration and optimization.",
+  "webUrl": "https://heyclau.de/skills/cursor-windsurf-ai-ide-setup",
+  "canonicalUrl": "https://heyclau.de/skills/cursor-windsurf-ai-ide-setup",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/cursor-windsurf-ai-ide-setup.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/cursor-windsurf-ai-ide-setup",
+  "seoTitle": "Cursor Windsurf AI Code Editor Skill - Claude Code Skills",
+  "seoDescription": "Configure and optimize Cursor and Windsurf AI code editors for maximum productivity. Set up agent mode, composer features, keybindings, and AI-powered refact...",
+  "repoUrl": "",
+  "documentationUrl": "https://cursor.sh/docs"
+}

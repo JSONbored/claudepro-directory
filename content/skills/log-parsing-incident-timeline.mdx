@@ -2,19 +2,19 @@
 title: Log Parsing + Incident Timeline Skill
 slug: log-parsing-incident-timeline
 category: skills
-description: 'Parse web, application, and system logs into structured incidents and timelines with anomaly detection.'
-cardDescription: 'Parse web, application, and system logs into structured incidents and timelines with anomaly detection.'
+description: "Parse web, application, and system logs into structured incidents and timelines with anomaly detection."
+cardDescription: "Parse web, application, and system logs into structured incidents and timelines with anomaly detection."
 seoTitle: Log Parsing + Incident Timeline Skill
-seoDescription: 'Parse web, application, and system logs into structured incidents and timelines with anomaly detection. Supports multiple log formats (Apache/Nginx access lo...'
+seoDescription: "Parse web, application, and system logs into structured incidents and timelines with anomaly detection. Supports multiple log formats (Apache/Nginx access lo..."
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-15'
-repoUrl: 'https://github.com/BurntSushi/ripgrep'
-documentationUrl: 'https://github.com/BurntSushi/ripgrep'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-15"
+repoUrl: "https://github.com/BurntSushi/ripgrep"
+documentationUrl: "https://github.com/BurntSushi/ripgrep"
 downloadUrl: /downloads/skills/log-parsing-incident-timeline.zip
 installable: true
-installCommand: 'curl -L https://heyclau.de/downloads/skills/log-parsing-incident-timeline.zip -o log-parsing-incident-timeline.zip && unzip -o log-parsing-incident-timeline.zip -d ./log-parsing-incident-timeline'
-usageSnippet: 'Claude can parse application logs, server logs, and system logs to extract errors, create incident timelines, identify patterns, and correlate events across distributed systems. Transform raw log data into actionable insights.'
+installCommand: "curl -L https://heyclau.de/downloads/skills/log-parsing-incident-timeline.zip -o log-parsing-incident-timeline.zip && unzip -o log-parsing-incident-timeline.zip -d ./log-parsing-incident-timeline"
+usageSnippet: "Claude can parse application logs, server logs, and system logs to extract errors, create incident timelines, identify patterns, and correlate events across distributed systems. Transform raw log data into actionable insights."
 copySnippet: |-
   # Filter 5xx errors from nginx and sort by time
   rg -n ' 5\d\d ' access.log | awk '{print $4, $5, $9, $7}' | sort > timeline.txt
@@ -22,9 +22,9 @@ copySnippet: |-
 skillType: general
 skillLevel: advanced
 verificationStatus: draft
-verifiedAt: '2025-10-15'
+verifiedAt: "2025-10-15"
 retrievalSources:
-  - 'https://github.com/BurntSushi/ripgrep'
+  - "https://github.com/BurntSushi/ripgrep"
 testedPlatforms:
   - Claude
   - Codex
@@ -34,11 +34,11 @@ testedPlatforms:
   - Gemini
 prerequisites:
   - ripgrep (rg)
-  - 'jq (optional, for JSON parsing)'
+  - "jq (optional, for JSON parsing)"
   - bash or Python 3.11+
-  - 'pandas (optional, for advanced analysis)'
-  - 'Log file access permissions - read access to log files in various formats (text, JSON, syslog, etc.) and write access for parsed output files'
-  - 'Regular expression knowledge or pattern matching tools (grep, awk, sed) for parsing structured and unstructured log formats'
+  - "pandas (optional, for advanced analysis)"
+  - "Log file access permissions - read access to log files in various formats (text, JSON, syslog, etc.) and write access for parsed output files"
+  - "Regular expression knowledge or pattern matching tools (grep, awk, sed) for parsing structured and unstructured log formats"
 tags:
   - logs
   - observability
@@ -67,6 +67,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## What This Skill Enables
 
 Claude can parse application logs, server logs, and system logs to extract errors, create incident timelines, identify patterns, and correlate events across distributed systems. Transform raw log data into actionable insights.
@@ -80,17 +81,20 @@ Claude can parse application logs, server logs, and system logs to extract error
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
-
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 
 **Required:**
+
 - Claude Pro subscription
 - Code Interpreter feature enabled
 - Log files uploaded (text, JSON, or compressed)
 
 **What Claude handles:**
+
 - Installing log parsing tools (grep, awk, jq, logparser)
 - Pattern matching and extraction
 - Timestamp parsing and correlation
@@ -104,6 +108,7 @@ Claude can parse application logs, server logs, and system logs to extract error
 **Prompt:** "Find all errors in this application log from the past hour. Group by error type and show frequency."
 
 Claude will:
+
 1. Parse log timestamps
 2. Filter to last hour
 3. Extract error messages
@@ -113,12 +118,14 @@ Claude will:
 ### Create Incident Timeline
 
 **Prompt:** "Create a timeline of what happened during the outage (2pm-3pm):
+
 - Filter to that time range
 - Show key events (errors, warnings, restarts)
 - Correlate across multiple log files
 - Present chronologically"
 
 Claude will:
+
 1. Parse multiple log sources
 2. Filter by time range
 3. Extract significant events
@@ -130,6 +137,7 @@ Claude will:
 **Prompt:** "Trace request ID 'abc123' through all log files. Show the complete journey with timestamps and any errors encountered."
 
 Claude will:
+
 1. Search for request ID across files
 2. Extract all matching lines
 3. Sort by timestamp
@@ -139,12 +147,14 @@ Claude will:
 ### Performance Analysis
 
 **Prompt:** "Analyze response times in this access log:
+
 - Calculate p50, p95, p99 percentiles
 - Identify slowest requests
 - Show distribution histogram
 - Flag requests over 1 second"
 
 Claude will:
+
 1. Extract response time data
 2. Calculate statistics
 3. Identify outliers
@@ -154,6 +164,7 @@ Claude will:
 ## Common Workflows
 
 ### Post-Incident Analysis
+
 ```
 "Analyze logs from the incident:
 1. Extract all errors between 14:00-15:00
@@ -164,6 +175,7 @@ Claude will:
 ```
 
 ### Security Audit
+
 ```
 "Audit access logs for security issues:
 1. Find failed login attempts (3+ in 5 min)
@@ -174,6 +186,7 @@ Claude will:
 ```
 
 ### Error Aggregation
+
 ```
 "Aggregate errors from past 7 days:
 1. Group by error type/stack trace
@@ -184,6 +197,7 @@ Claude will:
 ```
 
 ### Multi-Service Correlation
+
 ```
 "Correlate logs from:
 - API gateway (nginx)
@@ -196,6 +210,7 @@ For request ID xyz789, show complete flow across all services."
 ## Log Formats Supported
 
 ### Common Formats
+
 - Apache/Nginx access logs
 - JSON structured logs
 - Syslog format
@@ -204,6 +219,7 @@ For request ID xyz789, show complete flow across all services."
 - Docker container logs
 
 ### Custom Formats
+
 - Claude can parse custom log formats
 - Provide sample line and field descriptions
 - Define regex patterns or delimiters
@@ -221,18 +237,21 @@ For request ID xyz789, show complete flow across all services."
 ## Advanced Analysis
 
 ### Pattern Detection
+
 - Anomaly detection in log volume
 - Unusual pattern recognition
 - Cyclic pattern identification
 - Outlier detection
 
 ### Correlation Techniques
+
 - Cross-service request tracing
 - Time-based event correlation
 - User session reconstruction
 - Dependency mapping
 
 ### Filtering & Extraction
+
 - Regex-based pattern matching
 - JSON path extraction
 - Field parsing and normalization

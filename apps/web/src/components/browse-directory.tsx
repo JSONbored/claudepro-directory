@@ -9,14 +9,22 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from "@/components/ui/select";
 import type { DirectoryEntry } from "@/lib/content";
+import { useBrowseUrlSync } from "@/hooks/use-browse-url-sync";
+import { useClientId } from "@/hooks/use-client-id";
 import { categoryLabels, siteConfig } from "@/lib/site";
+import { categorySpec } from "@heyclaude/registry";
 
 type BrowseDirectoryProps = {
   entries: DirectoryEntry[];
   initialQuery?: string;
+  initialCategory?: string;
+  initialUtilityFilter?: string;
+  initialPlatformFilter?: string;
+  initialSortMode?: string;
+  syncUrl?: boolean;
   limit?: number;
   entriesUrl?: string;
 };
@@ -24,28 +32,141 @@ type BrowseDirectoryProps = {
 const VOTE_QUERY_BATCH_SIZE = 120;
 const VOTE_QUERY_MAX_ATTEMPTS = 3;
 const VOTE_QUERY_RETRY_DELAYS_MS = [250, 900, 1800] as const;
+const utilityFilterOptions = [
+  { value: "all", label: "All Utility" },
+  { value: "installable", label: "Installable" },
+  { value: "trusted-package", label: "Trusted Package" },
+  { value: "verified", label: "Verified/Prod" },
+  { value: "draft", label: "Draft" },
+  { value: "hook-trigger", label: "Hook Trigger" },
+  { value: "prerequisites", label: "Prerequisites" },
+  { value: "troubleshooting", label: "Troubleshooting" },
+] as const;
+const platformFilterOptions = [
+  { value: "all", label: "All Platforms" },
+  ...categorySpec.defaultTestedPlatforms.map((platform) => ({
+    value: platform.toLowerCase(),
+    label: platform,
+  })),
+] as const;
+const sortModeOptions = ["popular", "newest", "title"] as const;
+
+type DirectoryEntriesPayload = {
+  entries?: DirectoryEntry[];
+};
+
+function normalizeCategory(value?: string) {
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase();
+  if (normalized === "all") return "all";
+  return siteConfig.categoryOrder.includes(normalized) ? normalized : "all";
+}
+
+function normalizeUtilityFilter(value?: string) {
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase();
+  return utilityFilterOptions.some((option) => option.value === normalized)
+    ? normalized
+    : "all";
+}
+
+function normalizePlatformFilter(value?: string) {
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase();
+  return platformFilterOptions.some((option) => option.value === normalized)
+    ? normalized
+    : "all";
+}
+
+function readDirectoryEntries(payload: DirectoryEntriesPayload) {
+  if (Array.isArray(payload.entries)) return payload.entries;
+  return [];
+}
+
+function normalizeSortMode(value?: string) {
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase();
+  return sortModeOptions.includes(
+    normalized as (typeof sortModeOptions)[number],
+  )
+    ? normalized
+    : "popular";
+}
+
+function matchesUtilityFilter(entry: DirectoryEntry, filter: string) {
+  switch (filter) {
+    case "installable":
+      return Boolean(
+        entry.installable || entry.installCommand || entry.downloadUrl,
+      );
+    case "trusted-package":
+      return (
+        entry.downloadTrust === "first-party" || entry.packageVerified === true
+      );
+    case "verified":
+      return (
+        entry.verificationStatus === "validated" ||
+        entry.verificationStatus === "production"
+      );
+    case "draft":
+      return entry.verificationStatus === "draft";
+    case "hook-trigger":
+      return Boolean(entry.trigger);
+    case "prerequisites":
+      return Boolean(entry.hasPrerequisites || entry.prerequisites?.length);
+    case "troubleshooting":
+      return entry.hasTroubleshooting === true;
+    default:
+      return true;
+  }
+}
+
+function matchesPlatformFilter(entry: DirectoryEntry, filter: string) {
+  if (filter === "all") return true;
+  return (entry.platformCompatibility ?? []).some(
+    (item) => item.platform.trim().toLowerCase() === filter,
+  );
+}
 
 export function BrowseDirectory({
   entries,
   initialQuery = "",
+  initialCategory: initialCategoryProp = "all",
+  initialUtilityFilter: initialUtilityFilterProp = "all",
+  initialPlatformFilter: initialPlatformFilterProp = "all",
+  initialSortMode: initialSortModeProp = "popular",
+  syncUrl = false,
   limit,
-  entriesUrl
+  entriesUrl,
 }: BrowseDirectoryProps) {
   const isDefaultQuery = initialQuery.trim().length === 0;
-  const initialSortMode = "popular";
-  const initialCategory = "all";
+  const initialSortMode = normalizeSortMode(initialSortModeProp);
+  const initialCategory = normalizeCategory(initialCategoryProp);
+  const initialUtilityFilter = normalizeUtilityFilter(initialUtilityFilterProp);
+  const initialPlatformFilter = normalizePlatformFilter(
+    initialPlatformFilterProp,
+  );
   const [allEntries, setAllEntries] = useState(entries);
   const [hasLoadedFullEntries, setHasLoadedFullEntries] = useState(false);
   const [isLoadingFullEntries, setIsLoadingFullEntries] = useState(false);
-  const getEntryKey = (entry: DirectoryEntry) => `${entry.category}:${entry.slug}`;
+  const getEntryKey = (entry: DirectoryEntry) =>
+    `${entry.category}:${entry.slug}`;
   const [query, setQuery] = useState(initialQuery);
   const [category, setCategory] = useState(initialCategory);
+  const [utilityFilter, setUtilityFilter] = useState(initialUtilityFilter);
+  const [platformFilter, setPlatformFilter] = useState(initialPlatformFilter);
   const [sortMode, setSortMode] = useState(initialSortMode);
   const [visibleCount, setVisibleCount] = useState(limit ?? allEntries.length);
-  const [clientId, setClientId] = useState("");
+  const [clientId, setClientId] = useClientId("heyclaude-client-id");
   const [votesAvailable, setVotesAvailable] = useState(true);
   const [voteCounts, setVoteCounts] = useState<Record<string, number>>({});
-  const [popularSortSnapshot, setPopularSortSnapshot] = useState<Record<string, number>>({});
+  const [popularSortSnapshot, setPopularSortSnapshot] = useState<
+    Record<string, number>
+  >({});
   const [votedByMe, setVotedByMe] = useState<Record<string, boolean>>({});
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const deferredQuery = useDeferredValue(query);
@@ -64,14 +185,15 @@ export function BrowseDirectory({
     try {
       const response = await fetch(entriesUrl, {
         method: "GET",
-        cache: "force-cache"
+        cache: "force-cache",
       });
       if (!response.ok) return;
 
-      const payload = (await response.json()) as DirectoryEntry[];
-      if (!Array.isArray(payload) || payload.length === 0) return;
+      const payload = (await response.json()) as DirectoryEntriesPayload;
+      const nextEntries = readDirectoryEntries(payload);
+      if (!Array.isArray(nextEntries) || nextEntries.length === 0) return;
 
-      setAllEntries(payload);
+      setAllEntries(nextEntries);
       setHasLoadedFullEntries(true);
     } catch {
       // Keep initial entries on fetch failure.
@@ -85,21 +207,26 @@ export function BrowseDirectory({
     if (!isDefaultQuery) {
       void loadFullEntriesIfNeeded();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entriesUrl, isDefaultQuery]);
 
-  useEffect(() => {
-    const storageKey = "heyclaude-client-id";
-    const existing = window.localStorage.getItem(storageKey);
-    if (existing) {
-      setClientId(existing);
-      return;
-    }
-
-    const generated = crypto.randomUUID();
-    window.localStorage.setItem(storageKey, generated);
-    setClientId(generated);
-  }, []);
+  useBrowseUrlSync({
+    enabled: syncUrl,
+    query,
+    category,
+    utilityFilter,
+    platformFilter,
+    sortMode,
+    normalizeCategory,
+    normalizeUtilityFilter,
+    normalizePlatformFilter,
+    normalizeSortMode,
+    setQuery,
+    setCategory,
+    setUtilityFilter,
+    setPlatformFilter,
+    setSortMode,
+  });
 
   useEffect(() => {
     const baseScores: Record<string, number> = {};
@@ -121,8 +248,8 @@ export function BrowseDirectory({
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           keys: batchKeys,
-          clientId
-        })
+          clientId,
+        }),
       });
       if (!response.ok) {
         throw new Error(`votes query failed: ${response.status}`);
@@ -166,7 +293,9 @@ export function BrowseDirectory({
         } catch {
           if (attempt >= VOTE_QUERY_MAX_ATTEMPTS || cancelled) break;
           const delay =
-            VOTE_QUERY_RETRY_DELAYS_MS[Math.min(attempt - 1, VOTE_QUERY_RETRY_DELAYS_MS.length - 1)];
+            VOTE_QUERY_RETRY_DELAYS_MS[
+              Math.min(attempt - 1, VOTE_QUERY_RETRY_DELAYS_MS.length - 1)
+            ];
           await new Promise((resolve) => window.setTimeout(resolve, delay));
         }
       }
@@ -184,14 +313,27 @@ export function BrowseDirectory({
   const filteredEntries = useMemo(() => {
     const matched = allEntries.filter((entry) => {
       if (category !== "all" && entry.category !== category) return false;
+      if (!matchesUtilityFilter(entry, utilityFilter)) return false;
+      if (!matchesPlatformFilter(entry, platformFilter)) return false;
       if (!normalizedQuery) return true;
 
       const haystack = [
         entry.title,
         entry.description,
         entry.author,
+        entry.brandName,
+        entry.brandDomain,
+        entry.trigger,
+        entry.skillType,
+        entry.skillLevel,
+        entry.verificationStatus,
+        entry.downloadTrust,
+        ...(entry.platformCompatibility ?? []).flatMap((item) => [
+          item.platform,
+          item.supportLevel,
+        ]),
         ...entry.tags,
-        ...entry.keywords
+        ...entry.keywords,
       ]
         .filter(Boolean)
         .join(" ")
@@ -203,13 +345,13 @@ export function BrowseDirectory({
     const sorted = [...matched].sort((left, right) => {
       const rightKey = getEntryKey(right);
       const leftKey = getEntryKey(left);
-      const rightVotes =
-        popularSortSnapshot[rightKey] ?? 0;
-      const leftVotes =
-        popularSortSnapshot[leftKey] ?? 0;
+      const rightVotes = popularSortSnapshot[rightKey] ?? 0;
+      const leftVotes = popularSortSnapshot[leftKey] ?? 0;
 
       if (sortMode === "newest") {
-        return String(right.dateAdded ?? "").localeCompare(String(left.dateAdded ?? ""));
+        return String(right.dateAdded ?? "").localeCompare(
+          String(left.dateAdded ?? ""),
+        );
       }
       if (sortMode === "title") {
         return left.title.localeCompare(right.title);
@@ -218,11 +360,27 @@ export function BrowseDirectory({
     });
 
     return sorted;
-  }, [allEntries, category, normalizedQuery, popularSortSnapshot, sortMode]);
+  }, [
+    allEntries,
+    category,
+    normalizedQuery,
+    popularSortSnapshot,
+    platformFilter,
+    sortMode,
+    utilityFilter,
+  ]);
 
   useEffect(() => {
     setVisibleCount(limit ?? filteredEntries.length);
-  }, [category, deferredQuery, filteredEntries.length, limit, sortMode]);
+  }, [
+    category,
+    deferredQuery,
+    filteredEntries.length,
+    limit,
+    platformFilter,
+    sortMode,
+    utilityFilter,
+  ]);
 
   useEffect(() => {
     if (!limit) return;
@@ -236,22 +394,36 @@ export function BrowseDirectory({
           void loadFullEntriesIfNeeded();
           return;
         }
-        setVisibleCount((current) => Math.min(current + limit, filteredEntries.length));
+        setVisibleCount((current) =>
+          Math.min(current + limit, filteredEntries.length),
+        );
       },
-      { rootMargin: "400px 0px" }
+      { rootMargin: "400px 0px" },
     );
 
     observer.observe(target);
     return () => observer.disconnect();
-  }, [entriesUrl, filteredEntries.length, hasLoadedFullEntries, isLoadingFullEntries, limit]);
+  }, [
+    entriesUrl,
+    filteredEntries.length,
+    hasLoadedFullEntries,
+    isLoadingFullEntries,
+    limit,
+  ]);
 
   useEffect(() => {
     if (!entriesUrl) return;
-    if (category !== initialCategory || sortMode !== initialSortMode || query.trim().length > 0) {
+    if (
+      category !== initialCategory ||
+      utilityFilter !== initialUtilityFilter ||
+      platformFilter !== initialPlatformFilter ||
+      sortMode !== initialSortMode ||
+      query.trim().length > 0
+    ) {
       void loadFullEntriesIfNeeded();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entriesUrl, category, sortMode, query]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entriesUrl, category, utilityFilter, platformFilter, sortMode, query]);
 
   const displayedEntries = useMemo(() => {
     if (!limit) return filteredEntries;
@@ -262,7 +434,9 @@ export function BrowseDirectory({
     const key = getEntryKey(entry);
     let effectiveClientId = clientId;
     if (!effectiveClientId) {
-      effectiveClientId = window.localStorage.getItem("heyclaude-client-id") ?? crypto.randomUUID();
+      effectiveClientId =
+        window.localStorage.getItem("heyclaude-client-id") ??
+        crypto.randomUUID();
       window.localStorage.setItem("heyclaude-client-id", effectiveClientId);
       setClientId(effectiveClientId);
     }
@@ -281,8 +455,8 @@ export function BrowseDirectory({
         body: JSON.stringify({
           key,
           clientId: effectiveClientId,
-          vote: nextVote
-        })
+          vote: nextVote,
+        }),
       });
 
       if (!response.ok) {
@@ -294,20 +468,30 @@ export function BrowseDirectory({
         voted: boolean;
       };
 
-      setVoteCounts((current) => ({ ...current, [key]: Number(payload.count ?? 0) }));
-      setVotedByMe((current) => ({ ...current, [key]: Boolean(payload.voted) }));
-      window.dispatchEvent(new CustomEvent("heyclaude:intent", { detail: { type: "vote" } }));
+      setVoteCounts((current) => ({
+        ...current,
+        [key]: Number(payload.count ?? 0),
+      }));
+      setVotedByMe((current) => ({
+        ...current,
+        [key]: Boolean(payload.voted),
+      }));
+      window.dispatchEvent(
+        new CustomEvent("heyclaude:intent", {
+          detail: { type: "vote", entryKey: key },
+        }),
+      );
 
       return {
         count: Number(payload.count ?? 0),
-        voted: Boolean(payload.voted)
+        voted: Boolean(payload.voted),
       };
     } catch {
       setVoteCounts((current) => ({ ...current, [key]: previousCount }));
       setVotedByMe((current) => ({ ...current, [key]: previousVoted }));
       return {
         count: previousCount,
-        voted: previousVoted
+        voted: previousVoted,
       };
     }
   };
@@ -336,11 +520,38 @@ export function BrowseDirectory({
             ))}
           </SelectContent>
         </Select>
-        <Select value={sortMode} onValueChange={setSortMode}>
+        <Select value={utilityFilter} onValueChange={setUtilityFilter}>
           <SelectTrigger
-            aria-label="Sort"
-            className="directory-select-trigger"
+            aria-label="Utility filter"
+            className="directory-select-trigger sm:w-[12rem]"
           >
+            <SelectValue placeholder="All Utility" />
+          </SelectTrigger>
+          <SelectContent className="directory-select-content">
+            {utilityFilterOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={platformFilter} onValueChange={setPlatformFilter}>
+          <SelectTrigger
+            aria-label="Platform filter"
+            className="directory-select-trigger sm:w-[12rem]"
+          >
+            <SelectValue placeholder="All Platforms" />
+          </SelectTrigger>
+          <SelectContent className="directory-select-content">
+            {platformFilterOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={sortMode} onValueChange={setSortMode}>
+          <SelectTrigger aria-label="Sort" className="directory-select-trigger">
             <SelectValue placeholder="Most Popular" />
           </SelectTrigger>
           <SelectContent className="directory-select-content">
@@ -376,7 +587,10 @@ export function BrowseDirectory({
         ) : null}
 
         {limit && displayedEntries.length < filteredEntries.length ? (
-          <div ref={loadMoreRef} className="py-4 text-center text-sm text-muted-foreground">
+          <div
+            ref={loadMoreRef}
+            className="py-4 text-center text-sm text-muted-foreground"
+          >
             Loading more entries...
           </div>
         ) : null}

@@ -1,132 +1,86 @@
-import { NextResponse } from "next/server";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+
+import { newsletterSubscribeBodySchema } from "@/lib/api/contracts";
 import {
-  hasBodyWithinLimit,
-  hasJsonContentType,
-  isAllowedOrigin,
-  isRateLimited
-} from "@/lib/api-security";
-import { logApiError, logApiInfo, logApiWarn, redactEmail } from "@/lib/api-logs";
+  apiError,
+  apiJson,
+  createApiHandler,
+  type InferApiBody,
+} from "@/lib/api/router";
+import { logApiError, logApiInfo, redactEmail } from "@/lib/api-logs";
 
-type SubscribePayload = {
-  email?: string;
-  source?: string;
-};
+export const POST = createApiHandler(
+  "newsletter.subscribe",
+  async ({ request, body, requestId }) => {
+    const payload = body as InferApiBody<typeof newsletterSubscribeBodySchema>;
+    const email = payload.email;
+    const source = payload.source;
 
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const { env } = getCloudflareContext();
+    const envRecord = env as unknown as Record<string, unknown>;
+    const resendApiKey = String(envRecord["RESEND_API_KEY"] ?? "");
+    const resendSegmentId = String(envRecord["RESEND_SEGMENT_ID"] ?? "");
 
-export async function POST(request: Request) {
-  if (!isAllowedOrigin(request)) {
-    logApiWarn(request, "newsletter.subscribe.forbidden_origin");
-    return NextResponse.json({ error: "forbidden_origin" }, { status: 403 });
-  }
-
-  if (!hasBodyWithinLimit(request, 8 * 1024)) {
-    logApiWarn(request, "newsletter.subscribe.payload_too_large");
-    return NextResponse.json({ error: "payload_too_large" }, { status: 413 });
-  }
-
-  if (!hasJsonContentType(request)) {
-    logApiWarn(request, "newsletter.subscribe.invalid_content_type");
-    return NextResponse.json({ error: "invalid_content_type" }, { status: 415 });
-  }
-
-  if (isRateLimited({ request, scope: "newsletter-subscribe", limit: 15, windowMs: 60_000 })) {
-    logApiWarn(request, "newsletter.subscribe.rate_limited");
-    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
-  }
-
-  let payload: SubscribePayload = {};
-
-  try {
-    payload = (await request.json()) as SubscribePayload;
-  } catch {
-    logApiWarn(request, "newsletter.subscribe.invalid_json");
-    return NextResponse.json({ error: "invalid_json" }, { status: 400 });
-  }
-
-  const email = String(payload.email ?? "").trim().toLowerCase();
-  const source = String(payload.source ?? "site").trim().slice(0, 64);
-
-  if (!emailRegex.test(email) || email.length > 320) {
-    logApiWarn(request, "newsletter.subscribe.invalid_email");
-    return NextResponse.json({ error: "invalid_email" }, { status: 400 });
-  }
-
-  const { env } = getCloudflareContext();
-  const envRecord = env as unknown as Record<string, unknown>;
-  const resendApiKey = String(envRecord["RESEND_API_KEY"] ?? "");
-  const resendSegmentId = String(envRecord["RESEND_SEGMENT_ID"] ?? "");
-  const resendAudienceId = String(envRecord["RESEND_AUDIENCE_ID"] ?? "");
-
-  if (!resendApiKey || (!resendSegmentId && !resendAudienceId)) {
-    logApiError(request, "newsletter.subscribe.not_configured");
-    return NextResponse.json({ error: "newsletter_not_configured" }, { status: 503 });
-  }
-
-  const requestBody: Record<string, unknown> = {
-    email,
-    unsubscribed: false,
-    first_name: "",
-    last_name: "",
-    metadata: {
-      source
+    if (!resendApiKey || !resendSegmentId) {
+      logApiError(request, "newsletter.subscribe.not_configured");
+      return apiError("newsletter_not_configured", 503, { requestId });
     }
-  };
 
-  // Prefer the current Resend contacts+segments model.
-  if (resendSegmentId) {
-    requestBody.segments = [{ id: resendSegmentId }];
-  } else if (resendAudienceId) {
-    // Backward-compatible fallback for older audience-based setups.
-    requestBody.audience_id = resendAudienceId;
-  }
-
-  let response: Response;
-  try {
-    response = await fetch("https://api.resend.com/contacts", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${resendApiKey}`,
-        "Content-Type": "application/json"
+    const requestBody: Record<string, unknown> = {
+      email,
+      unsubscribed: false,
+      first_name: "",
+      last_name: "",
+      metadata: {
+        source,
       },
-      body: JSON.stringify(requestBody),
-      signal: AbortSignal.timeout(8000)
+      segments: [{ id: resendSegmentId }],
+    };
+
+    let response: Response;
+    try {
+      response = await fetch("https://api.resend.com/contacts", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${resendApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+        signal: AbortSignal.timeout(8000),
+      });
+    } catch {
+      logApiError(request, "newsletter.subscribe.provider_unavailable");
+      return apiError("provider_unavailable", 502, { requestId });
+    }
+
+    if (response.ok) {
+      logApiInfo(request, "newsletter.subscribe.success", {
+        email: redactEmail(email),
+        source,
+      });
+      return apiJson(
+        { ok: true },
+        { headers: { "cache-control": "no-store" } },
+      );
+    }
+
+    if (response.status === 409) {
+      // Treat duplicate as success to keep UX simple and avoid account enumeration.
+      logApiInfo(request, "newsletter.subscribe.duplicate", {
+        email: redactEmail(email),
+        source,
+      });
+      return apiJson(
+        { ok: true },
+        { headers: { "cache-control": "no-store" } },
+      );
+    }
+
+    logApiError(request, "newsletter.subscribe.provider_error", {
+      status: response.status,
+      email: redactEmail(email),
+      source,
     });
-  } catch {
-    logApiError(request, "newsletter.subscribe.provider_unavailable");
-    return NextResponse.json({ error: "provider_unavailable" }, { status: 502 });
-  }
-
-  if (response.ok) {
-    logApiInfo(request, "newsletter.subscribe.success", { email: redactEmail(email), source });
-    return NextResponse.json(
-      { ok: true },
-      {
-        headers: {
-          "cache-control": "no-store"
-        }
-      }
-    );
-  }
-
-  if (response.status === 409) {
-    // Treat duplicate as success to keep UX simple and avoid account enumeration.
-    logApiInfo(request, "newsletter.subscribe.duplicate", { email: redactEmail(email), source });
-    return NextResponse.json(
-      { ok: true },
-      {
-        headers: {
-          "cache-control": "no-store"
-        }
-      }
-    );
-  }
-
-  logApiError(request, "newsletter.subscribe.provider_error", {
-    status: response.status,
-    email: redactEmail(email),
-    source
-  });
-  return NextResponse.json({ error: "provider_error" }, { status: 502 });
-}
+    return apiError("provider_error", 502, { requestId });
+  },
+);

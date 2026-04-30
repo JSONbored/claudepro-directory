@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:make",
+  "category": "tools",
+  "slug": "make",
+  "title": "Make",
+  "author": "Make",
+  "brandName": "Make",
+  "brandDomain": "make.com",
+  "brandIconUrl": "/api/brand-assets/icon/make.com",
+  "brandAssetSource": "brandfetch",
+  "copyText": "## Editorial notes\n\nMake fits teams that prefer visual automation scenarios and integration workflows for AI-adjacent business processes.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Make\n\nVisual automation platform for building integrations, scenarios, API workflows, and AI-connected business processes.",
+  "webUrl": "https://heyclau.de/tools/make",
+  "canonicalUrl": "https://heyclau.de/tools/make",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/make.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/make",
+  "seoTitle": "Make visual workflow automation for AI teams",
+  "seoDescription": "Make helps build visual integrations, scenarios, API workflows, and AI-connected business processes. HeyClaude adds source links, install steps,...",
+  "repoUrl": "",
+  "documentationUrl": "https://www.make.com/en/help"
+}

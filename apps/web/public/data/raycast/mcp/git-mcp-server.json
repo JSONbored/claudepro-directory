@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "mcp:git-mcp-server",
+  "category": "mcp",
+  "slug": "git-mcp-server",
+  "title": "Git MCP Server for Claude",
+  "author": "Anthropic",
+  "brandName": "Anthropic",
+  "brandDomain": "anthropic.com",
+  "brandIconUrl": "/api/brand-assets/icon/anthropic.com",
+  "brandAssetSource": "brandfetch",
+  "copyText": "Install:\nclaude mcp list && claude mcp status git\n\nConfig:\n{\n  \"git\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-git\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n\nUsage:\n{\n  \"git\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-git\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
+  "detailMarkdown": "# Git MCP Server for Claude\n\nOfficial MCP server providing Git repository tools for reading, searching, and manipulating Git repositories\n\n## Install\n```bash\nclaude mcp list && claude mcp status git\n```\n\n## Config\n```json\n{\n  \"git\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-git\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status git",
+  "webUrl": "https://heyclau.de/mcp/git-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/git-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/git-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/git-mcp-server",
+  "seoTitle": "Git MCP Server for Claude",
+  "seoDescription": "Official MCP server providing Git repository tools for reading, searching, and manipulating Git repositories Discover tools for AI development.",
+  "repoUrl": "",
+  "documentationUrl": "https://modelcontextprotocol.io/examples"
+}

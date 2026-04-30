@@ -1,0 +1,1062 @@
+# V0 Component Generator for Claude
+URL: https://heyclau.de/commands/v0-generate
+Category: commands
+Author: JSONbored
+Date added: 2025-10-16
+Documentation: https://v0.dev/docs
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/v0-generate.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/commands/v0-generate
+- Source URLs: https://v0.dev/docs, https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/v0-generate.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
+## Summary
+Generate production-ready React components from natural language using V0.dev patterns with shadcn/ui, TailwindCSS, and TypeScript
+## Tags
+- v0
+- ui-generation
+- shadcn
+- react
+- tailwind
+## Content
+## Overview
+The `/v0-generate` command generates production-ready React components using V0.dev AI patterns with shadcn/ui integration, TailwindCSS v4, and full TypeScript support.
+
+## Usage
+```
+/v0-generate [options] <component_description>
+```
+```text
+/v0-generate [options] <component_description>
+```
+
+## Options
+### Component Types
+
+- `--page` - Generate full page layout (default)
+- `--component` - Generate reusable component
+- `--form` - Generate form with validation
+- `--dashboard` - Generate dashboard layout
+- `--landing` - Generate landing page section
+
+### Framework Integration
+
+- `--next15` - Next.js 15 App Router (default)
+- `--react19` - Standalone React 19
+- `--remix` - Remix framework
+- `--astro` - Astro with React islands
+
+### UI Libraries
+
+- `--shadcn` - Use shadcn/ui components (default)
+- `--radix` - Raw Radix UI primitives
+- `--headless` - Headless UI components
+- `--custom` - Custom styled components
+
+### Styling Options
+
+- `--tailwind` - TailwindCSS v4 (default)
+- `--css-modules` - CSS Modules
+- `--styled` - Styled Components
+- `--vanilla` - Vanilla Extract
+
+### Features
+
+- `--responsive` - Mobile-first responsive design (default: true)
+- `--dark-mode` - Include dark mode support
+- `--animated` - Add framer-motion animations
+- `--accessible` - WCAG 2.2 Level AA compliance
+- `--server-component` - React Server Component
+- `--client-component` - Client Component with interactivity
+
+## Examples
+### Dashboard Page Generation
+
+**Command:**
+
+```
+/v0-generate --page --dashboard --dark-mode "Analytics dashboard with revenue chart, user stats cards, and recent activity table"
+```
+
+**Generated Code:**
+
+```typescript
+// app/dashboard/page.tsx
+import { Suspense } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { RevenueChart } from '@/components/dashboard/revenue-chart';
+import { StatsCards } from '@/components/dashboard/stats-cards';
+import { ActivityTable } from '@/components/dashboard/activity-table';
+import { DollarSign, Users, ShoppingCart, TrendingUp } from 'lucide-react';
+
+export default async function DashboardPage() {
+  return (
+    <div className="flex min-h-screen flex-col">
+      <header className="border-b">
+        <div className="container flex h-16 items-center px-4">
+          <h1 className="text-2xl font-bold">Analytics Dashboard</h1>
+        </div>
+      </header>
+
+      <main className="flex-1 space-y-4 p-4 md:p-8">
+        {/* Stats Cards */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Revenue
+              </CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">$45,231.89</div>
+              <p className="text-xs text-muted-foreground">
+                +20.1% from last month
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Active Users
+              </CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">+2,350</div>
+              <p className="text-xs text-muted-foreground">
+                +180.1% from last month
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Sales</CardTitle>
+              <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">+12,234</div>
+              <p className="text-xs text-muted-foreground">
+                +19% from last month
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Conversion Rate
+              </CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">+3.24%</div>
+              <p className="text-xs text-muted-foreground">
+                +0.5% from last month
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Revenue Chart */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+          <Card className="col-span-4">
+            <CardHeader>
+              <CardTitle>Revenue Overview</CardTitle>
+            </CardHeader>
+            <CardContent className="pl-2">
+              <Suspense fallback={<div>Loading chart...</div>}>
+                <RevenueChart />
+              </Suspense>
+            </CardContent>
+          </Card>
+
+          <Card className="col-span-3">
+            <CardHeader>
+              <CardTitle>Recent Activity</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Suspense fallback={<div>Loading activity...</div>}>
+                <ActivityTable />
+              </Suspense>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    </div>
+  );
+}
+```
+
+**Generated Revenue Chart Component:**
+
+```typescript
+// components/dashboard/revenue-chart.tsx
+'use client';
+
+import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+
+const data = [
+  { month: 'Jan', revenue: 4000 },
+  { month: 'Feb', revenue: 3000 },
+  { month: 'Mar', revenue: 5000 },
+  { month: 'Apr', revenue: 4500 },
+  { month: 'May', revenue: 6000 },
+  { month: 'Jun', revenue: 5500 },
+];
+
+export function RevenueChart() {
+  return (
+    <ResponsiveContainer width="100%" height={350}>
+      <LineChart data={data}>
+        <XAxis
+          dataKey="month"
+          stroke="#888888"
+          fontSize={12}
+          tickLine={false}
+          axisLine={false}
+        />
+        <YAxis
+          stroke="#888888"
+          fontSize={12}
+          tickLine={false}
+          axisLine={false}
+          tickFormatter={(value) => `$${value}`}
+        />
+        <Tooltip />
+        <Line
+          type="monotone"
+          dataKey="revenue"
+          stroke="hsl(var(--primary))"
+          strokeWidth={2}
+        />
+      </LineChart>
+    </ResponsiveContainer>
+  );
+}
+```
+
+### Form Component Generation
+
+**Command:**
+
+```
+/v0-generate --form --accessible "User registration form with email, password, and terms acceptance"
+```
+
+**Generated Code:**
+
+```typescript
+// components/forms/registration-form.tsx
+'use client';
+
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { Button } from '@/components/ui/button';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Loader2 } from 'lucide-react';
+
+const formSchema = z.object({
+  email: z
+    .string()
+    .email({ message: 'Please enter a valid email address' })
+    .min(1, { message: 'Email is required' }),
+  password: z
+    .string()
+    .min(8, { message: 'Password must be at least 8 characters' })
+    .regex(/[A-Z]/, { message: 'Password must contain at least one uppercase letter' })
+    .regex(/[a-z]/, { message: 'Password must contain at least one lowercase letter' })
+    .regex(/[0-9]/, { message: 'Password must contain at least one number' }),
+  confirmPassword: z.string(),
+  acceptTerms: z.boolean().refine((val) => val === true, {
+    message: 'You must accept the terms and conditions',
+  }),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ['confirmPassword'],
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
+interface RegistrationFormProps {
+  onSubmit: (data: FormValues) => Promise<void>;
+}
+
+export function RegistrationForm({ onSubmit }: RegistrationFormProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+      confirmPassword: '',
+      acceptTerms: false,
+    },
+  });
+
+  const handleSubmit = async (data: FormValues) => {
+    setIsSubmitting(true);
+    try {
+      await onSubmit(data);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input
+                  type="email"
+                  placeholder="you@example.com"
+                  autoComplete="email"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input
+                  type="password"
+                  placeholder="••••••••"
+                  autoComplete="new-password"
+                  {...field}
+                />
+              </FormControl>
+              <FormDescription>
+                Must be at least 8 characters with uppercase, lowercase, and number
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="confirmPassword"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Confirm Password</FormLabel>
+              <FormControl>
+                <Input
+                  type="password"
+                  placeholder="••••••••"
+                  autoComplete="new-password"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="acceptTerms"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel>
+                  I accept the{' '}
+                  <a href="/terms" className="underline hover:text-primary">
+                    terms and conditions
+                  </a>
+                </FormLabel>
+                <FormMessage />
+              </div>
+            </FormItem>
+          )}
+        />
+
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Create Account
+        </Button>
+      </form>
+    </Form>
+  );
+}
+```
+
+### Landing Page Section
+
+**Command:**
+
+```
+/v0-generate --landing --animated "Hero section with gradient background, CTA buttons, and feature highlights"
+```
+
+**Generated Code:**
+
+```typescript
+// components/landing/hero-section.tsx
+'use client';
+
+import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { ArrowRight, Zap, Shield, Rocket } from 'lucide-react';
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5 },
+  },
+};
+
+export function HeroSection() {
+  return (
+    <section className="relative overflow-hidden bg-gradient-to-b from-primary/5 via-background to-background">
+      <div className="container relative z-10 px-4 py-24 md:py-32">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="mx-auto max-w-4xl text-center"
+        >
+          <motion.div variants={itemVariants}>
+            <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
+              Build Modern Apps{' '}
+              <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                10x Faster
+              </span>
+            </h1>
+          </motion.div>
+
+          <motion.p
+            variants={itemVariants}
+            className="mt-6 text-lg text-muted-foreground sm:text-xl"
+          >
+            Ship production-ready applications with the power of Next.js 15,
+            React 19, and cutting-edge AI tools. Start building today.
+          </motion.p>
+
+          <motion.div
+            variants={itemVariants}
+            className="mt-10 flex flex-col gap-4 sm:flex-row sm:justify-center"
+          >
+            <Button size="lg" className="group">
+              Get Started Free
+              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Button>
+            <Button size="lg" variant="outline">
+              View Demo
+            </Button>
+          </motion.div>
+
+          <motion.div
+            variants={containerVariants}
+            className="mt-20 grid gap-8 sm:grid-cols-3"
+          >
+            <motion.div variants={itemVariants} className="flex flex-col items-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+                <Zap className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="mt-4 text-lg font-semibold">Lightning Fast</h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Optimized performance with sub-second load times
+              </p>
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="flex flex-col items-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+                <Shield className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="mt-4 text-lg font-semibold">Secure by Default</h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Built-in security best practices and compliance
+              </p>
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="flex flex-col items-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+                <Rocket className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="mt-4 text-lg font-semibold">Deploy Instantly</h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                One-click deployment to global edge network
+              </p>
+            </motion.div>
+          </motion.div>
+        </motion.div>
+      </div>
+
+      {/* Background gradient orbs */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-primary/20 blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-primary/20 blur-3xl" />
+      </div>
+    </section>
+  );
+}
+```
+```text
+/v0-generate --page --dashboard --dark-mode "Analytics dashboard with revenue chart, user stats cards, and recent activity table"
+```
+```typescript
+// app/dashboard/page.tsx
+import { Suspense } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { RevenueChart } from '@/components/dashboard/revenue-chart';
+import { StatsCards } from '@/components/dashboard/stats-cards';
+import { ActivityTable } from '@/components/dashboard/activity-table';
+import { DollarSign, Users, ShoppingCart, TrendingUp } from 'lucide-react';
+
+export default async function DashboardPage() {
+  return (
+    <div className="flex min-h-screen flex-col">
+      <header className="border-b">
+        <div className="container flex h-16 items-center px-4">
+          <h1 className="text-2xl font-bold">Analytics Dashboard</h1>
+        </div>
+      </header>
+
+      <main className="flex-1 space-y-4 p-4 md:p-8">
+        {/* Stats Cards */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Revenue
+              </CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">$45,231.89</div>
+              <p className="text-xs text-muted-foreground">
+                +20.1% from last month
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Active Users
+              </CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">+2,350</div>
+              <p className="text-xs text-muted-foreground">
+                +180.1% from last month
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Sales</CardTitle>
+              <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">+12,234</div>
+              <p className="text-xs text-muted-foreground">
+                +19% from last month
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Conversion Rate
+              </CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">+3.24%</div>
+              <p className="text-xs text-muted-foreground">
+                +0.5% from last month
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Revenue Chart */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+          <Card className="col-span-4">
+            <CardHeader>
+              <CardTitle>Revenue Overview</CardTitle>
+            </CardHeader>
+            <CardContent className="pl-2">
+              <Suspense fallback={<div>Loading chart...</div>}>
+                <RevenueChart />
+              </Suspense>
+            </CardContent>
+          </Card>
+
+          <Card className="col-span-3">
+            <CardHeader>
+              <CardTitle>Recent Activity</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Suspense fallback={<div>Loading activity...</div>}>
+                <ActivityTable />
+              </Suspense>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    </div>
+  );
+}
+```
+```typescript
+// components/dashboard/revenue-chart.tsx
+'use client';
+
+import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+
+const data = [
+  { month: 'Jan', revenue: 4000 },
+  { month: 'Feb', revenue: 3000 },
+  { month: 'Mar', revenue: 5000 },
+  { month: 'Apr', revenue: 4500 },
+  { month: 'May', revenue: 6000 },
+  { month: 'Jun', revenue: 5500 },
+];
+
+export function RevenueChart() {
+  return (
+    <ResponsiveContainer width="100%" height={350}>
+      <LineChart data={data}>
+        <XAxis
+          dataKey="month"
+          stroke="#888888"
+          fontSize={12}
+          tickLine={false}
+          axisLine={false}
+        />
+        <YAxis
+          stroke="#888888"
+          fontSize={12}
+          tickLine={false}
+          axisLine={false}
+          tickFormatter={(value) => `$${value}`}
+        />
+        <Tooltip />
+        <Line
+          type="monotone"
+          dataKey="revenue"
+          stroke="hsl(var(--primary))"
+          strokeWidth={2}
+        />
+      </LineChart>
+    </ResponsiveContainer>
+  );
+}
+```
+```text
+/v0-generate --form --accessible "User registration form with email, password, and terms acceptance"
+```
+```typescript
+// components/forms/registration-form.tsx
+'use client';
+
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { Button } from '@/components/ui/button';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Loader2 } from 'lucide-react';
+
+const formSchema = z.object({
+  email: z
+    .string()
+    .email({ message: 'Please enter a valid email address' })
+    .min(1, { message: 'Email is required' }),
+  password: z
+    .string()
+    .min(8, { message: 'Password must be at least 8 characters' })
+    .regex(/[A-Z]/, { message: 'Password must contain at least one uppercase letter' })
+    .regex(/[a-z]/, { message: 'Password must contain at least one lowercase letter' })
+    .regex(/[0-9]/, { message: 'Password must contain at least one number' }),
+  confirmPassword: z.string(),
+  acceptTerms: z.boolean().refine((val) => val === true, {
+    message: 'You must accept the terms and conditions',
+  }),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ['confirmPassword'],
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
+interface RegistrationFormProps {
+  onSubmit: (data: FormValues) => Promise<void>;
+}
+
+export function RegistrationForm({ onSubmit }: RegistrationFormProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+      confirmPassword: '',
+      acceptTerms: false,
+    },
+  });
+
+  const handleSubmit = async (data: FormValues) => {
+    setIsSubmitting(true);
+    try {
+      await onSubmit(data);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input
+                  type="email"
+                  placeholder="you@example.com"
+                  autoComplete="email"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input
+                  type="password"
+                  placeholder="••••••••"
+                  autoComplete="new-password"
+                  {...field}
+                />
+              </FormControl>
+              <FormDescription>
+                Must be at least 8 characters with uppercase, lowercase, and number
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="confirmPassword"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Confirm Password</FormLabel>
+              <FormControl>
+                <Input
+                  type="password"
+                  placeholder="••••••••"
+                  autoComplete="new-password"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="acceptTerms"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel>
+                  I accept the{' '}
+                  <a href="/terms" className="underline hover:text-primary">
+                    terms and conditions
+                  </a>
+                </FormLabel>
+                <FormMessage />
+              </div>
+            </FormItem>
+          )}
+        />
+
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Create Account
+        </Button>
+      </form>
+    </Form>
+  );
+}
+```
+```text
+/v0-generate --landing --animated "Hero section with gradient background, CTA buttons, and feature highlights"
+```
+```typescript
+// components/landing/hero-section.tsx
+'use client';
+
+import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { ArrowRight, Zap, Shield, Rocket } from 'lucide-react';
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5 },
+  },
+};
+
+export function HeroSection() {
+  return (
+    <section className="relative overflow-hidden bg-gradient-to-b from-primary/5 via-background to-background">
+      <div className="container relative z-10 px-4 py-24 md:py-32">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="mx-auto max-w-4xl text-center"
+        >
+          <motion.div variants={itemVariants}>
+            <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
+              Build Modern Apps{' '}
+              <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                10x Faster
+              </span>
+            </h1>
+          </motion.div>
+
+          <motion.p
+            variants={itemVariants}
+            className="mt-6 text-lg text-muted-foreground sm:text-xl"
+          >
+            Ship production-ready applications with the power of Next.js 15,
+            React 19, and cutting-edge AI tools. Start building today.
+          </motion.p>
+
+          <motion.div
+            variants={itemVariants}
+            className="mt-10 flex flex-col gap-4 sm:flex-row sm:justify-center"
+          >
+            <Button size="lg" className="group">
+              Get Started Free
+              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Button>
+            <Button size="lg" variant="outline">
+              View Demo
+            </Button>
+          </motion.div>
+
+          <motion.div
+            variants={containerVariants}
+            className="mt-20 grid gap-8 sm:grid-cols-3"
+          >
+            <motion.div variants={itemVariants} className="flex flex-col items-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+                <Zap className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="mt-4 text-lg font-semibold">Lightning Fast</h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Optimized performance with sub-second load times
+              </p>
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="flex flex-col items-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+                <Shield className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="mt-4 text-lg font-semibold">Secure by Default</h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Built-in security best practices and compliance
+              </p>
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="flex flex-col items-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+                <Rocket className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="mt-4 text-lg font-semibold">Deploy Instantly</h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                One-click deployment to global edge network
+              </p>
+            </motion.div>
+          </motion.div>
+        </motion.div>
+      </div>
+
+      {/* Background gradient orbs */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-primary/20 blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-primary/20 blur-3xl" />
+      </div>
+    </section>
+  );
+}
+```
+
+## Configuration
+### shadcn/ui Setup
+
+```json
+// components.json
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "new-york",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "config": "tailwind.config.ts",
+    "css": "app/globals.css",
+    "baseColor": "slate",
+    "cssVariables": true
+  },
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils"
+  }
+}
+```
+
+### Dark Mode Support
+
+```typescript
+// Generated theme provider
+'use client';
+
+import { ThemeProvider as NextThemesProvider } from 'next-themes';
+import { type ThemeProviderProps } from 'next-themes/dist/types';
+
+export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
+  return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
+}
+```
+```json
+// components.json
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "new-york",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "config": "tailwind.config.ts",
+    "css": "app/globals.css",
+    "baseColor": "slate",
+    "cssVariables": true
+  },
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils"
+  }
+}
+```
+```typescript
+// Generated theme provider
+'use client';
+
+import { ThemeProvider as NextThemesProvider } from 'next-themes';
+import { type ThemeProviderProps } from 'next-themes/dist/types';
+
+export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
+  return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
+}
+```
+
+## Best Practices
+1. **Component Structure**: All generated components follow React 19 best practices with proper TypeScript types
+2. **Accessibility**: WCAG 2.2 Level AA compliant with proper ARIA labels and keyboard navigation
+3. **Responsive Design**: Mobile-first approach with Tailwind breakpoints
+4. **Performance**: Server Components by default, Client Components only when needed
+5. **Type Safety**: Full TypeScript support with Zod validation for forms
+6. **Styling**: TailwindCSS v4 with CSS variables for theming
+7. **Animation**: Framer Motion for smooth, performant animations
+8. **SEO**: Proper semantic HTML with metadata generation

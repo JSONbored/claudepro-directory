@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 2,
+  "key": "skills:proxmox-ve-api-orchestrator",
+  "category": "skills",
+  "slug": "proxmox-ve-api-orchestrator",
+  "title": "Proxmox VE API Orchestrator Skill",
+  "author": "JSONbored",
+  "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/proxmox-ve-api-orchestrator.zip -o proxmox-ve-api-orchestrator.zip && unzip -o proxmox-ve-api-orchestrator.zip -d ./proxmox-ve-api-orchestrator\n\nUsage:\nUse this skill to execute Proxmox infrastructure automations with predictable state transitions and reduced operational risk.\n\nAsset:\n# Trigger\n\"Run the Proxmox VE API orchestrator skill for this infrastructure request.\"\n\n# Required output\n1) Pre-flight checks (capacity, node health, locks)\n2) Operation sequence with dependencies\n3) Failure and rollback handling\n4) Post-operation verification report",
+  "detailMarkdown": "# Proxmox VE API Orchestrator Skill\n\nOrchestrate Proxmox VM and LXC lifecycle operations via API with safe sequencing, capacity checks, and rollback-aware automation.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/proxmox-ve-api-orchestrator.zip -o proxmox-ve-api-orchestrator.zip && unzip -o proxmox-ve-api-orchestrator.zip -d ./proxmox-ve-api-orchestrator\n```\n\n## Usage\nUse this skill to execute Proxmox infrastructure automations with predictable state transitions and reduced operational risk.",
+  "webUrl": "https://heyclau.de/skills/proxmox-ve-api-orchestrator",
+  "canonicalUrl": "https://heyclau.de/skills/proxmox-ve-api-orchestrator",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/proxmox-ve-api-orchestrator.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/proxmox-ve-api-orchestrator",
+  "seoTitle": "Proxmox VE API Orchestrator Skill",
+  "seoDescription": "Reusable AI skill for Proxmox API operations with secure token auth, orchestration sequencing, and operational safeguards.",
+  "repoUrl": "",
+  "documentationUrl": "https://pve.proxmox.com/mediawiki/index.php?title=Proxmox_VE_API"
+}

@@ -1,0 +1,14 @@
+---
+description: "SEO operations skill for faster indexing updates using structured publishing, sitemap hygiene, and IndexNow submission patterns."
+globs:
+alwaysApply: false
+---
+# IndexNow Search Indexing Accelerator Skill
+Accelerate search discovery and indexing updates with IndexNow-aware publishing workflows and crawl-efficient update signaling.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/indexnow-search-indexing-accelerator.zip -o indexnow-search-indexing-accelerator.zip && unzip -o indexnow-search-indexing-accelerator.zip -d ./indexnow-search-indexing-accelerator
+```
+## Source
+https://heyclau.de/downloads/skills/indexnow-search-indexing-accelerator.zip

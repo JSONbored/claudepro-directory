@@ -1,0 +1,14 @@
+---
+description: "Unraid-focused automation skill for agent-driven maintenance, observability, and repeatable operations."
+globs:
+alwaysApply: false
+---
+# Unraid API Automation Operator Skill
+Build practical Unraid API automations for server operations, health checks, and routine maintenance with safe execution controls.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/unraid-api-automation-operator.zip -o unraid-api-automation-operator.zip && unzip -o unraid-api-automation-operator.zip -d ./unraid-api-automation-operator
+```
+## Source
+https://heyclau.de/downloads/skills/unraid-api-automation-operator.zip

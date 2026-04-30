@@ -1,0 +1,359 @@
+{
+  "schemaVersion": 1,
+  "key": "skills:trpc-type-safe-api",
+  "entry": {
+    "category": "skills",
+    "slug": "trpc-type-safe-api",
+    "title": "tRPC Type-Safe API Builder Skill",
+    "description": "Build end-to-end type-safe APIs with tRPC and TypeScript, eliminating code generation and runtime bloat for full-stack applications. tRPC provides end-to-end type safety without code generation, schema stitching, or serialization layers - delivering a lighter, more intuitive developer experience than REST or GraphQL.",
+    "seoTitle": "tRPC Type-Safe API Builder Skill",
+    "seoDescription": "Build end-to-end type-safe APIs with tRPC and TypeScript, eliminating code generation and runtime bloat for full-stack applications. tRPC provides end-to-end...",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2025-10-16",
+    "contentUpdatedAt": "2026-04-27T02:57:15-06:00",
+    "tags": [
+      "trpc",
+      "typescript",
+      "api",
+      "type-safety",
+      "t3-stack"
+    ],
+    "keywords": [
+      "api",
+      "builder",
+      "claude",
+      "development",
+      "safe",
+      "skills",
+      "t3-stack",
+      "tools",
+      "trpc",
+      "type",
+      "type-safety",
+      "typescript"
+    ],
+    "readingTime": 6,
+    "difficultyScore": 100,
+    "documentationUrl": "https://trpc.io/docs/",
+    "cardDescription": "Build end-to-end type-safe APIs with tRPC and TypeScript, eliminating code generation and runtime bloat for full-stack applications.",
+    "installable": true,
+    "installCommand": "npm install @trpc/server @trpc/client @trpc/react-query zod",
+    "usageSnippet": "npm install @trpc/server @trpc/client @trpc/react-query zod",
+    "copySnippet": "import { initTRPC, TRPCError } from '@trpc/server';\nimport { z } from 'zod';\nimport { db } from './db';\n\n// Context creation\nexport const createContext = async ({ req }: { req: Request }) => {\n  const token = req.headers.get('authorization')?.replace('Bearer ', '');\n  const user = token ? await verifyToken(token) : null;\n  \n  return {\n    db,\n    user,\n  };\n};\n\ntype Context = Awaited<ReturnType<typeof createContext>>;\n\nconst t = initTRPC.context<Context>().create();\n\n// Middleware\nconst isAuthed = t.middleware(({ ctx, next }) => {\n  if (!ctx.user) {\n    throw new TRPCError({ code: 'UNAUTHORIZED' });\n  }\n  return next({\n    ctx: {\n      user: ctx.user,\n    },\n  });\n});\n\n// Procedures\nexport const publicProcedure = t.procedure;\nexport const protectedProcedure = t.procedure.use(isAuthed);\n\n// Router\nexport const appRouter = t.router({\n  users: t.router({\n    list: publicProcedure.query(async ({ ctx }) => {\n      return ctx.db.user.findMany();\n    }),\n    \n    create: protectedProcedure\n      .input(\n        z.object({\n          name: z.string().min(3),\n          email: z.string().email(),\n        })\n      )\n      .mutation(async ({ ctx, input }) => {\n        return ctx.db.user.create({\n          data: input,\n        });\n      }),\n  }),\n});\n\nexport type AppRouter = typeof appRouter;",
+    "skillType": "general",
+    "skillLevel": "advanced",
+    "verificationStatus": "draft",
+    "verifiedAt": "2025-10-16",
+    "retrievalSources": [
+      "https://trpc.io/docs/"
+    ],
+    "testedPlatforms": [
+      "Claude",
+      "Codex",
+      "OpenClaw",
+      "Cursor",
+      "Windsurf",
+      "Gemini"
+    ],
+    "prerequisites": [
+      "Node.js 18+",
+      "TypeScript 5.0+",
+      "@trpc/server ^10.0.0",
+      "@trpc/client ^10.0.0",
+      "@trpc/react-query ^10.0.0",
+      "TypeScript 5.0+ for full type inference and end-to-end type safety between client and server"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/skills/trpc-type-safe-api.zip",
+    "skillPackage": {
+      "format": "agent-skill",
+      "entrypoint": "SKILL.md",
+      "downloadUrl": "/downloads/skills/trpc-type-safe-api.zip",
+      "sha256": "33c0ad29db6fc2f841bd0bf3521a4ebb8111a34d702a317745ea11735d7422c0"
+    },
+    "platformCompatibility": [
+      {
+        "platform": "Claude",
+        "supportLevel": "native-skill",
+        "installPath": ".claude/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-16"
+      },
+      {
+        "platform": "Codex",
+        "supportLevel": "native-skill",
+        "installPath": ".agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-16"
+      },
+      {
+        "platform": "Windsurf",
+        "supportLevel": "native-skill",
+        "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-16"
+      },
+      {
+        "platform": "Gemini",
+        "supportLevel": "native-skill",
+        "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-16"
+      },
+      {
+        "platform": "Cursor",
+        "supportLevel": "adapter",
+        "installPath": ".cursor/rules/<skill-name>.mdc",
+        "adapterPath": "/data/skill-adapters/cursor/trpc-type-safe-api.mdc",
+        "verifiedAt": "2025-10-16"
+      },
+      {
+        "platform": "Generic AGENTS",
+        "supportLevel": "manual-context",
+        "installPath": "AGENTS.md or tool-specific context file",
+        "verifiedAt": "2025-10-16"
+      }
+    ],
+    "downloadTrust": "first-party",
+    "downloadSha256": "33c0ad29db6fc2f841bd0bf3521a4ebb8111a34d702a317745ea11735d7422c0",
+    "body": "## What This Skill Enables\n\nClaude can build fully type-safe APIs using tRPC (TypeScript Remote Procedure Call), part of the T3 Stack explosion in 2025. tRPC provides end-to-end type safety without code generation, schema stitching, or serialization layers - delivering a lighter, more intuitive developer experience than REST or GraphQL. With zero dependencies, tiny client-side footprint, and automatic type inference, tRPC makes full-stack TypeScript development actually enjoyable.\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Prerequisites\n\n**Required:**\n\n- Claude Pro subscription or Claude Code CLI\n- Node.js 18+ with TypeScript 5.0+\n- Understanding of React or Next.js\n- Basic API development knowledge\n\n**What Claude handles automatically:**\n\n- Setting up tRPC server with Express, Next.js, or standalone\n- Creating type-safe routers and procedures\n- Implementing middleware for authentication\n- Generating React Query hooks automatically\n- Adding input validation with Zod\n- Configuring error handling and transformers\n- Setting up WebSocket subscriptions\n- Integrating with Prisma or other ORMs\n\n## How to Use This Skill\n\n### Create Basic tRPC API\n\n**Prompt:** \"Set up a tRPC API with Next.js 15 that has procedures for creating, reading, updating, and deleting todos. Include Zod validation and automatic React Query hooks.\"\n\nClaude will:\n\n1. Initialize tRPC router with type-safe procedures\n2. Add Zod schemas for input validation\n3. Create CRUD operations with proper types\n4. Set up Next.js API route handlers\n5. Generate React hooks for client usage\n6. Include error handling and transformers\n7. Add TypeScript types exported automatically\n\n### Authentication Middleware\n\n**Prompt:** \"Add JWT authentication middleware to my tRPC API. Protected procedures should verify the token and attach user data to context.\"\n\nClaude will:\n\n1. Create authentication middleware\n2. Verify JWT tokens with jose library\n3. Extend tRPC context with user data\n4. Create protected procedure wrapper\n5. Add type-safe context typing\n6. Include refresh token logic\n7. Implement role-based authorization\n\n### Real-Time Subscriptions\n\n**Prompt:** \"Build a tRPC subscription that sends real-time notifications when new messages are posted. Use WebSocket transport.\"\n\nClaude will:\n\n1. Configure WebSocket link on client\n2. Create subscription procedure\n3. Implement event emitter pattern\n4. Add connection status handling\n5. Include automatic reconnection\n6. Type subscription payloads properly\n7. Add subscription filters\n\n### Full-Stack T3 App\n\n**Prompt:** \"Create a complete T3 Stack application with tRPC, Prisma, NextAuth, and Tailwind. Include user authentication, database models, and type-safe API routes.\"\n\nClaude will:\n\n1. Initialize T3 app with create-t3-app\n2. Set up Prisma schema and migrations\n3. Configure NextAuth providers\n4. Create tRPC routers for all features\n5. Build authenticated UI components\n6. Add optimistic updates with React Query\n7. Include comprehensive error handling\n\n## Tips for Best Results\n\n1. **Use Zod for Validation**: tRPC integrates perfectly with Zod. Always request Zod schemas for input validation to get runtime safety matching TypeScript types.\n\n2. **Leverage Context**: Put database clients, auth sessions, and shared utilities in tRPC context for type-safe access across all procedures.\n\n3. **React Query Integration**: tRPC's React hooks are powered by React Query. Request configurations for caching, refetching, and optimistic updates.\n\n4. **Organize with Sub-Routers**: For large APIs, ask Claude to split procedures into feature-based sub-routers (users, posts, comments) merged into a root router.\n\n5. **Type Inference Magic**: tRPC's `inferProcedureInput` and `inferProcedureOutput` utilities maintain types across client/server. Request these for shared type definitions.\n\n6. **Error Handling**: Use tRPC's `TRPCError` with specific codes (BAD_REQUEST, UNAUTHORIZED, etc.) for consistent error responses.\n\n## Common Workflows\n\n### E-Commerce API\n\n```\n\"Build a type-safe e-commerce API with tRPC:\n1. Product catalog with filtering and search\n2. Shopping cart management\n3. Order processing with Stripe\n4. User authentication with NextAuth\n5. Admin dashboard procedures\n6. Real-time inventory updates\n7. Include Zod validation and Prisma integration\"\n```\n\n### Social Media Backend\n\n```\n\"Create a social media backend using tRPC:\n1. User profiles with follow/unfollow\n2. Posts with likes and comments\n3. Real-time notifications via subscriptions\n4. Image uploads to S3\n5. Feed algorithm with pagination\n6. Direct messaging between users\n7. Content moderation procedures\"\n```\n\n### SaaS Multi-Tenant API\n\n```\n\"Build a multi-tenant SaaS API with tRPC:\n1. Organization and team management\n2. Role-based access control middleware\n3. Usage tracking and billing\n4. Webhook integrations\n5. Audit logging for all actions\n6. Rate limiting per tenant\n7. Data isolation at database level\"\n```\n\n### AI Chat Application\n\n```\n\"Create a chat app with tRPC and streaming:\n1. OpenAI integration with streaming responses\n2. Chat history with Prisma\n3. Real-time message updates\n4. Typing indicators via subscriptions\n5. File uploads for context\n6. Conversation summarization\n7. Cost tracking per user\"\n```\n\n## Troubleshooting\n\n**Issue:** Type errors between client and server\n**Solution:** Ensure both use the same TypeScript version and tRPC version. Export `AppRouter` type from server and import on client. Run `tsc --noEmit` to catch type issues.\n\n**Issue:** Queries not refetching properly\n**Solution:** Configure React Query's `staleTime` and `cacheTime`. Use `utils.invalidate()` after mutations or enable optimistic updates with `onMutate`.\n\n**Issue:** Authentication context undefined\n**Solution:** Verify middleware runs before protected procedures. Check that `createContext` properly extracts auth token from headers. Ensure client passes credentials.\n\n**Issue:** Slow API responses\n**Solution:** Add database query optimization, implement batching with DataLoader pattern, use tRPC's batching link on client, and consider Redis caching for expensive operations.\n\n**Issue:** WebSocket subscriptions disconnecting\n**Solution:** Implement heartbeat/ping-pong pattern, add automatic reconnection with exponential backoff, check firewall/proxy timeouts, and use connection pooling.\n\n**Issue:** Zod validation too strict\n**Solution:** Use `.optional()`, `.nullable()`, or `.default()` on schema fields. For flexible objects, use `z.record()` or `.passthrough()` to allow extra keys.\n\n## Learn More\n\n- [tRPC Official Documentation](https://trpc.io/docs/)\n- [T3 Stack Tutorial](https://create.t3.gg/)\n- [tRPC with Next.js 15 Guide](https://trpc.io/docs/nextjs)\n- [React Query Integration](https://trpc.io/docs/react-query)\n- [tRPC Awesome List](https://github.com/trpc/trpc/blob/main/www/docs/awesome-trpc.md)\n\n## Features\n\n- End-to-end type safety without code generation - TypeScript types flow from server to client automatically\n- Zero runtime dependencies and tiny bundle size - minimal overhead compared to GraphQL or REST\n- Automatic React Query hooks generation with @trpc/react-query for seamless data fetching\n- WebSocket subscriptions support for real-time updates with observable pattern\n- Middleware system for authentication, logging, rate limiting, and custom logic\n- Zod integration for runtime input validation matching TypeScript types\n- Batching support for multiple queries in single HTTP request for performance\n- Adapters for Express, Next.js, Fastify, and standalone servers with flexible deployment\n\n## Use Cases\n\n- Full-stack TypeScript applications with shared types between client and server\n- Real-time collaborative apps with WebSocket subscriptions and live updates\n- Type-safe microservices communication with end-to-end type inference\n- T3 Stack applications (Next.js, tRPC, Prisma, NextAuth, Tailwind)\n- Monorepo architectures with shared type definitions across packages\n- API-first development with automatic client generation and type safety",
+    "sections": [
+      {
+        "title": "What This Skill Enables",
+        "id": "what-this-skill-enables",
+        "markdown": "Claude can build fully type-safe APIs using tRPC (TypeScript Remote Procedure Call), part of the T3 Stack explosion in 2025. tRPC provides end-to-end type safety without code generation, schema stitching, or serialization layers - delivering a lighter, more intuitive developer experience than REST or GraphQL. With zero dependencies, tiny client-side footprint, and automatic type inference, tRPC makes full-stack TypeScript development actually enjoyable.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Compatibility",
+        "id": "compatibility",
+        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Prerequisites",
+        "id": "prerequisites",
+        "markdown": "**Required:**\n\n- Claude Pro subscription or Claude Code CLI\n- Node.js 18+ with TypeScript 5.0+\n- Understanding of React or Next.js\n- Basic API development knowledge\n\n**What Claude handles automatically:**\n\n- Setting up tRPC server with Express, Next.js, or standalone\n- Creating type-safe routers and procedures\n- Implementing middleware for authentication\n- Generating React Query hooks automatically\n- Adding input validation with Zod\n- Configuring error handling and transformers\n- Setting up WebSocket subscriptions\n- Integrating with Prisma or other ORMs",
+        "codeBlocks": []
+      },
+      {
+        "title": "How to Use This Skill",
+        "id": "how-to-use-this-skill",
+        "markdown": "### Create Basic tRPC API\n\n**Prompt:** \"Set up a tRPC API with Next.js 15 that has procedures for creating, reading, updating, and deleting todos. Include Zod validation and automatic React Query hooks.\"\n\nClaude will:\n\n1. Initialize tRPC router with type-safe procedures\n2. Add Zod schemas for input validation\n3. Create CRUD operations with proper types\n4. Set up Next.js API route handlers\n5. Generate React hooks for client usage\n6. Include error handling and transformers\n7. Add TypeScript types exported automatically\n\n### Authentication Middleware\n\n**Prompt:** \"Add JWT authentication middleware to my tRPC API. Protected procedures should verify the token and attach user data to context.\"\n\nClaude will:\n\n1. Create authentication middleware\n2. Verify JWT tokens with jose library\n3. Extend tRPC context with user data\n4. Create protected procedure wrapper\n5. Add type-safe context typing\n6. Include refresh token logic\n7. Implement role-based authorization\n\n### Real-Time Subscriptions\n\n**Prompt:** \"Build a tRPC subscription that sends real-time notifications when new messages are posted. Use WebSocket transport.\"\n\nClaude will:\n\n1. Configure WebSocket link on client\n2. Create subscription procedure\n3. Implement event emitter pattern\n4. Add connection status handling\n5. Include automatic reconnection\n6. Type subscription payloads properly\n7. Add subscription filters\n\n### Full-Stack T3 App\n\n**Prompt:** \"Create a complete T3 Stack application with tRPC, Prisma, NextAuth, and Tailwind. Include user authentication, database models, and type-safe API routes.\"\n\nClaude will:\n\n1. Initialize T3 app with create-t3-app\n2. Set up Prisma schema and migrations\n3. Configure NextAuth providers\n4. Create tRPC routers for all features\n5. Build authenticated UI components\n6. Add optimistic updates with React Query\n7. Include comprehensive error handling",
+        "codeBlocks": []
+      },
+      {
+        "title": "Tips for Best Results",
+        "id": "tips-for-best-results",
+        "markdown": "1. **Use Zod for Validation**: tRPC integrates perfectly with Zod. Always request Zod schemas for input validation to get runtime safety matching TypeScript types.\n\n2. **Leverage Context**: Put database clients, auth sessions, and shared utilities in tRPC context for type-safe access across all procedures.\n\n3. **React Query Integration**: tRPC's React hooks are powered by React Query. Request configurations for caching, refetching, and optimistic updates.\n\n4. **Organize with Sub-Routers**: For large APIs, ask Claude to split procedures into feature-based sub-routers (users, posts, comments) merged into a root router.\n\n5. **Type Inference Magic**: tRPC's `inferProcedureInput` and `inferProcedureOutput` utilities maintain types across client/server. Request these for shared type definitions.\n\n6. **Error Handling**: Use tRPC's `TRPCError` with specific codes (BAD_REQUEST, UNAUTHORIZED, etc.) for consistent error responses.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Common Workflows",
+        "id": "common-workflows",
+        "markdown": "### E-Commerce API\n\n```\n\"Build a type-safe e-commerce API with tRPC:\n1. Product catalog with filtering and search\n2. Shopping cart management\n3. Order processing with Stripe\n4. User authentication with NextAuth\n5. Admin dashboard procedures\n6. Real-time inventory updates\n7. Include Zod validation and Prisma integration\"\n```\n\n### Social Media Backend\n\n```\n\"Create a social media backend using tRPC:\n1. User profiles with follow/unfollow\n2. Posts with likes and comments\n3. Real-time notifications via subscriptions\n4. Image uploads to S3\n5. Feed algorithm with pagination\n6. Direct messaging between users\n7. Content moderation procedures\"\n```\n\n### SaaS Multi-Tenant API\n\n```\n\"Build a multi-tenant SaaS API with tRPC:\n1. Organization and team management\n2. Role-based access control middleware\n3. Usage tracking and billing\n4. Webhook integrations\n5. Audit logging for all actions\n6. Rate limiting per tenant\n7. Data isolation at database level\"\n```\n\n### AI Chat Application\n\n```\n\"Create a chat app with tRPC and streaming:\n1. OpenAI integration with streaming responses\n2. Chat history with Prisma\n3. Real-time message updates\n4. Typing indicators via subscriptions\n5. File uploads for context\n6. Conversation summarization\n7. Cost tracking per user\"\n```",
+        "codeBlocks": [
+          {
+            "language": "text",
+            "code": "\"Build a type-safe e-commerce API with tRPC:\n1. Product catalog with filtering and search\n2. Shopping cart management\n3. Order processing with Stripe\n4. User authentication with NextAuth\n5. Admin dashboard procedures\n6. Real-time inventory updates\n7. Include Zod validation and Prisma integration\""
+          },
+          {
+            "language": "text",
+            "code": "\"Create a social media backend using tRPC:\n1. User profiles with follow/unfollow\n2. Posts with likes and comments\n3. Real-time notifications via subscriptions\n4. Image uploads to S3\n5. Feed algorithm with pagination\n6. Direct messaging between users\n7. Content moderation procedures\""
+          },
+          {
+            "language": "text",
+            "code": "\"Build a multi-tenant SaaS API with tRPC:\n1. Organization and team management\n2. Role-based access control middleware\n3. Usage tracking and billing\n4. Webhook integrations\n5. Audit logging for all actions\n6. Rate limiting per tenant\n7. Data isolation at database level\""
+          },
+          {
+            "language": "text",
+            "code": "\"Create a chat app with tRPC and streaming:\n1. OpenAI integration with streaming responses\n2. Chat history with Prisma\n3. Real-time message updates\n4. Typing indicators via subscriptions\n5. File uploads for context\n6. Conversation summarization\n7. Cost tracking per user\""
+          }
+        ]
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "**Issue:** Type errors between client and server\n**Solution:** Ensure both use the same TypeScript version and tRPC version. Export `AppRouter` type from server and import on client. Run `tsc --noEmit` to catch type issues.\n\n**Issue:** Queries not refetching properly\n**Solution:** Configure React Query's `staleTime` and `cacheTime`. Use `utils.invalidate()` after mutations or enable optimistic updates with `onMutate`.\n\n**Issue:** Authentication context undefined\n**Solution:** Verify middleware runs before protected procedures. Check that `createContext` properly extracts auth token from headers. Ensure client passes credentials.\n\n**Issue:** Slow API responses\n**Solution:** Add database query optimization, implement batching with DataLoader pattern, use tRPC's batching link on client, and consider Redis caching for expensive operations.\n\n**Issue:** WebSocket subscriptions disconnecting\n**Solution:** Implement heartbeat/ping-pong pattern, add automatic reconnection with exponential backoff, check firewall/proxy timeouts, and use connection pooling.\n\n**Issue:** Zod validation too strict\n**Solution:** Use `.optional()`, `.nullable()`, or `.default()` on schema fields. For flexible objects, use `z.record()` or `.passthrough()` to allow extra keys.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Learn More",
+        "id": "learn-more",
+        "markdown": "- [tRPC Official Documentation](https://trpc.io/docs/)\n- [T3 Stack Tutorial](https://create.t3.gg/)\n- [tRPC with Next.js 15 Guide](https://trpc.io/docs/nextjs)\n- [React Query Integration](https://trpc.io/docs/react-query)\n- [tRPC Awesome List](https://github.com/trpc/trpc/blob/main/www/docs/awesome-trpc.md)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- End-to-end type safety without code generation - TypeScript types flow from server to client automatically\n- Zero runtime dependencies and tiny bundle size - minimal overhead compared to GraphQL or REST\n- Automatic React Query hooks generation with @trpc/react-query for seamless data fetching\n- WebSocket subscriptions support for real-time updates with observable pattern\n- Middleware system for authentication, logging, rate limiting, and custom logic\n- Zod integration for runtime input validation matching TypeScript types\n- Batching support for multiple queries in single HTTP request for performance\n- Adapters for Express, Next.js, Fastify, and standalone servers with flexible deployment",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Full-stack TypeScript applications with shared types between client and server\n- Real-time collaborative apps with WebSocket subscriptions and live updates\n- Type-safe microservices communication with end-to-end type inference\n- T3 Stack applications (Next.js, tRPC, Prisma, NextAuth, Tailwind)\n- Monorepo architectures with shared type definitions across packages\n- API-first development with automatic client generation and type safety",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "What This Skill Enables",
+        "id": "what-this-skill-enables"
+      },
+      {
+        "depth": 2,
+        "text": "Compatibility",
+        "id": "compatibility"
+      },
+      {
+        "depth": 3,
+        "text": "Native",
+        "id": "native"
+      },
+      {
+        "depth": 3,
+        "text": "Manual Adaptation",
+        "id": "manual-adaptation"
+      },
+      {
+        "depth": 2,
+        "text": "Prerequisites",
+        "id": "prerequisites"
+      },
+      {
+        "depth": 2,
+        "text": "How to Use This Skill",
+        "id": "how-to-use-this-skill"
+      },
+      {
+        "depth": 3,
+        "text": "Create Basic tRPC API",
+        "id": "create-basic-trpc-api"
+      },
+      {
+        "depth": 3,
+        "text": "Authentication Middleware",
+        "id": "authentication-middleware"
+      },
+      {
+        "depth": 3,
+        "text": "Real-Time Subscriptions",
+        "id": "real-time-subscriptions"
+      },
+      {
+        "depth": 3,
+        "text": "Full-Stack T3 App",
+        "id": "full-stack-t3-app"
+      },
+      {
+        "depth": 2,
+        "text": "Tips for Best Results",
+        "id": "tips-for-best-results"
+      },
+      {
+        "depth": 2,
+        "text": "Common Workflows",
+        "id": "common-workflows"
+      },
+      {
+        "depth": 3,
+        "text": "E-Commerce API",
+        "id": "e-commerce-api"
+      },
+      {
+        "depth": 3,
+        "text": "Social Media Backend",
+        "id": "social-media-backend"
+      },
+      {
+        "depth": 3,
+        "text": "SaaS Multi-Tenant API",
+        "id": "saas-multi-tenant-api"
+      },
+      {
+        "depth": 3,
+        "text": "AI Chat Application",
+        "id": "ai-chat-application"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 2,
+        "text": "Learn More",
+        "id": "learn-more"
+      },
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "text",
+        "code": "\"Build a type-safe e-commerce API with tRPC:\n1. Product catalog with filtering and search\n2. Shopping cart management\n3. Order processing with Stripe\n4. User authentication with NextAuth\n5. Admin dashboard procedures\n6. Real-time inventory updates\n7. Include Zod validation and Prisma integration\""
+      },
+      {
+        "language": "text",
+        "code": "\"Create a social media backend using tRPC:\n1. User profiles with follow/unfollow\n2. Posts with likes and comments\n3. Real-time notifications via subscriptions\n4. Image uploads to S3\n5. Feed algorithm with pagination\n6. Direct messaging between users\n7. Content moderation procedures\""
+      },
+      {
+        "language": "text",
+        "code": "\"Build a multi-tenant SaaS API with tRPC:\n1. Organization and team management\n2. Role-based access control middleware\n3. Usage tracking and billing\n4. Webhook integrations\n5. Audit logging for all actions\n6. Rate limiting per tenant\n7. Data isolation at database level\""
+      },
+      {
+        "language": "text",
+        "code": "\"Create a chat app with tRPC and streaming:\n1. OpenAI integration with streaming responses\n2. Chat history with Prisma\n3. Real-time message updates\n4. Typing indicators via subscriptions\n5. File uploads for context\n6. Conversation summarization\n7. Cost tracking per user\""
+      }
+    ],
+    "filePath": "content/skills/trpc-type-safe-api.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/trpc-type-safe-api.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": true,
+    "packageTrust": "first-party",
+    "packageChecksum": "33c0ad29db6fc2f841bd0bf3521a4ebb8111a34d702a317745ea11735d7422c0",
+    "checksumPresent": true,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://trpc.io/docs/",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/trpc-type-safe-api.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2025-10-16",
+    "adapterGenerated": true,
+    "platforms": [
+      "Claude",
+      "Codex",
+      "Windsurf",
+      "Gemini",
+      "Cursor",
+      "Generic AGENTS"
+    ],
+    "supportLevels": [
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "adapter",
+      "manual-context"
+    ]
+  }
+}

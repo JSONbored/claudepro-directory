@@ -1,0 +1,14 @@
+---
+description: "Build high-performance WebAssembly modules with WASI 0.3, multi-language support, and production-ready deployments for web, serverless, a..."
+globs:
+alwaysApply: false
+---
+# WebAssembly WASM Module Development Skill
+Build high-performance WebAssembly modules with WASI 0.3, multi-language support, and production-ready deployments for web, serverless, and AI workloads. WebAssembly (WASM) runs at near-native speeds across web browsers, serverless platforms, and edge computing environments.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/webassembly-module-development.zip -o webassembly-module-development.zip && unzip -o webassembly-module-development.zip -d ./webassembly-module-development
+```
+## Source
+https://heyclau.de/downloads/skills/webassembly-module-development.zip

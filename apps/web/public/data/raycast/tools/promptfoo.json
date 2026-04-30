@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:promptfoo",
+  "category": "tools",
+  "slug": "promptfoo",
+  "title": "Promptfoo",
+  "author": "Promptfoo",
+  "brandName": "Promptfoo",
+  "brandDomain": "promptfoo.dev",
+  "brandIconUrl": "/api/brand-assets/icon/promptfoo.dev",
+  "brandAssetSource": "brandfetch",
+  "copyText": "## Editorial notes\n\nPromptfoo is a practical fit for teams that want repeatable prompt tests, security checks, and evaluation gates in CI.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Promptfoo\n\nOpen-source prompt testing and red-teaming framework for LLM outputs, regressions, evaluations, and security checks.",
+  "webUrl": "https://heyclau.de/tools/promptfoo",
+  "canonicalUrl": "https://heyclau.de/tools/promptfoo",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/promptfoo.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/promptfoo",
+  "seoTitle": "Promptfoo prompt testing and red teaming",
+  "seoDescription": "Promptfoo is an open-source framework for prompt testing, LLM evaluations, red teaming, and regression checks. HeyClaude adds source links, install steps,...",
+  "repoUrl": "https://github.com/promptfoo/promptfoo",
+  "documentationUrl": "https://www.promptfoo.dev/docs"
+}

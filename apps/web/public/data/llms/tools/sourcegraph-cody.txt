@@ -1,0 +1,27 @@
+# Sourcegraph Cody
+URL: https://heyclau.de/tools/sourcegraph-cody
+Category: tools
+Author: Sourcegraph
+Date added: 2026-04-27
+Documentation: https://sourcegraph.com/docs/cody
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/sourcegraph-cody.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/tools/sourcegraph-cody
+- Source URLs: https://sourcegraph.com/docs/cody, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/sourcegraph-cody.mdx, https://sourcegraph.com/cody
+- Brand: Sourcegraph
+- Brand domain: sourcegraph.com
+- Brand asset source: brandfetch
+- Author: Sourcegraph
+- Last verified: 2026-04-26T23:21:14-06:00
+- Robots: indexable
+## Summary
+AI coding assistant built around large codebase search, context retrieval, chat, and editor integrations.
+## Tags
+- ai-coding
+- code-search
+## Content
+## Editorial notes
+Cody is strongest when repository-scale context and search quality matter more than one-off prompt completion.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

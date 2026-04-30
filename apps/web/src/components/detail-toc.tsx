@@ -39,8 +39,8 @@ export function DetailToc({ sections }: DetailTocProps) {
       {
         root: null,
         rootMargin: "-22% 0px -58% 0px",
-        threshold: [0, 0.25, 0.6, 1]
-      }
+        threshold: [0, 0.25, 0.6, 1],
+      },
     );
 
     for (const id of ids) {
@@ -62,7 +62,9 @@ export function DetailToc({ sections }: DetailTocProps) {
             className={`detail-nav-link ${active ? "detail-nav-link-active" : ""}`}
             aria-current={active ? "location" : undefined}
           >
-            <span className={`detail-nav-dot ${active ? "detail-nav-dot-active" : ""}`} />
+            <span
+              className={`detail-nav-dot ${active ? "detail-nav-dot-active" : ""}`}
+            />
             <span className="min-w-0 flex-1 truncate">{section.title}</span>
           </a>
         );

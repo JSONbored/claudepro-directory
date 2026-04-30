@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 2,
+  "key": "skills:browser-agent-workflow-automation",
+  "category": "skills",
+  "slug": "browser-agent-workflow-automation",
+  "title": "Browser Agent Workflow Automation Skill",
+  "author": "JSONbored",
+  "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/browser-agent-workflow-automation.zip -o browser-agent-workflow-automation.zip && unzip -o browser-agent-workflow-automation.zip -d ./browser-agent-workflow-automation\n\nUsage:\nUse this skill for repeatable browser-driven tasks like QA checks, data collection, and operational runbooks.\n\nAsset:\n# Trigger\n\"Apply browser agent workflow automation skill for this task.\"\n\n# Required output\n1) Step-by-step browser plan with checkpoints\n2) Selector strategy and fallback hierarchy\n3) Retry and timeout policy\n4) Safety boundaries for destructive actions",
+  "detailMarkdown": "# Browser Agent Workflow Automation Skill\n\nBuild robust browser automation workflows for AI agents with deterministic selectors, retries, and safe action boundaries.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/browser-agent-workflow-automation.zip -o browser-agent-workflow-automation.zip && unzip -o browser-agent-workflow-automation.zip -d ./browser-agent-workflow-automation\n```\n\n## Usage\nUse this skill for repeatable browser-driven tasks like QA checks, data collection, and operational runbooks.",
+  "webUrl": "https://heyclau.de/skills/browser-agent-workflow-automation",
+  "canonicalUrl": "https://heyclau.de/skills/browser-agent-workflow-automation",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/browser-agent-workflow-automation.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/browser-agent-workflow-automation",
+  "seoTitle": "Browser Agent Workflow Automation Skill",
+  "seoDescription": "Reusable skill for AI browser automation with robust selectors, retries, validation checkpoints, and operational safety.",
+  "repoUrl": "",
+  "documentationUrl": "https://playwright.dev/docs/best-practices"
+}

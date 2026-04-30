@@ -1,0 +1,14 @@
+---
+description: "Deep CI/CD security and reliability skill for GitHub Actions with reusable workflows, policy checks, and hardened automation patterns."
+globs:
+alwaysApply: false
+---
+# GitHub Actions Secure CI/CD Capability Pack Skill
+Expert GitHub Actions capability skill for secure workflow architecture, token minimization, supply-chain controls, and CI reliability.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/github-actions-secure-cicd-capability-pack.zip -o github-actions-secure-cicd-capability-pack.zip && unzip -o github-actions-secure-cicd-capability-pack.zip -d ./github-actions-secure-cicd-capability-pack
+```
+## Source
+https://heyclau.de/downloads/skills/github-actions-secure-cicd-capability-pack.zip

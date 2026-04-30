@@ -1,0 +1,326 @@
+{
+  "schemaVersion": 1,
+  "key": "mcp:notion-mcp-server",
+  "entry": {
+    "category": "mcp",
+    "slug": "notion-mcp-server",
+    "title": "Notion MCP Server for Claude",
+    "description": "Read docs, update pages, and manage tasks in Notion workspaces",
+    "seoTitle": "Notion MCP Server for Claude",
+    "seoDescription": "Read docs, update pages, and manage tasks in Notion workspaces Discover tools for AI development. HeyClaude adds source links, install steps, compatibility,...",
+    "author": "Notion",
+    "dateAdded": "2025-09-18",
+    "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+    "tags": [
+      "documentation",
+      "notion",
+      "wiki",
+      "notes",
+      "knowledge-base"
+    ],
+    "keywords": [
+      "claude",
+      "development",
+      "documentation",
+      "knowledge-base",
+      "mcp",
+      "mcp servers",
+      "notes",
+      "notion",
+      "server",
+      "tools",
+      "wiki",
+      "heyclaude"
+    ],
+    "readingTime": 1,
+    "difficultyScore": 6,
+    "documentationUrl": "https://developers.notion.com/docs/mcp",
+    "brandName": "Notion",
+    "brandDomain": "notion.so",
+    "brandIconUrl": "/api/brand-assets/icon/notion.so",
+    "brandAssetSource": "brandfetch",
+    "cardDescription": "Read docs, update pages, and manage tasks in Notion workspaces",
+    "installable": true,
+    "installCommand": "claude mcp list && claude mcp status notion",
+    "usageSnippet": "claude mcp list && claude mcp status notion",
+    "copySnippet": "{\n  \"notion\": {\n    \"url\": \"https://mcp.notion.com/mcp\",\n    \"transport\": \"http\"\n  }\n}",
+    "configSnippet": "{\n  \"notion\": {\n    \"url\": \"https://mcp.notion.com/mcp\",\n    \"transport\": \"http\"\n  }\n}",
+    "estimatedSetupTime": "2 minutes",
+    "difficulty": "beginner",
+    "prerequisites": [
+      "Notion workspace account (not Guest workspace - Guest workspaces don't support integrations)",
+      "OAuth 2.0 integration (create public integration in Notion with client ID and client secret)",
+      "HTTP transport support (remote MCP server at https://mcp.notion.com/mcp)",
+      "Internet connection (remote Notion API access required)",
+      "Understanding of Notion API rate limits (3 requests/second average per integration, bursts allowed)",
+      "Understanding of Notion integration permissions (pages/databases must be explicitly shared with integration)",
+      "Understanding of Notion API versioning (Notion-Version header required, e.g., 2022-06-28)",
+      "Claude Desktop 0.7.0+ or Claude Code with MCP support",
+      "Understanding of Notion concepts (pages, databases, blocks, properties, relations, rollups)",
+      "Integration capabilities configured (Read content, Update content, Insert content - any combination)"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/mcp/notion-mcp-server.mcpb",
+    "downloadTrust": "first-party",
+    "downloadSha256": "5be293afa3eadf51565061c1b49445b1f1f14610e7d3a275ded73155086d3d79",
+    "body": "## Content\n\nStreamline your documentation and knowledge management by connecting Claude to Notion. Read and update pages, create databases, query with advanced filters, manage tasks and workflows, search across workspaces, handle relations and rollups, and automate content creation—all through natural language commands. Leverage Notion's powerful API with rate limit monitoring and comprehensive workspace integration.\n\n## Features\n\n- Read and update Notion pages with rich content (blocks, formatting, embeds)\n- Create new pages and databases programmatically (with properties and structure)\n- Query database content with filters and sorts (advanced filtering and pagination)\n- Manage tasks and project workflows (database operations and relations)\n- Search across entire workspace content (with filters and sorting)\n- Manage database properties and schemas (add, update, configure property types)\n- Handle database relations and rollups (cross-database references and calculations)\n- Access comments and user information (collaboration features)\n- Advanced Notion database and page management with block manipulation, database querying, and team collaboration features\n- Batch operations support for efficient bulk page operations, database management, and content processing with automatic rate limit handling and retry logic\n- Real-time workspace synchronization capabilities with webhook integration support for monitoring Notion events and triggering automated workflows\n\n## Use Cases\n\n- Create meeting notes automatically from discussions with structured formatting\n- Update project documentation with latest information and cross-references\n- Generate reports from database content with custom filters and aggregations\n- Sync tasks across different systems via API integration\n- Build knowledge base entries from research with automatic categorization\n- Query and filter databases using advanced search for data analysis\n- Automate content creation workflows with page templates and property population\n- Manage team collaboration with comments, mentions, and user assignments\n- Build automated knowledge management workflows that sync external systems with Notion for real-time documentation and content management\n\n## Installation\n\n### Claude Code\n\n1. Create a public integration in Notion (Settings & members > Connections > Develop or manage integrations > New integration)\n2. Get your OAuth client ID and client secret from integration settings\n3. claude mcp add --transport http notion https://mcp.notion.com/mcp\n4. Authenticate via OAuth when prompted (authorize integration in Notion)\n5. Verify installation: claude mcp list\n6. Test connection: claude mcp status notion\n7. Share a page/database with your integration in Notion to verify access\n\n### Claude Desktop\n\n1. Create a public integration in Notion (Settings & members > Connections > Develop or manage integrations > New integration)\n2. Get your OAuth client ID and client secret from integration settings\n3. Open Claude Desktop configuration file (see configPath below)\n4. Add the Notion server configuration with HTTP transport pointing to https://mcp.notion.com/mcp\n5. Add OAuth credentials to environment variables or configuration\n6. Restart Claude Desktop\n7. Authenticate via OAuth when prompted (authorize integration in Notion)\n8. Share a page/database with your integration in Notion to verify access\n\n## Requirements\n\n- Notion workspace account (not Guest workspace - Guest workspaces don't support integrations)\n- OAuth 2.0 integration (create public integration in Notion with client ID and client secret)\n- HTTP transport support (remote MCP server at https://mcp.notion.com/mcp)\n- Internet connection (remote Notion API access required)\n- Understanding of Notion API rate limits (3 requests/second average per integration, bursts allowed)\n- Understanding of Notion integration permissions (pages/databases must be explicitly shared with integration)\n- Understanding of Notion API versioning (Notion-Version header required, e.g., 2022-06-28)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Understanding of Notion concepts (pages, databases, blocks, properties, relations, rollups)\n- Integration capabilities configured (Read content, Update content, Insert content - any combination)\n\n## Configuration\n\n```json\n{\n  \"notion\": {\n    \"url\": \"https://mcp.notion.com/mcp\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Examples\n\n### Create a new page for today's meeting notes\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Create a new page for today's meeting notes\"\n```\n\n### Update the project status in Notion\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Update the project status in Notion\"\n```\n\n### Find all tasks due this week\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Find all tasks due this week\"\n```\n\n### Add this conversation summary to Notion\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Add this conversation summary to Notion\"\n```\n\n### Create Page with Blocks\n\nCreate a new Notion page in a database with custom blocks\n\n```typescript\n// Create Notion page with blocks\nconst page = await notion.pages.create({\n  parent: { database_id: \"database-id\" },\n  properties: {\n    Title: { title: [{ text: { content: \"New Page\" } }] },\n  },\n  children: [\n    {\n      object: \"block\",\n      type: \"paragraph\",\n      paragraph: { rich_text: [{ text: { content: \"Page content\" } }] },\n    },\n  ],\n});\n```\n\n## Security\n\n- OAuth tokens are securely managed by Notion (OAuth 2.0 authorization flow)\n- Respect workspace permissions and sharing settings (pages/databases must be explicitly shared)\n- Be cautious with bulk update operations (rate limits apply)\n- Regular backups recommended for critical data (integration can modify content)\n- Monitor rate limit headers and implement exponential backoff to avoid service disruption\n- Notion API keys and integration tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- Notion OAuth access tokens should be used for third-party integrations to ensure proper access control, token lifecycle management, and automatic token refresh\n- Notion page, database, and workspace IDs may expose organizational structure and knowledge base information - ensure Notion resource identifiers are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Notion MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Notion webhook configurations and payloads may contain sensitive page content and database information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption\n\n## Troubleshooting\n\n### Rate limit reached - 429 error with rate_limited code\n\nRate limit: 3 requests/second average per integration. Bursts beyond this average are allowed. Implement 350ms delay between requests for sustained operations. Use burst capacity sparingly. Back off exponentially on 429 errors. Check Retry-After header in response to determine wait time. Implement request queuing for pending requests to manage rate limits effectively.\n\n### Page or database not accessible - integration permissions\n\nShare page/database with integration explicitly in Notion. Click Share > Add connection > select your integration. Verify integration has appropriate capabilities (Read content, Update content, Insert content). Check parent page sharing settings if accessing nested pages. For database relations and rollups, related databases must also be shared with integration. Guest workspaces don't support integrations.\n\n### OAuth authentication fails or bad gateway error\n\nRe-authenticate at https://mcp.notion.com/mcp. Verify workspace allows integrations (not Guest workspace). Check OAuth client ID and client secret are correct. Ensure redirect URI matches integration settings. Check internet connectivity. Verify Notion-Version header is included in requests (e.g., 2022-06-28). Restart MCP client if persistent 502 errors occur.\n\n### API returns empty results or stale data from queries\n\nVerify query filters match exact database property names (case-sensitive). Check integration has access to specific database. Refresh integration permissions. Use property IDs instead of names for reliability. For search, pages/databases directly shared with integration are guaranteed to be returned immediately. For nested content, ensure parent pages are also shared. Check integration capabilities match required operations.\n\n### Notion MCP server authentication errors with integration tokens\n\nVerify integration token is valid and not expired. Check integration permissions match required operations. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.\n\n### Notion rate limit errors when processing multiple requests\n\nImplement exponential backoff retry logic with jitter. Use Notion API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed page data. Notion allows 3 requests per second per integration.\n\n### Notion page or database access denied errors\n\nVerify integration has access to the page or database. Check page permissions and workspace sharing settings. Ensure integration has required capabilities (read, update, insert) for target operations.\n\n### Notion MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Notion API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+    "sections": [
+      {
+        "title": "Content",
+        "id": "content",
+        "markdown": "Streamline your documentation and knowledge management by connecting Claude to Notion. Read and update pages, create databases, query with advanced filters, manage tasks and workflows, search across workspaces, handle relations and rollups, and automate content creation—all through natural language commands. Leverage Notion's powerful API with rate limit monitoring and comprehensive workspace integration.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Read and update Notion pages with rich content (blocks, formatting, embeds)\n- Create new pages and databases programmatically (with properties and structure)\n- Query database content with filters and sorts (advanced filtering and pagination)\n- Manage tasks and project workflows (database operations and relations)\n- Search across entire workspace content (with filters and sorting)\n- Manage database properties and schemas (add, update, configure property types)\n- Handle database relations and rollups (cross-database references and calculations)\n- Access comments and user information (collaboration features)\n- Advanced Notion database and page management with block manipulation, database querying, and team collaboration features\n- Batch operations support for efficient bulk page operations, database management, and content processing with automatic rate limit handling and retry logic\n- Real-time workspace synchronization capabilities with webhook integration support for monitoring Notion events and triggering automated workflows",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Create meeting notes automatically from discussions with structured formatting\n- Update project documentation with latest information and cross-references\n- Generate reports from database content with custom filters and aggregations\n- Sync tasks across different systems via API integration\n- Build knowledge base entries from research with automatic categorization\n- Query and filter databases using advanced search for data analysis\n- Automate content creation workflows with page templates and property population\n- Manage team collaboration with comments, mentions, and user assignments\n- Build automated knowledge management workflows that sync external systems with Notion for real-time documentation and content management",
+        "codeBlocks": []
+      },
+      {
+        "title": "Installation",
+        "id": "installation",
+        "markdown": "### Claude Code\n\n1. Create a public integration in Notion (Settings & members > Connections > Develop or manage integrations > New integration)\n2. Get your OAuth client ID and client secret from integration settings\n3. claude mcp add --transport http notion https://mcp.notion.com/mcp\n4. Authenticate via OAuth when prompted (authorize integration in Notion)\n5. Verify installation: claude mcp list\n6. Test connection: claude mcp status notion\n7. Share a page/database with your integration in Notion to verify access\n\n### Claude Desktop\n\n1. Create a public integration in Notion (Settings & members > Connections > Develop or manage integrations > New integration)\n2. Get your OAuth client ID and client secret from integration settings\n3. Open Claude Desktop configuration file (see configPath below)\n4. Add the Notion server configuration with HTTP transport pointing to https://mcp.notion.com/mcp\n5. Add OAuth credentials to environment variables or configuration\n6. Restart Claude Desktop\n7. Authenticate via OAuth when prompted (authorize integration in Notion)\n8. Share a page/database with your integration in Notion to verify access",
+        "codeBlocks": []
+      },
+      {
+        "title": "Requirements",
+        "id": "requirements",
+        "markdown": "- Notion workspace account (not Guest workspace - Guest workspaces don't support integrations)\n- OAuth 2.0 integration (create public integration in Notion with client ID and client secret)\n- HTTP transport support (remote MCP server at https://mcp.notion.com/mcp)\n- Internet connection (remote Notion API access required)\n- Understanding of Notion API rate limits (3 requests/second average per integration, bursts allowed)\n- Understanding of Notion integration permissions (pages/databases must be explicitly shared with integration)\n- Understanding of Notion API versioning (Notion-Version header required, e.g., 2022-06-28)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Understanding of Notion concepts (pages, databases, blocks, properties, relations, rollups)\n- Integration capabilities configured (Read content, Update content, Insert content - any combination)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Configuration",
+        "id": "configuration",
+        "markdown": "```json\n{\n  \"notion\": {\n    \"url\": \"https://mcp.notion.com/mcp\",\n    \"transport\": \"http\"\n  }\n}\n```",
+        "codeBlocks": [
+          {
+            "language": "json",
+            "code": "{\n  \"notion\": {\n    \"url\": \"https://mcp.notion.com/mcp\",\n    \"transport\": \"http\"\n  }\n}"
+          }
+        ]
+      },
+      {
+        "title": "Examples",
+        "id": "examples",
+        "markdown": "### Create a new page for today's meeting notes\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Create a new page for today's meeting notes\"\n```\n\n### Update the project status in Notion\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Update the project status in Notion\"\n```\n\n### Find all tasks due this week\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Find all tasks due this week\"\n```\n\n### Add this conversation summary to Notion\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Add this conversation summary to Notion\"\n```\n\n### Create Page with Blocks\n\nCreate a new Notion page in a database with custom blocks\n\n```typescript\n// Create Notion page with blocks\nconst page = await notion.pages.create({\n  parent: { database_id: \"database-id\" },\n  properties: {\n    Title: { title: [{ text: { content: \"New Page\" } }] },\n  },\n  children: [\n    {\n      object: \"block\",\n      type: \"paragraph\",\n      paragraph: { rich_text: [{ text: { content: \"Page content\" } }] },\n    },\n  ],\n});\n```",
+        "codeBlocks": [
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Create a new page for today's meeting notes\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Update the project status in Notion\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Find all tasks due this week\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Add this conversation summary to Notion\""
+          },
+          {
+            "language": "typescript",
+            "code": "// Create Notion page with blocks\nconst page = await notion.pages.create({\n  parent: { database_id: \"database-id\" },\n  properties: {\n    Title: { title: [{ text: { content: \"New Page\" } }] },\n  },\n  children: [\n    {\n      object: \"block\",\n      type: \"paragraph\",\n      paragraph: { rich_text: [{ text: { content: \"Page content\" } }] },\n    },\n  ],\n});"
+          }
+        ]
+      },
+      {
+        "title": "Security",
+        "id": "security",
+        "markdown": "- OAuth tokens are securely managed by Notion (OAuth 2.0 authorization flow)\n- Respect workspace permissions and sharing settings (pages/databases must be explicitly shared)\n- Be cautious with bulk update operations (rate limits apply)\n- Regular backups recommended for critical data (integration can modify content)\n- Monitor rate limit headers and implement exponential backoff to avoid service disruption\n- Notion API keys and integration tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- Notion OAuth access tokens should be used for third-party integrations to ensure proper access control, token lifecycle management, and automatic token refresh\n- Notion page, database, and workspace IDs may expose organizational structure and knowledge base information - ensure Notion resource identifiers are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Notion MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Notion webhook configurations and payloads may contain sensitive page content and database information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "### Rate limit reached - 429 error with rate_limited code\n\nRate limit: 3 requests/second average per integration. Bursts beyond this average are allowed. Implement 350ms delay between requests for sustained operations. Use burst capacity sparingly. Back off exponentially on 429 errors. Check Retry-After header in response to determine wait time. Implement request queuing for pending requests to manage rate limits effectively.\n\n### Page or database not accessible - integration permissions\n\nShare page/database with integration explicitly in Notion. Click Share > Add connection > select your integration. Verify integration has appropriate capabilities (Read content, Update content, Insert content). Check parent page sharing settings if accessing nested pages. For database relations and rollups, related databases must also be shared with integration. Guest workspaces don't support integrations.\n\n### OAuth authentication fails or bad gateway error\n\nRe-authenticate at https://mcp.notion.com/mcp. Verify workspace allows integrations (not Guest workspace). Check OAuth client ID and client secret are correct. Ensure redirect URI matches integration settings. Check internet connectivity. Verify Notion-Version header is included in requests (e.g., 2022-06-28). Restart MCP client if persistent 502 errors occur.\n\n### API returns empty results or stale data from queries\n\nVerify query filters match exact database property names (case-sensitive). Check integration has access to specific database. Refresh integration permissions. Use property IDs instead of names for reliability. For search, pages/databases directly shared with integration are guaranteed to be returned immediately. For nested content, ensure parent pages are also shared. Check integration capabilities match required operations.\n\n### Notion MCP server authentication errors with integration tokens\n\nVerify integration token is valid and not expired. Check integration permissions match required operations. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.\n\n### Notion rate limit errors when processing multiple requests\n\nImplement exponential backoff retry logic with jitter. Use Notion API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed page data. Notion allows 3 requests per second per integration.\n\n### Notion page or database access denied errors\n\nVerify integration has access to the page or database. Check page permissions and workspace sharing settings. Ensure integration has required capabilities (read, update, insert) for target operations.\n\n### Notion MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Notion API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Content",
+        "id": "content"
+      },
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      },
+      {
+        "depth": 2,
+        "text": "Installation",
+        "id": "installation"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Code",
+        "id": "claude-code"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Desktop",
+        "id": "claude-desktop"
+      },
+      {
+        "depth": 2,
+        "text": "Requirements",
+        "id": "requirements"
+      },
+      {
+        "depth": 2,
+        "text": "Configuration",
+        "id": "configuration"
+      },
+      {
+        "depth": 2,
+        "text": "Examples",
+        "id": "examples"
+      },
+      {
+        "depth": 3,
+        "text": "Create a new page for today's meeting notes",
+        "id": "create-a-new-page-for-todays-meeting-notes"
+      },
+      {
+        "depth": 3,
+        "text": "Update the project status in Notion",
+        "id": "update-the-project-status-in-notion"
+      },
+      {
+        "depth": 3,
+        "text": "Find all tasks due this week",
+        "id": "find-all-tasks-due-this-week"
+      },
+      {
+        "depth": 3,
+        "text": "Add this conversation summary to Notion",
+        "id": "add-this-conversation-summary-to-notion"
+      },
+      {
+        "depth": 3,
+        "text": "Create Page with Blocks",
+        "id": "create-page-with-blocks"
+      },
+      {
+        "depth": 2,
+        "text": "Security",
+        "id": "security"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 3,
+        "text": "Rate limit reached - 429 error with rate_limited code",
+        "id": "rate-limit-reached---429-error-with-ratelimited-code"
+      },
+      {
+        "depth": 3,
+        "text": "Page or database not accessible - integration permissions",
+        "id": "page-or-database-not-accessible---integration-permissions"
+      },
+      {
+        "depth": 3,
+        "text": "OAuth authentication fails or bad gateway error",
+        "id": "oauth-authentication-fails-or-bad-gateway-error"
+      },
+      {
+        "depth": 3,
+        "text": "API returns empty results or stale data from queries",
+        "id": "api-returns-empty-results-or-stale-data-from-queries"
+      },
+      {
+        "depth": 3,
+        "text": "Notion MCP server authentication errors with integration tokens",
+        "id": "notion-mcp-server-authentication-errors-with-integration-tokens"
+      },
+      {
+        "depth": 3,
+        "text": "Notion rate limit errors when processing multiple requests",
+        "id": "notion-rate-limit-errors-when-processing-multiple-requests"
+      },
+      {
+        "depth": 3,
+        "text": "Notion page or database access denied errors",
+        "id": "notion-page-or-database-access-denied-errors"
+      },
+      {
+        "depth": 3,
+        "text": "Notion MCP server connection timeouts or network errors",
+        "id": "notion-mcp-server-connection-timeouts-or-network-errors"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "json",
+        "code": "{\n  \"notion\": {\n    \"url\": \"https://mcp.notion.com/mcp\",\n    \"transport\": \"http\"\n  }\n}"
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Create a new page for today's meeting notes\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Update the project status in Notion\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Find all tasks due this week\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Add this conversation summary to Notion\""
+      },
+      {
+        "language": "typescript",
+        "code": "// Create Notion page with blocks\nconst page = await notion.pages.create({\n  parent: { database_id: \"database-id\" },\n  properties: {\n    Title: { title: [{ text: { content: \"New Page\" } }] },\n  },\n  children: [\n    {\n      object: \"block\",\n      type: \"paragraph\",\n      paragraph: { rich_text: [{ text: { content: \"Page content\" } }] },\n    },\n  ],\n});"
+      }
+    ],
+    "filePath": "content/mcp/notion-mcp-server.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/notion-mcp-server.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": true,
+    "packageTrust": "first-party",
+    "packageChecksum": "5be293afa3eadf51565061c1b49445b1f1f14610e7d3a275ded73155086d3d79",
+    "checksumPresent": true,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://developers.notion.com/docs/mcp",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/notion-mcp-server.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

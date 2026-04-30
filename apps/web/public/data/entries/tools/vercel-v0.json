@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "key": "tools:vercel-v0",
+  "entry": {
+    "category": "tools",
+    "slug": "vercel-v0",
+    "title": "v0",
+    "description": "Vercel AI interface builder for generating, editing, and iterating on React and web UI from prompts.",
+    "seoTitle": "v0 AI interface builder for React",
+    "seoDescription": "v0 is Vercel's AI interface builder for generating, editing, and iterating on React and web UI from prompts. HeyClaude adds source links, install steps,...",
+    "author": "Vercel",
+    "dateAdded": "2026-04-27",
+    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+    "tags": [
+      "ui-generation",
+      "react"
+    ],
+    "keywords": [
+      "ai ui builder",
+      "react generation",
+      "ui-generation",
+      "react",
+      "tools",
+      "claude",
+      "heyclaude",
+      "v0"
+    ],
+    "documentationUrl": "https://v0.dev/docs",
+    "websiteUrl": "https://v0.dev",
+    "brandName": "v0",
+    "brandDomain": "v0.dev",
+    "brandIconUrl": "/api/brand-assets/icon/v0.dev",
+    "brandAssetSource": "brandfetch",
+    "pricingModel": "freemium",
+    "disclosure": "editorial",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Web",
+    "cardDescription": "AI interface builder for React and web UI.",
+    "installable": false,
+    "hasPrerequisites": false,
+    "hasTroubleshooting": false,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Editorial notes\n\nv0 is useful when the task is interface generation, component iteration, and React-first product UI exploration.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+    "sections": [
+      {
+        "title": "Editorial notes",
+        "id": "editorial-notes",
+        "markdown": "v0 is useful when the task is interface generation, component iteration, and React-first product UI exploration.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Disclosure",
+        "id": "disclosure",
+        "markdown": "Editorial listing. No paid placement or affiliate link is used.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Editorial notes",
+        "id": "editorial-notes"
+      },
+      {
+        "depth": 2,
+        "text": "Disclosure",
+        "id": "disclosure"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/tools/vercel-v0.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/vercel-v0.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 3,
+    "sourceUrls": [
+      "https://v0.dev/docs",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/vercel-v0.mdx",
+      "https://v0.dev"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

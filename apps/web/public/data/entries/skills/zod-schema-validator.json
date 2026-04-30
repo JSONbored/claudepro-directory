@@ -1,0 +1,376 @@
+{
+  "schemaVersion": 1,
+  "key": "skills:zod-schema-validator",
+  "entry": {
+    "category": "skills",
+    "slug": "zod-schema-validator",
+    "title": "Zod Schema Validation Skill",
+    "description": "Build type-safe runtime validation with Zod for APIs, forms, and data pipelines with TypeScript 5.5+ integration and automatic type inference.",
+    "seoTitle": "Zod Schema Validation Skill",
+    "seoDescription": "Build type-safe runtime validation with Zod for APIs, forms, and data pipelines with TypeScript 5.5+ integration and automatic type inference. Zod is a TypeS...",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2025-10-16",
+    "contentUpdatedAt": "2026-04-27T02:57:15-06:00",
+    "tags": [
+      "zod",
+      "validation",
+      "typescript",
+      "type-safety",
+      "schema"
+    ],
+    "keywords": [
+      "claude",
+      "development",
+      "schema",
+      "skills",
+      "tools",
+      "type-safety",
+      "typescript",
+      "validation",
+      "validator",
+      "zod",
+      "heyclaude",
+      "zod schema validation skill"
+    ],
+    "readingTime": 6,
+    "difficultyScore": 100,
+    "documentationUrl": "https://zod.dev/",
+    "cardDescription": "Build type-safe runtime validation with Zod for APIs, forms, and data pipelines with TypeScript 5.5+ integration and automatic type infer...",
+    "installable": true,
+    "installCommand": "npm install zod",
+    "usageSnippet": "npm install zod",
+    "copySnippet": "import { z } from 'zod';\n\nconst passwordSchema = z\n  .string()\n  .min(8, 'Password must be at least 8 characters')\n  .regex(/[0-9]/, 'Password must contain a number')\n  .regex(/[^a-zA-Z0-9]/, 'Password must contain a special character');\n\nconst userRegistrationSchema = z.object({\n  email: z.string().email('Invalid email address'),\n  password: passwordSchema,\n  confirmPassword: z.string(),\n  age: z.number().int().min(18, 'Must be 18 or older').max(100),\n  phone: z.string().regex(/^\\\\+?[1-9]\\\\d{1,14}$/).optional(),\n  acceptTerms: z.literal(true, {\n    errorMap: () => ({ message: 'You must accept the terms' }),\n  }),\n}).refine((data) => data.password === data.confirmPassword, {\n  message: 'Passwords do not match',\n  path: ['confirmPassword'],\n});\n\ntype UserRegistration = z.infer<typeof userRegistrationSchema>;\n\n// Usage with safeParse for error handling\nconst result = userRegistrationSchema.safeParse({\n  email: 'user@example.com',\n  password: 'SecureP@ss1',\n  confirmPassword: 'SecureP@ss1',\n  age: 25,\n  acceptTerms: true,\n});\n\nif (!result.success) {\n  console.error(result.error.format());\n} else {\n  console.log('Valid user:', result.data);\n}",
+    "skillType": "general",
+    "skillLevel": "advanced",
+    "verificationStatus": "draft",
+    "verifiedAt": "2025-10-16",
+    "retrievalSources": [
+      "https://zod.dev/"
+    ],
+    "testedPlatforms": [
+      "Claude",
+      "Codex",
+      "OpenClaw",
+      "Cursor",
+      "Windsurf",
+      "Gemini"
+    ],
+    "prerequisites": [
+      "TypeScript 5.0+ (5.5+ recommended)",
+      "zod ^3.22.0",
+      "Node.js 18+ or modern browser",
+      "Basic TypeScript knowledge",
+      "TypeScript 4.5+ (recommended 5.0+) for full type inference and compile-time type safety with Zod schemas",
+      "Runtime environment: Node.js 18+ for server-side validation or modern browser with ES2020+ support for client-side validation"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/skills/zod-schema-validator.zip",
+    "skillPackage": {
+      "format": "agent-skill",
+      "entrypoint": "SKILL.md",
+      "downloadUrl": "/downloads/skills/zod-schema-validator.zip",
+      "sha256": "56133067087d163b8ff5a35aa325a55b75ce8916a75bfc7523075b5e3e76974f"
+    },
+    "platformCompatibility": [
+      {
+        "platform": "Claude",
+        "supportLevel": "native-skill",
+        "installPath": ".claude/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-16"
+      },
+      {
+        "platform": "Codex",
+        "supportLevel": "native-skill",
+        "installPath": ".agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-16"
+      },
+      {
+        "platform": "Windsurf",
+        "supportLevel": "native-skill",
+        "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-16"
+      },
+      {
+        "platform": "Gemini",
+        "supportLevel": "native-skill",
+        "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-16"
+      },
+      {
+        "platform": "Cursor",
+        "supportLevel": "adapter",
+        "installPath": ".cursor/rules/<skill-name>.mdc",
+        "adapterPath": "/data/skill-adapters/cursor/zod-schema-validator.mdc",
+        "verifiedAt": "2025-10-16"
+      },
+      {
+        "platform": "Generic AGENTS",
+        "supportLevel": "manual-context",
+        "installPath": "AGENTS.md or tool-specific context file",
+        "verifiedAt": "2025-10-16"
+      }
+    ],
+    "downloadTrust": "first-party",
+    "downloadSha256": "56133067087d163b8ff5a35aa325a55b75ce8916a75bfc7523075b5e3e76974f",
+    "body": "Build type-safe runtime validation with Zod for APIs, forms, and data pipelines with TypeScript 5.5+ integration and automatic type inference. Zod is a TypeScript-first schema validation library that provides runtime validation matching compile-time types, enabling you to validate untrusted data (API inputs, user forms, external integrations) while maintaining end-to-end type safety. With zero dependencies, 8kb minified bundle size, and automatic type inference, Zod eliminates the gap between static types and runtime reality. Features include composable schemas with .extend() and .merge(), custom validation with .refine() and async support, discriminated unions for efficient type narrowing, transforms for data coercion, and seamless integration with React Hook Form, tRPC, and Express.\n\n## Content\n\n# Zod Schema Validator Skill\n\n## What This Skill Enables\n\nClaude can build comprehensive validation schemas using Zod, the TypeScript-first validation library tested against TypeScript v5.5+. Zod provides runtime validation that matches compile-time types, enabling you to validate untrusted data (API inputs, user forms, external integrations) while maintaining end-to-end type safety. With zero dependencies and automatic type inference, Zod eliminates the gap between static types and runtime reality.\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Prerequisites\n\n**Required:**\n\n- Claude Pro subscription or Claude Code CLI\n- TypeScript 5.0+ (5.5+ recommended)\n- Node.js 18+ or modern browser\n- Basic TypeScript knowledge\n\n**What Claude handles automatically:**\n\n- Writing Zod schemas with proper validators\n- Inferring TypeScript types from schemas\n- Adding custom validation logic with refinements\n- Generating error messages in multiple formats\n- Creating reusable schema compositions\n- Implementing async validation\n- Adding transforms for data coercion\n- Integrating with React Hook Form or tRPC\n\n## How to Use This Skill\n\n### Basic Schema Creation\n\n**Prompt:** \"Create Zod schemas for a user registration API that validates email, password (min 8 chars, requires number and special char), age (18-100), and optional phone number.\"\n\nClaude will:\n\n1. Write Zod schema with proper validators\n2. Add regex patterns for email and password\n3. Include range validation for age\n4. Make phone number optional\n5. Generate custom error messages\n6. Infer TypeScript type from schema\n7. Show validation usage examples\n\n### Form Validation with React Hook Form\n\n**Prompt:** \"Build a React form with Zod validation for: name, email, address (street, city, state, zip), and checkbox for terms acceptance. Integrate with React Hook Form and show field-level errors.\"\n\nClaude will:\n\n1. Create nested Zod schema for address\n2. Set up React Hook Form with zodResolver\n3. Add real-time validation on blur\n4. Display error messages per field\n5. Prevent submission until valid\n6. Include TypeScript types\n7. Add accessible error announcements\n\n### API Request/Response Validation\n\n**Prompt:** \"Create Zod schemas for a REST API with request validation and response parsing. Include pagination parameters, filters, and error handling.\"\n\nClaude will:\n\n1. Define request body schemas\n2. Create query parameter validators\n3. Add response schema with safeParse\n4. Handle validation errors gracefully\n5. Include pagination metadata\n6. Add discriminated unions for responses\n7. Generate OpenAPI types from schemas\n\n### Complex Business Logic Validation\n\n**Prompt:** \"Build a Zod schema for order validation where: if payment method is 'credit_card', require card details; if 'paypal', require email; shipping date must be after today; total must match items sum.\"\n\nClaude will:\n\n1. Use discriminated unions for payment methods\n2. Add conditional validation with refine()\n3. Implement cross-field validation\n4. Calculate and validate totals\n5. Add date comparison logic\n6. Provide clear error paths\n7. Include async validation for external checks\n\n## Tips for Best Results\n\n1. **Infer Types, Don't Duplicate**: Always use `z.infer<typeof schema>` instead of defining types manually. This ensures runtime validation matches compile-time types.\n\n2. **Use `.safeParse()` for Untrusted Data**: In API routes or external inputs, use `safeParse()` instead of `parse()` to avoid throwing exceptions. Handle validation errors gracefully.\n\n3. **Custom Error Messages**: Request custom error messages with `.min(8, { message: 'Password must be at least 8 characters' })` for better UX.\n\n4. **Refinements for Complex Logic**: Use `.refine()` or `.superRefine()` for validation that involves multiple fields or external calls.\n\n5. **Reusable Schemas**: Create base schemas and extend them with `.extend()` or compose with `.merge()` to avoid duplication.\n\n6. **Transforms for Coercion**: Use `.transform()` to normalize data (trim strings, parse numbers) before validation.\n\n## Common Workflows\n\n### E-Commerce Checkout Validation\n\n```\n\"Create complete Zod validation for checkout flow:\n1. Customer info: email, phone, billing address\n2. Shipping: address with validation (can't be PO box), preferred delivery date\n3. Payment: discriminated union for credit card, PayPal, crypto\n4. Items: array of products with quantity (min 1, max 10), size, color\n5. Promo code: optional, alphanumeric, validate against API\n6. Total must match cart calculation\n7. Accept terms and conditions (required)\"\n```\n\n### API Gateway Validation Layer\n\n```\n\"Build API validation middleware with Zod:\n1. Validate request headers (auth token, content-type)\n2. Parse and validate query parameters with coercion\n3. Validate request body based on endpoint\n4. Add rate limiting metadata validation\n5. Validate response format before sending to client\n6. Log validation errors with request context\n7. Return standardized error responses\"\n```\n\n### Database Input Sanitization\n\n```\n\"Create Zod schemas for database operations:\n1. User input sanitization before INSERT\n2. Strip dangerous characters from strings\n3. Validate foreign key relationships exist\n4. Ensure email uniqueness with async validator\n5. Transform dates to ISO format\n6. Validate JSON columns match expected structure\n7. Add database constraint validation\"\n```\n\n### File Upload Validation\n\n```\n\"Build file upload validator with Zod:\n1. Validate MIME types (images: PNG, JPG, WebP)\n2. Check file size (max 5MB)\n3. Validate image dimensions (min 800x600, max 4000x4000)\n4. Sanitize filename (alphanumeric, hyphens, underscores)\n5. Validate metadata (EXIF data)\n6. Check for malware signatures\n7. Transform to standard format\"\n```\n\n## Troubleshooting\n\n**Issue:** Type inference not working\n**Solution:** Ensure TypeScript version is 5.0+. Use `z.infer<typeof schema>` correctly. Check tsconfig.json has `strict: true`. Update Zod to latest version.\n\n**Issue:** Validation errors not showing custom messages\n**Solution:** Add message parameter to validators: `.min(8, { message: '...' })`. Use `error.format()` to get structured errors. Check error path matches form field names.\n\n**Issue:** Async validation not working\n**Solution:** Use `.refine()` with async function, not `.transform()`. Ensure you `await` the parse result. Consider using `.parseAsync()` or `.safeParseAsync()`.\n\n**Issue:** Performance slow with large arrays\n**Solution:** Use `.nonempty()` instead of `.min(1)` for faster validation. Implement pagination. Consider lazy validation with `.lazy()` for recursive structures.\n\n**Issue:** Optional fields not working correctly\n**Solution:** Use `.optional()` for truly optional fields, `.nullable()` for null values, `.default()` for default values. Don't mix `.optional()` with `.nullable()` unless you mean to accept both.\n\n**Issue:** Union types confusing in errors\n**Solution:** Use discriminated unions with `.discriminatedUnion()` for better error messages. Add explicit type checking before validation. Provide user-friendly labels.\n\n## Learn More\n\n- [Zod Official Documentation](https://zod.dev/)\n- [Zod GitHub Repository](https://github.com/colinhacks/zod)\n- [React Hook Form + Zod Integration](https://react-hook-form.com/get-started#SchemaValidation)\n- [tRPC + Zod Guide](https://trpc.io/docs/server/validators)\n- [Zod to JSON Schema](https://github.com/StefanTerdell/zod-to-json-schema)\n- [Zod Error Formatting](https://zod.dev/ERROR_HANDLING)\n\n## Features\n\n- TypeScript-first with automatic type inference using z.infer<typeof schema> for end-to-end type safety\n- Zero dependencies with 8kb minified bundle size for minimal overhead in production applications\n- Composable schemas with .extend() and .merge() for reusable validation patterns and schema composition\n- Custom validation with .refine() and .superRefine() for complex business logic and cross-field validation\n- Async validation support with .parseAsync() and .safeParseAsync() for database checks and external API calls\n- Discriminated unions with z.discriminatedUnion() for efficient type narrowing and better error messages\n- Data transformation with .transform() for coercion, normalization, and type conversion before validation\n- Error handling with .safeParse() returning discriminated union results without throwing exceptions\n\n## Use Cases\n\n- API request/response validation with type-safe parsing and error handling for REST and GraphQL endpoints\n- Form validation with error messages integrated with React Hook Form, Formik, and native HTML forms\n- Database input sanitization and validation before INSERT/UPDATE operations with Prisma integration\n- Configuration validation for environment variables and application settings with type safety\n- Data pipeline validation for ETL processes, CSV parsing, and data transformation workflows\n- Type-safe API client generation from OpenAPI specifications with Zod schema validation",
+    "sections": [
+      {
+        "title": "Overview",
+        "id": "overview",
+        "markdown": "Build type-safe runtime validation with Zod for APIs, forms, and data pipelines with TypeScript 5.5+ integration and automatic type inference. Zod is a TypeScript-first schema validation library that provides runtime validation matching compile-time types, enabling you to validate untrusted data (API inputs, user forms, external integrations) while maintaining end-to-end type safety. With zero dependencies, 8kb minified bundle size, and automatic type inference, Zod eliminates the gap between static types and runtime reality. Features include composable schemas with .extend() and .merge(), custom validation with .refine() and async support, discriminated unions for efficient type narrowing, transforms for data coercion, and seamless integration with React Hook Form, tRPC, and Express.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Content",
+        "id": "content",
+        "markdown": "# Zod Schema Validator Skill",
+        "codeBlocks": []
+      },
+      {
+        "title": "What This Skill Enables",
+        "id": "what-this-skill-enables",
+        "markdown": "Claude can build comprehensive validation schemas using Zod, the TypeScript-first validation library tested against TypeScript v5.5+. Zod provides runtime validation that matches compile-time types, enabling you to validate untrusted data (API inputs, user forms, external integrations) while maintaining end-to-end type safety. With zero dependencies and automatic type inference, Zod eliminates the gap between static types and runtime reality.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Compatibility",
+        "id": "compatibility",
+        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Prerequisites",
+        "id": "prerequisites",
+        "markdown": "**Required:**\n\n- Claude Pro subscription or Claude Code CLI\n- TypeScript 5.0+ (5.5+ recommended)\n- Node.js 18+ or modern browser\n- Basic TypeScript knowledge\n\n**What Claude handles automatically:**\n\n- Writing Zod schemas with proper validators\n- Inferring TypeScript types from schemas\n- Adding custom validation logic with refinements\n- Generating error messages in multiple formats\n- Creating reusable schema compositions\n- Implementing async validation\n- Adding transforms for data coercion\n- Integrating with React Hook Form or tRPC",
+        "codeBlocks": []
+      },
+      {
+        "title": "How to Use This Skill",
+        "id": "how-to-use-this-skill",
+        "markdown": "### Basic Schema Creation\n\n**Prompt:** \"Create Zod schemas for a user registration API that validates email, password (min 8 chars, requires number and special char), age (18-100), and optional phone number.\"\n\nClaude will:\n\n1. Write Zod schema with proper validators\n2. Add regex patterns for email and password\n3. Include range validation for age\n4. Make phone number optional\n5. Generate custom error messages\n6. Infer TypeScript type from schema\n7. Show validation usage examples\n\n### Form Validation with React Hook Form\n\n**Prompt:** \"Build a React form with Zod validation for: name, email, address (street, city, state, zip), and checkbox for terms acceptance. Integrate with React Hook Form and show field-level errors.\"\n\nClaude will:\n\n1. Create nested Zod schema for address\n2. Set up React Hook Form with zodResolver\n3. Add real-time validation on blur\n4. Display error messages per field\n5. Prevent submission until valid\n6. Include TypeScript types\n7. Add accessible error announcements\n\n### API Request/Response Validation\n\n**Prompt:** \"Create Zod schemas for a REST API with request validation and response parsing. Include pagination parameters, filters, and error handling.\"\n\nClaude will:\n\n1. Define request body schemas\n2. Create query parameter validators\n3. Add response schema with safeParse\n4. Handle validation errors gracefully\n5. Include pagination metadata\n6. Add discriminated unions for responses\n7. Generate OpenAPI types from schemas\n\n### Complex Business Logic Validation\n\n**Prompt:** \"Build a Zod schema for order validation where: if payment method is 'credit_card', require card details; if 'paypal', require email; shipping date must be after today; total must match items sum.\"\n\nClaude will:\n\n1. Use discriminated unions for payment methods\n2. Add conditional validation with refine()\n3. Implement cross-field validation\n4. Calculate and validate totals\n5. Add date comparison logic\n6. Provide clear error paths\n7. Include async validation for external checks",
+        "codeBlocks": []
+      },
+      {
+        "title": "Tips for Best Results",
+        "id": "tips-for-best-results",
+        "markdown": "1. **Infer Types, Don't Duplicate**: Always use `z.infer<typeof schema>` instead of defining types manually. This ensures runtime validation matches compile-time types.\n\n2. **Use `.safeParse()` for Untrusted Data**: In API routes or external inputs, use `safeParse()` instead of `parse()` to avoid throwing exceptions. Handle validation errors gracefully.\n\n3. **Custom Error Messages**: Request custom error messages with `.min(8, { message: 'Password must be at least 8 characters' })` for better UX.\n\n4. **Refinements for Complex Logic**: Use `.refine()` or `.superRefine()` for validation that involves multiple fields or external calls.\n\n5. **Reusable Schemas**: Create base schemas and extend them with `.extend()` or compose with `.merge()` to avoid duplication.\n\n6. **Transforms for Coercion**: Use `.transform()` to normalize data (trim strings, parse numbers) before validation.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Common Workflows",
+        "id": "common-workflows",
+        "markdown": "### E-Commerce Checkout Validation\n\n```\n\"Create complete Zod validation for checkout flow:\n1. Customer info: email, phone, billing address\n2. Shipping: address with validation (can't be PO box), preferred delivery date\n3. Payment: discriminated union for credit card, PayPal, crypto\n4. Items: array of products with quantity (min 1, max 10), size, color\n5. Promo code: optional, alphanumeric, validate against API\n6. Total must match cart calculation\n7. Accept terms and conditions (required)\"\n```\n\n### API Gateway Validation Layer\n\n```\n\"Build API validation middleware with Zod:\n1. Validate request headers (auth token, content-type)\n2. Parse and validate query parameters with coercion\n3. Validate request body based on endpoint\n4. Add rate limiting metadata validation\n5. Validate response format before sending to client\n6. Log validation errors with request context\n7. Return standardized error responses\"\n```\n\n### Database Input Sanitization\n\n```\n\"Create Zod schemas for database operations:\n1. User input sanitization before INSERT\n2. Strip dangerous characters from strings\n3. Validate foreign key relationships exist\n4. Ensure email uniqueness with async validator\n5. Transform dates to ISO format\n6. Validate JSON columns match expected structure\n7. Add database constraint validation\"\n```\n\n### File Upload Validation\n\n```\n\"Build file upload validator with Zod:\n1. Validate MIME types (images: PNG, JPG, WebP)\n2. Check file size (max 5MB)\n3. Validate image dimensions (min 800x600, max 4000x4000)\n4. Sanitize filename (alphanumeric, hyphens, underscores)\n5. Validate metadata (EXIF data)\n6. Check for malware signatures\n7. Transform to standard format\"\n```",
+        "codeBlocks": [
+          {
+            "language": "text",
+            "code": "\"Create complete Zod validation for checkout flow:\n1. Customer info: email, phone, billing address\n2. Shipping: address with validation (can't be PO box), preferred delivery date\n3. Payment: discriminated union for credit card, PayPal, crypto\n4. Items: array of products with quantity (min 1, max 10), size, color\n5. Promo code: optional, alphanumeric, validate against API\n6. Total must match cart calculation\n7. Accept terms and conditions (required)\""
+          },
+          {
+            "language": "text",
+            "code": "\"Build API validation middleware with Zod:\n1. Validate request headers (auth token, content-type)\n2. Parse and validate query parameters with coercion\n3. Validate request body based on endpoint\n4. Add rate limiting metadata validation\n5. Validate response format before sending to client\n6. Log validation errors with request context\n7. Return standardized error responses\""
+          },
+          {
+            "language": "text",
+            "code": "\"Create Zod schemas for database operations:\n1. User input sanitization before INSERT\n2. Strip dangerous characters from strings\n3. Validate foreign key relationships exist\n4. Ensure email uniqueness with async validator\n5. Transform dates to ISO format\n6. Validate JSON columns match expected structure\n7. Add database constraint validation\""
+          },
+          {
+            "language": "text",
+            "code": "\"Build file upload validator with Zod:\n1. Validate MIME types (images: PNG, JPG, WebP)\n2. Check file size (max 5MB)\n3. Validate image dimensions (min 800x600, max 4000x4000)\n4. Sanitize filename (alphanumeric, hyphens, underscores)\n5. Validate metadata (EXIF data)\n6. Check for malware signatures\n7. Transform to standard format\""
+          }
+        ]
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "**Issue:** Type inference not working\n**Solution:** Ensure TypeScript version is 5.0+. Use `z.infer<typeof schema>` correctly. Check tsconfig.json has `strict: true`. Update Zod to latest version.\n\n**Issue:** Validation errors not showing custom messages\n**Solution:** Add message parameter to validators: `.min(8, { message: '...' })`. Use `error.format()` to get structured errors. Check error path matches form field names.\n\n**Issue:** Async validation not working\n**Solution:** Use `.refine()` with async function, not `.transform()`. Ensure you `await` the parse result. Consider using `.parseAsync()` or `.safeParseAsync()`.\n\n**Issue:** Performance slow with large arrays\n**Solution:** Use `.nonempty()` instead of `.min(1)` for faster validation. Implement pagination. Consider lazy validation with `.lazy()` for recursive structures.\n\n**Issue:** Optional fields not working correctly\n**Solution:** Use `.optional()` for truly optional fields, `.nullable()` for null values, `.default()` for default values. Don't mix `.optional()` with `.nullable()` unless you mean to accept both.\n\n**Issue:** Union types confusing in errors\n**Solution:** Use discriminated unions with `.discriminatedUnion()` for better error messages. Add explicit type checking before validation. Provide user-friendly labels.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Learn More",
+        "id": "learn-more",
+        "markdown": "- [Zod Official Documentation](https://zod.dev/)\n- [Zod GitHub Repository](https://github.com/colinhacks/zod)\n- [React Hook Form + Zod Integration](https://react-hook-form.com/get-started#SchemaValidation)\n- [tRPC + Zod Guide](https://trpc.io/docs/server/validators)\n- [Zod to JSON Schema](https://github.com/StefanTerdell/zod-to-json-schema)\n- [Zod Error Formatting](https://zod.dev/ERROR_HANDLING)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- TypeScript-first with automatic type inference using z.infer<typeof schema> for end-to-end type safety\n- Zero dependencies with 8kb minified bundle size for minimal overhead in production applications\n- Composable schemas with .extend() and .merge() for reusable validation patterns and schema composition\n- Custom validation with .refine() and .superRefine() for complex business logic and cross-field validation\n- Async validation support with .parseAsync() and .safeParseAsync() for database checks and external API calls\n- Discriminated unions with z.discriminatedUnion() for efficient type narrowing and better error messages\n- Data transformation with .transform() for coercion, normalization, and type conversion before validation\n- Error handling with .safeParse() returning discriminated union results without throwing exceptions",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- API request/response validation with type-safe parsing and error handling for REST and GraphQL endpoints\n- Form validation with error messages integrated with React Hook Form, Formik, and native HTML forms\n- Database input sanitization and validation before INSERT/UPDATE operations with Prisma integration\n- Configuration validation for environment variables and application settings with type safety\n- Data pipeline validation for ETL processes, CSV parsing, and data transformation workflows\n- Type-safe API client generation from OpenAPI specifications with Zod schema validation",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Content",
+        "id": "content"
+      },
+      {
+        "depth": 2,
+        "text": "What This Skill Enables",
+        "id": "what-this-skill-enables"
+      },
+      {
+        "depth": 2,
+        "text": "Compatibility",
+        "id": "compatibility"
+      },
+      {
+        "depth": 3,
+        "text": "Native",
+        "id": "native"
+      },
+      {
+        "depth": 3,
+        "text": "Manual Adaptation",
+        "id": "manual-adaptation"
+      },
+      {
+        "depth": 2,
+        "text": "Prerequisites",
+        "id": "prerequisites"
+      },
+      {
+        "depth": 2,
+        "text": "How to Use This Skill",
+        "id": "how-to-use-this-skill"
+      },
+      {
+        "depth": 3,
+        "text": "Basic Schema Creation",
+        "id": "basic-schema-creation"
+      },
+      {
+        "depth": 3,
+        "text": "Form Validation with React Hook Form",
+        "id": "form-validation-with-react-hook-form"
+      },
+      {
+        "depth": 3,
+        "text": "API Request/Response Validation",
+        "id": "api-requestresponse-validation"
+      },
+      {
+        "depth": 3,
+        "text": "Complex Business Logic Validation",
+        "id": "complex-business-logic-validation"
+      },
+      {
+        "depth": 2,
+        "text": "Tips for Best Results",
+        "id": "tips-for-best-results"
+      },
+      {
+        "depth": 2,
+        "text": "Common Workflows",
+        "id": "common-workflows"
+      },
+      {
+        "depth": 3,
+        "text": "E-Commerce Checkout Validation",
+        "id": "e-commerce-checkout-validation"
+      },
+      {
+        "depth": 3,
+        "text": "API Gateway Validation Layer",
+        "id": "api-gateway-validation-layer"
+      },
+      {
+        "depth": 3,
+        "text": "Database Input Sanitization",
+        "id": "database-input-sanitization"
+      },
+      {
+        "depth": 3,
+        "text": "File Upload Validation",
+        "id": "file-upload-validation"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 2,
+        "text": "Learn More",
+        "id": "learn-more"
+      },
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "text",
+        "code": "\"Create complete Zod validation for checkout flow:\n1. Customer info: email, phone, billing address\n2. Shipping: address with validation (can't be PO box), preferred delivery date\n3. Payment: discriminated union for credit card, PayPal, crypto\n4. Items: array of products with quantity (min 1, max 10), size, color\n5. Promo code: optional, alphanumeric, validate against API\n6. Total must match cart calculation\n7. Accept terms and conditions (required)\""
+      },
+      {
+        "language": "text",
+        "code": "\"Build API validation middleware with Zod:\n1. Validate request headers (auth token, content-type)\n2. Parse and validate query parameters with coercion\n3. Validate request body based on endpoint\n4. Add rate limiting metadata validation\n5. Validate response format before sending to client\n6. Log validation errors with request context\n7. Return standardized error responses\""
+      },
+      {
+        "language": "text",
+        "code": "\"Create Zod schemas for database operations:\n1. User input sanitization before INSERT\n2. Strip dangerous characters from strings\n3. Validate foreign key relationships exist\n4. Ensure email uniqueness with async validator\n5. Transform dates to ISO format\n6. Validate JSON columns match expected structure\n7. Add database constraint validation\""
+      },
+      {
+        "language": "text",
+        "code": "\"Build file upload validator with Zod:\n1. Validate MIME types (images: PNG, JPG, WebP)\n2. Check file size (max 5MB)\n3. Validate image dimensions (min 800x600, max 4000x4000)\n4. Sanitize filename (alphanumeric, hyphens, underscores)\n5. Validate metadata (EXIF data)\n6. Check for malware signatures\n7. Transform to standard format\""
+      }
+    ],
+    "filePath": "content/skills/zod-schema-validator.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/zod-schema-validator.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": true,
+    "packageTrust": "first-party",
+    "packageChecksum": "56133067087d163b8ff5a35aa325a55b75ce8916a75bfc7523075b5e3e76974f",
+    "checksumPresent": true,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://zod.dev/",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/zod-schema-validator.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2025-10-16",
+    "adapterGenerated": true,
+    "platforms": [
+      "Claude",
+      "Codex",
+      "Windsurf",
+      "Gemini",
+      "Cursor",
+      "Generic AGENTS"
+    ],
+    "supportLevels": [
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "adapter",
+      "manual-context"
+    ]
+  }
+}

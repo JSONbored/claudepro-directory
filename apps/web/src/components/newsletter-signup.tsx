@@ -7,7 +7,9 @@ import { useToast } from "@/components/ui/toast-provider";
 
 export function NewsletterSignup() {
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [status, setStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
   const { pushToast } = useToast();
 
   useEffect(() => {
@@ -26,12 +28,12 @@ export function NewsletterSignup() {
       const response = await fetch("/api/newsletter/subscribe", {
         method: "POST",
         headers: {
-          "content-type": "application/json"
+          "content-type": "application/json",
         },
         body: JSON.stringify({
           email,
-          source: "footer"
-        })
+          source: "footer",
+        }),
       });
 
       if (!response.ok) throw new Error(`subscribe failed: ${response.status}`);
@@ -40,14 +42,14 @@ export function NewsletterSignup() {
       pushToast({
         variant: "success",
         title: "Subscribed",
-        description: "You are on the list for launch and major updates."
+        description: "You are on the list for launch and major updates.",
       });
     } catch {
       setStatus("error");
       pushToast({
         variant: "error",
         title: "Subscription failed",
-        description: "Could not subscribe right now. Try again in a bit."
+        description: "Could not subscribe right now. Try again in a bit.",
       });
     }
   };
@@ -73,7 +75,16 @@ export function NewsletterSignup() {
           disabled={status === "loading"}
           className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-4 text-sm text-foreground transition hover:border-primary/45 disabled:cursor-not-allowed disabled:opacity-65"
         >
-          {status === "loading" ? "Joining..." : status === "success" ? (<><Check className="size-4 text-emerald-500" />Joined</>) : "Join"}
+          {status === "loading" ? (
+            "Joining..."
+          ) : status === "success" ? (
+            <>
+              <Check className="size-4 text-emerald-500" />
+              Joined
+            </>
+          ) : (
+            "Join"
+          )}
         </button>
       </form>
     </div>

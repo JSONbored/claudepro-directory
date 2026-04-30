@@ -1,0 +1,108 @@
+# Browser Agent Workflow Automation Skill
+URL: https://heyclau.de/skills/browser-agent-workflow-automation
+Category: skills
+Author: JSONbored
+Date added: 2026-04-10
+Documentation: https://playwright.dev/docs/best-practices
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/browser-agent-workflow-automation.mdx
+Download: /downloads/skills/browser-agent-workflow-automation.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/browser-agent-workflow-automation
+- Source URLs: https://playwright.dev/docs/best-practices, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/browser-agent-workflow-automation.mdx
+- Package URL: /downloads/skills/browser-agent-workflow-automation.zip
+- Package SHA256: 6aa6e8c44b99d7cf368236a7567453abefb91476ba74d431c992b409c5cfc8f3
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-10
+- Robots: indexable
+## Summary
+Build robust browser automation workflows for AI agents with deterministic selectors, retries, and safe action boundaries.
+## Tags
+- browser-automation
+- ai-agents
+- playwright
+- workflows
+- reliability
+## Content
+## Overview
+This skill provides a practical framework for building browser-driven agent workflows that survive real-world UI variability. It prioritizes deterministic automation, explicit checkpoints, and safe failure handling instead of brittle click-recording scripts.
+
+## Compatibility
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Prerequisites
+- Clearly defined desired outcome and termination condition
+- Stable environment (staging/prod) with acceptable automation policy
+- Credential/session strategy for authenticated steps
+
+## Workflow Blueprint
+- Define start state and target success state
+- Use resilient selector hierarchy (semantic selectors first)
+- Add validation checkpoints between major steps
+- Use bounded retries with explicit failure reasons
+
+## How to Use This Skill
+### Prompt Pattern
+
+```text
+Apply browser agent workflow automation skill.
+Deliver:
+1) deterministic step plan,
+2) selector map,
+3) retry/timeout policy,
+4) failure recovery playbook.
+```
+
+### Execution Flow
+
+1. Map the workflow into atomic actions and checks.
+2. Choose reliable selectors and alternates.
+3. Add guardrails for destructive actions (confirmations/human gate).
+4. Instrument logs/screenshots for every failed checkpoint.
+5. Run repeatedly to validate stability before shipping.
+```text
+Apply browser agent workflow automation skill.
+Deliver:
+1) deterministic step plan,
+2) selector map,
+3) retry/timeout policy,
+4) failure recovery playbook.
+```
+
+## Troubleshooting
+**Issue:** Flaky failures on dynamic pages  
+**Fix:** replace brittle selectors with role/label/text anchors and add readiness checks.
+
+**Issue:** Infinite retries hide root cause  
+**Fix:** cap retries and emit structured failure reasons after each attempt.
+
+**Issue:** Automation performs unsafe actions  
+**Fix:** require explicit confirmation gates for irreversible operations.
+
+## Knowledge Freshness
+Treat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.
+
+## Retrieval Sources
+- https://playwright.dev/docs/best-practices
+
+## Output Contract
+1. Return a concrete plan with implementation order.
+2. Provide production-ready commands/config/code snippets (not placeholders).
+3. Include explicit assumptions and unresolved risks.
+4. Include a verification checklist with pass/fail criteria.
+
+## Quality Gates
+- All commands are copy/paste ready.
+- Security-sensitive steps call out secret handling and least privilege.
+- Version-sensitive guidance cites current docs used.
+- Rollback path is included for risky changes.
+- Final output includes quick validation commands/tests.

@@ -1,0 +1,106 @@
+# ChatGPT to Claude Migration
+URL: https://heyclau.de/guides/chatgpt-migration-guide
+Category: guides
+Author: JSONbored
+Date added: 2025-10-27
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/chatgpt-migration-guide.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/guides/chatgpt-migration-guide
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/chatgpt-migration-guide.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
+## Summary
+Switch from ChatGPT to Claude in 30 minutes. Complete migration tutorial covering API transitions, prompt engineering, and workflow optimization strategies.
+## Tags
+- tutorial
+- intermediate
+- migration
+- api
+## Content
+## TL;DR
+This tutorial teaches you to migrate from ChatGPT to Claude in 30 minutes. You'll learn API parameter mapping, XML prompt engineering, and cost optimization strategies. Perfect for developers who want to leverage Claude's superior performance and large context window.
+
+**Key Points:**
+
+- API migration with complete parameter mapping - 15 minutes setup
+- XML prompt engineering for improved quality - structured approach
+- Hybrid workflow strategy for enhanced productivity
+- 30 minutes total with 5 hands-on exercises
+
+Master the migration from ChatGPT to Claude in this comprehensive tutorial. By completion, you'll have working API migration code and optimized prompts. This guide includes 5 practical examples, 10 code samples, and 3 real-world applications.
+
+> **Tutorial Requirements**
+>
+> **Prerequisites:** Basic API knowledge, OpenAI experience  
+> **Time Required:** 30 minutes active work  
+> **Tools Needed:** Anthropic API key, Python/JavaScript  
+> **Outcome:** Working migration system with optimized prompts
+
+## What You'll Learn
+<!-- Section type: feature_grid -->
+
+## Step-by-Step Tutorial
+1. **Step 1: Setup and Authentication**
+
+2. **Step 2: Build Migration Adapter**
+
+3. **Step 3: Transform Prompts to XML**
+
+4. **Step 4: Optimize Performance and Costs**
+
+## Key Concepts Explained
+Understanding these concepts ensures you can adapt this tutorial to your specific needs and troubleshoot issues effectively.
+
+<!-- Section type: accordion -->
+
+## Practical Examples
+<!-- Section type: tabs -->
+
+## Troubleshooting Guide
+> **Common Issues and Solutions**
+>
+> **Issue 1: ANTHROPIC_API_KEY not found error**  
+> **Solution:** Set environment variable correctly - This fixes authentication failures and prevents API errors.
+>
+> **Issue 2: Token count mismatch**
+> **Solution:** Account for tokenizer differences between models.
+>
+> **Issue 3: Rate limit errors (50 RPM limit)**  
+> **Solution:** Implement exponential backoff - Works with Tier 1 limits and maintains reliability.
+
+## Advanced Techniques
+> **Professional Tips**
+>
+> **Performance Optimization:** Prompt caching significantly reduces token costs while maintaining response quality.
+>
+> **Security Best Practice:** Always use environment variables for API keys to prevent credential exposure.
+>
+> **Scalability Pattern:** For enterprise deployments, use workspace separation which handles 100,000+ requests while preserving isolation.
+
+## Validation and Testing
+<!-- Section type: feature_grid -->
+
+## Quick Reference
+**Note:** The original guide contains a `<UnifiedContentBlock variant="quick-reference">` component which is not in the standard component mapping. This has been converted to a feature_grid for compatibility.
+
+<!-- Section type: feature_grid -->
+
+## Related Learning Resources
+<!-- Section type: related_content -->
+
+---
+
+> **Tutorial Complete!**
+>
+> **Congratulations!** You've mastered ChatGPT to Claude migration and can now leverage both platforms strategically.
+>
+> **What you achieved:**
+>
+> - ✅ Built working API migration adapter
+> - ✅ Transformed prompts using XML structure
+> - ✅ Implemented cost optimization with caching
+>
+> **Ready for more?** Explore our [tutorials collection](/guides/tutorials) or join our [community](/community) to share your implementation and get help with advanced use cases.
+
+_Last updated: September 2025 | Found this helpful? Share it with your team and explore more [Claude tutorials](/guides/tutorials)._

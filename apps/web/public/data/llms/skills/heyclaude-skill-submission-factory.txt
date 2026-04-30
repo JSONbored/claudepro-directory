@@ -1,0 +1,77 @@
+# HeyClaude Skill Submission Factory
+URL: https://heyclau.de/skills/heyclaude-skill-submission-factory
+Category: skills
+Author: JSONbored
+Date added: 2026-04-27
+Documentation: https://heyclau.de/submit
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/heyclaude-skill-submission-factory.mdx
+Download: /downloads/skills/heyclaude-skill-submission-factory.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/heyclaude-skill-submission-factory
+- Source URLs: https://heyclau.de/submit, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/heyclaude-skill-submission-factory.mdx
+- Package URL: /downloads/skills/heyclaude-skill-submission-factory.zip
+- Package SHA256: 1f3d7c549807e8381d01b97ef34a13d570342d402fb0a16e5637d59093c3751f
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-27
+- Robots: indexable
+## Summary
+Create portable Agent Skills, generate platform adapters, validate package metadata, and prepare issue-first HeyClaude submissions.
+## Tags
+- heyclaude
+- skill-authoring
+- agent-skills
+- registry
+- submissions
+## Content
+## Knowledge Freshness
+This skill is pinned to Agent Skills and HeyClaude submission behavior verified on **2026-04-27**.
+
+## Retrieval Sources
+- https://heyclau.de/submit
+- https://developers.openai.com/codex/skills
+- https://docs.claude.com/en/docs/claude-code/skills
+- https://docs.windsurf.com/windsurf/cascade/skills
+- https://docs.cursor.com/en/context
+- https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/custom-commands.md
+
+## Core Workflow
+1. Define the skill user, trigger language, and out-of-scope behavior.
+2. Create a single root folder with `SKILL.md`.
+3. Keep `SKILL.md` concise, with required `name` and `description` frontmatter.
+4. Add only necessary optional resources under `scripts/`, `references/`, `assets/`, or `agents/openai.yaml`.
+5. Generate compatibility notes for native Agent Skills platforms and adapter-only platforms.
+6. Prepare HeyClaude issue fields from the canonical submission form instead of auto-publishing.
+
+## Capability Scope
+- Agent Skill package authoring
+- Compatibility metadata
+- Cursor `.mdc` adapter drafting
+- Package validation checklist
+- HeyClaude issue-first submission preparation
+
+## Compatibility
+### Native Agent Skills
+
+- Claude
+- Codex/OpenAI
+- Windsurf
+- Gemini
+
+### Adapter Targets
+
+- Cursor via `.cursor/rules/<skill-name>.mdc`
+- Generic AGENTS or tool-specific context files
+
+## Production Rules
+- Do not claim native support for a platform unless its current docs support `SKILL.md`-style skills.
+- Do not include private repo names, secrets, credentials, or internal operating details in a public skill.
+- Do not auto-publish registry content; prepare a maintainer-reviewed issue submission.
+- Keep package resources minimal and directly referenced from `SKILL.md`.
+
+## Troubleshooting
+**Issue:** The skill is too broad to trigger reliably
+**Fix:** Narrow the description to the exact workflow and add negative scope.
+
+**Issue:** Cursor users ask how to install it
+**Fix:** Generate a Cursor rule adapter and label it as an adapter, not a native skill.

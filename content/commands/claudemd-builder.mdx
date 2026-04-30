@@ -15,13 +15,13 @@ seoDescription: >-
   notes, and context preservation for team-wide AI consistency and efficient
   onbo...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-25'
-documentationUrl: 'https://docs.claude.com/en/docs/claude-code/claude-md'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-25"
+documentationUrl: "https://docs.claude.com/en/docs/claude-code/claude-md"
 installable: true
-installCommand: '/claudemd-builder [action] [options]'
-usageSnippet: '/claudemd-builder [action] [options]'
-copySnippet: '/claudemd-builder [action] [options]'
+installCommand: "/claudemd-builder [action] [options]"
+usageSnippet: "/claudemd-builder [action] [options]"
+copySnippet: "/claudemd-builder [action] [options]"
 scriptLanguage: text
 scriptBody: >-
   The `/claudemd-builder` command generates CLAUDE.md files that store coding
@@ -1064,8 +1064,9 @@ hasPrerequisites: false
 hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
-commandSyntax: '/claudemd-builder [action] [options]'
+commandSyntax: "/claudemd-builder [action] [options]"
 ---
+
 The `/claudemd-builder` command generates CLAUDE.md files that store coding standards, architectural decisions, and project context for consistent AI assistance across your team.
 
 ## Features
@@ -1113,11 +1114,13 @@ The `/claudemd-builder` command generates CLAUDE.md files that store coding stan
 ### Initialize Project with /init
 
 **Command:**
+
 ```bash
 /claudemd-builder --init
 ```
 
 **Claude's Process:**
+
 ```
 [Scanning Project]
 ✓ Detected: Next.js 15.5.2
@@ -1137,7 +1140,8 @@ The `/claudemd-builder` command generates CLAUDE.md files that store coding stan
 ```
 
 **Generated CLAUDE.md:**
-```markdown
+
+````markdown
 # Project Context for Claude Code
 
 **Last Updated:** 2025-10-25
@@ -1147,6 +1151,7 @@ The `/claudemd-builder` command generates CLAUDE.md files that store coding stan
 ## Technology Stack
 
 ### Frontend
+
 - React 19.1.1 (React Compiler enabled)
 - Next.js 15.5.2 (App Router)
 - TailwindCSS v4.1.13
@@ -1154,17 +1159,20 @@ The `/claudemd-builder` command generates CLAUDE.md files that store coding stan
 - Framer Motion for animations
 
 ### Backend
+
 - Next.js API Routes
 - Prisma ORM (PostgreSQL)
 - tRPC for type-safe APIs
 - better-auth v1.3.9
 
 ### Testing
+
 - Vitest (unit/integration)
 - Playwright (E2E)
 - React Testing Library
 
 ### Tooling
+
 - TypeScript 5.x (strict mode)
 - Biome (linting/formatting)
 - pnpm (package manager)
@@ -1172,6 +1180,7 @@ The `/claudemd-builder` command generates CLAUDE.md files that store coding stan
 ## Coding Standards
 
 ### TypeScript
+
 - **Strict mode enabled**: No `any`, use `unknown`
 - **Explicit return types**: For public functions
 - **Interfaces over types**: For public APIs
@@ -1193,8 +1202,10 @@ async function getData(id: string): Promise<UserData> {
   return response.json();
 }
 ```
+````
 
 ### React Components
+
 - **Server Components by default**: Only use 'use client' when necessary
 - **Async Server Components**: For data fetching
 - **Named exports**: For components
@@ -1216,6 +1227,7 @@ export function InteractiveButton() {
 ```
 
 ### File Organization
+
 ```
 app/
 ├── (auth)/          # Auth routes group
@@ -1234,6 +1246,7 @@ lib/
 ```
 
 ### Naming Conventions
+
 - Files: kebab-case (`user-profile.tsx`)
 - Components: PascalCase (`UserProfile`)
 - Functions: camelCase (`getUserById`)
@@ -1242,18 +1255,21 @@ lib/
 ## Architecture Decisions
 
 ### Authentication
+
 - **Library**: better-auth v1.3.9
 - **Strategy**: JWT with refresh tokens
 - **Session**: 15min access, 7d refresh
 - **Storage**: HTTP-only cookies
 
 ### Database
+
 - **ORM**: Prisma
 - **Database**: PostgreSQL
 - **Migrations**: Prisma Migrate
 - **Seeding**: `prisma/seed.ts`
 
 ### API Layer
+
 - **Type Safety**: tRPC for internal APIs
 - **REST**: For public/webhook endpoints
 - **Validation**: Zod schemas
@@ -1261,6 +1277,7 @@ lib/
 ## Common Patterns
 
 ### Data Fetching
+
 ```typescript
 // Use async Server Components
 export async function ProductList() {
@@ -1270,6 +1287,7 @@ export async function ProductList() {
 ```
 
 ### Form Handling
+
 ```typescript
 // Use react-hook-form + Zod
 import { useForm } from 'react-hook-form';
@@ -1286,6 +1304,7 @@ export function ContactForm() {
 ```
 
 ### Error Handling
+
 ```typescript
 // Always use Error Boundaries
 import { ErrorBoundary } from '@/components/error-boundary';
@@ -1323,26 +1342,30 @@ export default function Layout({ children }) {
 ## AI Assistant Instructions
 
 When writing code:
+
 1. Follow TypeScript strict mode
 2. Use Server Components by default
 3. Validate with Zod schemas
 4. Add error boundaries
 5. Write tests for new features
 6. Follow file naming conventions
-```
+
+````
 
 ### Use Pre-Built Template
 
 **Command:**
 ```bash
 /claudemd-builder --template=react
-```
+````
 
 **Generated React Template:**
-```markdown
+
+````markdown
 # React Project - Claude Code Context
 
 ## Stack
+
 - React 19.1.1
 - Vite 6.x
 - TypeScript 5.x
@@ -1352,6 +1375,7 @@ When writing code:
 ## Component Patterns
 
 ### Functional Components (Required)
+
 ```typescript
 // ✅ Use function declarations
 export function MyComponent({ prop }: Props) {
@@ -1361,19 +1385,23 @@ export function MyComponent({ prop }: Props) {
 // ❌ Avoid arrow functions for components
 const MyComponent = ({ prop }: Props) => <div>{prop}</div>;
 ```
+````
 
 ### Hooks Rules
+
 - Call hooks at top level only
 - Custom hooks start with 'use'
 - Extract complex logic to custom hooks
 
 ### State Management
+
 - Local state: `useState`
 - Global state: Zustand
 - Server state: TanStack Query
 - Form state: react-hook-form
 
 ## Code Organization
+
 ```
 src/
 ├── components/
@@ -1386,33 +1414,39 @@ src/
 ```
 
 ## Styling
+
 - **Primary**: TailwindCSS utility classes
 - **Components**: shadcn/ui
 - **Dynamic**: CSS variables + Tailwind
 
 ## Testing
+
 - **Unit**: Vitest + React Testing Library
 - **E2E**: Playwright
 - **Coverage**: 80% minimum
-```
+
+````
 
 ### Directory-Specific CLAUDE.md
 
 **Command:**
 ```bash
 /claudemd-builder --directory=src/components/forms
-```
+````
 
 **Generated src/components/forms/CLAUDE.md:**
-```markdown
+
+````markdown
 # Forms Directory Context
 
 ## Purpose
+
 Reusable form components with validation and error handling
 
 ## Patterns
 
 ### Form Component Structure
+
 ```typescript
 interface FormProps {
   onSubmit: (data: FormData) => Promise<void>;
@@ -1424,7 +1458,7 @@ export function MyForm({ onSubmit, defaultValues }: FormProps) {
     resolver: zodResolver(schema),
     defaultValues
   });
-  
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -1434,27 +1468,32 @@ export function MyForm({ onSubmit, defaultValues }: FormProps) {
   );
 }
 ```
+````
 
 ## Validation
+
 - **Always use Zod**: Define schema in same file
 - **Field-level errors**: Display immediately
 - **Submit-level errors**: Show in toast/alert
 
 ## Accessibility
+
 - Label every input
 - Use proper ARIA attributes
 - Keyboard navigation support
 - Error announcements
-```
+
+````
 
 ### Hierarchical CLAUDE.md Generation
 
 **Command:**
 ```bash
 /claudemd-builder --hierarchy
-```
+````
 
 **Generated Structure:**
+
 ```
 project/
 ├── CLAUDE.md                    # Root context (project-wide)
@@ -1474,6 +1513,7 @@ project/
 
 **Context Resolution:**
 Claude reads from most specific → general:
+
 1. `src/components/forms/CLAUDE.md` (most specific)
 2. `src/components/CLAUDE.md`
 3. `src/CLAUDE.md`
@@ -1482,11 +1522,13 @@ Claude reads from most specific → general:
 ### Update Existing CLAUDE.md
 
 **Command:**
+
 ```bash
 /claudemd-builder --update
 ```
 
 **Process:**
+
 ```
 [Analyzing Changes]
 ✓ New patterns detected:
@@ -1506,11 +1548,13 @@ Claude reads from most specific → general:
 ### Validate CLAUDE.md
 
 **Command:**
+
 ```bash
 /claudemd-builder --validate
 ```
 
 **Validation Report:**
+
 ```
 [CLAUDE.md Validation]
 
@@ -1534,6 +1578,7 @@ Completeness: 70%
 ### What to Include
 
 ✅ **Do Include:**
+
 - Technology stack and versions
 - Coding standards with examples
 - File organization structure
@@ -1544,6 +1589,7 @@ Completeness: 70%
 - Development workflow
 
 ❌ **Don't Include:**
+
 - Implementation details (code duplicates)
 - Frequently changing data
 - Secrets or credentials
@@ -1553,8 +1599,10 @@ Completeness: 70%
 ### Writing Effective Context
 
 **Good Context (Specific):**
+
 ```markdown
 ## Authentication
+
 - Library: better-auth v1.3.9
 - Session: 15min access token, 7d refresh
 - Storage: HTTP-only secure cookies
@@ -1562,8 +1610,10 @@ Completeness: 70%
 ```
 
 **Bad Context (Vague):**
+
 ```markdown
 ## Authentication
+
 - We use authentication
 - Sessions expire eventually
 - Cookies store tokens
@@ -1585,6 +1635,7 @@ git commit -m "feat: Add user authentication + update CLAUDE.md"
 ## Team Collaboration
 
 ### Onboarding New Developers
+
 ```bash
 # Day 1: New developer clones repo
 git clone repo.git
@@ -1601,6 +1652,7 @@ Result: Productive in hours, not days
 ```
 
 ### Consistency Across Team
+
 ```bash
 # All developers use same CLAUDE.md
 # AI generates consistent code:
@@ -1630,6 +1682,7 @@ Result: Quick-start CLAUDE.md in seconds
 ## Advanced Patterns
 
 ### Monorepo CLAUDE.md
+
 ```
 monorepo/
 ├── CLAUDE.md                    # Monorepo-wide standards
@@ -1646,15 +1699,18 @@ monorepo/
 ```
 
 ### Environment-Specific Context
+
 ```markdown
 ## Development vs Production
 
 ### Development
+
 - Database: Local PostgreSQL
 - API: http://localhost:3000
 - Auth: Mock OAuth for testing
 
-### Production  
+### Production
+
 - Database: Supabase PostgreSQL
 - API: https://api.example.com
 - Auth: Real OAuth2 providers

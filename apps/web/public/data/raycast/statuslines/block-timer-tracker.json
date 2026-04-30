@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 2,
+  "key": "statuslines:block-timer-tracker",
+  "category": "statuslines",
+  "slug": "block-timer-tracker",
+  "title": "Block Timer Tracker - Statuslines",
+  "author": "JSONbored",
+  "copyText": "Claude config:\n{\n  \"statusLine\": {\n    \"type\": \"command\",\n    \"command\": \"$CLAUDE_PROJECT_DIR/.claude/statuslines/block-timer-tracker.sh\",\n    \"refreshInterval\": 1000\n  }\n}\n\nUsage:\n✓ Block: [████████████████░░░░] 3h 42m 15s (74%)\n\nAsset:\n#!/usr/bin/env bash\n\n# Block Timer Tracker for Claude Code\n# Monitors Claude's 5-hour conversation block limit with countdown\n\n# Read JSON from stdin\nread -r input\n\n# Extract session start time and current timestamp\nsession_start=$(echo \"$input\" | jq -r '.session.startTime // \"\"')\ncurrent_time=$(date +%s)\n\n# Calculate elapsed time in seconds\nif [ -n \"$session_start\" ]; then\n  start_epoch=$(date -j -f \"%Y-%m-%dT%H:%M:%SZ\" \"$session_start\" +%s 2>/dev/null || echo \"$current_time\")\n  elapsed=$((current_time - start_epoch))\nelse\n  elapsed=0\nfi\n\n# 5-hour block = 18000 seconds\nBLOCK_LIMIT=18000\nremaining=$((BLOCK_LIMIT - elapsed))\n\n# Convert to hours:minutes:seconds\nhours=$((remaining / 3600))\nminutes=$(((remaining % 3600) / 60))\nseconds=$((remaining % 60))\n\n# Calculate percentage remaining\nif [ $BLOCK_LIMIT -gt 0 ]; then\n  percent=$((remaining * 100 / BLOCK_LIMIT))\nelse\n  percent=0\nfi\n\n# Color codes based on time remaining\nif [ $percent -gt 50 ]; then\n  # Green: > 2.5 hours remaining\n  COLOR=\"\\033[38;5;46m\"\n  ICON=\"✓\"\nelif [ $percent -gt 20 ]; then\n  # Yellow: 1-2.5 hours remaining\n  COLOR=\"\\033[38;5;226m\"\n  ICON=\"⚠\"\nelif [ $percent -gt 0 ]; then\n  # Red: < 1 hour remaining\n  COLOR=\"\\033[38;5;196m\"\n  ICON=\"⚠\"\nelse\n  # Expired\n  COLOR=\"\\033[38;5;160m\"\n  ICON=\"✗\"\nfi\n\nRESET=\"\\033[0m\"\n\n# Progress bar (20 chars)\nbar_filled=$((percent / 5))\nbar_empty=$((20 - bar_filled))\nbar=\"\"\nfor ((i=0; i<bar_filled; i++)); do bar+=\"█\"; done\nfor ((i=0; i<bar_empty; i++)); do bar+=\"░\"; done\n\n# Format time display\nif [ $remaining -gt 0 ]; then\n  time_display=$(printf \"%dh %02dm %02ds\" $hours $minutes $seconds)\nelse\n  time_display=\"EXPIRED\"\nfi\n\n# Build statusline\necho -e \"${COLOR}${ICON} Block: [${bar}] ${time_display} (${percent}%)${RESET}\"\n\n# Warning messages (stderr for alerts)\nif [ $percent -le 10 ] && [ $percent -gt 0 ]; then\n  echo \"⚠ WARNING: Less than 30 minutes remaining in conversation block!\" >&2\nelif [ $remaining -le 0 ]; then\n  echo \"✗ BLOCK EXPIRED: Start new conversation to continue.\" >&2\nfi",
+  "detailMarkdown": "# Block Timer Tracker - Statuslines\n\nClaude 5-hour conversation block tracker with visual countdown, expiration warnings, and color-coded indicators to prevent unexpected session terminations.\n\n## Config\n```json\n{\n  \"statusLine\": {\n    \"type\": \"command\",\n    \"command\": \"$CLAUDE_PROJECT_DIR/.claude/statuslines/block-timer-tracker.sh\",\n    \"refreshInterval\": 1000\n  }\n}\n```\n\n## Usage\n✓ Block: [████████████████░░░░] 3h 42m 15s (74%)",
+  "webUrl": "https://heyclau.de/statuslines/block-timer-tracker",
+  "canonicalUrl": "https://heyclau.de/statuslines/block-timer-tracker",
+  "llmsUrl": "https://heyclau.de/data/llms/statuslines/block-timer-tracker.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/statuslines/block-timer-tracker",
+  "seoTitle": "Block Timer Tracker - Statuslines",
+  "seoDescription": "Claude 5-hour conversation block tracker with visual countdown, expiration warnings, and color-coded indicators to prevent unexpected session terminations.",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.claude.com/en/docs/claude-code/statusline"
+}

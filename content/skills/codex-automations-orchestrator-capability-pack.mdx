@@ -2,18 +2,18 @@
 title: Codex Automations Orchestrator Capability Pack Skill
 slug: codex-automations-orchestrator-capability-pack
 category: skills
-description: 'Expert automation-orchestration capability pack for designing safe, low-noise recurring Codex workflows with clear runbooks.'
-cardDescription: 'Plan and operate recurring agent automations with deterministic prompts, guardrails, and output contracts.'
+description: "Expert automation-orchestration capability pack for designing safe, low-noise recurring Codex workflows with clear runbooks."
+cardDescription: "Plan and operate recurring agent automations with deterministic prompts, guardrails, and output contracts."
 seoTitle: Codex Automations Orchestrator Capability Pack Skill
-seoDescription: 'Advanced AI skill for Codex automation design, recurring task governance, and safe long-running operational workflows.'
+seoDescription: "Advanced AI skill for Codex automation design, recurring task governance, and safe long-running operational workflows."
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2026-04-11'
-documentationUrl: 'https://github.com/openai/codex'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2026-04-11"
+documentationUrl: "https://github.com/openai/codex"
 downloadUrl: /downloads/skills/codex-automations-orchestrator-capability-pack.zip
 installable: true
-installCommand: 'curl -L https://heyclau.de/downloads/skills/codex-automations-orchestrator-capability-pack.zip -o codex-automations-orchestrator-capability-pack.zip && unzip -o codex-automations-orchestrator-capability-pack.zip -d ./codex-automations-orchestrator-capability-pack'
-usageSnippet: 'Use this skill to design robust recurring automations with bounded scope, explicit outputs, and low alert fatigue.'
+installCommand: "curl -L https://heyclau.de/downloads/skills/codex-automations-orchestrator-capability-pack.zip -o codex-automations-orchestrator-capability-pack.zip && unzip -o codex-automations-orchestrator-capability-pack.zip -d ./codex-automations-orchestrator-capability-pack"
+usageSnippet: "Use this skill to design robust recurring automations with bounded scope, explicit outputs, and low alert fatigue."
 copySnippet: |-
   # Trigger
   "Apply the Codex automations orchestrator capability pack."
@@ -26,11 +26,11 @@ copySnippet: |-
 skillType: capability-pack
 skillLevel: expert
 verificationStatus: validated
-verifiedAt: '2026-04-11'
+verifiedAt: "2026-04-11"
 retrievalSources:
-  - 'https://github.com/openai/codex'
-  - 'https://spec.modelcontextprotocol.io/specification/'
-  - 'https://www.rfc-editor.org/rfc/rfc5545'
+  - "https://github.com/openai/codex"
+  - "https://spec.modelcontextprotocol.io/specification/"
+  - "https://www.rfc-editor.org/rfc/rfc5545"
 testedPlatforms:
   - Claude
   - Codex
@@ -62,6 +62,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Knowledge Freshness
 
 This capability pack is pinned to documentation verified on **2026-04-11**.
@@ -101,7 +102,9 @@ This skill turns ad-hoc recurring tasks into maintainable automations with clear
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Production Rules
 

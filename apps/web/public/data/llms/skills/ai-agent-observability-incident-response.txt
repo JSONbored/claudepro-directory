@@ -1,0 +1,108 @@
+# AI Agent Observability and Incident Response Skill
+URL: https://heyclau.de/skills/ai-agent-observability-incident-response
+Category: skills
+Author: JSONbored
+Date added: 2026-04-10
+Documentation: https://opentelemetry.io/docs/
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/ai-agent-observability-incident-response.mdx
+Download: /downloads/skills/ai-agent-observability-incident-response.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/ai-agent-observability-incident-response
+- Source URLs: https://opentelemetry.io/docs/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/ai-agent-observability-incident-response.mdx
+- Package URL: /downloads/skills/ai-agent-observability-incident-response.zip
+- Package SHA256: be991706421c0df692082e6109da5ef9b3479fa7fdcdf95809c8eeaff3b892b4
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-10
+- Robots: indexable
+## Summary
+Instrument AI agent systems with high-signal telemetry and runbook-driven incident response for reliability and safety.
+## Tags
+- observability
+- incident-response
+- reliability
+- telemetry
+- ai-agents
+## Content
+## Overview
+This skill turns AI agent operations into an observable system with measurable reliability. It defines what to log, what to measure, and what to alert on so incidents can be resolved quickly and with consistent process.
+
+## Compatibility
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Prerequisites
+- Access to request/response lifecycle in your agent runtime
+- Structured logging support
+- Ability to tag traces/events by workflow and model
+
+## What to Instrument
+- Prompt and tool execution spans (with redaction-safe metadata)
+- Latency percentiles by route/workflow/model
+- Error classes: model timeout, tool failure, policy denial, parse failure
+- Safety events: blocked actions, suspicious prompt patterns, auth failures
+
+## How to Use This Skill
+### Prompt Pattern
+
+```text
+Apply the AI agent observability and incident response skill.
+Provide:
+1) telemetry contract,
+2) SLO definitions,
+3) alert routing matrix,
+4) incident playbook with triage steps.
+```
+
+### Execution Flow
+
+1. Define critical user journeys and reliability targets.
+2. Add telemetry fields needed for fast diagnosis.
+3. Create alert thresholds aligned to user impact.
+4. Build runbooks with owner, severity, and escalation path.
+5. Validate incident drills before production launch.
+```text
+Apply the AI agent observability and incident response skill.
+Provide:
+1) telemetry contract,
+2) SLO definitions,
+3) alert routing matrix,
+4) incident playbook with triage steps.
+```
+
+## Troubleshooting
+**Issue:** Alert fatigue from noisy thresholds  
+**Fix:** Alert on sustained error budgets, not single spikes.
+
+**Issue:** Logs are present but not useful  
+**Fix:** Standardize event schema (request ID, workflow ID, tool name, failure reason).
+
+**Issue:** Incidents take too long to triage  
+**Fix:** Add direct links from alerts to trace dashboards and runbook sections.
+
+## Knowledge Freshness
+Treat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.
+
+## Retrieval Sources
+- https://opentelemetry.io/docs/
+
+## Output Contract
+1. Return a concrete plan with implementation order.
+2. Provide production-ready commands/config/code snippets (not placeholders).
+3. Include explicit assumptions and unresolved risks.
+4. Include a verification checklist with pass/fail criteria.
+
+## Quality Gates
+- All commands are copy/paste ready.
+- Security-sensitive steps call out secret handling and least privilege.
+- Version-sensitive guidance cites current docs used.
+- Rollback path is included for risky changes.
+- Final output includes quick validation commands/tests.

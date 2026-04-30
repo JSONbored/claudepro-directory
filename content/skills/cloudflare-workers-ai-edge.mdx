@@ -2,14 +2,14 @@
 title: Cloudflare Workers AI Edge Functions Skill
 slug: cloudflare-workers-ai-edge
 category: skills
-description: 'Deploy AI models and serverless functions to Cloudflare''s global edge network with sub-5ms cold starts and 40% edge computing market share. Access 50+ open-source AI models (Llama-2, Whisper, Stable Diffusion) with pay-per-use pricing.'
+description: "Deploy AI models and serverless functions to Cloudflare's global edge network with sub-5ms cold starts and 40% edge computing market share. Access 50+ open-source AI models (Llama-2, Whisper, Stable Diffusion) with pay-per-use pricing."
 cardDescription: Deploy AI models and serverless functions to Cloudflare's global edge network with sub-5ms cold starts and 40% edge computing market share.
 seoTitle: Cloudflare Workers AI Edge Functions Skill
 seoDescription: Deploy AI models and serverless functions to Cloudflare's global edge network with sub-5ms cold starts and 40% edge computing market share. Access 50+ open-s...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-16'
-documentationUrl: 'https://developers.cloudflare.com/workers-ai/'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-16"
+documentationUrl: "https://developers.cloudflare.com/workers-ai/"
 downloadUrl: /downloads/skills/cloudflare-workers-ai-edge.zip
 installable: true
 installCommand: npm install -g wrangler
@@ -46,9 +46,9 @@ copySnippet: |-
 skillType: general
 skillLevel: advanced
 verificationStatus: draft
-verifiedAt: '2025-10-16'
+verifiedAt: "2025-10-16"
 retrievalSources:
-  - 'https://developers.cloudflare.com/workers-ai/'
+  - "https://developers.cloudflare.com/workers-ai/"
 testedPlatforms:
   - Claude
   - Codex
@@ -60,7 +60,7 @@ prerequisites:
   - Cloudflare account
   - Wrangler CLI 3.0+
   - Node.js 18+
-  - '@cloudflare/workers-types'
+  - "@cloudflare/workers-types"
   - Cloudflare account with Workers AI enabled (available on Free and Paid plans)
   - Wrangler CLI authentication configured (wrangler login) for deployment access
 tags:
@@ -89,6 +89,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 Deploy AI models and serverless functions to Cloudflare's global edge network with sub-5ms cold starts and 40% edge computing market share. Access 50+ open-source AI models (Llama-2, Whisper, Stable Diffusion) with pay-per-use pricing. Includes 10,000 free Neurons per day, integrated D1/R2/KV storage, and deployment to 275+ cities worldwide.
 
 ## Content
@@ -108,18 +109,21 @@ Claude can build and deploy AI-powered serverless functions on Cloudflare's glob
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
-
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 
 **Required:**
+
 - Claude Pro subscription or Claude Code CLI
 - Cloudflare account (free tier available)
 - Wrangler CLI installed (`npm install -g wrangler`)
 - Basic understanding of JavaScript/TypeScript
 
 **What Claude handles automatically:**
+
 - Writing Workers code with TypeScript types
 - Configuring wrangler.toml for deployments
 - Implementing AI model bindings (Llama-2, Whisper, Stable Diffusion)
@@ -135,6 +139,7 @@ Claude can build and deploy AI-powered serverless functions on Cloudflare's glob
 **Prompt:** "Create a Cloudflare Worker that responds to HTTP requests with JSON data and deploys to the edge."
 
 Claude will:
+
 1. Generate a Worker with proper `fetch` event handler
 2. Create `wrangler.toml` configuration
 3. Set up TypeScript types for Request/Response
@@ -147,6 +152,7 @@ Claude will:
 **Prompt:** "Build a Cloudflare Worker that uses Llama-2 to generate chat responses. Accept POST requests with user messages and stream the AI responses back."
 
 Claude will:
+
 1. Configure AI binding in wrangler.toml
 2. Implement streaming response with ReadableStream
 3. Add proper prompt formatting for Llama-2
@@ -159,6 +165,7 @@ Claude will:
 **Prompt:** "Create an edge function that generates images using Stable Diffusion XL. Accept a text prompt via API and return the generated image URL stored in R2."
 
 Claude will:
+
 1. Set up Workers AI binding for Stable Diffusion
 2. Configure R2 bucket for image storage
 3. Implement image generation with proper parameters
@@ -171,6 +178,7 @@ Claude will:
 **Prompt:** "Build a translation API using Cloudflare Workers AI that detects the source language and translates to the target language. Support 50+ languages with edge caching."
 
 Claude will:
+
 1. Use Workers AI translation models
 2. Implement language detection
 3. Set up KV namespace for translation caching
@@ -195,6 +203,7 @@ Claude will:
 ## Common Workflows
 
 ### Full-Stack AI Application
+
 ```
 "Create a complete AI-powered application on Cloudflare:
 1. Workers AI for text generation (Llama-2)
@@ -207,6 +216,7 @@ Include TypeScript types and deployment scripts."
 ```
 
 ### Content Moderation API
+
 ```
 "Build an edge API that:
 1. Accepts text content via POST request
@@ -218,6 +228,7 @@ Include TypeScript types and deployment scripts."
 ```
 
 ### Smart Image CDN
+
 ```
 "Create a Cloudflare Worker that:
 1. Intercepts image requests
@@ -229,6 +240,7 @@ Include TypeScript types and deployment scripts."
 ```
 
 ### Real-Time Sentiment Analysis
+
 ```
 "Build a WebSocket-based sentiment analysis service:
 1. Accept streaming text via WebSocket
@@ -248,7 +260,7 @@ Include TypeScript types and deployment scripts."
 **Solution:** Use smaller model variants (e.g., Llama-2-7B instead of 13B), implement request queuing with Workers Queue, or cache common responses in KV storage.
 
 **Issue:** CORS errors when calling from frontend
-**Solution:** Add proper CORS headers in Worker response. Ask Claude to include OPTIONS method handler and appropriate Access-Control-* headers.
+**Solution:** Add proper CORS headers in Worker response. Ask Claude to include OPTIONS method handler and appropriate Access-Control-\* headers.
 
 **Issue:** Workers AI billing concerns
 **Solution:** Implement rate limiting with Durable Objects or KV, cache responses aggressively, use smaller models for simpler tasks, and set up billing alerts in Cloudflare dashboard.

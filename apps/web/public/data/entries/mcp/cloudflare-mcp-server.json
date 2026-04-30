@@ -1,0 +1,331 @@
+{
+  "schemaVersion": 1,
+  "key": "mcp:cloudflare-mcp-server",
+  "entry": {
+    "category": "mcp",
+    "slug": "cloudflare-mcp-server",
+    "title": "Cloudflare MCP Server - MCP Servers",
+    "description": "Build applications, analyze traffic, and manage security settings through Cloudflare",
+    "seoTitle": "Cloudflare MCP Server - MCP Servers",
+    "seoDescription": "Build applications, analyze traffic, and manage security settings through Cloudflare Discover tools for AI development. HeyClaude adds source links, install...",
+    "author": "Cloudflare",
+    "dateAdded": "2025-09-18",
+    "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+    "tags": [
+      "cloudflare",
+      "cdn",
+      "security",
+      "dns",
+      "infrastructure"
+    ],
+    "keywords": [
+      "cdn",
+      "claude",
+      "cloudflare",
+      "development",
+      "dns",
+      "infrastructure",
+      "mcp",
+      "mcp servers",
+      "security",
+      "server",
+      "tools",
+      "heyclaude"
+    ],
+    "readingTime": 1,
+    "difficultyScore": 5,
+    "documentationUrl": "https://developers.cloudflare.com/agents/model-context-protocol/mcp-servers-for-cloudflare/",
+    "brandName": "Cloudflare",
+    "brandDomain": "cloudflare.com",
+    "brandIconUrl": "/api/brand-assets/icon/cloudflare.com",
+    "brandAssetSource": "brandfetch",
+    "cardDescription": "Build applications, analyze traffic, and manage security settings through Cloudflare",
+    "installable": true,
+    "installCommand": "claude mcp add cloudflare --env CLOUDFLARE_API_TOKEN=YOUR_TOKEN --env CLOUDFLARE_ACCOUNT_ID=YOUR_ACCOUNT_ID && claude mcp list",
+    "usageSnippet": "claude mcp add cloudflare --env CLOUDFLARE_API_TOKEN=YOUR_TOKEN --env CLOUDFLARE_ACCOUNT_ID=YOUR_ACCOUNT_ID && claude mcp list",
+    "copySnippet": "{\n  \"cloudflare\": {\n    \"env\": {\n      \"CLOUDFLARE_API_TOKEN\": \"${CLOUDFLARE_API_TOKEN}\",\n      \"CLOUDFLARE_ACCOUNT_ID\": \"${CLOUDFLARE_ACCOUNT_ID}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@cloudflare/mcp-server-cloudflare\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
+    "configSnippet": "{\n  \"cloudflare\": {\n    \"env\": {\n      \"CLOUDFLARE_API_TOKEN\": \"${CLOUDFLARE_API_TOKEN}\",\n      \"CLOUDFLARE_ACCOUNT_ID\": \"${CLOUDFLARE_ACCOUNT_ID}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@cloudflare/mcp-server-cloudflare\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
+    "estimatedSetupTime": "2 minutes",
+    "difficulty": "beginner",
+    "prerequisites": [
+      "Cloudflare account with active zones",
+      "Cloudflare API Token from https://dash.cloudflare.com/profile/api-tokens",
+      "Cloudflare Account ID (found in Cloudflare dashboard)",
+      "Node.js and npm/npx available for running the @cloudflare/mcp-server-cloudflare package",
+      "Internet connection for accessing Cloudflare API (https://api.cloudflare.com endpoints)",
+      "Claude Desktop 0.7.0+ or Claude Code with MCP support",
+      "Rate limit awareness: 1,200 requests per 5 minutes (global limit, ~4 requests per second)",
+      "Understanding of Cloudflare zones, DNS records, Workers, Pages, and security settings",
+      "Appropriate API token permissions (read, write, deploy as needed for target operations)",
+      "Content-Type: application/json header for API requests and Bearer authentication (not email/key pair)"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/mcp/cloudflare-mcp-server.mcpb",
+    "downloadTrust": "first-party",
+    "downloadSha256": "06a4d88be66de572abcbfe34634a8ce927597249e591ec5717ef6b9c6a520212",
+    "body": "## Content\n\nManage Cloudflare services and configurations through Claude for comprehensive infrastructure control.\n\n## Features\n\n- Configure DNS settings and records\n- Manage security rules and WAF\n- Analyze traffic patterns and metrics\n- Control caching behavior and purging\n- Deploy Workers and Pages\n- Advanced Cloudflare zone and DNS management with CDN configuration, security rules, and analytics integration\n- Batch operations support for efficient bulk DNS record creation, updates, and cache purging with automatic rate limit handling and retry logic\n- Real-time configuration synchronization capabilities with webhook integration support for monitoring zone changes and triggering automated workflows\n\n## Use Cases\n\n- Deploy edge functions globally\n- Configure WAF rules for security\n- Manage DNS records programmatically\n- Analyze attack patterns and threats\n- Optimize site performance with caching\n- Build automated infrastructure management workflows that sync external systems with Cloudflare zones for real-time DNS and security configuration\n\n## Installation\n\n### Claude Code\n\n1. claude mcp add cloudflare --env CLOUDFLARE_API_TOKEN=YOUR_TOKEN --env CLOUDFLARE_ACCOUNT_ID=YOUR_ACCOUNT_ID\n2. Verify installation: claude mcp list\n3. Test connection: claude mcp status cloudflare\n\n### Claude Desktop\n\n1. Get your Cloudflare API Token from https://dash.cloudflare.com/profile/api-tokens\n2. Find your Account ID in the Cloudflare dashboard\n3. Open Claude Desktop configuration file\n4. Add the Cloudflare MCP server configuration with your credentials\n5. Restart Claude Desktop\n\n## Requirements\n\n- Cloudflare account with active zones\n- Cloudflare API Token from https://dash.cloudflare.com/profile/api-tokens\n- Cloudflare Account ID (found in Cloudflare dashboard)\n- Node.js and npm/npx available for running the @cloudflare/mcp-server-cloudflare package\n- Internet connection for accessing Cloudflare API (https://api.cloudflare.com endpoints)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Rate limit awareness: 1,200 requests per 5 minutes (global limit, ~4 requests per second)\n- Understanding of Cloudflare zones, DNS records, Workers, Pages, and security settings\n- Appropriate API token permissions (read, write, deploy as needed for target operations)\n- Content-Type: application/json header for API requests and Bearer authentication (not email/key pair)\n\n## Configuration\n\n```json\n{\n  \"cloudflare\": {\n    \"env\": {\n      \"CLOUDFLARE_API_TOKEN\": \"${CLOUDFLARE_API_TOKEN}\",\n      \"CLOUDFLARE_ACCOUNT_ID\": \"${CLOUDFLARE_ACCOUNT_ID}\"\n    },\n    \"args\": [\"-y\", \"@cloudflare/mcp-server-cloudflare\"],\n    \"command\": \"npx\"\n  }\n}\n```\n\n## Examples\n\n### Add DNS record for subdomain\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Add DNS record for subdomain\"\n```\n\n### Deploy Worker script\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Deploy Worker script\"\n```\n\n### Show traffic analytics\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Show traffic analytics\"\n```\n\n### Configure firewall rule\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Configure firewall rule\"\n```\n\n### Create DNS Record\n\nCreate a new Cloudflare DNS A record with TTL configuration\n\n```typescript\n// Create Cloudflare DNS record\nconst record = await cloudflare.dns.records.create({\n  zone_id: \"zone-id\",\n  type: \"A\",\n  name: \"example.com\",\n  content: \"192.0.2.1\",\n  ttl: 3600,\n});\n```\n\n## Security\n\n- Use API tokens with minimal scope\n- Enable 2FA on Cloudflare account\n- Regular security audits recommended\n- Monitor API usage and rate limits\n- Cloudflare API tokens and Global API keys must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- Cloudflare API tokens should be scoped with minimal required permissions following the principle of least privilege - regularly audit API token permissions and remove unused tokens\n- Cloudflare zone IDs and account IDs may expose infrastructure architecture and domain information - ensure Cloudflare resource IDs are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Cloudflare MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Cloudflare webhook configurations and payloads may contain sensitive DNS and security configuration data - ensure webhook endpoints are properly secured with authentication and HTTPS encryption\n\n## Troubleshooting\n\n### HTTP 429 error: API rate limit exceeded for 5 minutes\n\nCloudflare global rate limit is 1,200 requests per 5 minutes. Wait for 5-minute window to reset. Distribute API calls across time and implement request throttling to stay under 4 requests per second.\n\n### Rate limit API error: decoding not yet implemented\n\nAdd Content-Type: application/json header to your API request. Verify request body is properly formatted JSON and includes all required parameters for the endpoint.\n\n### Error: ratelimit.api.not_entitled for Enterprise features\n\nContact your Cloudflare Account Team to enable Enterprise rate limiting features. Verify your account tier supports advanced rate limiting or migrate to Ruleset Engine API.\n\n### Authentication error: token permission insufficient\n\nVerify API token has Firewall Services Write permission for rate limiting. Check token hasn't expired and regenerate from Cloudflare dashboard if needed. Use Bearer authentication, not email/key pair.\n\n### Cannot configure rate limits or firewall rules\n\nEnsure API token has correct zone and account-level permissions. Verify you're using Ruleset Engine API (not deprecated Rate Limiting API) and check account tier supports feature.\n\n### Cloudflare MCP server authentication errors with API tokens\n\nVerify API token is valid and not expired. Check token permissions match required operations. Ensure token format is correct (Bearer token in Authorization header). For Global API keys, verify email and key combination is correct.\n\n### Cloudflare rate limit errors when managing large zones\n\nImplement exponential backoff retry logic with jitter. Use batch operations to reduce API calls. Cache frequently accessed zone data. Monitor rate limit headers and adjust request frequency accordingly. Cloudflare allows 1,200 requests per 5 minutes per API token.\n\n### Cloudflare zone or DNS record access denied errors\n\nVerify API token has access to the zone and account. Check zone permissions and account membership. Ensure API token scopes include required zone and DNS permissions.\n\n### Cloudflare MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Cloudflare API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+    "sections": [
+      {
+        "title": "Content",
+        "id": "content",
+        "markdown": "Manage Cloudflare services and configurations through Claude for comprehensive infrastructure control.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Configure DNS settings and records\n- Manage security rules and WAF\n- Analyze traffic patterns and metrics\n- Control caching behavior and purging\n- Deploy Workers and Pages\n- Advanced Cloudflare zone and DNS management with CDN configuration, security rules, and analytics integration\n- Batch operations support for efficient bulk DNS record creation, updates, and cache purging with automatic rate limit handling and retry logic\n- Real-time configuration synchronization capabilities with webhook integration support for monitoring zone changes and triggering automated workflows",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Deploy edge functions globally\n- Configure WAF rules for security\n- Manage DNS records programmatically\n- Analyze attack patterns and threats\n- Optimize site performance with caching\n- Build automated infrastructure management workflows that sync external systems with Cloudflare zones for real-time DNS and security configuration",
+        "codeBlocks": []
+      },
+      {
+        "title": "Installation",
+        "id": "installation",
+        "markdown": "### Claude Code\n\n1. claude mcp add cloudflare --env CLOUDFLARE_API_TOKEN=YOUR_TOKEN --env CLOUDFLARE_ACCOUNT_ID=YOUR_ACCOUNT_ID\n2. Verify installation: claude mcp list\n3. Test connection: claude mcp status cloudflare\n\n### Claude Desktop\n\n1. Get your Cloudflare API Token from https://dash.cloudflare.com/profile/api-tokens\n2. Find your Account ID in the Cloudflare dashboard\n3. Open Claude Desktop configuration file\n4. Add the Cloudflare MCP server configuration with your credentials\n5. Restart Claude Desktop",
+        "codeBlocks": []
+      },
+      {
+        "title": "Requirements",
+        "id": "requirements",
+        "markdown": "- Cloudflare account with active zones\n- Cloudflare API Token from https://dash.cloudflare.com/profile/api-tokens\n- Cloudflare Account ID (found in Cloudflare dashboard)\n- Node.js and npm/npx available for running the @cloudflare/mcp-server-cloudflare package\n- Internet connection for accessing Cloudflare API (https://api.cloudflare.com endpoints)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Rate limit awareness: 1,200 requests per 5 minutes (global limit, ~4 requests per second)\n- Understanding of Cloudflare zones, DNS records, Workers, Pages, and security settings\n- Appropriate API token permissions (read, write, deploy as needed for target operations)\n- Content-Type: application/json header for API requests and Bearer authentication (not email/key pair)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Configuration",
+        "id": "configuration",
+        "markdown": "```json\n{\n  \"cloudflare\": {\n    \"env\": {\n      \"CLOUDFLARE_API_TOKEN\": \"${CLOUDFLARE_API_TOKEN}\",\n      \"CLOUDFLARE_ACCOUNT_ID\": \"${CLOUDFLARE_ACCOUNT_ID}\"\n    },\n    \"args\": [\"-y\", \"@cloudflare/mcp-server-cloudflare\"],\n    \"command\": \"npx\"\n  }\n}\n```",
+        "codeBlocks": [
+          {
+            "language": "json",
+            "code": "{\n  \"cloudflare\": {\n    \"env\": {\n      \"CLOUDFLARE_API_TOKEN\": \"${CLOUDFLARE_API_TOKEN}\",\n      \"CLOUDFLARE_ACCOUNT_ID\": \"${CLOUDFLARE_ACCOUNT_ID}\"\n    },\n    \"args\": [\"-y\", \"@cloudflare/mcp-server-cloudflare\"],\n    \"command\": \"npx\"\n  }\n}"
+          }
+        ]
+      },
+      {
+        "title": "Examples",
+        "id": "examples",
+        "markdown": "### Add DNS record for subdomain\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Add DNS record for subdomain\"\n```\n\n### Deploy Worker script\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Deploy Worker script\"\n```\n\n### Show traffic analytics\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Show traffic analytics\"\n```\n\n### Configure firewall rule\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Configure firewall rule\"\n```\n\n### Create DNS Record\n\nCreate a new Cloudflare DNS A record with TTL configuration\n\n```typescript\n// Create Cloudflare DNS record\nconst record = await cloudflare.dns.records.create({\n  zone_id: \"zone-id\",\n  type: \"A\",\n  name: \"example.com\",\n  content: \"192.0.2.1\",\n  ttl: 3600,\n});\n```",
+        "codeBlocks": [
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Add DNS record for subdomain\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Deploy Worker script\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Show traffic analytics\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Configure firewall rule\""
+          },
+          {
+            "language": "typescript",
+            "code": "// Create Cloudflare DNS record\nconst record = await cloudflare.dns.records.create({\n  zone_id: \"zone-id\",\n  type: \"A\",\n  name: \"example.com\",\n  content: \"192.0.2.1\",\n  ttl: 3600,\n});"
+          }
+        ]
+      },
+      {
+        "title": "Security",
+        "id": "security",
+        "markdown": "- Use API tokens with minimal scope\n- Enable 2FA on Cloudflare account\n- Regular security audits recommended\n- Monitor API usage and rate limits\n- Cloudflare API tokens and Global API keys must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- Cloudflare API tokens should be scoped with minimal required permissions following the principle of least privilege - regularly audit API token permissions and remove unused tokens\n- Cloudflare zone IDs and account IDs may expose infrastructure architecture and domain information - ensure Cloudflare resource IDs are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Cloudflare MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Cloudflare webhook configurations and payloads may contain sensitive DNS and security configuration data - ensure webhook endpoints are properly secured with authentication and HTTPS encryption",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "### HTTP 429 error: API rate limit exceeded for 5 minutes\n\nCloudflare global rate limit is 1,200 requests per 5 minutes. Wait for 5-minute window to reset. Distribute API calls across time and implement request throttling to stay under 4 requests per second.\n\n### Rate limit API error: decoding not yet implemented\n\nAdd Content-Type: application/json header to your API request. Verify request body is properly formatted JSON and includes all required parameters for the endpoint.\n\n### Error: ratelimit.api.not_entitled for Enterprise features\n\nContact your Cloudflare Account Team to enable Enterprise rate limiting features. Verify your account tier supports advanced rate limiting or migrate to Ruleset Engine API.\n\n### Authentication error: token permission insufficient\n\nVerify API token has Firewall Services Write permission for rate limiting. Check token hasn't expired and regenerate from Cloudflare dashboard if needed. Use Bearer authentication, not email/key pair.\n\n### Cannot configure rate limits or firewall rules\n\nEnsure API token has correct zone and account-level permissions. Verify you're using Ruleset Engine API (not deprecated Rate Limiting API) and check account tier supports feature.\n\n### Cloudflare MCP server authentication errors with API tokens\n\nVerify API token is valid and not expired. Check token permissions match required operations. Ensure token format is correct (Bearer token in Authorization header). For Global API keys, verify email and key combination is correct.\n\n### Cloudflare rate limit errors when managing large zones\n\nImplement exponential backoff retry logic with jitter. Use batch operations to reduce API calls. Cache frequently accessed zone data. Monitor rate limit headers and adjust request frequency accordingly. Cloudflare allows 1,200 requests per 5 minutes per API token.\n\n### Cloudflare zone or DNS record access denied errors\n\nVerify API token has access to the zone and account. Check zone permissions and account membership. Ensure API token scopes include required zone and DNS permissions.\n\n### Cloudflare MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Cloudflare API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Content",
+        "id": "content"
+      },
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      },
+      {
+        "depth": 2,
+        "text": "Installation",
+        "id": "installation"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Code",
+        "id": "claude-code"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Desktop",
+        "id": "claude-desktop"
+      },
+      {
+        "depth": 2,
+        "text": "Requirements",
+        "id": "requirements"
+      },
+      {
+        "depth": 2,
+        "text": "Configuration",
+        "id": "configuration"
+      },
+      {
+        "depth": 2,
+        "text": "Examples",
+        "id": "examples"
+      },
+      {
+        "depth": 3,
+        "text": "Add DNS record for subdomain",
+        "id": "add-dns-record-for-subdomain"
+      },
+      {
+        "depth": 3,
+        "text": "Deploy Worker script",
+        "id": "deploy-worker-script"
+      },
+      {
+        "depth": 3,
+        "text": "Show traffic analytics",
+        "id": "show-traffic-analytics"
+      },
+      {
+        "depth": 3,
+        "text": "Configure firewall rule",
+        "id": "configure-firewall-rule"
+      },
+      {
+        "depth": 3,
+        "text": "Create DNS Record",
+        "id": "create-dns-record"
+      },
+      {
+        "depth": 2,
+        "text": "Security",
+        "id": "security"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 3,
+        "text": "HTTP 429 error: API rate limit exceeded for 5 minutes",
+        "id": "http-429-error-api-rate-limit-exceeded-for-5-minutes"
+      },
+      {
+        "depth": 3,
+        "text": "Rate limit API error: decoding not yet implemented",
+        "id": "rate-limit-api-error-decoding-not-yet-implemented"
+      },
+      {
+        "depth": 3,
+        "text": "Error: ratelimit.api.not_entitled for Enterprise features",
+        "id": "error-ratelimitapinotentitled-for-enterprise-features"
+      },
+      {
+        "depth": 3,
+        "text": "Authentication error: token permission insufficient",
+        "id": "authentication-error-token-permission-insufficient"
+      },
+      {
+        "depth": 3,
+        "text": "Cannot configure rate limits or firewall rules",
+        "id": "cannot-configure-rate-limits-or-firewall-rules"
+      },
+      {
+        "depth": 3,
+        "text": "Cloudflare MCP server authentication errors with API tokens",
+        "id": "cloudflare-mcp-server-authentication-errors-with-api-tokens"
+      },
+      {
+        "depth": 3,
+        "text": "Cloudflare rate limit errors when managing large zones",
+        "id": "cloudflare-rate-limit-errors-when-managing-large-zones"
+      },
+      {
+        "depth": 3,
+        "text": "Cloudflare zone or DNS record access denied errors",
+        "id": "cloudflare-zone-or-dns-record-access-denied-errors"
+      },
+      {
+        "depth": 3,
+        "text": "Cloudflare MCP server connection timeouts or network errors",
+        "id": "cloudflare-mcp-server-connection-timeouts-or-network-errors"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "json",
+        "code": "{\n  \"cloudflare\": {\n    \"env\": {\n      \"CLOUDFLARE_API_TOKEN\": \"${CLOUDFLARE_API_TOKEN}\",\n      \"CLOUDFLARE_ACCOUNT_ID\": \"${CLOUDFLARE_ACCOUNT_ID}\"\n    },\n    \"args\": [\"-y\", \"@cloudflare/mcp-server-cloudflare\"],\n    \"command\": \"npx\"\n  }\n}"
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Add DNS record for subdomain\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Deploy Worker script\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Show traffic analytics\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Configure firewall rule\""
+      },
+      {
+        "language": "typescript",
+        "code": "// Create Cloudflare DNS record\nconst record = await cloudflare.dns.records.create({\n  zone_id: \"zone-id\",\n  type: \"A\",\n  name: \"example.com\",\n  content: \"192.0.2.1\",\n  ttl: 3600,\n});"
+      }
+    ],
+    "filePath": "content/mcp/cloudflare-mcp-server.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/cloudflare-mcp-server.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": true,
+    "packageTrust": "first-party",
+    "packageChecksum": "06a4d88be66de572abcbfe34634a8ce927597249e591ec5717ef6b9c6a520212",
+    "checksumPresent": true,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://developers.cloudflare.com/agents/model-context-protocol/mcp-servers-for-cloudflare/",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/cloudflare-mcp-server.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

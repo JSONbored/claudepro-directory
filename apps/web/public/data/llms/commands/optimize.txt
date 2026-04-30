@@ -1,0 +1,1063 @@
+# /optimize - Performance Optimizer Command for Claude Code
+URL: https://heyclau.de/commands/optimize
+Category: commands
+Author: JSONbored
+Date added: 2025-09-16
+Documentation: https://docs.claude.ai/commands/optimize
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/optimize.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/commands/optimize
+- Source URLs: https://docs.claude.ai/commands/optimize, https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/optimize.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
+## Summary
+Advanced performance optimization with bottleneck analysis, memory profiling, and automated improvements
+## Tags
+- performance
+- optimization
+- profiling
+- bottleneck
+- efficiency
+## Content
+## Overview
+The `/optimize` command provides comprehensive performance analysis and optimization recommendations including bottleneck identification, memory profiling, algorithm improvements, and automated code transformations.
+
+## Usage
+```
+/optimize [options] <file_or_function>
+```
+```text
+/optimize [options] <file_or_function>
+```
+
+## Options
+### Optimization Types
+
+- `--performance` - CPU and execution time optimization
+- `--memory` - Memory usage and allocation optimization
+- `--network` - Network request and bandwidth optimization
+- `--database` - Database query and connection optimization
+- `--bundle` - Bundle size and loading optimization
+- `--all` - Comprehensive optimization analysis (default)
+
+### Analysis Depth
+
+- `--quick` - Fast analysis with basic recommendations
+- `--detailed` - Comprehensive profiling and analysis
+- `--deep` - Advanced algorithm and architecture analysis
+- `--benchmark` - Performance benchmarking and comparison
+
+### Target Metrics
+
+- `--latency` - Focus on response time reduction
+- `--throughput` - Focus on request handling capacity
+- `--scalability` - Focus on scaling characteristics
+- `--efficiency` - Focus on resource utilization
+
+### Output Options
+
+- `--format=report` - Detailed optimization report (default)
+- `--format=diff` - Before/after code comparison
+- `--format=metrics` - Performance metrics and benchmarks
+- `--format=interactive` - Interactive optimization guide
+
+## Examples
+### Database Query Optimization
+
+```javascript
+// Unoptimized code with multiple performance issues
+class ProductService {
+  constructor(database) {
+    this.db = database;
+  }
+
+  // 🐌 Issue 1: N+1 Query Problem
+  async getProductsWithReviews() {
+    const products = await this.db.query("SELECT * FROM products");
+
+    for (const product of products) {
+      // 🐌 Executes N queries (one per product)
+      product.reviews = await this.db.query(
+        "SELECT * FROM reviews WHERE product_id = ?",
+        [product.id],
+      );
+
+      // 🐌 Issue 2: Another N queries for user data
+      for (const review of product.reviews) {
+        review.user = await this.db.query(
+          "SELECT name, avatar FROM users WHERE id = ?",
+          [review.user_id],
+        );
+      }
+    }
+
+    return products;
+  }
+
+  // 🐌 Issue 3: Inefficient search without indexes
+  async searchProducts(searchTerm) {
+    return await this.db.query(`
+      SELECT * FROM products 
+      WHERE LOWER(name) LIKE LOWER('%${searchTerm}%') 
+         OR LOWER(description) LIKE LOWER('%${searchTerm}%')
+      ORDER BY name
+    `);
+  }
+
+  // 🐌 Issue 4: No pagination, loads all data
+  async getPopularProducts() {
+    return await this.db.query(`
+      SELECT p.*, COUNT(r.id) as review_count,
+             AVG(r.rating) as avg_rating
+      FROM products p
+      LEFT JOIN reviews r ON p.id = r.product_id
+      GROUP BY p.id
+      ORDER BY review_count DESC, avg_rating DESC
+    `);
+  }
+
+  // 🐌 Issue 5: Expensive aggregation on every call
+  async getProductStats(productId) {
+    const product = await this.db.query("SELECT * FROM products WHERE id = ?", [
+      productId,
+    ]);
+
+    const reviewCount = await this.db.query(
+      "SELECT COUNT(*) as count FROM reviews WHERE product_id = ?",
+      [productId],
+    );
+
+    const avgRating = await this.db.query(
+      "SELECT AVG(rating) as avg FROM reviews WHERE product_id = ?",
+      [productId],
+    );
+
+    const recentReviews = await this.db.query(
+      "SELECT * FROM reviews WHERE product_id = ? ORDER BY created_at DESC LIMIT 5",
+      [productId],
+    );
+
+    return {
+      ...product[0],
+      reviewCount: reviewCount[0].count,
+      avgRating: avgRating[0].avg,
+      recentReviews,
+    };
+  }
+}
+```
+
+**Optimization Analysis:**
+
+```markdown
+# 🚀 Performance Optimization Report
+
+## 📊 Performance Issues Identified
+
+### Issue 1: N+1 Query Problem (Critical)
+
+**Location:** `getProductsWithReviews()` method
+**Impact:** 🔴 Severe - O(n²) database queries
+**Current Performance:** 1,000 products = 2,001 queries
+**Estimated Fix Impact:** 99.5% query reduction
+
+**Problem Analysis:**
+```
+
+Current Execution:
+
+1. SELECT \* FROM products (1 query)
+2. For each product (N queries):
+   - SELECT \* FROM reviews WHERE product_id = ?
+3. For each review (N\*M queries):
+   - SELECT name, avatar FROM users WHERE id = ?
+
+Total Queries: 1 + N + (N \* avg_reviews_per_product)
+With 100 products, 5 reviews each: 1 + 100 + 500 = 601 queries!
+
+````
+
+**Optimized Solution:**
+```javascript
+async getProductsWithReviews() {
+  // ✅ Single optimized query with JOINs
+  const query = `
+    SELECT
+      p.id as product_id,
+      p.name as product_name,
+      p.description,
+      p.price,
+      p.created_at as product_created_at,
+      r.id as review_id,
+      r.rating,
+      r.comment,
+      r.created_at as review_created_at,
+      u.name as user_name,
+      u.avatar as user_avatar
+    FROM products p
+    LEFT JOIN reviews r ON p.id = r.product_id
+    LEFT JOIN users u ON r.user_id = u.id
+    ORDER BY p.id, r.created_at DESC
+  `;
+
+  const rows = await this.db.query(query);
+
+  // ✅ Transform flat result into nested structure
+  const productsMap = new Map();
+
+  for (const row of rows) {
+    if (!productsMap.has(row.product_id)) {
+      productsMap.set(row.product_id, {
+        id: row.product_id,
+        name: row.product_name,
+        description: row.description,
+        price: row.price,
+        created_at: row.product_created_at,
+        reviews: []
+      });
+    }
+
+    const product = productsMap.get(row.product_id);
+
+    if (row.review_id) {
+      product.reviews.push({
+        id: row.review_id,
+        rating: row.rating,
+        comment: row.comment,
+        created_at: row.review_created_at,
+        user: {
+          name: row.user_name,
+          avatar: row.user_avatar
+        }
+      });
+    }
+  }
+
+  return Array.from(productsMap.values());
+}
+
+// ✅ Performance improvement: 601 queries → 1 query (99.8% reduction)
+````
+
+### Issue 2: Missing Database Indexes (High)
+
+**Location:** `searchProducts()` method
+**Impact:** 🟡 High - Full table scans on every search
+**Current Performance:** O(n) scan of entire products table
+**Estimated Fix Impact:** 10-100x search speed improvement
+
+**Index Recommendations:**
+
+```sql
+-- ✅ Full-text search index for product names and descriptions
+CREATE FULLTEXT INDEX idx_products_search
+ON products(name, description);
+
+-- ✅ Composite index for filtered searches
+CREATE INDEX idx_products_category_price
+ON products(category_id, price);
+
+-- ✅ Index for popular products query
+CREATE INDEX idx_reviews_product_rating
+ON reviews(product_id, rating);
+```
+
+**Optimized Search Query:**
+
+```javascript
+async searchProducts(searchTerm, filters = {}) {
+  let query = `
+    SELECT p.*,
+           MATCH(p.name, p.description) AGAINST(? IN NATURAL LANGUAGE MODE) as relevance
+    FROM products p
+    WHERE MATCH(p.name, p.description) AGAINST(? IN NATURAL LANGUAGE MODE)
+  `;
+
+  const params = [searchTerm, searchTerm];
+
+  // ✅ Add filters with indexed columns
+  if (filters.category_id) {
+    query += ' AND p.category_id = ?';
+    params.push(filters.category_id);
+  }
+
+  if (filters.min_price) {
+    query += ' AND p.price >= ?';
+    params.push(filters.min_price);
+  }
+
+  if (filters.max_price) {
+    query += ' AND p.price <= ?';
+    params.push(filters.max_price);
+  }
+
+  query += ' ORDER BY relevance DESC, p.name LIMIT ? OFFSET ?';
+  params.push(filters.limit || 20, filters.offset || 0);
+
+  return await this.db.query(query, params);
+}
+```
+
+### Issue 3: Missing Pagination (Medium)
+
+**Location:** `getPopularProducts()` method
+**Impact:** 🟡 Medium - Memory and bandwidth waste
+**Current Performance:** Loads entire dataset regardless of need
+**Estimated Fix Impact:** 80% memory reduction, faster response times
+
+**Optimized with Pagination:**
+
+```javascript
+async getPopularProducts(page = 1, pageSize = 20) {
+  const offset = (page - 1) * pageSize;
+
+  // ✅ Paginated query with LIMIT/OFFSET
+  const [products, totalCount] = await Promise.all([
+    this.db.query(`
+      SELECT p.id, p.name, p.price, p.image_url,
+             COUNT(r.id) as review_count,
+             ROUND(AVG(r.rating), 2) as avg_rating
+      FROM products p
+      LEFT JOIN reviews r ON p.id = r.product_id
+      GROUP BY p.id
+      HAVING review_count > 0
+      ORDER BY review_count DESC, avg_rating DESC
+      LIMIT ? OFFSET ?
+    `, [pageSize, offset]),
+
+    // ✅ Get total count for pagination metadata
+    this.db.query(`
+      SELECT COUNT(DISTINCT p.id) as total
+      FROM products p
+      INNER JOIN reviews r ON p.id = r.product_id
+    `)
+  ]);
+
+  return {
+    products,
+    pagination: {
+      page,
+      pageSize,
+      total: totalCount[0].total,
+      totalPages: Math.ceil(totalCount[0].total / pageSize)
+    }
+  };
+}
+```
+
+### Issue 4: Redundant Aggregation Queries (Medium)
+
+**Location:** `getProductStats()` method
+**Impact:** 🟡 Medium - Multiple unnecessary database roundtrips
+**Current Performance:** 4 separate queries per call
+**Estimated Fix Impact:** 75% query reduction
+
+**Optimized Single Query:**
+
+```javascript
+async getProductStats(productId) {
+  // ✅ Single query with all required data
+  const result = await this.db.query(`
+    SELECT
+      p.*,
+      COUNT(r.id) as review_count,
+      ROUND(AVG(r.rating), 2) as avg_rating,
+      JSON_ARRAYAGG(
+        CASE
+          WHEN r.id IS NOT NULL
+          THEN JSON_OBJECT(
+            'id', r.id,
+            'rating', r.rating,
+            'comment', r.comment,
+            'created_at', r.created_at,
+            'user_name', u.name
+          )
+          ELSE NULL
+        END
+      ) as recent_reviews
+    FROM products p
+    LEFT JOIN (
+      SELECT * FROM reviews
+      WHERE product_id = ?
+      ORDER BY created_at DESC
+      LIMIT 5
+    ) r ON p.id = r.product_id
+    LEFT JOIN users u ON r.user_id = u.id
+    WHERE p.id = ?
+    GROUP BY p.id
+  `, [productId, productId]);
+
+  const product = result[0];
+
+  // ✅ Parse JSON array of recent reviews
+  product.recent_reviews = JSON.parse(product.recent_reviews)
+    .filter(review => review !== null);
+
+  return product;
+}
+
+// ✅ Performance improvement: 4 queries → 1 query (75% reduction)
+```
+
+## 🧠 Caching Strategy Implementation
+
+```javascript
+const Redis = require("redis");
+
+class OptimizedProductService {
+  constructor(database, cache) {
+    this.db = database;
+    this.cache = cache || Redis.createClient();
+  }
+
+  // ✅ Multi-level caching strategy
+  async getProductStats(productId) {
+    const cacheKey = `product:stats:${productId}`;
+
+    // Level 1: Memory cache check
+    let stats = this.memoryCache.get(cacheKey);
+    if (stats) {
+      return stats;
+    }
+
+    // Level 2: Redis cache check
+    const cached = await this.cache.get(cacheKey);
+    if (cached) {
+      stats = JSON.parse(cached);
+      this.memoryCache.set(cacheKey, stats, 300); // 5 min memory cache
+      return stats;
+    }
+
+    // Level 3: Database query
+    stats = await this.fetchProductStatsFromDB(productId);
+
+    // Cache the result
+    await this.cache.setex(cacheKey, 3600, JSON.stringify(stats)); // 1 hour Redis cache
+    this.memoryCache.set(cacheKey, stats, 300); // 5 min memory cache
+
+    return stats;
+  }
+
+  // ✅ Cache invalidation on updates
+  async updateProduct(productId, updates) {
+    await this.db.query("UPDATE products SET ? WHERE id = ?", [
+      updates,
+      productId,
+    ]);
+
+    // Invalidate related caches
+    await this.cache.del(`product:stats:${productId}`);
+    await this.cache.del(`product:${productId}`);
+    this.memoryCache.delete(`product:stats:${productId}`);
+  }
+}
+```
+
+## 📊 Performance Benchmarks
+
+### Before Optimization
+
+```
+Operation                    | Time    | Queries | Memory
+---------------------------- | ------- | ------- | -------
+getProductsWithReviews(100)  | 2.3s    | 601     | 45MB
+searchProducts("laptop")     | 450ms   | 1       | 12MB
+getPopularProducts()         | 890ms   | 1       | 67MB
+getProductStats(123)         | 180ms   | 4       | 2MB
+```
+
+### After Optimization
+
+```
+Operation                    | Time    | Queries | Memory  | Improvement
+---------------------------- | ------- | ------- | ------- | -----------
+getProductsWithReviews(100)  | 45ms    | 1       | 8MB     | 98% faster
+searchProducts("laptop")     | 12ms    | 1       | 1MB     | 97% faster
+getPopularProducts(20)       | 35ms    | 2       | 2MB     | 96% faster
+getProductStats(123)         | 8ms     | 1       | 0.5MB   | 95% faster
+```
+
+### Load Testing Results
+
+```
+Concurrent Users: 1000
+Test Duration: 5 minutes
+
+Before Optimization:
+├─ Average Response Time: 1.2s
+├─ 95th Percentile: 3.5s
+├─ Requests/sec: 120
+├─ Error Rate: 15%
+└─ CPU Usage: 85%
+
+After Optimization:
+├─ Average Response Time: 85ms
+├─ 95th Percentile: 150ms
+├─ Requests/sec: 2,400
+├─ Error Rate: 0.1%
+└─ CPU Usage: 25%
+
+Improvement:
+├─ 14x faster response time
+├─ 20x higher throughput
+├─ 150x fewer errors
+└─ 70% less CPU usage
+```
+
+## 🔧 Algorithm Optimization Examples
+
+### Array Processing Optimization
+
+```javascript
+// 🐌 Inefficient: Multiple array iterations
+function processProducts(products) {
+  // O(n) - Filter active products
+  const activeProducts = products.filter((p) => p.status === "active");
+
+  // O(n) - Add discounted prices
+  const withDiscounts = activeProducts.map((p) => ({
+    ...p,
+    discountedPrice: p.price * 0.9,
+  }));
+
+  // O(n) - Sort by price
+  const sorted = withDiscounts.sort(
+    (a, b) => a.discountedPrice - b.discountedPrice,
+  );
+
+  // O(n) - Take first 10
+  return sorted.slice(0, 10);
+}
+
+// ✅ Optimized: Single iteration with early termination
+function processProductsOptimized(products) {
+  const result = [];
+
+  // O(n) but with early termination
+  for (const product of products) {
+    if (product.status !== "active") continue;
+
+    const processedProduct = {
+      ...product,
+      discountedPrice: product.price * 0.9,
+    };
+
+    // Insert in sorted position (for small arrays, faster than full sort)
+    insertSorted(
+      result,
+      processedProduct,
+      (a, b) => a.discountedPrice - b.discountedPrice,
+    );
+
+    // Early termination once we have enough results
+    if (result.length > 10) {
+      result.pop(); // Remove the most expensive item
+    }
+  }
+
+  return result;
+}
+
+function insertSorted(array, item, compareFn) {
+  if (array.length === 0) {
+    array.push(item);
+    return;
+  }
+
+  // Binary search for insertion point
+  let left = 0;
+  let right = array.length;
+
+  while (left < right) {
+    const mid = Math.floor((left + right) / 2);
+    if (compareFn(array[mid], item) <= 0) {
+      left = mid + 1;
+    } else {
+      right = mid;
+    }
+  }
+
+  array.splice(left, 0, item);
+}
+
+// Performance improvement: 4x faster for large datasets
+```
+
+### Memory-Efficient Data Processing
+
+```javascript
+// 🐌 Memory inefficient: Creates multiple intermediate arrays
+function processLargeDataset(data) {
+  return data
+    .filter((item) => item.isValid) // Creates copy 1
+    .map((item) => transformItem(item)) // Creates copy 2
+    .filter((item) => item.score > 0.5) // Creates copy 3
+    .sort((a, b) => b.score - a.score) // Modifies copy 3
+    .slice(0, 100); // Creates copy 4
+}
+
+// ✅ Memory efficient: Generator-based streaming
+function* processLargeDatasetStream(data) {
+  const results = [];
+
+  for (const item of data) {
+    if (!item.isValid) continue;
+
+    const transformed = transformItem(item);
+    if (transformed.score <= 0.5) continue;
+
+    // Insert in sorted position
+    insertSorted(results, transformed, (a, b) => b.score - a.score);
+
+    // Keep only top 100
+    if (results.length > 100) {
+      results.pop();
+    }
+  }
+
+  yield* results;
+}
+
+// Usage: Memory usage reduced by 80%
+const results = Array.from(processLargeDatasetStream(largeDataset));
+```
+
+## 🌐 Network Optimization
+
+### API Request Batching
+
+```javascript
+// 🐌 Individual API requests
+class UserService {
+  async getUsersWithProfiles(userIds) {
+    const users = [];
+
+    for (const id of userIds) {
+      const user = await fetch(`/api/users/${id}`);
+      const profile = await fetch(`/api/profiles/${id}`);
+
+      users.push({
+        ...(await user.json()),
+        profile: await profile.json(),
+      });
+    }
+
+    return users;
+  }
+}
+
+// ✅ Batched requests with concurrency control
+class OptimizedUserService {
+  async getUsersWithProfiles(userIds) {
+    // Batch API requests
+    const batchSize = 10;
+    const batches = this.chunk(userIds, batchSize);
+
+    const allResults = [];
+
+    for (const batch of batches) {
+      // Parallel requests within batch
+      const [users, profiles] = await Promise.all([
+        this.batchFetchUsers(batch),
+        this.batchFetchProfiles(batch),
+      ]);
+
+      // Combine results
+      const combined = users.map((user) => ({
+        ...user,
+        profile: profiles.find((p) => p.userId === user.id),
+      }));
+
+      allResults.push(...combined);
+    }
+
+    return allResults;
+  }
+
+  async batchFetchUsers(ids) {
+    const response = await fetch("/api/users/batch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids }),
+    });
+
+    return response.json();
+  }
+
+  chunk(array, size) {
+    const chunks = [];
+    for (let i = 0; i < array.length; i += size) {
+      chunks.push(array.slice(i, i + size));
+    }
+    return chunks;
+  }
+}
+
+// Performance improvement: 10x faster for 100 users
+```
+
+### Request Deduplication
+
+```javascript
+// ✅ Request deduplication to prevent duplicate API calls
+class RequestCache {
+  constructor() {
+    this.cache = new Map();
+    this.pendingRequests = new Map();
+  }
+
+  async get(url, options = {}) {
+    const key = this.generateKey(url, options);
+
+    // Return cached result
+    if (this.cache.has(key)) {
+      return this.cache.get(key);
+    }
+
+    // Join existing request if in progress
+    if (this.pendingRequests.has(key)) {
+      return this.pendingRequests.get(key);
+    }
+
+    // Create new request
+    const request = this.fetchWithRetry(url, options)
+      .then((result) => {
+        this.cache.set(key, result);
+        this.pendingRequests.delete(key);
+
+        // Auto-expire cache
+        setTimeout(() => this.cache.delete(key), options.ttl || 300000);
+
+        return result;
+      })
+      .catch((error) => {
+        this.pendingRequests.delete(key);
+        throw error;
+      });
+
+    this.pendingRequests.set(key, request);
+    return request;
+  }
+
+  generateKey(url, options) {
+    return `${url}:${JSON.stringify(options.params || {})}`;
+  }
+
+  async fetchWithRetry(url, options, retries = 3) {
+    for (let i = 0; i <= retries; i++) {
+      try {
+        const response = await fetch(url, options);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return await response.json();
+      } catch (error) {
+        if (i === retries) throw error;
+        await this.delay(Math.pow(2, i) * 1000); // Exponential backoff
+      }
+    }
+  }
+
+  delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+}
+
+const apiCache = new RequestCache();
+
+// Usage: Automatic deduplication and caching
+const users = await apiCache.get("/api/users/123");
+```
+
+## 📱 Bundle Size Optimization
+
+### Code Splitting and Lazy Loading
+
+```javascript
+// 🐌 Large bundle: Everything loaded upfront
+import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import HomePage from "./pages/HomePage";
+import ProductsPage from "./pages/ProductsPage";
+import UserProfilePage from "./pages/UserProfilePage";
+import AdminDashboard from "./pages/AdminDashboard";
+import ReportsPage from "./pages/ReportsPage";
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/products" element={<ProductsPage />} />
+        <Route path="/profile" element={<UserProfilePage />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/reports" element={<ReportsPage />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+// ✅ Optimized: Lazy loading with code splitting
+import React, { Suspense } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+// Critical components loaded immediately
+import HomePage from "./pages/HomePage";
+
+// Non-critical components lazy loaded
+const ProductsPage = React.lazy(() => import("./pages/ProductsPage"));
+const UserProfilePage = React.lazy(() => import("./pages/UserProfilePage"));
+const AdminDashboard = React.lazy(() => import("./pages/AdminDashboard"));
+const ReportsPage = React.lazy(() => import("./pages/ReportsPage"));
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Suspense fallback={<div className="loading">Loading...</div>}>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/products" element={<ProductsPage />} />
+          <Route path="/profile" element={<UserProfilePage />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/reports" element={<ReportsPage />} />
+        </Routes>
+      </Suspense>
+    </BrowserRouter>
+  );
+}
+
+// Bundle size reduction: 60% smaller initial bundle
+```
+
+### Tree Shaking Optimization
+
+```javascript
+// 🐌 Imports entire lodash library
+import _ from "lodash";
+
+const users = _.uniqBy(userList, "id");
+const sorted = _.sortBy(products, "name");
+
+// ✅ Optimized: Import only needed functions
+import uniqBy from "lodash/uniqBy";
+import sortBy from "lodash/sortBy";
+
+const users = uniqBy(userList, "id");
+const sorted = sortBy(products, "name");
+
+// Even better: Use native methods where possible
+const users = userList.filter(
+  (user, index, array) => array.findIndex((u) => u.id === user.id) === index,
+);
+const sorted = products.sort((a, b) => a.name.localeCompare(b.name));
+
+// Bundle size reduction: 95% smaller (from 70KB to 3KB)
+```
+
+## 🎯 Optimization Checklist
+
+### ✅ Database Optimization
+
+- [ ] Identify and fix N+1 query problems
+- [ ] Add appropriate indexes for frequent queries
+- [ ] Implement query result caching
+- [ ] Use pagination for large datasets
+- [ ] Optimize JOIN operations and subqueries
+- [ ] Monitor slow query logs
+
+### ✅ Memory Optimization
+
+- [ ] Identify memory leaks with profiling tools
+- [ ] Implement object pooling for frequent allocations
+- [ ] Use streaming for large data processing
+- [ ] Optimize data structures and algorithms
+- [ ] Implement garbage collection tuning
+
+### ✅ Network Optimization
+
+- [ ] Implement request batching and deduplication
+- [ ] Add compression (gzip/brotli)
+- [ ] Use CDN for static assets
+- [ ] Implement HTTP/2 server push
+- [ ] Optimize API response sizes
+- [ ] Add retry logic with exponential backoff
+
+### ✅ Frontend Optimization
+
+- [ ] Implement code splitting and lazy loading
+- [ ] Optimize bundle sizes with tree shaking
+- [ ] Use service workers for caching
+- [ ] Implement virtual scrolling for large lists
+- [ ] Optimize images and assets
+- [ ] Minimize render cycles with memoization
+
+This optimization guide demonstrates systematic performance improvement with measurable results and best practices across all layers of the application stack.
+```javascript
+// Unoptimized code with multiple performance issues
+class ProductService {
+  constructor(database) {
+    this.db = database;
+  }
+
+  // 🐌 Issue 1: N+1 Query Problem
+  async getProductsWithReviews() {
+    const products = await this.db.query("SELECT * FROM products");
+
+    for (const product of products) {
+      // 🐌 Executes N queries (one per product)
+      product.reviews = await this.db.query(
+        "SELECT * FROM reviews WHERE product_id = ?",
+        [product.id],
+      );
+
+      // 🐌 Issue 2: Another N queries for user data
+      for (const review of product.reviews) {
+        review.user = await this.db.query(
+          "SELECT name, avatar FROM users WHERE id = ?",
+          [review.user_id],
+        );
+      }
+    }
+
+    return products;
+  }
+
+  // 🐌 Issue 3: Inefficient search without indexes
+  async searchProducts(searchTerm) {
+    return await this.db.query(`
+      SELECT * FROM products 
+      WHERE LOWER(name) LIKE LOWER('%${searchTerm}%') 
+         OR LOWER(description) LIKE LOWER('%${searchTerm}%')
+      ORDER BY name
+    `);
+  }
+
+  // 🐌 Issue 4: No pagination, loads all data
+  async getPopularProducts() {
+    return await this.db.query(`
+      SELECT p.*, COUNT(r.id) as review_count,
+             AVG(r.rating) as avg_rating
+      FROM products p
+      LEFT JOIN reviews r ON p.id = r.product_id
+      GROUP BY p.id
+      ORDER BY review_count DESC, avg_rating DESC
+    `);
+  }
+
+  // 🐌 Issue 5: Expensive aggregation on every call
+  async getProductStats(productId) {
+    const product = await this.db.query("SELECT * FROM products WHERE id = ?", [
+      productId,
+    ]);
+
+    const reviewCount = await this.db.query(
+      "SELECT COUNT(*) as count FROM reviews WHERE product_id = ?",
+      [productId],
+    );
+
+    const avgRating = await this.db.query(
+      "SELECT AVG(rating) as avg FROM reviews WHERE product_id = ?",
+      [productId],
+    );
+
+    const recentReviews = await this.db.query(
+      "SELECT * FROM reviews WHERE product_id = ? ORDER BY created_at DESC LIMIT 5",
+      [productId],
+    );
+
+    return {
+      ...product[0],
+      reviewCount: reviewCount[0].count,
+      avgRating: avgRating[0].avg,
+      recentReviews,
+    };
+  }
+}
+```
+```markdown
+# 🚀 Performance Optimization Report
+
+## 📊 Performance Issues Identified
+
+### Issue 1: N+1 Query Problem (Critical)
+
+**Location:** `getProductsWithReviews()` method
+**Impact:** 🔴 Severe - O(n²) database queries
+**Current Performance:** 1,000 products = 2,001 queries
+**Estimated Fix Impact:** 99.5% query reduction
+
+**Problem Analysis:**
+```
+```text
+**Optimized Solution:**
+```
+```text
+### Issue 2: Missing Database Indexes (High)
+
+**Location:** `searchProducts()` method
+**Impact:** 🟡 High - Full table scans on every search
+**Current Performance:** O(n) scan of entire products table
+**Estimated Fix Impact:** 10-100x search speed improvement
+
+**Index Recommendations:**
+```
+```text
+**Optimized Search Query:**
+```
+```text
+### Issue 3: Missing Pagination (Medium)
+
+**Location:** `getPopularProducts()` method
+**Impact:** 🟡 Medium - Memory and bandwidth waste
+**Current Performance:** Loads entire dataset regardless of need
+**Estimated Fix Impact:** 80% memory reduction, faster response times
+
+**Optimized with Pagination:**
+```
+```text
+### Issue 4: Redundant Aggregation Queries (Medium)
+
+**Location:** `getProductStats()` method
+**Impact:** 🟡 Medium - Multiple unnecessary database roundtrips
+**Current Performance:** 4 separate queries per call
+**Estimated Fix Impact:** 75% query reduction
+
+**Optimized Single Query:**
+```
+```text
+## 🧠 Caching Strategy Implementation
+```
+```text
+## 📊 Performance Benchmarks
+
+### Before Optimization
+```
+```text
+### After Optimization
+```
+```text
+### Load Testing Results
+```
+```text
+## 🔧 Algorithm Optimization Examples
+
+### Array Processing Optimization
+```
+```text
+### Memory-Efficient Data Processing
+```
+```text
+## 🌐 Network Optimization
+
+### API Request Batching
+```
+```text
+### Request Deduplication
+```
+```text
+## 📱 Bundle Size Optimization
+
+### Code Splitting and Lazy Loading
+```
+```text
+### Tree Shaking Optimization
+```

@@ -1,0 +1,254 @@
+{
+  "schemaVersion": 1,
+  "key": "collections:developer-productivity-booster",
+  "entry": {
+    "category": "collections",
+    "slug": "developer-productivity-booster",
+    "title": "Productivity Booster",
+    "description": "Maximize your development efficiency with automated workflows, smart backups, code formatting, and enhanced visual feedback. This collection combines productivity hooks, informative statuslines, and time-saving commands for a streamlined development experience.",
+    "seoTitle": "Productivity Booster",
+    "seoDescription": "Maximize your development efficiency with automated workflows, smart backups, code formatting, and enhanced visual feedback. This collection combines product...",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2025-10-02",
+    "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+    "tags": [
+      "productivity",
+      "automation",
+      "workflow",
+      "efficiency",
+      "developer-tools"
+    ],
+    "keywords": [
+      "automation",
+      "booster",
+      "claude",
+      "collections",
+      "developer",
+      "developer-tools",
+      "development",
+      "efficiency",
+      "productivity",
+      "tools",
+      "workflow",
+      "heyclaude"
+    ],
+    "readingTime": 1,
+    "difficultyScore": 0,
+    "cardDescription": "Maximize your development efficiency with automated workflows, smart backups, code formatting, and enhanced visual feedback.",
+    "installable": false,
+    "usageSnippet": "Start with `auto-code-formatter-hook` → `auto-save-backup` → `git-status-statusline`",
+    "items": [
+      {
+        "slug": "auto-code-formatter-hook",
+        "category": "hooks"
+      },
+      {
+        "slug": "auto-save-backup",
+        "category": "hooks"
+      },
+      {
+        "slug": "git-status-statusline",
+        "category": "statuslines"
+      },
+      {
+        "slug": "session-timer-statusline",
+        "category": "statuslines"
+      },
+      {
+        "slug": "docs",
+        "category": "commands"
+      },
+      {
+        "slug": "git-smart-commit",
+        "category": "commands"
+      }
+    ],
+    "installationOrder": [
+      "auto-code-formatter-hook",
+      "auto-save-backup",
+      "git-status-statusline",
+      "session-timer-statusline",
+      "docs",
+      "git-smart-commit"
+    ],
+    "estimatedSetupTime": "15 minutes",
+    "difficulty": "beginner",
+    "prerequisites": [
+      "Git repository initialized",
+      "Code formatter (Prettier, Black, etc.) installed",
+      "Basic git workflow knowledge"
+    ],
+    "hasPrerequisites": true,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "Maximize your development efficiency with automated workflows, smart backups, code formatting, and enhanced visual feedback. This collection combines productivity hooks, informative statuslines, and time-saving commands for a streamlined development experience.\n\n## Features\n\n- Automated code formatting on save\n- Automatic backup and session management\n- Enhanced visual statusline with git info\n- Time-saving documentation commands\n\n## Use Cases\n\n- Setting up a productive development environment\n- Reducing manual repetitive tasks\n- Improving code consistency across team\n- Preventing work loss with automatic backups\n\n## TL;DR\n\nA productivity-focused collection of shortcuts, snippets, automation scripts, and workflow optimizations. Supercharge your development velocity with Claude-powered efficiency tools.\n\n- Code snippets and templates for common patterns\n- Keyboard shortcuts and IDE productivity tips\n- Git workflows and automation scripts\n- Project scaffolding and boilerplate generators\n\nEliminate repetitive tasks and speed up your workflow with this collection of productivity tools, snippets, and automation scripts designed to maximize developer efficiency with Claude.\n\n## Collection Overview\n\n**Collection Type:** Productivity Tools\n**Focus Area:** Developer Efficiency\n**Skill Level:** All Levels\n**Time Saving:** 30-50% reduction in repetitive tasks\n\n## What's Included\n\n## Collection Contents\n\nTools for accelerated development\n\n- **Code Templates** (Snippets): VS Code, Cursor, and Windsurf snippets for React, TypeScript, Python, and more.\n- **Workflow Scripts** (Automation): Shell scripts, git aliases, and automation for common development tasks with Claude.\n- **Project Generators** (Scaffolding): Boilerplate generators for new projects, components, and microservices with best practices.\n- **IDE Optimization** (Shortcuts): Keyboard shortcuts, workspace configs, and IDE extensions for maximum productivity.\n\n## Quick Start\n\nInstall the snippets and shortcuts first for immediate productivity gains. Then add automation scripts and generators to eliminate repetitive tasks.\n\n## Prerequisites\n\n- Git repository initialized\n- Code formatter (Prettier, Black, etc.) installed\n- Basic git workflow knowledge\n\n## Recommended Order\n\n1. `auto-code-formatter-hook`\n2. `auto-save-backup`\n3. `git-status-statusline`\n4. `session-timer-statusline`\n5. `docs`\n6. `git-smart-commit`\n\n## Troubleshooting\n\n### Auto-formatter hook conflicts with git-smart-commit command\n\nInstall auto-code-formatter-hook before git-smart-commit. Configure formatter exclusions in .prettierignore or similar. Ensure both use same formatter version to prevent conflicting reformats.\n\n### Statuslines not displaying after installing all hooks first\n\nInstall hooks first, then statuslines, then commands per installationOrder. Restart Claude Code after installing statuslines. Check View > Statusline is enabled in preferences.\n\n### Auto-save-backup interferes with git-status-statusline updates\n\nConfigure auto-save-backup to ignore .git directory. Add .git/\\*\\* to backup exclusions. Ensure git-status-statusline polling interval allows backup completion between updates.\n\n### Missing code formatter binary prevents hook from executing\n\nInstall formatter globally: npm install -g prettier or pip install black. Verify formatter command available in PATH: which prettier. Then reinstall auto-code-formatter-hook.\n\n### Session timer statusline conflicts with git status display\n\nBoth statuslines can coexist. Configure statusline layout in Claude Code settings: place session-timer-statusline on left, git-status-statusline on right. Restart after configuration change.",
+    "sections": [
+      {
+        "title": "Overview",
+        "id": "overview",
+        "markdown": "Maximize your development efficiency with automated workflows, smart backups, code formatting, and enhanced visual feedback. This collection combines productivity hooks, informative statuslines, and time-saving commands for a streamlined development experience.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Automated code formatting on save\n- Automatic backup and session management\n- Enhanced visual statusline with git info\n- Time-saving documentation commands",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Setting up a productive development environment\n- Reducing manual repetitive tasks\n- Improving code consistency across team\n- Preventing work loss with automatic backups",
+        "codeBlocks": []
+      },
+      {
+        "title": "TL;DR",
+        "id": "tldr",
+        "markdown": "A productivity-focused collection of shortcuts, snippets, automation scripts, and workflow optimizations. Supercharge your development velocity with Claude-powered efficiency tools.\n\n- Code snippets and templates for common patterns\n- Keyboard shortcuts and IDE productivity tips\n- Git workflows and automation scripts\n- Project scaffolding and boilerplate generators\n\nEliminate repetitive tasks and speed up your workflow with this collection of productivity tools, snippets, and automation scripts designed to maximize developer efficiency with Claude.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Collection Overview",
+        "id": "collection-overview",
+        "markdown": "**Collection Type:** Productivity Tools\n**Focus Area:** Developer Efficiency\n**Skill Level:** All Levels\n**Time Saving:** 30-50% reduction in repetitive tasks",
+        "codeBlocks": []
+      },
+      {
+        "title": "Collection Contents",
+        "id": "collection-contents",
+        "markdown": "Tools for accelerated development\n\n- **Code Templates** (Snippets): VS Code, Cursor, and Windsurf snippets for React, TypeScript, Python, and more.\n- **Workflow Scripts** (Automation): Shell scripts, git aliases, and automation for common development tasks with Claude.\n- **Project Generators** (Scaffolding): Boilerplate generators for new projects, components, and microservices with best practices.\n- **IDE Optimization** (Shortcuts): Keyboard shortcuts, workspace configs, and IDE extensions for maximum productivity.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Quick Start",
+        "id": "quick-start",
+        "markdown": "Install the snippets and shortcuts first for immediate productivity gains. Then add automation scripts and generators to eliminate repetitive tasks.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Prerequisites",
+        "id": "prerequisites",
+        "markdown": "- Git repository initialized\n- Code formatter (Prettier, Black, etc.) installed\n- Basic git workflow knowledge",
+        "codeBlocks": []
+      },
+      {
+        "title": "Recommended Order",
+        "id": "recommended-order",
+        "markdown": "1. `auto-code-formatter-hook`\n2. `auto-save-backup`\n3. `git-status-statusline`\n4. `session-timer-statusline`\n5. `docs`\n6. `git-smart-commit`",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "### Auto-formatter hook conflicts with git-smart-commit command\n\nInstall auto-code-formatter-hook before git-smart-commit. Configure formatter exclusions in .prettierignore or similar. Ensure both use same formatter version to prevent conflicting reformats.\n\n### Statuslines not displaying after installing all hooks first\n\nInstall hooks first, then statuslines, then commands per installationOrder. Restart Claude Code after installing statuslines. Check View > Statusline is enabled in preferences.\n\n### Auto-save-backup interferes with git-status-statusline updates\n\nConfigure auto-save-backup to ignore .git directory. Add .git/\\*\\* to backup exclusions. Ensure git-status-statusline polling interval allows backup completion between updates.\n\n### Missing code formatter binary prevents hook from executing\n\nInstall formatter globally: npm install -g prettier or pip install black. Verify formatter command available in PATH: which prettier. Then reinstall auto-code-formatter-hook.\n\n### Session timer statusline conflicts with git status display\n\nBoth statuslines can coexist. Configure statusline layout in Claude Code settings: place session-timer-statusline on left, git-status-statusline on right. Restart after configuration change.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      },
+      {
+        "depth": 2,
+        "text": "TL;DR",
+        "id": "tldr"
+      },
+      {
+        "depth": 2,
+        "text": "Collection Overview",
+        "id": "collection-overview"
+      },
+      {
+        "depth": 2,
+        "text": "What's Included",
+        "id": "whats-included"
+      },
+      {
+        "depth": 2,
+        "text": "Collection Contents",
+        "id": "collection-contents"
+      },
+      {
+        "depth": 2,
+        "text": "Quick Start",
+        "id": "quick-start"
+      },
+      {
+        "depth": 2,
+        "text": "Prerequisites",
+        "id": "prerequisites"
+      },
+      {
+        "depth": 2,
+        "text": "Recommended Order",
+        "id": "recommended-order"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 3,
+        "text": "Auto-formatter hook conflicts with git-smart-commit command",
+        "id": "auto-formatter-hook-conflicts-with-git-smart-commit-command"
+      },
+      {
+        "depth": 3,
+        "text": "Statuslines not displaying after installing all hooks first",
+        "id": "statuslines-not-displaying-after-installing-all-hooks-first"
+      },
+      {
+        "depth": 3,
+        "text": "Auto-save-backup interferes with git-status-statusline updates",
+        "id": "auto-save-backup-interferes-with-git-status-statusline-updates"
+      },
+      {
+        "depth": 3,
+        "text": "Missing code formatter binary prevents hook from executing",
+        "id": "missing-code-formatter-binary-prevents-hook-from-executing"
+      },
+      {
+        "depth": 3,
+        "text": "Session timer statusline conflicts with git status display",
+        "id": "session-timer-statusline-conflicts-with-git-status-display"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/collections/developer-productivity-booster.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/developer-productivity-booster.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 1,
+    "sourceUrls": [
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/developer-productivity-booster.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

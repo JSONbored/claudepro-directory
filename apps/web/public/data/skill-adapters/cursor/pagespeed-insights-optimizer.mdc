@@ -1,0 +1,14 @@
+---
+description: "Improve PSI/Lighthouse scores with a strict workflow for LCP, render-blocking resources, and unused JS/CSS while preserving design and behavior."
+globs:
+alwaysApply: false
+---
+# PageSpeed Insights Optimization Skill for AI Agents
+Structured optimization workflow for PageSpeed Insights and Lighthouse that improves Core Web Vitals without changing UI/UX.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/pagespeed-insights-optimizer.zip -o pagespeed-insights-optimizer.zip && unzip -o pagespeed-insights-optimizer.zip -d ./pagespeed-insights-optimizer
+```
+## Source
+https://heyclau.de/downloads/skills/pagespeed-insights-optimizer.zip

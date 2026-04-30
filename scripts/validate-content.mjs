@@ -9,8 +9,8 @@ import {
   inferSectionBooleans,
   inferStructuredFields,
   normalizeBody,
-  validateEntry
-} from "./content-schema.mjs";
+  validateEntry,
+} from "@heyclaude/registry/content-schema";
 
 const repoRoot = process.cwd();
 const contentRoot = path.join(repoRoot, "content");
@@ -33,7 +33,11 @@ for (const category of Object.keys(CATEGORY_SCHEMAS)) {
     const source = fs.readFileSync(filePath, "utf8");
     const parsed = matter(source);
     const normalizedBody = normalizeBody(parsed.content, category);
-    const inferred = inferStructuredFields(parsed.data, normalizedBody, category);
+    const inferred = inferStructuredFields(
+      parsed.data,
+      normalizedBody,
+      category,
+    );
     const validation = validateEntry(category, parsed.data, inferred);
     const sectionFlags = inferSectionBooleans(normalizedBody);
 
@@ -43,9 +47,17 @@ for (const category of Object.keys(CATEGORY_SCHEMAS)) {
       failures.push(`${entry}: metadata-only content is not allowed`);
     }
 
+    if (/claudepro\.directory|Claude Pro Directory/i.test(source)) {
+      failures.push(`${entry}: old brand/domain references are not allowed`);
+    }
+
+    if (/\[Script content from first example\]/.test(source)) {
+      failures.push(`${entry}: placeholder script marker is not allowed`);
+    }
+
     if (validation.missingRequired.length > 0) {
       failures.push(
-        `${entry}: missing required fields -> ${validation.missingRequired.join(", ")}`
+        `${entry}: missing required fields -> ${validation.missingRequired.join(", ")}`,
       );
     }
 
@@ -72,9 +84,12 @@ for (const category of Object.keys(CATEGORY_SCHEMAS)) {
       }
     }
 
-    if (parsed.data.category && String(parsed.data.category).trim() !== category) {
+    if (
+      parsed.data.category &&
+      String(parsed.data.category).trim() !== category
+    ) {
       failures.push(
-        `${entry}: category mismatch (frontmatter="${String(parsed.data.category).trim()}" folder="${category}")`
+        `${entry}: category mismatch (frontmatter="${String(parsed.data.category).trim()}" folder="${category}")`,
       );
     }
 
@@ -94,12 +109,22 @@ for (const category of Object.keys(CATEGORY_SCHEMAS)) {
       failures.push(`${entry}: collections must not include copySnippet`);
     }
 
-    if (parsed.data.hasPrerequisites === false && sectionFlags.hasPrerequisites) {
-      failures.push(`${entry}: hasPrerequisites=false but Prerequisites section exists`);
+    if (
+      parsed.data.hasPrerequisites === false &&
+      sectionFlags.hasPrerequisites
+    ) {
+      failures.push(
+        `${entry}: hasPrerequisites=false but Prerequisites section exists`,
+      );
     }
 
-    if (parsed.data.hasTroubleshooting === false && sectionFlags.hasTroubleshooting) {
-      failures.push(`${entry}: hasTroubleshooting=false but Troubleshooting section exists`);
+    if (
+      parsed.data.hasTroubleshooting === false &&
+      sectionFlags.hasTroubleshooting
+    ) {
+      failures.push(
+        `${entry}: hasTroubleshooting=false but Troubleshooting section exists`,
+      );
     }
 
     const downloadUrl = String(parsed.data.downloadUrl ?? "").trim();
@@ -112,12 +137,16 @@ for (const category of Object.keys(CATEGORY_SCHEMAS)) {
         failures.push(`${entry}: mcp downloadUrl must end with .mcpb`);
       }
       if (localDownload && parsed.data.packageVerified !== true) {
-        failures.push(`${entry}: local /downloads package must set packageVerified: true`);
+        failures.push(
+          `${entry}: local /downloads package must set packageVerified: true`,
+        );
       }
     }
 
     if (category === "skills") {
-      const skillType = String(parsed.data.skillType ?? inferred.skillType ?? "")
+      const skillType = String(
+        parsed.data.skillType ?? inferred.skillType ?? "",
+      )
         .trim()
         .toLowerCase();
       const retrievalSources = Array.isArray(parsed.data.retrievalSources)
@@ -128,7 +157,9 @@ for (const category of Object.keys(CATEGORY_SCHEMAS)) {
 
       for (const url of retrievalSources) {
         if (!/^https:\/\//i.test(url)) {
-          failures.push(`${entry}: retrievalSources must use https URLs -> ${url}`);
+          failures.push(
+            `${entry}: retrievalSources must use https URLs -> ${url}`,
+          );
         }
       }
 
@@ -138,11 +169,13 @@ for (const category of Object.keys(CATEGORY_SCHEMAS)) {
           "## Retrieval Sources",
           "## Core Workflow",
           "## Capability Scope",
-          "## Production Rules"
+          "## Production Rules",
         ];
         for (const heading of requiredSections) {
           if (!normalizedBody.includes(heading)) {
-            failures.push(`${entry}: capability-pack missing section -> ${heading}`);
+            failures.push(
+              `${entry}: capability-pack missing section -> ${heading}`,
+            );
           }
         }
       }

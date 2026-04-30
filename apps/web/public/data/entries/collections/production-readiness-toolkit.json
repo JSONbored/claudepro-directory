@@ -1,0 +1,256 @@
+{
+  "schemaVersion": 1,
+  "key": "collections:production-readiness-toolkit",
+  "entry": {
+    "category": "collections",
+    "slug": "production-readiness-toolkit",
+    "title": "Production Toolkit",
+    "description": "Comprehensive system for ensuring code quality, security, and compliance before production deployment. Includes automated code reviews, complexity monitoring, backup strategies, and production-grade rules for professional development teams.",
+    "seoTitle": "Production Toolkit",
+    "seoDescription": "Comprehensive system for ensuring code quality, security, and compliance before production deployment. Includes automated code reviews, complexity monitoring...",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2025-10-02",
+    "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+    "tags": [
+      "production",
+      "code-quality",
+      "security",
+      "compliance",
+      "deployment",
+      "best-practices"
+    ],
+    "keywords": [
+      "best-practices",
+      "claude",
+      "code-quality",
+      "collections",
+      "compliance",
+      "deployment",
+      "development",
+      "production",
+      "readiness",
+      "security",
+      "toolkit",
+      "tools"
+    ],
+    "readingTime": 1,
+    "difficultyScore": 0,
+    "cardDescription": "Comprehensive system for ensuring code quality, security, and compliance before production deployment.",
+    "installable": false,
+    "usageSnippet": "Start with `production-codebase-auditor` → `code-review-expert` → `code-complexity-alert-monitor`",
+    "items": [
+      {
+        "slug": "production-codebase-auditor",
+        "category": "rules"
+      },
+      {
+        "slug": "code-review-expert",
+        "category": "rules"
+      },
+      {
+        "slug": "code-complexity-alert-monitor",
+        "category": "hooks"
+      },
+      {
+        "slug": "auto-save-backup",
+        "category": "hooks"
+      },
+      {
+        "slug": "code-reviewer-agent",
+        "category": "agents"
+      },
+      {
+        "slug": "generate-tests",
+        "category": "commands"
+      }
+    ],
+    "installationOrder": [
+      "production-codebase-auditor",
+      "code-review-expert",
+      "code-complexity-alert-monitor",
+      "auto-save-backup",
+      "code-reviewer-agent",
+      "generate-tests"
+    ],
+    "estimatedSetupTime": "45 minutes",
+    "difficulty": "advanced",
+    "prerequisites": [
+      "Existing codebase with CI/CD pipeline",
+      "Understanding of production deployment processes",
+      "Team buy-in for code quality standards",
+      "Access to version control system"
+    ],
+    "hasPrerequisites": true,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "Comprehensive system for ensuring code quality, security, and compliance before production deployment. Includes automated code reviews, complexity monitoring, backup strategies, and production-grade rules for professional development teams.\n\n## Features\n\n- Automated code review and complexity monitoring\n- Production-grade codebase auditing\n- Automatic backup and safety hooks\n- Security and compliance checking\n\n## Use Cases\n\n- Preparing code for production deployment\n- Implementing team code quality standards\n- Preventing production bugs and security issues\n- Enterprise-grade development workflows\n\n## TL;DR\n\nA comprehensive production readiness checklist with deployment workflows, monitoring setup, security hardening, and incident response playbooks. Ship confidently with battle-tested patterns.\n\n- Production deployment checklists and automation\n- Monitoring, alerting, and observability stack\n- Security hardening and compliance verification\n- Incident response and disaster recovery plans\n\nEnsure your applications are production-ready with this collection of deployment workflows, monitoring configurations, security checklists, and operational runbooks powered by Claude.\n\n## Collection Overview\n\n**Collection Type:** Operations & DevOps\n**Focus Area:** Production Deployment\n**Skill Level:** Intermediate to Advanced\n**Time Saving:** 50-70% reduction in deployment preparation time\n\n## What's Included\n\n## Collection Contents\n\nEverything needed for production deployment\n\n- **Release Automation** (Deployment): CI/CD pipelines, blue-green deployments, and rollback strategies with Claude-assisted testing.\n- **Observability** (Monitoring): Prometheus, Grafana, and APM configurations with custom dashboards and alert rules.\n- **Hardening Checklist** (Security): OWASP top 10 mitigations, dependency scanning, secrets management, and security audits.\n- **Response Playbooks** (Incident): On-call runbooks, incident response procedures, and disaster recovery with Claude assistance.\n\n## Quick Start\n\nWork through the production readiness checklist systematically. Start with security and monitoring, then add deployment automation and incident response procedures.\n\n## Prerequisites\n\n- Existing codebase with CI/CD pipeline\n- Understanding of production deployment processes\n- Team buy-in for code quality standards\n- Access to version control system\n\n## Recommended Order\n\n1. `production-codebase-auditor`\n2. `code-review-expert`\n3. `code-complexity-alert-monitor`\n4. `auto-save-backup`\n5. `code-reviewer-agent`\n6. `generate-tests`\n\n## Troubleshooting\n\n### Code complexity monitor triggers false alerts constantly\n\nConfigure thresholds in hook settings: cyclomatic_complexity: 15, cognitive_complexity: 20. Add exceptions for generated code in .complexityignore file.\n\n### Auto-save backup conflicts with Git version control system\n\nSet backup directory outside Git repo in hook config: backup_path: '../backups'. Add backup_path to .gitignore. Schedule cleanup for backups older than 7 days.\n\n### Code reviewer agent and production auditor rules disagree\n\nProduction auditor takes precedence for deployment decisions. Use reviewer agent for development phase. Configure agent to defer to auditor rules.\n\n### Generate-tests command fails: missing test framework setup\n\nInstall test dependencies: npm install -D jest @types/jest ts-jest. Initialize config: npx jest --init. Ensure package.json has test script defined.\n\n### Collection slows down Claude responses significantly\n\nDisable hooks during development: set enabled: false for complexity monitor and backup. Re-enable before commits. Use agent/rules only for reviews.",
+    "sections": [
+      {
+        "title": "Overview",
+        "id": "overview",
+        "markdown": "Comprehensive system for ensuring code quality, security, and compliance before production deployment. Includes automated code reviews, complexity monitoring, backup strategies, and production-grade rules for professional development teams.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Automated code review and complexity monitoring\n- Production-grade codebase auditing\n- Automatic backup and safety hooks\n- Security and compliance checking",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Preparing code for production deployment\n- Implementing team code quality standards\n- Preventing production bugs and security issues\n- Enterprise-grade development workflows",
+        "codeBlocks": []
+      },
+      {
+        "title": "TL;DR",
+        "id": "tldr",
+        "markdown": "A comprehensive production readiness checklist with deployment workflows, monitoring setup, security hardening, and incident response playbooks. Ship confidently with battle-tested patterns.\n\n- Production deployment checklists and automation\n- Monitoring, alerting, and observability stack\n- Security hardening and compliance verification\n- Incident response and disaster recovery plans\n\nEnsure your applications are production-ready with this collection of deployment workflows, monitoring configurations, security checklists, and operational runbooks powered by Claude.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Collection Overview",
+        "id": "collection-overview",
+        "markdown": "**Collection Type:** Operations & DevOps\n**Focus Area:** Production Deployment\n**Skill Level:** Intermediate to Advanced\n**Time Saving:** 50-70% reduction in deployment preparation time",
+        "codeBlocks": []
+      },
+      {
+        "title": "Collection Contents",
+        "id": "collection-contents",
+        "markdown": "Everything needed for production deployment\n\n- **Release Automation** (Deployment): CI/CD pipelines, blue-green deployments, and rollback strategies with Claude-assisted testing.\n- **Observability** (Monitoring): Prometheus, Grafana, and APM configurations with custom dashboards and alert rules.\n- **Hardening Checklist** (Security): OWASP top 10 mitigations, dependency scanning, secrets management, and security audits.\n- **Response Playbooks** (Incident): On-call runbooks, incident response procedures, and disaster recovery with Claude assistance.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Quick Start",
+        "id": "quick-start",
+        "markdown": "Work through the production readiness checklist systematically. Start with security and monitoring, then add deployment automation and incident response procedures.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Prerequisites",
+        "id": "prerequisites",
+        "markdown": "- Existing codebase with CI/CD pipeline\n- Understanding of production deployment processes\n- Team buy-in for code quality standards\n- Access to version control system",
+        "codeBlocks": []
+      },
+      {
+        "title": "Recommended Order",
+        "id": "recommended-order",
+        "markdown": "1. `production-codebase-auditor`\n2. `code-review-expert`\n3. `code-complexity-alert-monitor`\n4. `auto-save-backup`\n5. `code-reviewer-agent`\n6. `generate-tests`",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "### Code complexity monitor triggers false alerts constantly\n\nConfigure thresholds in hook settings: cyclomatic_complexity: 15, cognitive_complexity: 20. Add exceptions for generated code in .complexityignore file.\n\n### Auto-save backup conflicts with Git version control system\n\nSet backup directory outside Git repo in hook config: backup_path: '../backups'. Add backup_path to .gitignore. Schedule cleanup for backups older than 7 days.\n\n### Code reviewer agent and production auditor rules disagree\n\nProduction auditor takes precedence for deployment decisions. Use reviewer agent for development phase. Configure agent to defer to auditor rules.\n\n### Generate-tests command fails: missing test framework setup\n\nInstall test dependencies: npm install -D jest @types/jest ts-jest. Initialize config: npx jest --init. Ensure package.json has test script defined.\n\n### Collection slows down Claude responses significantly\n\nDisable hooks during development: set enabled: false for complexity monitor and backup. Re-enable before commits. Use agent/rules only for reviews.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      },
+      {
+        "depth": 2,
+        "text": "TL;DR",
+        "id": "tldr"
+      },
+      {
+        "depth": 2,
+        "text": "Collection Overview",
+        "id": "collection-overview"
+      },
+      {
+        "depth": 2,
+        "text": "What's Included",
+        "id": "whats-included"
+      },
+      {
+        "depth": 2,
+        "text": "Collection Contents",
+        "id": "collection-contents"
+      },
+      {
+        "depth": 2,
+        "text": "Quick Start",
+        "id": "quick-start"
+      },
+      {
+        "depth": 2,
+        "text": "Prerequisites",
+        "id": "prerequisites"
+      },
+      {
+        "depth": 2,
+        "text": "Recommended Order",
+        "id": "recommended-order"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 3,
+        "text": "Code complexity monitor triggers false alerts constantly",
+        "id": "code-complexity-monitor-triggers-false-alerts-constantly"
+      },
+      {
+        "depth": 3,
+        "text": "Auto-save backup conflicts with Git version control system",
+        "id": "auto-save-backup-conflicts-with-git-version-control-system"
+      },
+      {
+        "depth": 3,
+        "text": "Code reviewer agent and production auditor rules disagree",
+        "id": "code-reviewer-agent-and-production-auditor-rules-disagree"
+      },
+      {
+        "depth": 3,
+        "text": "Generate-tests command fails: missing test framework setup",
+        "id": "generate-tests-command-fails-missing-test-framework-setup"
+      },
+      {
+        "depth": 3,
+        "text": "Collection slows down Claude responses significantly",
+        "id": "collection-slows-down-claude-responses-significantly"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/collections/production-readiness-toolkit.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/production-readiness-toolkit.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 1,
+    "sourceUrls": [
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/production-readiness-toolkit.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

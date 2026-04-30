@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:windsurf",
+  "category": "tools",
+  "slug": "windsurf",
+  "title": "Windsurf",
+  "author": "Windsurf",
+  "brandName": "Windsurf",
+  "brandDomain": "windsurf.com",
+  "brandIconUrl": "/api/brand-assets/icon/windsurf.com",
+  "brandAssetSource": "brandfetch",
+  "copyText": "## Editorial notes\n\nWindsurf belongs in Claude-native tool stacks where the priority is editor-native agent flow and coordinated edits.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Windsurf\n\nAgentic coding environment focused on codebase context, multi-file edits, and AI-assisted development flow.",
+  "webUrl": "https://heyclau.de/tools/windsurf",
+  "canonicalUrl": "https://heyclau.de/tools/windsurf",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/windsurf.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/windsurf",
+  "seoTitle": "Windsurf agentic coding environment",
+  "seoDescription": "Windsurf is an agentic coding environment for codebase context, multi-file edits, and AI development workflows. HeyClaude adds source links, install steps,...",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.windsurf.com"
+}

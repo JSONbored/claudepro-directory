@@ -30,8 +30,11 @@ export function NewsletterPrompt() {
     try {
       if (window.localStorage.getItem(SUBSCRIBED_KEY) === "1") return;
       if (window.sessionStorage.getItem(SHOWN_SESSION_KEY) === "1") return;
-      const dismissedUntil = Number(window.localStorage.getItem(DISMISS_KEY) ?? 0);
-      if (Number.isFinite(dismissedUntil) && dismissedUntil > Date.now()) return;
+      const dismissedUntil = Number(
+        window.localStorage.getItem(DISMISS_KEY) ?? 0,
+      );
+      if (Number.isFinite(dismissedUntil) && dismissedUntil > Date.now())
+        return;
     } catch {
       return;
     }
@@ -39,7 +42,8 @@ export function NewsletterPrompt() {
     const dwellTimer = window.setTimeout(() => setDwellReady(true), 55000);
 
     const onScroll = () => {
-      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollable =
+        document.documentElement.scrollHeight - window.innerHeight;
       if (scrollable <= 0) return;
       const progress = window.scrollY / scrollable;
       if (progress >= 0.4) setScrollReady(true);
@@ -69,7 +73,10 @@ export function NewsletterPrompt() {
   const dismiss = (persist: boolean) => {
     if (persist) {
       try {
-        window.localStorage.setItem(DISMISS_KEY, String(Date.now() + DISMISS_MS));
+        window.localStorage.setItem(
+          DISMISS_KEY,
+          String(Date.now() + DISMISS_MS),
+        );
       } catch {}
     }
     setSuppressed(true);
@@ -86,12 +93,12 @@ export function NewsletterPrompt() {
       const response = await fetch("/api/newsletter/subscribe", {
         method: "POST",
         headers: {
-          "content-type": "application/json"
+          "content-type": "application/json",
         },
         body: JSON.stringify({
           email,
-          source: "floating_prompt"
-        })
+          source: "floating_prompt",
+        }),
       });
 
       if (!response.ok) throw new Error(`subscribe failed: ${response.status}`);
@@ -116,7 +123,7 @@ export function NewsletterPrompt() {
   return (
     <aside
       className={cn(
-        "fixed bottom-4 left-4 z-[75] w-[min(26rem,calc(100vw-1.5rem))] rounded-2xl border border-border/85 bg-card/95 p-4 shadow-2xl backdrop-blur toast-enter"
+        "fixed bottom-4 left-4 z-[75] w-[min(26rem,calc(100vw-1.5rem))] rounded-2xl border border-border/85 bg-card/95 p-4 shadow-2xl backdrop-blur toast-enter",
       )}
       role="dialog"
       aria-label="Newsletter signup"
@@ -135,9 +142,12 @@ export function NewsletterPrompt() {
           <Mail className="size-4" />
         </span>
         <div className="min-w-0 space-y-2">
-          <p className="text-sm font-semibold text-foreground">Get high-signal Claude updates</p>
+          <p className="text-sm font-semibold text-foreground">
+            Get high-signal Claude updates
+          </p>
           <p className="text-xs leading-5 text-muted-foreground">
-            Occasional launch notes, best new configs, and practical workflow drops. No spam.
+            Occasional launch notes, best new configs, and practical workflow
+            drops. No spam.
           </p>
         </div>
       </div>
@@ -165,7 +175,9 @@ export function NewsletterPrompt() {
         <p className="mt-2 text-xs text-emerald-500">You are on the list.</p>
       ) : null}
       {status === "error" ? (
-        <p className="mt-2 text-xs text-destructive">Could not subscribe right now. Try again later.</p>
+        <p className="mt-2 text-xs text-destructive">
+          Could not subscribe right now. Try again later.
+        </p>
       ) : null}
     </aside>
   );

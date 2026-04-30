@@ -1,0 +1,302 @@
+{
+  "schemaVersion": 1,
+  "key": "skills:agent-evals-regression-gate",
+  "entry": {
+    "category": "skills",
+    "slug": "agent-evals-regression-gate",
+    "title": "Agent Evals Regression Gate Skill",
+    "description": "Build repeatable eval suites that catch quality regressions in AI agent behavior before merge or release.",
+    "seoTitle": "Agent Evals Regression Gate Skill for AI Workflows",
+    "seoDescription": "Reusable AI skill for building agent eval harnesses with regression thresholds, CI checks, and stable scoring. HeyClaude adds source links, install steps,...",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2026-04-10",
+    "contentUpdatedAt": "2026-04-27T02:57:15-06:00",
+    "tags": [
+      "evals",
+      "regression",
+      "ai-agents",
+      "qa",
+      "quality-gate"
+    ],
+    "keywords": [
+      "ai-skill",
+      "agent-evals",
+      "regression-testing",
+      "quality-gates",
+      "ci",
+      "reliability",
+      "evals",
+      "regression",
+      "ai-agents",
+      "qa",
+      "quality-gate",
+      "skills"
+    ],
+    "readingTime": 6,
+    "difficultyScore": 74,
+    "documentationUrl": "https://openai.com/index/new-tools-and-features-in-the-responses-api/",
+    "cardDescription": "Create a practical eval harness with golden sets, rubric scoring, and release gates for agentic workflows.",
+    "installable": true,
+    "installCommand": "curl -L https://heyclau.de/downloads/skills/agent-evals-regression-gate.zip -o agent-evals-regression-gate.zip && unzip -o agent-evals-regression-gate.zip -d ./agent-evals-regression-gate",
+    "usageSnippet": "Use this skill to define eval datasets, objective scoring, and pass/fail quality gates for agent updates.",
+    "copySnippet": "# Trigger\n\"Run the agent evals regression gate skill on this project and produce a\nmerge-blocking quality report.\"\n\n# Required output\n1) Eval dataset design (happy path + adversarial + edge cases)\n2) Scoring rubric with explicit pass thresholds\n3) Baseline vs candidate comparison with deltas\n4) Merge decision with release risk summary",
+    "skillType": "general",
+    "skillLevel": "advanced",
+    "verificationStatus": "draft",
+    "verifiedAt": "2026-04-10",
+    "retrievalSources": [
+      "https://openai.com/index/new-tools-and-features-in-the-responses-api/"
+    ],
+    "testedPlatforms": [
+      "Claude",
+      "Codex",
+      "OpenClaw",
+      "Cursor",
+      "Windsurf",
+      "Gemini"
+    ],
+    "prerequisites": [
+      "Existing prompts, tools, or agent workflows to evaluate",
+      "A representative set of real user tasks or transcripts",
+      "CI or local runner where eval suites can be executed repeatedly"
+    ],
+    "hasPrerequisites": true,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/skills/agent-evals-regression-gate.zip",
+    "skillPackage": {
+      "format": "agent-skill",
+      "entrypoint": "SKILL.md",
+      "downloadUrl": "/downloads/skills/agent-evals-regression-gate.zip",
+      "sha256": "c11d9b5eecae8fa09374644ee91dd77197ecbc11f5f60519b9b161f4754214d3"
+    },
+    "platformCompatibility": [
+      {
+        "platform": "Claude",
+        "supportLevel": "native-skill",
+        "installPath": ".claude/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Codex",
+        "supportLevel": "native-skill",
+        "installPath": ".agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Windsurf",
+        "supportLevel": "native-skill",
+        "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Gemini",
+        "supportLevel": "native-skill",
+        "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Cursor",
+        "supportLevel": "adapter",
+        "installPath": ".cursor/rules/<skill-name>.mdc",
+        "adapterPath": "/data/skill-adapters/cursor/agent-evals-regression-gate.mdc",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Generic AGENTS",
+        "supportLevel": "manual-context",
+        "installPath": "AGENTS.md or tool-specific context file",
+        "verifiedAt": "2026-04-10"
+      }
+    ],
+    "downloadTrust": "first-party",
+    "downloadSha256": "c11d9b5eecae8fa09374644ee91dd77197ecbc11f5f60519b9b161f4754214d3",
+    "body": "## Overview\n\nThis skill helps you turn subjective \"looks good\" checks into measurable, repeatable quality gates for AI agent behavior. It is built for teams shipping agent workflows to production and needing confidence that model, prompt, or tool changes do not silently degrade outcomes.\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Prerequisites\n\n- Baseline behavior snapshot from current stable version\n- Candidate branch or prompt/tool change to evaluate\n- Evaluation tasks that reflect real production use\n\n## What This Skill Delivers\n\n- Task matrix across happy-path, edge-case, and failure scenarios\n- Deterministic scoring rubric and weighted pass/fail thresholds\n- Regression report with severity and root-cause candidates\n- Release recommendation for merge, patch, or rollback\n\n## How to Use This Skill\n\n### Prompt Pattern\n\n```text\nApply the agent evals regression gate skill to this workflow.\nGenerate:\n1) Eval set (minimum 30 cases),\n2) Rubric and scoring model,\n3) Baseline vs candidate score delta report,\n4) Merge decision with blocking issues.\n```\n\n### Execution Flow\n\n1. Define scope and quality goals (accuracy, safety, latency, format compliance).\n2. Build or refresh eval dataset from production-like tasks.\n3. Run baseline and candidate under identical conditions.\n4. Compute deltas and classify regressions by impact.\n5. Block merge when thresholds fail; output remediation actions.\n\n## Troubleshooting\n\n**Issue:** Scores fluctuate heavily between runs  \n**Fix:** Reduce nondeterminism (temperature controls, fixed seeds where possible, stable tool mocks).\n\n**Issue:** Eval passes but production still degrades  \n**Fix:** Expand dataset with real production transcripts and failure exemplars.\n\n**Issue:** Teams disagree on pass criteria  \n**Fix:** Move rubric to explicit weighted dimensions and threshold contracts.\n\n## Knowledge Freshness\n\nTreat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.\n\n## Retrieval Sources\n\n- https://openai.com/index/new-tools-and-features-in-the-responses-api/\n\n## Output Contract\n\n1. Return a concrete plan with implementation order.\n2. Provide production-ready commands/config/code snippets (not placeholders).\n3. Include explicit assumptions and unresolved risks.\n4. Include a verification checklist with pass/fail criteria.\n\n## Quality Gates\n\n- All commands are copy/paste ready.\n- Security-sensitive steps call out secret handling and least privilege.\n- Version-sensitive guidance cites current docs used.\n- Rollback path is included for risky changes.\n- Final output includes quick validation commands/tests.",
+    "sections": [
+      {
+        "title": "Overview",
+        "id": "overview",
+        "markdown": "This skill helps you turn subjective \"looks good\" checks into measurable, repeatable quality gates for AI agent behavior. It is built for teams shipping agent workflows to production and needing confidence that model, prompt, or tool changes do not silently degrade outcomes.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Compatibility",
+        "id": "compatibility",
+        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Prerequisites",
+        "id": "prerequisites",
+        "markdown": "- Baseline behavior snapshot from current stable version\n- Candidate branch or prompt/tool change to evaluate\n- Evaluation tasks that reflect real production use",
+        "codeBlocks": []
+      },
+      {
+        "title": "What This Skill Delivers",
+        "id": "what-this-skill-delivers",
+        "markdown": "- Task matrix across happy-path, edge-case, and failure scenarios\n- Deterministic scoring rubric and weighted pass/fail thresholds\n- Regression report with severity and root-cause candidates\n- Release recommendation for merge, patch, or rollback",
+        "codeBlocks": []
+      },
+      {
+        "title": "How to Use This Skill",
+        "id": "how-to-use-this-skill",
+        "markdown": "### Prompt Pattern\n\n```text\nApply the agent evals regression gate skill to this workflow.\nGenerate:\n1) Eval set (minimum 30 cases),\n2) Rubric and scoring model,\n3) Baseline vs candidate score delta report,\n4) Merge decision with blocking issues.\n```\n\n### Execution Flow\n\n1. Define scope and quality goals (accuracy, safety, latency, format compliance).\n2. Build or refresh eval dataset from production-like tasks.\n3. Run baseline and candidate under identical conditions.\n4. Compute deltas and classify regressions by impact.\n5. Block merge when thresholds fail; output remediation actions.",
+        "codeBlocks": [
+          {
+            "language": "text",
+            "code": "Apply the agent evals regression gate skill to this workflow.\nGenerate:\n1) Eval set (minimum 30 cases),\n2) Rubric and scoring model,\n3) Baseline vs candidate score delta report,\n4) Merge decision with blocking issues."
+          }
+        ]
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "**Issue:** Scores fluctuate heavily between runs  \n**Fix:** Reduce nondeterminism (temperature controls, fixed seeds where possible, stable tool mocks).\n\n**Issue:** Eval passes but production still degrades  \n**Fix:** Expand dataset with real production transcripts and failure exemplars.\n\n**Issue:** Teams disagree on pass criteria  \n**Fix:** Move rubric to explicit weighted dimensions and threshold contracts.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Knowledge Freshness",
+        "id": "knowledge-freshness",
+        "markdown": "Treat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Retrieval Sources",
+        "id": "retrieval-sources",
+        "markdown": "- https://openai.com/index/new-tools-and-features-in-the-responses-api/",
+        "codeBlocks": []
+      },
+      {
+        "title": "Output Contract",
+        "id": "output-contract",
+        "markdown": "1. Return a concrete plan with implementation order.\n2. Provide production-ready commands/config/code snippets (not placeholders).\n3. Include explicit assumptions and unresolved risks.\n4. Include a verification checklist with pass/fail criteria.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Quality Gates",
+        "id": "quality-gates",
+        "markdown": "- All commands are copy/paste ready.\n- Security-sensitive steps call out secret handling and least privilege.\n- Version-sensitive guidance cites current docs used.\n- Rollback path is included for risky changes.\n- Final output includes quick validation commands/tests.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Overview",
+        "id": "overview"
+      },
+      {
+        "depth": 2,
+        "text": "Compatibility",
+        "id": "compatibility"
+      },
+      {
+        "depth": 3,
+        "text": "Native",
+        "id": "native"
+      },
+      {
+        "depth": 3,
+        "text": "Manual Adaptation",
+        "id": "manual-adaptation"
+      },
+      {
+        "depth": 2,
+        "text": "Prerequisites",
+        "id": "prerequisites"
+      },
+      {
+        "depth": 2,
+        "text": "What This Skill Delivers",
+        "id": "what-this-skill-delivers"
+      },
+      {
+        "depth": 2,
+        "text": "How to Use This Skill",
+        "id": "how-to-use-this-skill"
+      },
+      {
+        "depth": 3,
+        "text": "Prompt Pattern",
+        "id": "prompt-pattern"
+      },
+      {
+        "depth": 3,
+        "text": "Execution Flow",
+        "id": "execution-flow"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 2,
+        "text": "Knowledge Freshness",
+        "id": "knowledge-freshness"
+      },
+      {
+        "depth": 2,
+        "text": "Retrieval Sources",
+        "id": "retrieval-sources"
+      },
+      {
+        "depth": 2,
+        "text": "Output Contract",
+        "id": "output-contract"
+      },
+      {
+        "depth": 2,
+        "text": "Quality Gates",
+        "id": "quality-gates"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "text",
+        "code": "Apply the agent evals regression gate skill to this workflow.\nGenerate:\n1) Eval set (minimum 30 cases),\n2) Rubric and scoring model,\n3) Baseline vs candidate score delta report,\n4) Merge decision with blocking issues."
+      }
+    ],
+    "filePath": "content/skills/agent-evals-regression-gate.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/agent-evals-regression-gate.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": true,
+    "packageTrust": "first-party",
+    "packageChecksum": "c11d9b5eecae8fa09374644ee91dd77197ecbc11f5f60519b9b161f4754214d3",
+    "checksumPresent": true,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://openai.com/index/new-tools-and-features-in-the-responses-api/",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/agent-evals-regression-gate.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-10",
+    "adapterGenerated": true,
+    "platforms": [
+      "Claude",
+      "Codex",
+      "Windsurf",
+      "Gemini",
+      "Cursor",
+      "Generic AGENTS"
+    ],
+    "supportLevels": [
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "adapter",
+      "manual-context"
+    ]
+  }
+}

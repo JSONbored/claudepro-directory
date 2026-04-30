@@ -1,0 +1,14 @@
+---
+description: "Build quality-aware model routing with fallback tiers, budget controls, and measurable cost/performance tradeoffs."
+globs:
+alwaysApply: false
+---
+# Model Routing Cost and Latency Optimizer Skill
+Design and validate model routing strategies that reduce cost and latency while preserving output quality.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/model-routing-cost-latency-optimizer.zip -o model-routing-cost-latency-optimizer.zip && unzip -o model-routing-cost-latency-optimizer.zip -d ./model-routing-cost-latency-optimizer
+```
+## Source
+https://heyclau.de/downloads/skills/model-routing-cost-latency-optimizer.zip

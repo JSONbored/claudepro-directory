@@ -1,0 +1,384 @@
+{
+  "schemaVersion": 1,
+  "key": "skills:docx-report-generator",
+  "entry": {
+    "category": "skills",
+    "slug": "docx-report-generator",
+    "title": "DOCX Report Generator Skill",
+    "description": "Fill templated DOCX with data to produce reports, invoices, and formatted documents. Generate professional Word documents programmatically with python-docx or use Jinja2 templates with docxtpl for dynamic content insertion. Support tables, images, headers, footers, and custom styling.",
+    "seoTitle": "DOCX Report Generator Skill",
+    "seoDescription": "Fill templated DOCX with data to produce reports, invoices, and formatted documents. Generate professional Word documents programmatically with python-docx o...",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2025-10-15",
+    "contentUpdatedAt": "2026-04-27T02:57:15-06:00",
+    "tags": [
+      "docx",
+      "reports",
+      "templating",
+      "python"
+    ],
+    "keywords": [
+      "claude",
+      "development",
+      "docx",
+      "generator",
+      "python",
+      "report",
+      "reports",
+      "skills",
+      "templating",
+      "tools",
+      "heyclaude",
+      "docx report generator skill"
+    ],
+    "readingTime": 5,
+    "difficultyScore": 100,
+    "documentationUrl": "https://docxtpl.readthedocs.io/",
+    "cardDescription": "Fill templated DOCX with data to produce reports, invoices, and formatted documents.",
+    "installable": true,
+    "installCommand": "curl -L https://heyclau.de/downloads/skills/docx-report-generator.zip -o docx-report-generator.zip && unzip -o docx-report-generator.zip -d ./docx-report-generator",
+    "usageSnippet": "Claude can create, edit, and format Microsoft Word documents (.docx) programmatically. Generate professional reports, proposals, documentation, and formatted documents with tables, charts, headers, and custom styling.",
+    "copySnippet": "from docxtpl import DocxTemplate\n\ndoc = DocxTemplate('template.docx')\ncontext = { 'client': 'Acme', 'items': [{'name': 'Widget', 'price': 9.99}] }\ndoc.render(context)\ndoc.save('invoice.docx')",
+    "skillType": "general",
+    "skillLevel": "advanced",
+    "verificationStatus": "draft",
+    "verifiedAt": "2025-10-15",
+    "retrievalSources": [
+      "https://docxtpl.readthedocs.io/"
+    ],
+    "testedPlatforms": [
+      "Claude",
+      "Codex",
+      "OpenClaw",
+      "Cursor",
+      "Windsurf",
+      "Gemini"
+    ],
+    "prerequisites": [
+      "Python 3.11+",
+      "docxtpl",
+      "docx2pdf or libreoffice for PDF",
+      "File system read/write access for template files and generated DOCX documents",
+      "Python environment with pip for installing python-docx and docxtpl packages",
+      "Optional: LibreOffice or docx2pdf for PDF conversion (requires system installation of LibreOffice for cross-platform PDF export)"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/skills/docx-report-generator.zip",
+    "skillPackage": {
+      "format": "agent-skill",
+      "entrypoint": "SKILL.md",
+      "downloadUrl": "/downloads/skills/docx-report-generator.zip",
+      "sha256": "97c1f763257656b21679a7b0158c6a5f70e4f9feae1722c8674242498e39d462"
+    },
+    "platformCompatibility": [
+      {
+        "platform": "Claude",
+        "supportLevel": "native-skill",
+        "installPath": ".claude/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-15"
+      },
+      {
+        "platform": "Codex",
+        "supportLevel": "native-skill",
+        "installPath": ".agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-15"
+      },
+      {
+        "platform": "Windsurf",
+        "supportLevel": "native-skill",
+        "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-15"
+      },
+      {
+        "platform": "Gemini",
+        "supportLevel": "native-skill",
+        "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-15"
+      },
+      {
+        "platform": "Cursor",
+        "supportLevel": "adapter",
+        "installPath": ".cursor/rules/<skill-name>.mdc",
+        "adapterPath": "/data/skill-adapters/cursor/docx-report-generator.mdc",
+        "verifiedAt": "2025-10-15"
+      },
+      {
+        "platform": "Generic AGENTS",
+        "supportLevel": "manual-context",
+        "installPath": "AGENTS.md or tool-specific context file",
+        "verifiedAt": "2025-10-15"
+      }
+    ],
+    "downloadTrust": "first-party",
+    "downloadSha256": "97c1f763257656b21679a7b0158c6a5f70e4f9feae1722c8674242498e39d462",
+    "body": "## What This Skill Enables\n\nClaude can create, edit, and format Microsoft Word documents (.docx) programmatically. Generate professional reports, proposals, documentation, and formatted documents with tables, charts, headers, and custom styling.\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Prerequisites\n\n**Required:**\n\n- Claude Pro subscription\n- Code Interpreter feature enabled\n- Template document uploaded (optional, for editing existing docs)\n\n**What Claude handles:**\n\n- Installing python-docx and document libraries\n- Document structure and formatting\n- Table generation and styling\n- Page layout and sections\n- Converting between formats (Markdown → DOCX)\n\n## How to Use This Skill\n\n### Create a New Document\n\n**Prompt:** \"Create a professional business proposal document with:\n\n- Title page with company logo placeholder\n- Executive summary section\n- 3-column pricing table\n- Terms and conditions\n  Save as proposal.docx\"\n\nClaude will:\n\n1. Create document structure\n2. Add formatted sections\n3. Generate styled tables\n4. Apply professional formatting\n5. Export as .docx file\n\n### Edit Existing Document\n\n**Prompt:** \"Open this contract template and:\n\n1. Replace all [COMPANY_NAME] with 'Acme Corp'\n2. Update the pricing table in section 3\n3. Add a new clause about termination\n4. Save as acme_contract.docx\"\n\nClaude will:\n\n1. Load the existing document\n2. Find and replace text\n3. Modify tables\n4. Insert new content\n5. Preserve original formatting\n\n### Generate Report from Data\n\n**Prompt:** \"Create a monthly sales report from this CSV data:\n\n- Executive summary with key metrics\n- Sales by region table\n- Top performers list\n- Month-over-month comparison chart\n- Save as sales_report_october.docx\"\n\nClaude will:\n\n1. Analyze the CSV data\n2. Calculate metrics\n3. Generate formatted sections\n4. Create tables with data\n5. Add visual elements\n\n### Format Conversion\n\n**Prompt:** \"Convert this Markdown document to a formatted Word document with:\n\n- Headings styled with built-in heading styles\n- Code blocks in monospace font\n- Bullet lists properly formatted\n- Save as documentation.docx\"\n\nClaude will:\n\n1. Parse Markdown structure\n2. Map to Word styles\n3. Apply formatting\n4. Generate DOCX\n\n## Common Workflows\n\n### Meeting Minutes Template\n\n```\n\"Create a meeting minutes template with:\n1. Header: Date, Time, Location, Attendees\n2. Agenda items section\n3. Discussion notes table (Topic | Discussion | Decision)\n4. Action items table (Task | Owner | Due Date | Status)\n5. Next meeting section\nUse professional formatting with the 'Office' built-in style.\"\n```\n\n### Invoice Generation\n\n```\n\"Generate an invoice document:\n1. Company header (name, address, logo placeholder)\n2. Invoice details (number, date, due date)\n3. Bill to / Ship to sections\n4. Line items table (Description, Qty, Rate, Amount)\n5. Subtotal, tax, total calculations\n6. Payment terms footer\nMake it look professional with borders and shading.\"\n```\n\n### Technical Documentation\n\n```\n\"Create technical documentation:\n1. Cover page with title and version\n2. Table of contents (auto-generated)\n3. Multiple sections with heading hierarchy\n4. Code examples in monospace with syntax highlighting\n5. Tables for API endpoints\n6. Numbered figures with captions\nUse consistent styling throughout.\"\n```\n\n### Resume/CV Formatting\n\n```\n\"Format this resume data into a professional document:\n1. Header with name and contact info\n2. Professional summary\n3. Work experience (company, role, dates, bullets)\n4. Education section\n5. Skills table (2 columns)\n6. Use modern, clean formatting\nSave as resume.docx\"\n```\n\n## Tips for Best Results\n\n1. **Be Specific About Formatting**: Mention fonts, sizes, colors, alignment\n2. **Reference Built-in Styles**: Use Word's built-in styles (\"Heading 1\", \"Title\", \"Intense Quote\")\n3. **Table Formatting**: Specify headers, borders, shading, column widths\n4. **Page Layout**: Mention margins, orientation, page size if non-standard\n5. **Images**: Provide image files or describe placeholder dimensions\n6. **Consistent Style**: Ask for style guides (\"use Arial 11pt throughout\")\n7. **Sections**: Use section breaks for different headers/footers\n\n## Advanced Features\n\n### Headers & Footers\n\n- Different first page headers\n- Page numbers with custom formatting\n- Chapter/section titles in headers\n- Watermarks and background\n\n### Table Enhancements\n\n- Merged cells\n- Repeating header rows\n- Conditional formatting\n- Auto-width columns\n\n### Document Automation\n\n- Mail merge from data files\n- Template-based generation\n- Batch document creation\n- Variable substitution\n\n## Troubleshooting\n\n**Issue:** Formatting doesn't look right\n**Solution:** Be more specific about styles. Reference Word's built-in style names or describe exact formatting (font, size, color, alignment)\n\n**Issue:** Tables break across pages poorly\n**Solution:** Ask Claude to set \"keep rows together\" or adjust table properties\n\n**Issue:** Images not appearing\n**Solution:** Upload images separately and reference them in your prompt, or describe placeholder dimensions\n\n**Issue:** Headers/footers not updating\n**Solution:** Specify which sections need different headers/footers and where section breaks should go\n\n**Issue:** Lost formatting when editing\n**Solution:** Ask Claude to preserve existing styles: \"Keep all original formatting except...\"\n\n## Learn More\n\n- [python-docx Documentation](https://python-docx.readthedocs.io/) - Comprehensive API guide\n- [Word Document Structure](https://python-docx.readthedocs.io/en/latest/user/documents.html) - Understanding .docx internals\n- [Office Open XML Spec](https://en.wikipedia.org/wiki/Office_Open_XML) - DOCX file format details\n- [Simon Willison's DOCX Analysis](https://simonwillison.net/2025/Oct/10/claude-skills/) - Claude's DOCX capabilities\n\n## Features\n\n- Template placeholders and loops\n- Image and table insertion\n- Page layout control\n- Optional PDF export pipeline\n- Jinja2 template engine for dynamic content insertion\n- Rich text formatting with inline styles and formatting\n- Batch document generation from data sources\n- Header and footer customization with page numbers, dynamic content insertion, different first page headers, and section-based header/footer variations\n\n## Use Cases\n\n- Invoices and statements\n- Client reports\n- Batch document generation\n- Automated invoice and billing statement generation\n- Personalized client reports and proposals\n- Technical documentation with code examples and diagrams",
+    "sections": [
+      {
+        "title": "What This Skill Enables",
+        "id": "what-this-skill-enables",
+        "markdown": "Claude can create, edit, and format Microsoft Word documents (.docx) programmatically. Generate professional reports, proposals, documentation, and formatted documents with tables, charts, headers, and custom styling.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Compatibility",
+        "id": "compatibility",
+        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Prerequisites",
+        "id": "prerequisites",
+        "markdown": "**Required:**\n\n- Claude Pro subscription\n- Code Interpreter feature enabled\n- Template document uploaded (optional, for editing existing docs)\n\n**What Claude handles:**\n\n- Installing python-docx and document libraries\n- Document structure and formatting\n- Table generation and styling\n- Page layout and sections\n- Converting between formats (Markdown → DOCX)",
+        "codeBlocks": []
+      },
+      {
+        "title": "How to Use This Skill",
+        "id": "how-to-use-this-skill",
+        "markdown": "### Create a New Document\n\n**Prompt:** \"Create a professional business proposal document with:\n\n- Title page with company logo placeholder\n- Executive summary section\n- 3-column pricing table\n- Terms and conditions\n  Save as proposal.docx\"\n\nClaude will:\n\n1. Create document structure\n2. Add formatted sections\n3. Generate styled tables\n4. Apply professional formatting\n5. Export as .docx file\n\n### Edit Existing Document\n\n**Prompt:** \"Open this contract template and:\n\n1. Replace all [COMPANY_NAME] with 'Acme Corp'\n2. Update the pricing table in section 3\n3. Add a new clause about termination\n4. Save as acme_contract.docx\"\n\nClaude will:\n\n1. Load the existing document\n2. Find and replace text\n3. Modify tables\n4. Insert new content\n5. Preserve original formatting\n\n### Generate Report from Data\n\n**Prompt:** \"Create a monthly sales report from this CSV data:\n\n- Executive summary with key metrics\n- Sales by region table\n- Top performers list\n- Month-over-month comparison chart\n- Save as sales_report_october.docx\"\n\nClaude will:\n\n1. Analyze the CSV data\n2. Calculate metrics\n3. Generate formatted sections\n4. Create tables with data\n5. Add visual elements\n\n### Format Conversion\n\n**Prompt:** \"Convert this Markdown document to a formatted Word document with:\n\n- Headings styled with built-in heading styles\n- Code blocks in monospace font\n- Bullet lists properly formatted\n- Save as documentation.docx\"\n\nClaude will:\n\n1. Parse Markdown structure\n2. Map to Word styles\n3. Apply formatting\n4. Generate DOCX",
+        "codeBlocks": []
+      },
+      {
+        "title": "Common Workflows",
+        "id": "common-workflows",
+        "markdown": "### Meeting Minutes Template\n\n```\n\"Create a meeting minutes template with:\n1. Header: Date, Time, Location, Attendees\n2. Agenda items section\n3. Discussion notes table (Topic | Discussion | Decision)\n4. Action items table (Task | Owner | Due Date | Status)\n5. Next meeting section\nUse professional formatting with the 'Office' built-in style.\"\n```\n\n### Invoice Generation\n\n```\n\"Generate an invoice document:\n1. Company header (name, address, logo placeholder)\n2. Invoice details (number, date, due date)\n3. Bill to / Ship to sections\n4. Line items table (Description, Qty, Rate, Amount)\n5. Subtotal, tax, total calculations\n6. Payment terms footer\nMake it look professional with borders and shading.\"\n```\n\n### Technical Documentation\n\n```\n\"Create technical documentation:\n1. Cover page with title and version\n2. Table of contents (auto-generated)\n3. Multiple sections with heading hierarchy\n4. Code examples in monospace with syntax highlighting\n5. Tables for API endpoints\n6. Numbered figures with captions\nUse consistent styling throughout.\"\n```\n\n### Resume/CV Formatting\n\n```\n\"Format this resume data into a professional document:\n1. Header with name and contact info\n2. Professional summary\n3. Work experience (company, role, dates, bullets)\n4. Education section\n5. Skills table (2 columns)\n6. Use modern, clean formatting\nSave as resume.docx\"\n```",
+        "codeBlocks": [
+          {
+            "language": "text",
+            "code": "\"Create a meeting minutes template with:\n1. Header: Date, Time, Location, Attendees\n2. Agenda items section\n3. Discussion notes table (Topic | Discussion | Decision)\n4. Action items table (Task | Owner | Due Date | Status)\n5. Next meeting section\nUse professional formatting with the 'Office' built-in style.\""
+          },
+          {
+            "language": "text",
+            "code": "\"Generate an invoice document:\n1. Company header (name, address, logo placeholder)\n2. Invoice details (number, date, due date)\n3. Bill to / Ship to sections\n4. Line items table (Description, Qty, Rate, Amount)\n5. Subtotal, tax, total calculations\n6. Payment terms footer\nMake it look professional with borders and shading.\""
+          },
+          {
+            "language": "text",
+            "code": "\"Create technical documentation:\n1. Cover page with title and version\n2. Table of contents (auto-generated)\n3. Multiple sections with heading hierarchy\n4. Code examples in monospace with syntax highlighting\n5. Tables for API endpoints\n6. Numbered figures with captions\nUse consistent styling throughout.\""
+          },
+          {
+            "language": "text",
+            "code": "\"Format this resume data into a professional document:\n1. Header with name and contact info\n2. Professional summary\n3. Work experience (company, role, dates, bullets)\n4. Education section\n5. Skills table (2 columns)\n6. Use modern, clean formatting\nSave as resume.docx\""
+          }
+        ]
+      },
+      {
+        "title": "Tips for Best Results",
+        "id": "tips-for-best-results",
+        "markdown": "1. **Be Specific About Formatting**: Mention fonts, sizes, colors, alignment\n2. **Reference Built-in Styles**: Use Word's built-in styles (\"Heading 1\", \"Title\", \"Intense Quote\")\n3. **Table Formatting**: Specify headers, borders, shading, column widths\n4. **Page Layout**: Mention margins, orientation, page size if non-standard\n5. **Images**: Provide image files or describe placeholder dimensions\n6. **Consistent Style**: Ask for style guides (\"use Arial 11pt throughout\")\n7. **Sections**: Use section breaks for different headers/footers",
+        "codeBlocks": []
+      },
+      {
+        "title": "Advanced Features",
+        "id": "advanced-features",
+        "markdown": "### Headers & Footers\n\n- Different first page headers\n- Page numbers with custom formatting\n- Chapter/section titles in headers\n- Watermarks and background\n\n### Table Enhancements\n\n- Merged cells\n- Repeating header rows\n- Conditional formatting\n- Auto-width columns\n\n### Document Automation\n\n- Mail merge from data files\n- Template-based generation\n- Batch document creation\n- Variable substitution",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "**Issue:** Formatting doesn't look right\n**Solution:** Be more specific about styles. Reference Word's built-in style names or describe exact formatting (font, size, color, alignment)\n\n**Issue:** Tables break across pages poorly\n**Solution:** Ask Claude to set \"keep rows together\" or adjust table properties\n\n**Issue:** Images not appearing\n**Solution:** Upload images separately and reference them in your prompt, or describe placeholder dimensions\n\n**Issue:** Headers/footers not updating\n**Solution:** Specify which sections need different headers/footers and where section breaks should go\n\n**Issue:** Lost formatting when editing\n**Solution:** Ask Claude to preserve existing styles: \"Keep all original formatting except...\"",
+        "codeBlocks": []
+      },
+      {
+        "title": "Learn More",
+        "id": "learn-more",
+        "markdown": "- [python-docx Documentation](https://python-docx.readthedocs.io/) - Comprehensive API guide\n- [Word Document Structure](https://python-docx.readthedocs.io/en/latest/user/documents.html) - Understanding .docx internals\n- [Office Open XML Spec](https://en.wikipedia.org/wiki/Office_Open_XML) - DOCX file format details\n- [Simon Willison's DOCX Analysis](https://simonwillison.net/2025/Oct/10/claude-skills/) - Claude's DOCX capabilities",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Template placeholders and loops\n- Image and table insertion\n- Page layout control\n- Optional PDF export pipeline\n- Jinja2 template engine for dynamic content insertion\n- Rich text formatting with inline styles and formatting\n- Batch document generation from data sources\n- Header and footer customization with page numbers, dynamic content insertion, different first page headers, and section-based header/footer variations",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Invoices and statements\n- Client reports\n- Batch document generation\n- Automated invoice and billing statement generation\n- Personalized client reports and proposals\n- Technical documentation with code examples and diagrams",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "What This Skill Enables",
+        "id": "what-this-skill-enables"
+      },
+      {
+        "depth": 2,
+        "text": "Compatibility",
+        "id": "compatibility"
+      },
+      {
+        "depth": 3,
+        "text": "Native",
+        "id": "native"
+      },
+      {
+        "depth": 3,
+        "text": "Manual Adaptation",
+        "id": "manual-adaptation"
+      },
+      {
+        "depth": 2,
+        "text": "Prerequisites",
+        "id": "prerequisites"
+      },
+      {
+        "depth": 2,
+        "text": "How to Use This Skill",
+        "id": "how-to-use-this-skill"
+      },
+      {
+        "depth": 3,
+        "text": "Create a New Document",
+        "id": "create-a-new-document"
+      },
+      {
+        "depth": 3,
+        "text": "Edit Existing Document",
+        "id": "edit-existing-document"
+      },
+      {
+        "depth": 3,
+        "text": "Generate Report from Data",
+        "id": "generate-report-from-data"
+      },
+      {
+        "depth": 3,
+        "text": "Format Conversion",
+        "id": "format-conversion"
+      },
+      {
+        "depth": 2,
+        "text": "Common Workflows",
+        "id": "common-workflows"
+      },
+      {
+        "depth": 3,
+        "text": "Meeting Minutes Template",
+        "id": "meeting-minutes-template"
+      },
+      {
+        "depth": 3,
+        "text": "Invoice Generation",
+        "id": "invoice-generation"
+      },
+      {
+        "depth": 3,
+        "text": "Technical Documentation",
+        "id": "technical-documentation"
+      },
+      {
+        "depth": 3,
+        "text": "Resume/CV Formatting",
+        "id": "resumecv-formatting"
+      },
+      {
+        "depth": 2,
+        "text": "Tips for Best Results",
+        "id": "tips-for-best-results"
+      },
+      {
+        "depth": 2,
+        "text": "Advanced Features",
+        "id": "advanced-features"
+      },
+      {
+        "depth": 3,
+        "text": "Headers & Footers",
+        "id": "headers-footers"
+      },
+      {
+        "depth": 3,
+        "text": "Table Enhancements",
+        "id": "table-enhancements"
+      },
+      {
+        "depth": 3,
+        "text": "Document Automation",
+        "id": "document-automation"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 2,
+        "text": "Learn More",
+        "id": "learn-more"
+      },
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "text",
+        "code": "\"Create a meeting minutes template with:\n1. Header: Date, Time, Location, Attendees\n2. Agenda items section\n3. Discussion notes table (Topic | Discussion | Decision)\n4. Action items table (Task | Owner | Due Date | Status)\n5. Next meeting section\nUse professional formatting with the 'Office' built-in style.\""
+      },
+      {
+        "language": "text",
+        "code": "\"Generate an invoice document:\n1. Company header (name, address, logo placeholder)\n2. Invoice details (number, date, due date)\n3. Bill to / Ship to sections\n4. Line items table (Description, Qty, Rate, Amount)\n5. Subtotal, tax, total calculations\n6. Payment terms footer\nMake it look professional with borders and shading.\""
+      },
+      {
+        "language": "text",
+        "code": "\"Create technical documentation:\n1. Cover page with title and version\n2. Table of contents (auto-generated)\n3. Multiple sections with heading hierarchy\n4. Code examples in monospace with syntax highlighting\n5. Tables for API endpoints\n6. Numbered figures with captions\nUse consistent styling throughout.\""
+      },
+      {
+        "language": "text",
+        "code": "\"Format this resume data into a professional document:\n1. Header with name and contact info\n2. Professional summary\n3. Work experience (company, role, dates, bullets)\n4. Education section\n5. Skills table (2 columns)\n6. Use modern, clean formatting\nSave as resume.docx\""
+      }
+    ],
+    "filePath": "content/skills/docx-report-generator.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/docx-report-generator.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": true,
+    "packageTrust": "first-party",
+    "packageChecksum": "97c1f763257656b21679a7b0158c6a5f70e4f9feae1722c8674242498e39d462",
+    "checksumPresent": true,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://docxtpl.readthedocs.io/",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/docx-report-generator.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2025-10-15",
+    "adapterGenerated": true,
+    "platforms": [
+      "Claude",
+      "Codex",
+      "Windsurf",
+      "Gemini",
+      "Cursor",
+      "Generic AGENTS"
+    ],
+    "supportLevels": [
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "adapter",
+      "manual-context"
+    ]
+  }
+}

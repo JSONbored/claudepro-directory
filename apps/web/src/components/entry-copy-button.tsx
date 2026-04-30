@@ -5,7 +5,7 @@ import { Check, Copy } from "lucide-react";
 
 import { useToast } from "@/components/ui/toast-provider";
 import type { ContentEntry } from "@/lib/content";
-import { getCopyText } from "@/lib/entry-presentation";
+import { getCopyText } from "@heyclaude/registry/presentation";
 
 type EntryCopyButtonProps = {
   entry?: ContentEntry;
@@ -22,7 +22,7 @@ export function EntryCopyButton({
   label = "Copy full asset",
   className,
   iconOnly = false,
-  title
+  title,
 }: EntryCopyButtonProps) {
   const [copied, setCopied] = useState(false);
   const { pushToast } = useToast();
@@ -42,13 +42,13 @@ export function EntryCopyButton({
       pushToast({
         variant: "success",
         title: "Copied",
-        description: label
+        description: label,
       });
     } catch {
       pushToast({
         variant: "error",
         title: "Copy failed",
-        description: "Clipboard access was blocked by the browser."
+        description: "Clipboard access was blocked by the browser.",
       });
     }
   };
@@ -61,8 +61,18 @@ export function EntryCopyButton({
       title={title ?? label}
       aria-label={title ?? label}
     >
-      {copied ? <Check className="size-4 text-emerald-500 copy-check-icon" /> : <Copy className="size-4" />}
-      {iconOnly ? <span className="sr-only">{copied ? "Copied" : label}</span> : copied ? "Copied" : label}
+      {copied ? (
+        <Check className="size-4 text-emerald-500 copy-check-icon" />
+      ) : (
+        <Copy className="size-4" />
+      )}
+      {iconOnly ? (
+        <span className="sr-only">{copied ? "Copied" : label}</span>
+      ) : copied ? (
+        "Copied"
+      ) : (
+        label
+      )}
     </button>
   );
 }

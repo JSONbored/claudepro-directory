@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "key": "tools:cursor",
+  "entry": {
+    "category": "tools",
+    "slug": "cursor",
+    "title": "Cursor",
+    "description": "AI-native code editor for codebase-aware chat, agent-assisted edits, and software development workflows.",
+    "seoTitle": "Cursor AI code editor for Claude-native teams",
+    "seoDescription": "Cursor is an AI-native code editor for codebase-aware chat, agent edits, and developer workflows. HeyClaude adds source links, install steps, compatibility,...",
+    "author": "Cursor",
+    "dateAdded": "2026-04-27",
+    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+    "tags": [
+      "ai-coding",
+      "code-editor"
+    ],
+    "keywords": [
+      "claude tools",
+      "ai code editor",
+      "ai-coding",
+      "code-editor",
+      "tools",
+      "claude",
+      "heyclaude",
+      "cursor"
+    ],
+    "documentationUrl": "https://docs.cursor.com",
+    "websiteUrl": "https://cursor.com",
+    "brandName": "Cursor",
+    "brandDomain": "cursor.com",
+    "brandIconUrl": "/api/brand-assets/icon/cursor.com",
+    "brandAssetSource": "brandfetch",
+    "pricingModel": "freemium",
+    "disclosure": "heyclaude_pick",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "macOS, Windows, Linux",
+    "cardDescription": "Codebase-aware AI editor for agent-assisted development.",
+    "installable": false,
+    "hasPrerequisites": false,
+    "hasTroubleshooting": false,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Editorial notes\n\nCursor is a strong fit for teams that want codebase-aware AI workflows inside an editor rather than a separate chat surface.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+    "sections": [
+      {
+        "title": "Editorial notes",
+        "id": "editorial-notes",
+        "markdown": "Cursor is a strong fit for teams that want codebase-aware AI workflows inside an editor rather than a separate chat surface.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Disclosure",
+        "id": "disclosure",
+        "markdown": "Editorial listing. No paid placement or affiliate link is used.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Editorial notes",
+        "id": "editorial-notes"
+      },
+      {
+        "depth": 2,
+        "text": "Disclosure",
+        "id": "disclosure"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/tools/cursor.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/cursor.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": true,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 3,
+    "sourceUrls": [
+      "https://docs.cursor.com",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/cursor.mdx",
+      "https://cursor.com"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

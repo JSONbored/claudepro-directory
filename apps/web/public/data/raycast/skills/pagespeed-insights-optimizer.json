@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 2,
+  "key": "skills:pagespeed-insights-optimizer",
+  "category": "skills",
+  "slug": "pagespeed-insights-optimizer",
+  "title": "PageSpeed Insights Optimization Skill for AI Agents",
+  "author": "JSONbored",
+  "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/pagespeed-insights-optimizer.zip -o pagespeed-insights-optimizer.zip && unzip -o pagespeed-insights-optimizer.zip -d ./pagespeed-insights-optimizer\n\nUsage:\nUse this skill whenever you need measurable PSI/Lighthouse improvements while keeping UI/UX unchanged.\n\nAsset:\n# Trigger\n\"Run the PageSpeed Insights optimizer skill on this route and only propose\nchanges that preserve visual output and behavior.\"\n\n# Required output\n1) Baseline metrics (mobile + desktop): FCP, LCP, TBT, CLS, SI\n2) Top bottlenecks ordered by expected impact\n3) Smallest safe patch set\n4) Validation rerun with before/after deltas\n\n# Hard constraints\n- No visual redesign\n- No feature removal\n- Keep accessibility and SEO intact",
+  "detailMarkdown": "# PageSpeed Insights Optimization Skill for AI Agents\n\nStructured optimization workflow for PageSpeed Insights and Lighthouse that improves Core Web Vitals without changing UI/UX.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/pagespeed-insights-optimizer.zip -o pagespeed-insights-optimizer.zip && unzip -o pagespeed-insights-optimizer.zip -d ./pagespeed-insights-optimizer\n```\n\n## Usage\nUse this skill whenever you need measurable PSI/Lighthouse improvements while keeping UI/UX unchanged.",
+  "webUrl": "https://heyclau.de/skills/pagespeed-insights-optimizer",
+  "canonicalUrl": "https://heyclau.de/skills/pagespeed-insights-optimizer",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/pagespeed-insights-optimizer.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/pagespeed-insights-optimizer",
+  "seoTitle": "PageSpeed Insights Optimization Skill for AI Agents",
+  "seoDescription": "Reusable AI skill for PageSpeed Insights optimization focused on Core Web Vitals, practical remediation, and regression-safe performance improvements.",
+  "repoUrl": "",
+  "documentationUrl": "https://web.dev/articles/vitals"
+}

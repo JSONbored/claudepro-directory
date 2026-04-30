@@ -2,18 +2,18 @@
 title: Bun JavaScript Runtime Development Skill
 slug: bun-runtime-modern-javascript
 category: skills
-description: 'Build high-performance JavaScript and TypeScript applications with Bun, the all-in-one runtime that''s 3x faster than Node.js. Includes native TypeScript execution, built-in bundler, test runner, and package manager in a single binary.'
-cardDescription: 'Build high-performance JavaScript and TypeScript applications with Bun, the all-in-one runtime that''s 3x faster than Node.js.'
+description: "Build high-performance JavaScript and TypeScript applications with Bun, the all-in-one runtime that's 3x faster than Node.js. Includes native TypeScript execution, built-in bundler, test runner, and package manager in a single binary."
+cardDescription: "Build high-performance JavaScript and TypeScript applications with Bun, the all-in-one runtime that's 3x faster than Node.js."
 seoTitle: Bun JavaScript Runtime Development Skill
-seoDescription: 'Build high-performance JavaScript and TypeScript applications with Bun, the all-in-one runtime that''s 3x faster than Node.js. Includes native TypeScript exec...'
+seoDescription: "Build high-performance JavaScript and TypeScript applications with Bun, the all-in-one runtime that's 3x faster than Node.js. Includes native TypeScript exec..."
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-23'
-documentationUrl: 'https://bun.sh/docs'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-23"
+documentationUrl: "https://bun.sh/docs"
 downloadUrl: /downloads/skills/bun-runtime-modern-javascript.zip
 installable: true
-installCommand: 'curl -L https://heyclau.de/downloads/skills/bun-runtime-modern-javascript.zip -o bun-runtime-modern-javascript.zip && unzip -o bun-runtime-modern-javascript.zip -d ./bun-runtime-modern-javascript'
-usageSnippet: 'Claude can build and deploy JavaScript/TypeScript applications using Bun, the all-in-one JavaScript runtime that''s 3x faster than Node.js for package installs and startup time. Bun includes a native bundler, test runner, package manager, and TypeScript transpiler in a single binary. From APIs to CLIs to build tools, Bun provides drop-in Node.js compatibility with modern performance.'
+installCommand: "curl -L https://heyclau.de/downloads/skills/bun-runtime-modern-javascript.zip -o bun-runtime-modern-javascript.zip && unzip -o bun-runtime-modern-javascript.zip -d ./bun-runtime-modern-javascript"
+usageSnippet: "Claude can build and deploy JavaScript/TypeScript applications using Bun, the all-in-one JavaScript runtime that's 3x faster than Node.js for package installs and startup time. Bun includes a native bundler, test runner, package manager, and TypeScript transpiler in a single binary. From APIs to CLIs to build tools, Bun provides drop-in Node.js compatibility with modern performance."
 copySnippet: |-
   const server = Bun.serve({
     port: 3000,
@@ -44,9 +44,9 @@ copySnippet: |-
 skillType: general
 skillLevel: advanced
 verificationStatus: draft
-verifiedAt: '2025-10-23'
+verifiedAt: "2025-10-23"
 retrievalSources:
-  - 'https://bun.sh/docs'
+  - "https://bun.sh/docs"
 testedPlatforms:
   - Claude
   - Codex
@@ -59,7 +59,7 @@ prerequisites:
   - macOS/Linux/WSL
   - curl or wget for installation
   - Basic JavaScript/TypeScript knowledge
-  - 'Bun runtime installed (curl -fsSL https://bun.sh/install | bash or npm install -g bun)'
+  - "Bun runtime installed (curl -fsSL https://bun.sh/install | bash or npm install -g bun)"
   - Node.js-compatible project structure with package.json for dependency management and module resolution
 tags:
   - bun
@@ -87,6 +87,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## What This Skill Enables
 
 Claude can build and deploy JavaScript/TypeScript applications using Bun, the all-in-one JavaScript runtime that's 3x faster than Node.js for package installs and startup time. Bun includes a native bundler, test runner, package manager, and TypeScript transpiler in a single binary. From APIs to CLIs to build tools, Bun provides drop-in Node.js compatibility with modern performance.
@@ -100,18 +101,21 @@ Claude can build and deploy JavaScript/TypeScript applications using Bun, the al
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
-
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 
 **Required:**
+
 - Claude Pro subscription or Claude Code CLI
 - macOS, Linux, or WSL (Windows support in beta)
 - curl or wget for installation
 - Basic JavaScript/TypeScript knowledge
 
 **What Claude handles automatically:**
+
 - Writing Bun-optimized server code
 - Configuring bun:test for testing
 - Setting up Bun.serve() for HTTP servers
@@ -128,6 +132,7 @@ Claude can build and deploy JavaScript/TypeScript applications using Bun, the al
 **Prompt:** "Create Bun HTTP server with: REST API routes, JSON parsing, CORS middleware, static file serving, WebSocket support, and error handling. Optimize for maximum req/sec."
 
 Claude will:
+
 1. Use Bun.serve() with fetch handler
 2. Implement routing with URL patterns
 3. Add CORS headers
@@ -141,6 +146,7 @@ Claude will:
 **Prompt:** "Build CLI tool with Bun for: file processing, progress bars, colored output, interactive prompts, and parallel operations. Package as standalone binary."
 
 Claude will:
+
 1. Parse args with Bun.argv
 2. Use chalk for colors
 3. Add ora for spinners
@@ -154,6 +160,7 @@ Claude will:
 **Prompt:** "Create Bun app with SQLite using bun:sqlite. Include: connection pooling, prepared statements, migrations, and query builder pattern."
 
 Claude will:
+
 1. Use bun:sqlite module
 2. Set up connection pool
 3. Create prepared statements
@@ -167,6 +174,7 @@ Claude will:
 **Prompt:** "Set up Bun testing for API with: unit tests, integration tests, mocking, coverage reporting, and parallel execution."
 
 Claude will:
+
 1. Write tests with bun:test
 2. Use expect assertions
 3. Mock with spyOn
@@ -190,6 +198,7 @@ Claude will:
 ## Common Workflows
 
 ### REST API Backend
+
 ```
 "Build production REST API with Bun:
 1. HTTP server with Bun.serve() and routing
@@ -203,6 +212,7 @@ Claude will:
 ```
 
 ### Build Tool Development
+
 ```
 "Create build tool with Bun:
 1. File watching with Bun.watch()
@@ -216,6 +226,7 @@ Claude will:
 ```
 
 ### Microservices Infrastructure
+
 ```
 "Build microservices with Bun:
 1. Service discovery with etcd

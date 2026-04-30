@@ -1,0 +1,97 @@
+# GitHub Actions Secure CI/CD Capability Pack Skill
+URL: https://heyclau.de/skills/github-actions-secure-cicd-capability-pack
+Category: skills
+Author: JSONbored
+Date added: 2026-04-10
+Documentation: https://docs.github.com/actions
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/github-actions-secure-cicd-capability-pack.mdx
+Download: /downloads/skills/github-actions-secure-cicd-capability-pack.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/github-actions-secure-cicd-capability-pack
+- Source URLs: https://docs.github.com/actions, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/github-actions-secure-cicd-capability-pack.mdx
+- Brand: GitHub
+- Brand domain: github.com
+- Brand asset source: brandfetch
+- Package URL: /downloads/skills/github-actions-secure-cicd-capability-pack.zip
+- Package SHA256: 171cde88dd94e324d349dfa76d0910dfd8bd3da54f1f22898331b04f5132e4b0
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-10
+- Robots: indexable
+## Summary
+Expert GitHub Actions capability skill for secure workflow architecture, token minimization, supply-chain controls, and CI reliability.
+## Tags
+- github-actions
+- cicd
+- security
+- devops
+- capability-pack
+## Content
+## Knowledge Freshness
+This capability pack is pinned to documentation verified on **2026-04-10**.
+When upstream docs change, refresh endpoint contracts, examples, and constraints before using this skill for production changes.
+
+## Retrieval Sources
+- https://docs.github.com/actions
+- https://docs.github.com/actions/security-for-github-actions/security-guides/automatic-token-authentication
+- https://docs.github.com/actions/learn-github-actions/reusing-workflows
+
+Always prefer direct retrieval from official docs/API references over model memory for limits, endpoint signatures, and behavior guarantees.
+
+## Core Workflow
+1. Confirm target version/runtime and pull latest official docs for the task scope.
+2. Build an execution plan with explicit read-only discovery before any mutation.
+3. Validate contracts, permissions, and safety constraints before applying changes.
+4. Execute with deterministic checkpoints and rollback criteria.
+5. Produce a verification report with evidence, caveats, and next actions.
+
+## Overview
+This capability pack teaches agents how to build secure and resilient GitHub Actions systems. It focuses on practical controls that reduce compromise risk and operational breakage.
+
+## Capability Scope
+- Workflow architecture and trust boundaries
+- Token permissions and environment scoping
+- Action pinning and supply-chain controls
+- Reusable workflow governance
+- Build reliability and incident handling
+
+## Compatibility
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Production Rules
+- Grant minimum workflow permissions by job.
+- Pin third-party actions to immutable refs.
+- Separate trusted release workflows from untrusted PR execution.
+- Capture artifacts/logs for post-failure diagnostics.
+
+## Troubleshooting
+**Issue:** CI passes in PRs but fails after merge  
+**Fix:** Align PR and main workflow environments and dependency assumptions.
+
+**Issue:** Workflow has excessive token scope  
+**Fix:** Reduce permissions per job and isolate privileged steps to protected environments.
+
+**Issue:** Third-party action risk is unclear  
+**Fix:** Pin exact versions/SHAs and periodically review upstream security posture.
+
+## Output Contract
+1. Provide an implementation plan ordered by risk and dependency.
+2. Provide exact production-ready config/commands with no placeholders.
+3. Call out secrets, permissions, and least-privilege requirements.
+4. Include rollback and recovery guidance for each risky step.
+
+## Validation Checklist
+- Verify all referenced docs/versions before applying changes.
+- Run regression checks for core user flow and error paths.
+- Confirm observability/logging is enabled for changed components.
+- Confirm security controls (auth, rate limits, input validation) still pass.
+- Record final known limitations and follow-up actions.

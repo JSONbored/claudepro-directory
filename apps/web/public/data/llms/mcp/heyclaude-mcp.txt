@@ -1,0 +1,166 @@
+# HeyClaude MCP Server
+URL: https://heyclau.de/mcp/heyclaude-mcp
+Category: mcp
+Author: HeyClaude Team
+Date added: 2025-11-25
+Documentation: https://github.com/JSONbored/claudepro-directory/tree/main/packages/mcp
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/heyclaude-mcp.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/mcp/heyclaude-mcp
+- Source URLs: https://github.com/JSONbored/claudepro-directory/tree/main/packages/mcp, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/heyclaude-mcp.mdx
+- Brand: HeyClaude
+- Brand domain: heyclau.de
+- Brand asset source: manual
+- Author: HeyClaude Team
+- Last verified: 2026-04-30T02:43:14-06:00
+- Robots: indexable
+## Summary
+Search the public HeyClaude registry, fetch entry details, inspect compatibility, and build issue-first submission URLs through MCP.
+## Tags
+- heyclaude
+- mcp
+- registry
+- search
+- directory
+- submissions
+- compatibility
+- feeds
+## Content
+## Overview
+The official HeyClaude MCP server exposes the public HeyClaude registry to MCP
+clients. It is designed for read-only discovery: search registry entries, fetch
+details, inspect platform compatibility, copy install guidance, discover feeds,
+and prepare reviewable content submissions.
+
+The server does not publish content, create GitHub issues, open pull requests,
+manage accounts, write local project files, or mutate editor configuration.
+Submission helpers validate drafts and generate prefilled HeyClaude/GitHub URLs
+for a human-reviewed issue-first workflow.
+
+## Tools
+- `search_registry`: search public registry entries by query, category, and platform.
+- `get_entry_detail`: fetch an entry detail payload by category and slug.
+- `get_compatibility`: inspect skill platform compatibility metadata.
+- `get_install_guidance`: fetch install commands, config snippets, package links, and usage notes.
+- `get_platform_adapter`: fetch generated platform adapter content such as Cursor rule adapters for skills.
+- `list_distribution_feeds`: discover registry JSON, RSS, Atom, category, platform, and artifact feeds.
+- `get_submission_schema`: inspect category-specific submission fields and issue-template metadata.
+- `validate_submission_draft`: validate a content submission draft without making write calls.
+- `search_duplicate_entries`: check for likely duplicate registry entries before submitting.
+- `build_submission_urls`: build prefilled HeyClaude submit and GitHub issue URLs.
+- `get_category_submission_guidance`: fetch category-specific contribution guidance and review expectations.
+
+## Install
+### Remote endpoint through mcp-remote
+
+Use this when your MCP client expects a stdio command but you want to connect to
+the hosted HeyClaude endpoint.
+
+```json
+{
+  "mcpServers": {
+    "heyclaude": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://heyclau.de/api/mcp"]
+    }
+  }
+}
+```
+
+### Streamable HTTP endpoint
+
+Use the hosted endpoint directly if your MCP client supports remote Streamable
+HTTP servers.
+
+```text
+https://heyclau.de/api/mcp
+```
+
+### Local stdio from the repository
+
+Use this when developing HeyClaude locally or testing generated registry
+artifacts before deploy.
+
+```bash
+pnpm --filter @heyclaude/mcp start
+```
+
+Set `HEYCLAUDE_DATA_DIR=/absolute/path/to/apps/web/public/data` if you need to
+point the server at a specific generated artifact directory.
+```json
+{
+  "mcpServers": {
+    "heyclaude": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://heyclau.de/api/mcp"]
+    }
+  }
+}
+```
+```text
+https://heyclau.de/api/mcp
+```
+```bash
+pnpm --filter @heyclaude/mcp start
+```
+
+## Example prompts
+```text
+Search HeyClaude for MCP servers related to GitHub.
+```
+
+```text
+Show install guidance for mcp/github-mcp-server.
+```
+
+```text
+Validate this HeyClaude content submission draft and build a prefilled issue URL.
+```
+
+```text
+Find possible duplicate entries before I submit this new Claude skill.
+```
+```text
+Search HeyClaude for MCP servers related to GitHub.
+```
+```text
+Show install guidance for mcp/github-mcp-server.
+```
+```text
+Validate this HeyClaude content submission draft and build a prefilled issue URL.
+```
+```text
+Find possible duplicate entries before I submit this new Claude skill.
+```
+
+## Security model
+- Read-only registry artifacts are the source of truth.
+- Hosted MCP requests are schema validated and rate limited.
+- Submission tools return validation reports and URLs only.
+- No GitHub tokens, OAuth grants, API keys, PR creation, or issue creation are exposed through MCP.
+- No local project files, `.cursor`, `.claude`, or MCP client config files are written by the server.
+- Accepted submissions remain maintainer reviewed before content is imported.
+
+## Troubleshooting
+### The client cannot connect to the hosted endpoint
+
+Confirm the client supports Streamable HTTP MCP servers. If it only supports
+stdio, use `mcp-remote` with `https://heyclau.de/api/mcp`.
+
+### Search returns no results
+
+Try a broader query or pass only one filter at a time. Categories use HeyClaude
+slugs such as `agents`, `mcp`, `tools`, `skills`, `rules`, `commands`, `hooks`,
+`guides`, `collections`, and `statuslines`.
+
+### A submission draft is invalid
+
+Call `get_submission_schema` for the target category, then pass the required
+fields into `validate_submission_draft`. The MCP server will report missing
+fields, unsafe URLs, likely duplicates, and the next review step.
+
+### I need to publish content automatically
+
+That is intentionally outside the MCP v1 boundary. Use the generated submit URL
+or GitHub issue URL, then let the maintainer-reviewed import workflow handle
+accepted submissions.

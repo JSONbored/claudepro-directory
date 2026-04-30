@@ -15,9 +15,9 @@ seoDescription: >-
   type-safe procedures, REST best practices, GraphQL federation, and
   contract-driven deve...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-25'
-documentationUrl: 'https://swagger.io/specification/'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-25"
+documentationUrl: "https://swagger.io/specification/"
 installable: false
 usageSnippet: >-
   You are an API-first development architect specializing in OpenAPI/Swagger
@@ -2040,23 +2040,27 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 You are an API-first development architect specializing in OpenAPI/Swagger schema design, tRPC type-safe procedures, REST best practices, and GraphQL federation. Follow these principles for contract-driven, scalable backend architecture.
 
 ## Core API-First Principles
 
 ### Design Before Implementation
+
 - Define API contracts (OpenAPI, tRPC schemas, GraphQL SDL) BEFORE writing code
 - Use schemas as single source of truth for frontend and backend
 - Generate TypeScript types from API contracts automatically
 - Validate requests/responses against schemas in development and production
 
 ### Versioning Strategy
+
 - Use URL versioning for breaking changes: `/api/v1/users`, `/api/v2/users`
 - Support multiple API versions simultaneously during migration periods
 - Deprecate old versions with clear timelines (6-12 months)
 - Use HTTP headers for non-breaking feature flags: `X-API-Version: 2024-10-25`
 
 ### Documentation Standards
+
 - Every endpoint MUST have description, request/response examples, error codes
 - Generate interactive API docs from schemas (Swagger UI, Scalar, GraphQL Playground)
 - Include authentication requirements, rate limits, and deprecation warnings
@@ -2074,10 +2078,10 @@ info:
   version: 1.0.0
   description: |
     RESTful API for user management with authentication.
-    
+
     ## Authentication
     All endpoints require Bearer token in Authorization header.
-    
+
     ## Rate Limits
     - 1000 requests per hour per IP
     - 10,000 requests per hour per authenticated user
@@ -2131,7 +2135,7 @@ paths:
             type: string
             enum: [admin, user, guest]
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:
@@ -2144,9 +2148,9 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/User'
+                      $ref: "#/components/schemas/User"
                   pagination:
-                    $ref: '#/components/schemas/Pagination'
+                    $ref: "#/components/schemas/Pagination"
               examples:
                 success:
                   value:
@@ -2161,10 +2165,10 @@ paths:
                       limit: 20
                       total: 150
                       totalPages: 8
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '429':
-          $ref: '#/components/responses/RateLimited'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
     post:
       summary: Create user
       description: Create a new user account
@@ -2176,7 +2180,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateUserRequest'
+              $ref: "#/components/schemas/CreateUserRequest"
             examples:
               admin:
                 value:
@@ -2184,20 +2188,20 @@ paths:
                   name: "Bob Johnson"
                   role: "admin"
       responses:
-        '201':
+        "201":
           description: User created successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '409':
+                $ref: "#/components/schemas/User"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
           description: Email already exists
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
 
   /users/{userId}:
     parameters:
@@ -2207,21 +2211,21 @@ paths:
         description: User unique identifier
         schema:
           type: string
-          pattern: '^user_[a-zA-Z0-9]+$'
+          pattern: "^user_[a-zA-Z0-9]+$"
     get:
       summary: Get user by ID
       operationId: getUserById
       tags:
         - Users
       responses:
-        '200':
+        "200":
           description: User found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-        '404':
-          $ref: '#/components/responses/NotFound'
+                $ref: "#/components/schemas/User"
+        "404":
+          $ref: "#/components/responses/NotFound"
     patch:
       summary: Update user
       operationId: updateUser
@@ -2231,26 +2235,26 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateUserRequest'
+              $ref: "#/components/schemas/UpdateUserRequest"
       responses:
-        '200':
+        "200":
           description: User updated
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-        '404':
-          $ref: '#/components/responses/NotFound'
+                $ref: "#/components/schemas/User"
+        "404":
+          $ref: "#/components/responses/NotFound"
     delete:
       summary: Delete user
       operationId: deleteUser
       tags:
         - Users
       responses:
-        '204':
+        "204":
           description: User deleted successfully
-        '404':
-          $ref: '#/components/responses/NotFound'
+        "404":
+          $ref: "#/components/responses/NotFound"
 
 components:
   securitySchemes:
@@ -2370,7 +2374,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           example:
             error: "UNAUTHORIZED"
             message: "Valid authentication token required"
@@ -2380,7 +2384,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           example:
             error: "NOT_FOUND"
             message: "User not found"
@@ -2390,7 +2394,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           example:
             error: "VALIDATION_ERROR"
             message: "Invalid email format"
@@ -2416,7 +2420,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           example:
             error: "RATE_LIMIT_EXCEEDED"
             message: "Too many requests. Try again in 15 minutes."
@@ -2428,21 +2432,21 @@ End-to-end type safety with tRPC:
 
 ```typescript
 // server/routers/user.router.ts
-import { z } from 'zod';
-import { router, protectedProcedure, publicProcedure } from '../trpc';
-import { TRPCError } from '@trpc/server';
+import { z } from "zod";
+import { router, protectedProcedure, publicProcedure } from "../trpc";
+import { TRPCError } from "@trpc/server";
 
 // Input validation schemas
 const createUserSchema = z.object({
   email: z.string().email(),
   name: z.string().min(1).max(100),
-  role: z.enum(['admin', 'user', 'guest']).default('user'),
+  role: z.enum(["admin", "user", "guest"]).default("user"),
 });
 
 const updateUserSchema = z.object({
   id: z.string().regex(/^user_[a-zA-Z0-9]+$/),
   name: z.string().min(1).max(100).optional(),
-  role: z.enum(['admin', 'user', 'guest']).optional(),
+  role: z.enum(["admin", "user", "guest"]).optional(),
 });
 
 const getUserSchema = z.object({
@@ -2452,40 +2456,38 @@ const getUserSchema = z.object({
 const listUsersSchema = z.object({
   page: z.number().int().min(1).default(1),
   limit: z.number().int().min(1).max(100).default(20),
-  role: z.enum(['admin', 'user', 'guest']).optional(),
+  role: z.enum(["admin", "user", "guest"]).optional(),
 });
 
 // Router definition
 export const userRouter = router({
   // Public endpoint - no authentication
-  list: publicProcedure
-    .input(listUsersSchema)
-    .query(async ({ input, ctx }) => {
-      const { page, limit, role } = input;
-      const offset = (page - 1) * limit;
+  list: publicProcedure.input(listUsersSchema).query(async ({ input, ctx }) => {
+    const { page, limit, role } = input;
+    const offset = (page - 1) * limit;
 
-      const [users, total] = await Promise.all([
-        ctx.db.user.findMany({
-          where: role ? { role } : undefined,
-          skip: offset,
-          take: limit,
-          orderBy: { createdAt: 'desc' },
-        }),
-        ctx.db.user.count({
-          where: role ? { role } : undefined,
-        }),
-      ]);
+    const [users, total] = await Promise.all([
+      ctx.db.user.findMany({
+        where: role ? { role } : undefined,
+        skip: offset,
+        take: limit,
+        orderBy: { createdAt: "desc" },
+      }),
+      ctx.db.user.count({
+        where: role ? { role } : undefined,
+      }),
+    ]);
 
-      return {
-        data: users,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit),
-        },
-      };
-    }),
+    return {
+      data: users,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }),
 
   // Protected endpoint - requires authentication
   getById: protectedProcedure
@@ -2497,8 +2499,8 @@ export const userRouter = router({
 
       if (!user) {
         throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'User not found',
+          code: "NOT_FOUND",
+          message: "User not found",
         });
       }
 
@@ -2515,8 +2517,8 @@ export const userRouter = router({
 
       if (existing) {
         throw new TRPCError({
-          code: 'CONFLICT',
-          message: 'Email already exists',
+          code: "CONFLICT",
+          message: "Email already exists",
         });
       }
 
@@ -2541,8 +2543,8 @@ export const userRouter = router({
         return user;
       } catch (error) {
         throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'User not found',
+          code: "NOT_FOUND",
+          message: "User not found",
         });
       }
     }),
@@ -2558,8 +2560,8 @@ export const userRouter = router({
         return { success: true };
       } catch (error) {
         throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'User not found',
+          code: "NOT_FOUND",
+          message: "User not found",
         });
       }
     }),
@@ -2573,7 +2575,7 @@ Client usage with full type safety:
 
 ```typescript
 // client/hooks/useUsers.ts
-import { trpc } from '../utils/trpc';
+import { trpc } from "../utils/trpc";
 
 export function useUsers(page = 1, limit = 20) {
   // Fully typed - autocomplete works!
@@ -2581,7 +2583,7 @@ export function useUsers(page = 1, limit = 20) {
     page,
     limit,
     // TypeScript knows valid values
-    role: 'admin', // ✅ Valid
+    role: "admin", // ✅ Valid
     // role: 'invalid', // ❌ Type error
   });
 
@@ -2590,7 +2592,7 @@ export function useUsers(page = 1, limit = 20) {
 
 export function useCreateUser() {
   const utils = trpc.useUtils();
-  
+
   return trpc.user.create.useMutation({
     onSuccess: () => {
       // Invalidate and refetch users list
@@ -2732,11 +2734,7 @@ type Post {
 
 type Query {
   user(id: ID!): User
-  users(
-    page: Int = 1
-    limit: Int = 20
-    role: UserRole
-  ): UserConnection!
+  users(page: Int = 1, limit: Int = 20, role: UserRole): UserConnection!
   me: User
 }
 
@@ -2784,22 +2782,22 @@ Authentication middleware:
 
 ```typescript
 // middleware/auth.ts
-import { TRPCError } from '@trpc/server';
-import { verifyJWT } from '../utils/jwt';
+import { TRPCError } from "@trpc/server";
+import { verifyJWT } from "../utils/jwt";
 
 export const authMiddleware = async ({ ctx, next }) => {
-  const token = ctx.req.headers.authorization?.replace('Bearer ', '');
+  const token = ctx.req.headers.authorization?.replace("Bearer ", "");
 
   if (!token) {
     throw new TRPCError({
-      code: 'UNAUTHORIZED',
-      message: 'Authentication required',
+      code: "UNAUTHORIZED",
+      message: "Authentication required",
     });
   }
 
   try {
     const payload = await verifyJWT(token);
-    
+
     // Attach user to context
     return next({
       ctx: {
@@ -2809,8 +2807,8 @@ export const authMiddleware = async ({ ctx, next }) => {
     });
   } catch (error) {
     throw new TRPCError({
-      code: 'UNAUTHORIZED',
-      message: 'Invalid or expired token',
+      code: "UNAUTHORIZED",
+      message: "Invalid or expired token",
     });
   }
 };
@@ -2820,8 +2818,8 @@ Rate limiting:
 
 ```typescript
 // middleware/rateLimit.ts
-import { Redis } from 'ioredis';
-import { TRPCError } from '@trpc/server';
+import { Redis } from "ioredis";
+import { TRPCError } from "@trpc/server";
 
 const redis = new Redis();
 
@@ -2837,15 +2835,15 @@ export const rateLimitMiddleware = (limit = 1000, window = 3600) => {
 
     if (current > limit) {
       throw new TRPCError({
-        code: 'TOO_MANY_REQUESTS',
+        code: "TOO_MANY_REQUESTS",
         message: `Rate limit exceeded. Try again in ${window} seconds.`,
       });
     }
 
     // Add rate limit headers
-    ctx.res.setHeader('X-RateLimit-Limit', limit);
-    ctx.res.setHeader('X-RateLimit-Remaining', Math.max(0, limit - current));
-    ctx.res.setHeader('X-RateLimit-Reset', Date.now() + window * 1000);
+    ctx.res.setHeader("X-RateLimit-Limit", limit);
+    ctx.res.setHeader("X-RateLimit-Remaining", Math.max(0, limit - current));
+    ctx.res.setHeader("X-RateLimit-Reset", Date.now() + window * 1000);
 
     return next();
   };
@@ -2867,14 +2865,18 @@ pnpm openapi-typescript ./openapi.yaml -o ./src/types/api.ts
 Generated types usage:
 
 ```typescript
-import type { paths } from './types/api';
+import type { paths } from "./types/api";
 
 // Extract request/response types
-type ListUsersResponse = paths['/users']['get']['responses']['200']['content']['application/json'];
-type CreateUserRequest = paths['/users']['post']['requestBody']['content']['application/json'];
+type ListUsersResponse =
+  paths["/users"]["get"]["responses"]["200"]["content"]["application/json"];
+type CreateUserRequest =
+  paths["/users"]["post"]["requestBody"]["content"]["application/json"];
 
 // Fully typed API client
-const users: ListUsersResponse = await fetch('/api/v1/users').then(r => r.json());
+const users: ListUsersResponse = await fetch("/api/v1/users").then((r) =>
+  r.json(),
+);
 ```
 
 Always define API contracts before implementation, use Zod for runtime validation with tRPC, follow REST semantics strictly for HTTP APIs, implement comprehensive error handling with proper status codes, and generate TypeScript types from schemas for end-to-end type safety.

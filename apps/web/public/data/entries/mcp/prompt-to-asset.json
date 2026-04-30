@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "key": "mcp:prompt-to-asset",
+  "entry": {
+    "category": "mcp",
+    "slug": "prompt-to-asset",
+    "title": "Prompt-to-asset",
+    "description": "MCP server that generates production-ready visual assets by routing requests across 30+ image generation models. Handles app icons, favicons, OG images, logos, and wordmarks. Validates output for WCAG contrast and palette consistency. Zero API key required for first run via Pollinations and Stable Horde free tiers.",
+    "seoTitle": "Prompt-to-asset MCP Server for Claude Visual Assets",
+    "seoDescription": "Generate app icons, favicons, OG images, logos, and wordmarks from Claude with the Prompt-to-asset MCP server and 30+ image models.",
+    "author": "MohamedAbdallah-14",
+    "authorProfileUrl": "https://github.com/MohamedAbdallah-14",
+    "dateAdded": "2026-04-25",
+    "contentUpdatedAt": "2026-04-30T04:13:44-06:00",
+    "tags": [
+      "mcp",
+      "image-generation",
+      "design-tools",
+      "visual-assets",
+      "icons",
+      "favicons",
+      "og-images"
+    ],
+    "keywords": [
+      "prompt to asset mcp",
+      "claude image generation",
+      "app icon generator",
+      "og image generator",
+      "design tools mcp",
+      "mcp",
+      "image-generation",
+      "design-tools",
+      "visual-assets",
+      "icons",
+      "favicons",
+      "og-images"
+    ],
+    "documentationUrl": "https://github.com/MohamedAbdallah-14/prompt-to-asset#readme",
+    "cardDescription": "Generate app icons, favicons, OG images, and logos via 30+ image models. No API key required for first run.",
+    "installable": true,
+    "installCommand": "npx -y prompt-to-asset",
+    "usageSnippet": "claude mcp add prompt-to-asset -- npx -y prompt-to-asset",
+    "copySnippet": "claude mcp add prompt-to-asset -- npx -y prompt-to-asset",
+    "configSnippet": "{\n  \"mcpServers\": {\n    \"prompt-to-asset\": {\n      \"command\": \"npx\",\n      \"args\": [\"-y\", \"prompt-to-asset\"]\n    }\n  }\n}",
+    "hasPrerequisites": false,
+    "hasTroubleshooting": false,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Overview\n\nMCP server that generates production-ready visual assets by routing requests across 30+ image generation models. Handles app icons, favicons, OG images, logos, and wordmarks. Validates output for WCAG contrast and palette consistency. Zero API key required for first run via Pollinations and Stable Horde free tiers.\n\n## Usage\n\nclaude mcp add prompt-to-asset -- npx -y prompt-to-asset",
+    "sections": [
+      {
+        "title": "Overview",
+        "id": "overview",
+        "markdown": "MCP server that generates production-ready visual assets by routing requests across 30+ image generation models. Handles app icons, favicons, OG images, logos, and wordmarks. Validates output for WCAG contrast and palette consistency. Zero API key required for first run via Pollinations and Stable Horde free tiers.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Usage",
+        "id": "usage",
+        "markdown": "claude mcp add prompt-to-asset -- npx -y prompt-to-asset",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Overview",
+        "id": "overview"
+      },
+      {
+        "depth": 2,
+        "text": "Usage",
+        "id": "usage"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/mcp/prompt-to-asset.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/prompt-to-asset.mdx",
+    "repoUrl": "https://github.com/MohamedAbdallah-14/prompt-to-asset",
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 3,
+    "sourceUrls": [
+      "https://github.com/MohamedAbdallah-14/prompt-to-asset#readme",
+      "https://github.com/MohamedAbdallah-14/prompt-to-asset",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/prompt-to-asset.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-30T04:13:44-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

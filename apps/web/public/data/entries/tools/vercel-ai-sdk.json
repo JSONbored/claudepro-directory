@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "key": "tools:vercel-ai-sdk",
+  "entry": {
+    "category": "tools",
+    "slug": "vercel-ai-sdk",
+    "title": "Vercel AI SDK",
+    "description": "TypeScript toolkit for building AI applications with model providers, streaming UI, tools, agents, and framework adapters.",
+    "seoTitle": "Vercel AI SDK for TypeScript AI apps",
+    "seoDescription": "Vercel AI SDK helps build AI applications with model providers, streaming UI, tools, agents, and framework adapters. HeyClaude adds source links, install...",
+    "author": "Vercel",
+    "dateAdded": "2026-04-27",
+    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+    "tags": [
+      "ai-sdk",
+      "typescript"
+    ],
+    "keywords": [
+      "ai sdk",
+      "streaming ui",
+      "typescript",
+      "tools",
+      "claude",
+      "heyclaude",
+      "vercel ai sdk"
+    ],
+    "documentationUrl": "https://ai-sdk.dev/docs",
+    "websiteUrl": "https://ai-sdk.dev",
+    "brandName": "Vercel AI SDK",
+    "brandDomain": "ai-sdk.dev",
+    "brandIconUrl": "/api/brand-assets/icon/ai-sdk.dev",
+    "brandAssetSource": "brandfetch",
+    "pricingModel": "open-source",
+    "disclosure": "heyclaude_pick",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "macOS, Windows, Linux, Web",
+    "cardDescription": "TypeScript toolkit for AI apps and streaming UI.",
+    "installable": false,
+    "hasPrerequisites": false,
+    "hasTroubleshooting": false,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Editorial notes\n\nVercel AI SDK is a core building block for TypeScript teams shipping AI interfaces and streaming model interactions.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+    "sections": [
+      {
+        "title": "Editorial notes",
+        "id": "editorial-notes",
+        "markdown": "Vercel AI SDK is a core building block for TypeScript teams shipping AI interfaces and streaming model interactions.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Disclosure",
+        "id": "disclosure",
+        "markdown": "Editorial listing. No paid placement or affiliate link is used.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Editorial notes",
+        "id": "editorial-notes"
+      },
+      {
+        "depth": 2,
+        "text": "Disclosure",
+        "id": "disclosure"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/tools/vercel-ai-sdk.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/vercel-ai-sdk.mdx",
+    "repoUrl": "https://github.com/vercel/ai",
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": true,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 4,
+    "sourceUrls": [
+      "https://ai-sdk.dev/docs",
+      "https://github.com/vercel/ai",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/vercel-ai-sdk.mdx",
+      "https://ai-sdk.dev"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

@@ -9,7 +9,7 @@ function pickRequestMeta(request: Request) {
     path: url.pathname,
     query: url.search ? "present" : "none",
     cfRay: request.headers.get("cf-ray") ?? undefined,
-    userAgent: request.headers.get("user-agent") ?? undefined
+    userAgent: request.headers.get("user-agent") ?? undefined,
   };
 }
 
@@ -18,7 +18,7 @@ function writeLog(level: LogLevel, event: string, meta: LogMeta) {
     ts: new Date().toISOString(),
     level,
     event,
-    ...meta
+    ...meta,
   };
   const line = JSON.stringify(payload);
   if (level === "error") {
@@ -32,15 +32,27 @@ function writeLog(level: LogLevel, event: string, meta: LogMeta) {
   console.info(line);
 }
 
-export function logApiInfo(request: Request, event: string, meta: LogMeta = {}) {
+export function logApiInfo(
+  request: Request,
+  event: string,
+  meta: LogMeta = {},
+) {
   writeLog("info", event, { ...pickRequestMeta(request), ...meta });
 }
 
-export function logApiWarn(request: Request, event: string, meta: LogMeta = {}) {
+export function logApiWarn(
+  request: Request,
+  event: string,
+  meta: LogMeta = {},
+) {
   writeLog("warn", event, { ...pickRequestMeta(request), ...meta });
 }
 
-export function logApiError(request: Request, event: string, meta: LogMeta = {}) {
+export function logApiError(
+  request: Request,
+  event: string,
+  meta: LogMeta = {},
+) {
   writeLog("error", event, { ...pickRequestMeta(request), ...meta });
 }
 
@@ -49,7 +61,9 @@ export function sample(rate: number) {
 }
 
 export function redactEmail(value: string) {
-  const email = String(value || "").trim().toLowerCase();
+  const email = String(value || "")
+    .trim()
+    .toLowerCase();
   const [local, domain] = email.split("@");
   if (!local || !domain) return "invalid";
   const visible = local.slice(0, 2);

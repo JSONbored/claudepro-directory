@@ -1,0 +1,14 @@
+---
+description: "Parse web, application, and system logs into structured incidents and timelines with anomaly detection."
+globs:
+alwaysApply: false
+---
+# Log Parsing + Incident Timeline Skill
+Parse web, application, and system logs into structured incidents and timelines with anomaly detection.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/log-parsing-incident-timeline.zip -o log-parsing-incident-timeline.zip && unzip -o log-parsing-incident-timeline.zip -d ./log-parsing-incident-timeline
+```
+## Source
+https://heyclau.de/downloads/skills/log-parsing-incident-timeline.zip

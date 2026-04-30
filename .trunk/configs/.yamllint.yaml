@@ -1,0 +1,5 @@
+rules:
+  quoted-strings: disable
+  key-duplicates: {}
+  octal-values:
+    forbid-implicit-octal: true

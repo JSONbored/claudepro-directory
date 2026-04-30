@@ -1,0 +1,418 @@
+{
+  "schemaVersion": 1,
+  "key": "skills:image-ocr-table-extraction",
+  "entry": {
+    "category": "skills",
+    "slug": "image-ocr-table-extraction",
+    "title": "Image OCR + Table Extraction Skill",
+    "description": "Extract text and tabular data from images, scanned documents, and PDFs using Tesseract OCR engine with OpenCV preprocessing. Supports multi-language OCR (100+ languages), table structure detection, confidence scoring, orientation correction, and exports to CSV, JSON, and structured formats.",
+    "seoTitle": "Image OCR + Table Extraction Skill",
+    "seoDescription": "Extract text and tabular data from images, scanned documents, and PDFs using Tesseract OCR engine with OpenCV preprocessing. Supports multi-language OCR (100...",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2025-10-15",
+    "contentUpdatedAt": "2026-04-27T02:57:15-06:00",
+    "tags": [
+      "ocr",
+      "image",
+      "pytesseract",
+      "opencv",
+      "tables"
+    ],
+    "keywords": [
+      "and",
+      "claude",
+      "development",
+      "extraction",
+      "image",
+      "ocr",
+      "opencv",
+      "pytesseract",
+      "skills",
+      "table",
+      "tables",
+      "tools"
+    ],
+    "readingTime": 5,
+    "difficultyScore": 96,
+    "documentationUrl": "https://tesseract-ocr.github.io/",
+    "cardDescription": "Extract text and tabular data from images, scanned documents, and PDFs using Tesseract OCR engine with OpenCV preprocessing.",
+    "installable": true,
+    "installCommand": "curl -L https://heyclau.de/downloads/skills/image-ocr-table-extraction.zip -o image-ocr-table-extraction.zip && unzip -o image-ocr-table-extraction.zip -d ./image-ocr-table-extraction",
+    "usageSnippet": "Extract text and tabular data from images, scanned documents, and PDFs using Tesseract OCR engine with OpenCV preprocessing. Supports multi-language OCR (100+ languages), table structure detection, confidence scoring, orientation correction, and exports to CSV, JSON, and structured formats. Includes advanced image preprocessing pipelines for noise reduction, binarization, deskewing, and contrast enhancement to maximize OCR accuracy.",
+    "copySnippet": "import cv2\nimport pytesseract\nfrom PIL import Image\n\n# Preprocess image for better OCR\nimg = cv2.imread('scan.png', cv2.IMREAD_GRAYSCALE)\nimg = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]\nimg = cv2.medianBlur(img, 3)\n\ntext = pytesseract.image_to_string(img, lang='eng')\nprint(text[:300])",
+    "skillType": "general",
+    "skillLevel": "advanced",
+    "verificationStatus": "draft",
+    "verifiedAt": "2025-10-15",
+    "retrievalSources": [
+      "https://tesseract-ocr.github.io/"
+    ],
+    "testedPlatforms": [
+      "Claude",
+      "Codex",
+      "OpenClaw",
+      "Cursor",
+      "Windsurf",
+      "Gemini"
+    ],
+    "prerequisites": [
+      "Python 3.11+",
+      "opencv-python",
+      "pytesseract",
+      "Tesseract OCR binary with language data",
+      "Image file access permissions - read access to input image files and write access for OCR output files",
+      "System libraries: Tesseract OCR binary installed system-wide (not just Python package) with language data packs for target languages"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/skills/image-ocr-table-extraction.zip",
+    "skillPackage": {
+      "format": "agent-skill",
+      "entrypoint": "SKILL.md",
+      "downloadUrl": "/downloads/skills/image-ocr-table-extraction.zip",
+      "sha256": "9b48b3202b664e1fbe69e162d3193cb5ad7f64a38a929268b4175c3433873764"
+    },
+    "platformCompatibility": [
+      {
+        "platform": "Claude",
+        "supportLevel": "native-skill",
+        "installPath": ".claude/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-15"
+      },
+      {
+        "platform": "Codex",
+        "supportLevel": "native-skill",
+        "installPath": ".agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-15"
+      },
+      {
+        "platform": "Windsurf",
+        "supportLevel": "native-skill",
+        "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-15"
+      },
+      {
+        "platform": "Gemini",
+        "supportLevel": "native-skill",
+        "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-15"
+      },
+      {
+        "platform": "Cursor",
+        "supportLevel": "adapter",
+        "installPath": ".cursor/rules/<skill-name>.mdc",
+        "adapterPath": "/data/skill-adapters/cursor/image-ocr-table-extraction.mdc",
+        "verifiedAt": "2025-10-15"
+      },
+      {
+        "platform": "Generic AGENTS",
+        "supportLevel": "manual-context",
+        "installPath": "AGENTS.md or tool-specific context file",
+        "verifiedAt": "2025-10-15"
+      }
+    ],
+    "downloadTrust": "first-party",
+    "downloadSha256": "9b48b3202b664e1fbe69e162d3193cb5ad7f64a38a929268b4175c3433873764",
+    "body": "Extract text and tabular data from images, scanned documents, and PDFs using Tesseract OCR engine with OpenCV preprocessing. Supports multi-language OCR (100+ languages), table structure detection, confidence scoring, orientation correction, and exports to CSV, JSON, and structured formats. Includes advanced image preprocessing pipelines for noise reduction, binarization, deskewing, and contrast enhancement to maximize OCR accuracy.\n\n## Content\n\n# Image OCR & Table Extraction Skill\n\n## What This Skill Enables\n\nClaude can extract text and tables from images, screenshots, scanned documents, and PDFs using OCR (Optical Character Recognition). Convert images of receipts, invoices, forms, and tables into editable text and structured data.\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Prerequisites\n\n**Required:**\n\n- Claude Pro subscription\n- Code Interpreter feature enabled\n- Image file uploaded (PNG, JPG, PDF with images)\n\n**What Claude handles:**\n\n- Installing Tesseract OCR and vision libraries\n- Image preprocessing and enhancement\n- Text recognition and layout analysis\n- Table structure detection\n- Data extraction and formatting\n\n## How to Use This Skill\n\n### Basic Text Extraction\n\n**Prompt:** \"Extract all text from this screenshot and give me the content as plain text.\"\n\nClaude will:\n\n1. Preprocess the image\n2. Run OCR\n3. Extract text with layout preservation\n4. Return formatted text\n\n### Table Extraction\n\n**Prompt:** \"Extract the table from this image and export it as CSV.\"\n\nClaude will:\n\n1. Detect table boundaries\n2. Identify rows and columns\n3. Extract cell contents\n4. Structure as tabular data\n5. Export as CSV\n\n### Form Data Extraction\n\n**Prompt:** \"Extract data from this invoice image:\n\n- Invoice number\n- Date\n- Vendor name\n- Line items (description, quantity, price)\n- Total amount\n  Format as JSON.\"\n\nClaude will:\n\n1. OCR the entire image\n2. Identify fields by labels\n3. Extract values\n4. Structure as JSON\n5. Validate data format\n\n### Receipt Processing\n\n**Prompt:** \"Process this receipt image and extract:\n\n- Merchant name\n- Date and time\n- All item names and prices\n- Subtotal, tax, total\n  Create a structured expense record.\"\n\nClaude will:\n\n1. OCR the receipt\n2. Parse line items\n3. Extract financial data\n4. Calculate totals\n5. Format as structured data\n\n## Common Workflows\n\n### Batch Invoice Processing\n\n```\n\"Process all invoice images I upload and:\n1. Extract: invoice #, date, vendor, total\n2. Create a master spreadsheet with all invoices\n3. Flag any invoices where OCR confidence is low\n4. Export as invoices_data.csv\"\n```\n\n### Screenshot Text Recovery\n\n```\n\"Extract all code from this screenshot of a terminal:\n1. Recognize monospace text accurately\n2. Preserve indentation\n3. Clean up any OCR artifacts\n4. Save as code.py\"\n```\n\n### Business Card Digitization\n\n```\n\"Extract contact information from this business card:\n1. Name\n2. Title/Position\n3. Company\n4. Email\n5. Phone\n6. Address\nFormat as vCard or CSV for import to contacts.\"\n```\n\n### Table from PDF Extraction\n\n```\n\"This PDF contains a table that I can't copy/paste properly:\n1. Extract the table using OCR\n2. Recognize the column headers\n3. Parse all rows\n4. Handle multi-line cells\n5. Export as clean CSV\"\n```\n\n## Tips for Best Results\n\n1. **Image Quality Matters**: Higher resolution, clear contrast, straight orientation = better OCR\n2. **Preprocessing**: Ask Claude to enhance/preprocess low-quality images first\n3. **Language**: Specify if text isn't in English (\"OCR this German document...\")\n4. **Table Complexity**: For complex tables, describe the structure (\"5 columns, headers in first row\")\n5. **Multiple Pages**: Upload one page at a time for best results, or ask Claude to process sequentially\n6. **Handwriting**: Note that OCR works best on printed text; handwriting recognition is limited\n7. **Confidence Thresholds**: Ask Claude to report OCR confidence scores for verification\n\n## Image Quality Enhancements\n\n### Preprocessing Options\n\n- Rotate/deskew images\n- Increase contrast\n- Remove noise and artifacts\n- Binarization (convert to black/white)\n- Upscale low-resolution images\n- Crop to region of interest\n\n### Common Issues Claude Can Fix\n\n- Skewed/rotated images\n- Low contrast\n- Background noise\n- Poor lighting\n- Watermarks (some removal possible)\n\n## Advanced Extraction\n\n### Multi-Column Layouts\n\n- Newspaper-style columns\n- Magazine layouts\n- Academic papers\n- Forms with complex layouts\n\n### Special Document Types\n\n- Passports and IDs\n- Medical forms\n- Financial statements\n- Legal documents\n- Shipping labels\n\n## Troubleshooting\n\n**Issue:** OCR results are garbled or inaccurate\n**Solution:** Ask Claude to preprocess the image first: \"Enhance this image (increase contrast, deskew) and then run OCR\"\n\n**Issue:** Table structure not recognized properly\n**Solution:** Describe the table: \"This is a 4-column table with headers in row 1. Extract it as CSV.\"\n\n**Issue:** Numbers recognized as letters (0 as O, 1 as I)\n**Solution:** Tell Claude what type of data to expect: \"Extract invoice number (numeric only) and date\"\n\n**Issue:** Multi-page document results are mixed up\n**Solution:** Process pages individually: \"Extract text from page 1 only\" then \"Now page 2\"\n\n**Issue:** Handwriting not recognized\n**Solution:** OCR works best on printed text. For handwriting, describe it: \"This is handwritten notes, do your best to extract text\"\n\n**Issue:** Foreign language not recognized\n**Solution:** Specify language explicitly: \"OCR this Japanese document using Japanese language model\"\n\n## Learn More\n\n- [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) - Open-source OCR engine\n- [pytesseract Documentation](https://pypi.org/project/pytesseract/) - Python wrapper for Tesseract\n- [OpenCV for Image Processing](https://opencv.org/) - Image preprocessing techniques\n- [Table Detection Methods](https://nanonets.com/blog/table-extraction-deep-learning/) - How table extraction works\n- [Claude Vision Capabilities](https://www.anthropic.com/news/claude-3-family) - Claude's image understanding\n\n## Features\n\n- OpenCV preprocessing recipes (thresholding, noise reduction, deskewing)\n- Pytesseract OCR with 100+ language packs\n- Table structure detection and extraction\n- Export tables to CSV/JSON/DataFrame formats\n- Confidence-aware extraction with quality scoring\n- Multi-language OCR support with auto-detection\n- Bounding box detection and text region identification\n- Orientation and script detection (OSD)\n\n## Use Cases\n\n- Digitize receipts and invoices for expense tracking\n- Extract tables from scanned documents and PDFs\n- Create searchable archives from image-based documents\n- Process business cards and contact information\n- Extract form data from filled documents\n- Convert printed documents to editable text formats",
+    "sections": [
+      {
+        "title": "Overview",
+        "id": "overview",
+        "markdown": "Extract text and tabular data from images, scanned documents, and PDFs using Tesseract OCR engine with OpenCV preprocessing. Supports multi-language OCR (100+ languages), table structure detection, confidence scoring, orientation correction, and exports to CSV, JSON, and structured formats. Includes advanced image preprocessing pipelines for noise reduction, binarization, deskewing, and contrast enhancement to maximize OCR accuracy.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Content",
+        "id": "content",
+        "markdown": "# Image OCR & Table Extraction Skill",
+        "codeBlocks": []
+      },
+      {
+        "title": "What This Skill Enables",
+        "id": "what-this-skill-enables",
+        "markdown": "Claude can extract text and tables from images, screenshots, scanned documents, and PDFs using OCR (Optical Character Recognition). Convert images of receipts, invoices, forms, and tables into editable text and structured data.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Compatibility",
+        "id": "compatibility",
+        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Prerequisites",
+        "id": "prerequisites",
+        "markdown": "**Required:**\n\n- Claude Pro subscription\n- Code Interpreter feature enabled\n- Image file uploaded (PNG, JPG, PDF with images)\n\n**What Claude handles:**\n\n- Installing Tesseract OCR and vision libraries\n- Image preprocessing and enhancement\n- Text recognition and layout analysis\n- Table structure detection\n- Data extraction and formatting",
+        "codeBlocks": []
+      },
+      {
+        "title": "How to Use This Skill",
+        "id": "how-to-use-this-skill",
+        "markdown": "### Basic Text Extraction\n\n**Prompt:** \"Extract all text from this screenshot and give me the content as plain text.\"\n\nClaude will:\n\n1. Preprocess the image\n2. Run OCR\n3. Extract text with layout preservation\n4. Return formatted text\n\n### Table Extraction\n\n**Prompt:** \"Extract the table from this image and export it as CSV.\"\n\nClaude will:\n\n1. Detect table boundaries\n2. Identify rows and columns\n3. Extract cell contents\n4. Structure as tabular data\n5. Export as CSV\n\n### Form Data Extraction\n\n**Prompt:** \"Extract data from this invoice image:\n\n- Invoice number\n- Date\n- Vendor name\n- Line items (description, quantity, price)\n- Total amount\n  Format as JSON.\"\n\nClaude will:\n\n1. OCR the entire image\n2. Identify fields by labels\n3. Extract values\n4. Structure as JSON\n5. Validate data format\n\n### Receipt Processing\n\n**Prompt:** \"Process this receipt image and extract:\n\n- Merchant name\n- Date and time\n- All item names and prices\n- Subtotal, tax, total\n  Create a structured expense record.\"\n\nClaude will:\n\n1. OCR the receipt\n2. Parse line items\n3. Extract financial data\n4. Calculate totals\n5. Format as structured data",
+        "codeBlocks": []
+      },
+      {
+        "title": "Common Workflows",
+        "id": "common-workflows",
+        "markdown": "### Batch Invoice Processing\n\n```\n\"Process all invoice images I upload and:\n1. Extract: invoice #, date, vendor, total\n2. Create a master spreadsheet with all invoices\n3. Flag any invoices where OCR confidence is low\n4. Export as invoices_data.csv\"\n```\n\n### Screenshot Text Recovery\n\n```\n\"Extract all code from this screenshot of a terminal:\n1. Recognize monospace text accurately\n2. Preserve indentation\n3. Clean up any OCR artifacts\n4. Save as code.py\"\n```\n\n### Business Card Digitization\n\n```\n\"Extract contact information from this business card:\n1. Name\n2. Title/Position\n3. Company\n4. Email\n5. Phone\n6. Address\nFormat as vCard or CSV for import to contacts.\"\n```\n\n### Table from PDF Extraction\n\n```\n\"This PDF contains a table that I can't copy/paste properly:\n1. Extract the table using OCR\n2. Recognize the column headers\n3. Parse all rows\n4. Handle multi-line cells\n5. Export as clean CSV\"\n```",
+        "codeBlocks": [
+          {
+            "language": "text",
+            "code": "\"Process all invoice images I upload and:\n1. Extract: invoice #, date, vendor, total\n2. Create a master spreadsheet with all invoices\n3. Flag any invoices where OCR confidence is low\n4. Export as invoices_data.csv\""
+          },
+          {
+            "language": "text",
+            "code": "\"Extract all code from this screenshot of a terminal:\n1. Recognize monospace text accurately\n2. Preserve indentation\n3. Clean up any OCR artifacts\n4. Save as code.py\""
+          },
+          {
+            "language": "text",
+            "code": "\"Extract contact information from this business card:\n1. Name\n2. Title/Position\n3. Company\n4. Email\n5. Phone\n6. Address\nFormat as vCard or CSV for import to contacts.\""
+          },
+          {
+            "language": "text",
+            "code": "\"This PDF contains a table that I can't copy/paste properly:\n1. Extract the table using OCR\n2. Recognize the column headers\n3. Parse all rows\n4. Handle multi-line cells\n5. Export as clean CSV\""
+          }
+        ]
+      },
+      {
+        "title": "Tips for Best Results",
+        "id": "tips-for-best-results",
+        "markdown": "1. **Image Quality Matters**: Higher resolution, clear contrast, straight orientation = better OCR\n2. **Preprocessing**: Ask Claude to enhance/preprocess low-quality images first\n3. **Language**: Specify if text isn't in English (\"OCR this German document...\")\n4. **Table Complexity**: For complex tables, describe the structure (\"5 columns, headers in first row\")\n5. **Multiple Pages**: Upload one page at a time for best results, or ask Claude to process sequentially\n6. **Handwriting**: Note that OCR works best on printed text; handwriting recognition is limited\n7. **Confidence Thresholds**: Ask Claude to report OCR confidence scores for verification",
+        "codeBlocks": []
+      },
+      {
+        "title": "Image Quality Enhancements",
+        "id": "image-quality-enhancements",
+        "markdown": "### Preprocessing Options\n\n- Rotate/deskew images\n- Increase contrast\n- Remove noise and artifacts\n- Binarization (convert to black/white)\n- Upscale low-resolution images\n- Crop to region of interest\n\n### Common Issues Claude Can Fix\n\n- Skewed/rotated images\n- Low contrast\n- Background noise\n- Poor lighting\n- Watermarks (some removal possible)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Advanced Extraction",
+        "id": "advanced-extraction",
+        "markdown": "### Multi-Column Layouts\n\n- Newspaper-style columns\n- Magazine layouts\n- Academic papers\n- Forms with complex layouts\n\n### Special Document Types\n\n- Passports and IDs\n- Medical forms\n- Financial statements\n- Legal documents\n- Shipping labels",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "**Issue:** OCR results are garbled or inaccurate\n**Solution:** Ask Claude to preprocess the image first: \"Enhance this image (increase contrast, deskew) and then run OCR\"\n\n**Issue:** Table structure not recognized properly\n**Solution:** Describe the table: \"This is a 4-column table with headers in row 1. Extract it as CSV.\"\n\n**Issue:** Numbers recognized as letters (0 as O, 1 as I)\n**Solution:** Tell Claude what type of data to expect: \"Extract invoice number (numeric only) and date\"\n\n**Issue:** Multi-page document results are mixed up\n**Solution:** Process pages individually: \"Extract text from page 1 only\" then \"Now page 2\"\n\n**Issue:** Handwriting not recognized\n**Solution:** OCR works best on printed text. For handwriting, describe it: \"This is handwritten notes, do your best to extract text\"\n\n**Issue:** Foreign language not recognized\n**Solution:** Specify language explicitly: \"OCR this Japanese document using Japanese language model\"",
+        "codeBlocks": []
+      },
+      {
+        "title": "Learn More",
+        "id": "learn-more",
+        "markdown": "- [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) - Open-source OCR engine\n- [pytesseract Documentation](https://pypi.org/project/pytesseract/) - Python wrapper for Tesseract\n- [OpenCV for Image Processing](https://opencv.org/) - Image preprocessing techniques\n- [Table Detection Methods](https://nanonets.com/blog/table-extraction-deep-learning/) - How table extraction works\n- [Claude Vision Capabilities](https://www.anthropic.com/news/claude-3-family) - Claude's image understanding",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- OpenCV preprocessing recipes (thresholding, noise reduction, deskewing)\n- Pytesseract OCR with 100+ language packs\n- Table structure detection and extraction\n- Export tables to CSV/JSON/DataFrame formats\n- Confidence-aware extraction with quality scoring\n- Multi-language OCR support with auto-detection\n- Bounding box detection and text region identification\n- Orientation and script detection (OSD)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Digitize receipts and invoices for expense tracking\n- Extract tables from scanned documents and PDFs\n- Create searchable archives from image-based documents\n- Process business cards and contact information\n- Extract form data from filled documents\n- Convert printed documents to editable text formats",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Content",
+        "id": "content"
+      },
+      {
+        "depth": 2,
+        "text": "What This Skill Enables",
+        "id": "what-this-skill-enables"
+      },
+      {
+        "depth": 2,
+        "text": "Compatibility",
+        "id": "compatibility"
+      },
+      {
+        "depth": 3,
+        "text": "Native",
+        "id": "native"
+      },
+      {
+        "depth": 3,
+        "text": "Manual Adaptation",
+        "id": "manual-adaptation"
+      },
+      {
+        "depth": 2,
+        "text": "Prerequisites",
+        "id": "prerequisites"
+      },
+      {
+        "depth": 2,
+        "text": "How to Use This Skill",
+        "id": "how-to-use-this-skill"
+      },
+      {
+        "depth": 3,
+        "text": "Basic Text Extraction",
+        "id": "basic-text-extraction"
+      },
+      {
+        "depth": 3,
+        "text": "Table Extraction",
+        "id": "table-extraction"
+      },
+      {
+        "depth": 3,
+        "text": "Form Data Extraction",
+        "id": "form-data-extraction"
+      },
+      {
+        "depth": 3,
+        "text": "Receipt Processing",
+        "id": "receipt-processing"
+      },
+      {
+        "depth": 2,
+        "text": "Common Workflows",
+        "id": "common-workflows"
+      },
+      {
+        "depth": 3,
+        "text": "Batch Invoice Processing",
+        "id": "batch-invoice-processing"
+      },
+      {
+        "depth": 3,
+        "text": "Screenshot Text Recovery",
+        "id": "screenshot-text-recovery"
+      },
+      {
+        "depth": 3,
+        "text": "Business Card Digitization",
+        "id": "business-card-digitization"
+      },
+      {
+        "depth": 3,
+        "text": "Table from PDF Extraction",
+        "id": "table-from-pdf-extraction"
+      },
+      {
+        "depth": 2,
+        "text": "Tips for Best Results",
+        "id": "tips-for-best-results"
+      },
+      {
+        "depth": 2,
+        "text": "Image Quality Enhancements",
+        "id": "image-quality-enhancements"
+      },
+      {
+        "depth": 3,
+        "text": "Preprocessing Options",
+        "id": "preprocessing-options"
+      },
+      {
+        "depth": 3,
+        "text": "Common Issues Claude Can Fix",
+        "id": "common-issues-claude-can-fix"
+      },
+      {
+        "depth": 2,
+        "text": "Advanced Extraction",
+        "id": "advanced-extraction"
+      },
+      {
+        "depth": 3,
+        "text": "Multi-Column Layouts",
+        "id": "multi-column-layouts"
+      },
+      {
+        "depth": 3,
+        "text": "Special Document Types",
+        "id": "special-document-types"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 2,
+        "text": "Learn More",
+        "id": "learn-more"
+      },
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "text",
+        "code": "\"Process all invoice images I upload and:\n1. Extract: invoice #, date, vendor, total\n2. Create a master spreadsheet with all invoices\n3. Flag any invoices where OCR confidence is low\n4. Export as invoices_data.csv\""
+      },
+      {
+        "language": "text",
+        "code": "\"Extract all code from this screenshot of a terminal:\n1. Recognize monospace text accurately\n2. Preserve indentation\n3. Clean up any OCR artifacts\n4. Save as code.py\""
+      },
+      {
+        "language": "text",
+        "code": "\"Extract contact information from this business card:\n1. Name\n2. Title/Position\n3. Company\n4. Email\n5. Phone\n6. Address\nFormat as vCard or CSV for import to contacts.\""
+      },
+      {
+        "language": "text",
+        "code": "\"This PDF contains a table that I can't copy/paste properly:\n1. Extract the table using OCR\n2. Recognize the column headers\n3. Parse all rows\n4. Handle multi-line cells\n5. Export as clean CSV\""
+      }
+    ],
+    "filePath": "content/skills/image-ocr-table-extraction.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/image-ocr-table-extraction.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": true,
+    "packageTrust": "first-party",
+    "packageChecksum": "9b48b3202b664e1fbe69e162d3193cb5ad7f64a38a929268b4175c3433873764",
+    "checksumPresent": true,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://tesseract-ocr.github.io/",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/image-ocr-table-extraction.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2025-10-15",
+    "adapterGenerated": true,
+    "platforms": [
+      "Claude",
+      "Codex",
+      "Windsurf",
+      "Gemini",
+      "Cursor",
+      "Generic AGENTS"
+    ],
+    "supportLevels": [
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "adapter",
+      "manual-context"
+    ]
+  }
+}

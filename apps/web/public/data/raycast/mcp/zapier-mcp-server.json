@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "mcp:zapier-mcp-server",
+  "category": "mcp",
+  "slug": "zapier-mcp-server",
+  "title": "Zapier MCP Server for Claude",
+  "author": "Zapier",
+  "brandName": "Zapier",
+  "brandDomain": "zapier.com",
+  "brandIconUrl": "/api/brand-assets/icon/zapier.com",
+  "brandAssetSource": "brandfetch",
+  "copyText": "Install:\nclaude mcp add --transport http zapier YOUR_GENERATED_URL && claude mcp list\n\nConfig:\n{\n  \"zapier\": {\n    \"url\": \"https://mcp.zapier.com/YOUR_GENERATED_URL\",\n    \"transport\": \"http\"\n  }\n}\n\nUsage:\n{\n  \"zapier\": {\n    \"url\": \"https://mcp.zapier.com/YOUR_GENERATED_URL\",\n    \"transport\": \"http\"\n  }\n}",
+  "detailMarkdown": "# Zapier MCP Server for Claude\n\nConnect to nearly 8,000 apps through Zapier's automation platform\n\n## Install\n```bash\nclaude mcp add --transport http zapier YOUR_GENERATED_URL && claude mcp list\n```\n\n## Config\n```json\n{\n  \"zapier\": {\n    \"url\": \"https://mcp.zapier.com/YOUR_GENERATED_URL\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Usage\nclaude mcp add --transport http zapier YOUR_GENERATED_URL && claude mcp list",
+  "webUrl": "https://heyclau.de/mcp/zapier-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/zapier-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/zapier-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/zapier-mcp-server",
+  "seoTitle": "Zapier MCP Server for Claude",
+  "seoDescription": "Connect to nearly 8,000 apps through Zapier's automation platform Discover tools for AI development. HeyClaude adds source links, install steps,...",
+  "repoUrl": "",
+  "documentationUrl": "https://help.zapier.com/hc/en-us/articles/36265392843917"
+}

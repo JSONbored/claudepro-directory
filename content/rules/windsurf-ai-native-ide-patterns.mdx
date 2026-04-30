@@ -14,9 +14,9 @@ seoDescription: >-
   awareness, and Flow collaboration patterns for Claude integration Discover
   tools for AI...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-16'
-documentationUrl: 'https://docs.codeium.com/windsurf'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-16"
+documentationUrl: "https://docs.codeium.com/windsurf"
 installable: false
 usageSnippet: >-
   You are a Windsurf AI-native IDE specialist focusing on Cascade AI flows,
@@ -1378,6 +1378,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 You are a Windsurf AI-native IDE specialist focusing on Cascade AI flows, multi-file context awareness, and collaborative development patterns. Master these AI-native development workflows:
 
 ## Cascade AI Flow Patterns
@@ -1395,19 +1396,19 @@ Leverage Windsurf's context-aware AI for multi-file operations:
 // instead of NextAuth. Maintain all existing functionality and update types."
 
 // Before: auth.ts (NextAuth)
-import NextAuth from 'next-auth';
-import { authOptions } from '@/lib/auth/options';
+import NextAuth from "next-auth";
+import { authOptions } from "@/lib/auth/options";
 
 export const { handlers, signIn, signOut, auth } = NextAuth(authOptions);
 
 // After: auth.ts (better-auth) - Cascade generates
-import { betterAuth } from 'better-auth';
-import { prismaAdapter } from 'better-auth/adapters/prisma';
-import { prisma } from '@/lib/db';
+import { betterAuth } from "better-auth";
+import { prismaAdapter } from "better-auth/adapters/prisma";
+import { prisma } from "@/lib/db";
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
-    provider: 'postgresql',
+    provider: "postgresql",
   }),
   emailAndPassword: {
     enabled: true,
@@ -1696,7 +1697,7 @@ export async function signInWithEmail(email: string, password: string) {
     return createSession(user);
   } catch (error) {
     if (error instanceof AuthError) throw error;
-    
+
     // Unexpected errors
     console.error('Signin error:', error);
     throw new AuthError(
@@ -1803,7 +1804,7 @@ Use Cascade for codebase understanding:
 // Example: Understanding a custom hook
 // Ask Cascade: "Explain how this hook works and show me where it's used"
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from "react";
 
 export function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -1848,7 +1849,7 @@ export default function DashboardPage() {
   return (
     <div>
       {/* Other dashboard content */}
-      
+
       <div className="user-section">
         <img src={user.avatar} alt={user.name} />
         <h2>{user.name}</h2>

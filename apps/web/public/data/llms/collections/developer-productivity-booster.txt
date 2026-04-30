@@ -1,0 +1,96 @@
+# Productivity Booster
+URL: https://heyclau.de/collections/developer-productivity-booster
+Category: collections
+Author: JSONbored
+Date added: 2025-10-02
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/developer-productivity-booster.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/collections/developer-productivity-booster
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/developer-productivity-booster.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
+## Summary
+Maximize your development efficiency with automated workflows, smart backups, code formatting, and enhanced visual feedback. This collection combines productivity hooks, informative statuslines, and time-saving commands for a streamlined development experience.
+## Tags
+- productivity
+- automation
+- workflow
+- efficiency
+- developer-tools
+## Content
+## Overview
+Maximize your development efficiency with automated workflows, smart backups, code formatting, and enhanced visual feedback. This collection combines productivity hooks, informative statuslines, and time-saving commands for a streamlined development experience.
+
+## Features
+- Automated code formatting on save
+- Automatic backup and session management
+- Enhanced visual statusline with git info
+- Time-saving documentation commands
+
+## Use Cases
+- Setting up a productive development environment
+- Reducing manual repetitive tasks
+- Improving code consistency across team
+- Preventing work loss with automatic backups
+
+## TL;DR
+A productivity-focused collection of shortcuts, snippets, automation scripts, and workflow optimizations. Supercharge your development velocity with Claude-powered efficiency tools.
+
+- Code snippets and templates for common patterns
+- Keyboard shortcuts and IDE productivity tips
+- Git workflows and automation scripts
+- Project scaffolding and boilerplate generators
+
+Eliminate repetitive tasks and speed up your workflow with this collection of productivity tools, snippets, and automation scripts designed to maximize developer efficiency with Claude.
+
+## Collection Overview
+**Collection Type:** Productivity Tools
+**Focus Area:** Developer Efficiency
+**Skill Level:** All Levels
+**Time Saving:** 30-50% reduction in repetitive tasks
+
+## Collection Contents
+Tools for accelerated development
+
+- **Code Templates** (Snippets): VS Code, Cursor, and Windsurf snippets for React, TypeScript, Python, and more.
+- **Workflow Scripts** (Automation): Shell scripts, git aliases, and automation for common development tasks with Claude.
+- **Project Generators** (Scaffolding): Boilerplate generators for new projects, components, and microservices with best practices.
+- **IDE Optimization** (Shortcuts): Keyboard shortcuts, workspace configs, and IDE extensions for maximum productivity.
+
+## Quick Start
+Install the snippets and shortcuts first for immediate productivity gains. Then add automation scripts and generators to eliminate repetitive tasks.
+
+## Prerequisites
+- Git repository initialized
+- Code formatter (Prettier, Black, etc.) installed
+- Basic git workflow knowledge
+
+## Recommended Order
+1. `auto-code-formatter-hook`
+2. `auto-save-backup`
+3. `git-status-statusline`
+4. `session-timer-statusline`
+5. `docs`
+6. `git-smart-commit`
+
+## Troubleshooting
+### Auto-formatter hook conflicts with git-smart-commit command
+
+Install auto-code-formatter-hook before git-smart-commit. Configure formatter exclusions in .prettierignore or similar. Ensure both use same formatter version to prevent conflicting reformats.
+
+### Statuslines not displaying after installing all hooks first
+
+Install hooks first, then statuslines, then commands per installationOrder. Restart Claude Code after installing statuslines. Check View > Statusline is enabled in preferences.
+
+### Auto-save-backup interferes with git-status-statusline updates
+
+Configure auto-save-backup to ignore .git directory. Add .git/\*\* to backup exclusions. Ensure git-status-statusline polling interval allows backup completion between updates.
+
+### Missing code formatter binary prevents hook from executing
+
+Install formatter globally: npm install -g prettier or pip install black. Verify formatter command available in PATH: which prettier. Then reinstall auto-code-formatter-hook.
+
+### Session timer statusline conflicts with git status display
+
+Both statuslines can coexist. Configure statusline layout in Claude Code settings: place session-timer-statusline on left, git-status-statusline on right. Restart after configuration change.

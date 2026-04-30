@@ -2,18 +2,18 @@
 title: Docker Compose Production Blueprints Skill
 slug: docker-compose-production-blueprints
 category: skills
-description: 'Create production-grade Docker Compose stacks with healthchecks, secrets handling, network isolation, and safe rollout patterns.'
+description: "Create production-grade Docker Compose stacks with healthchecks, secrets handling, network isolation, and safe rollout patterns."
 cardDescription: Opinionated Docker Compose patterns for reliable production deployments and maintainable operations.
 seoTitle: Docker Compose Production Blueprints Skill
-seoDescription: 'Reusable AI skill for designing secure, resilient Docker Compose deployments with healthchecks, profiles, and operational guardrails.'
+seoDescription: "Reusable AI skill for designing secure, resilient Docker Compose deployments with healthchecks, profiles, and operational guardrails."
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2026-04-10'
-documentationUrl: 'https://docs.docker.com/compose/'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2026-04-10"
+documentationUrl: "https://docs.docker.com/compose/"
 downloadUrl: /downloads/skills/docker-compose-production-blueprints.zip
 installable: true
-installCommand: 'curl -L https://heyclau.de/downloads/skills/docker-compose-production-blueprints.zip -o docker-compose-production-blueprints.zip && unzip -o docker-compose-production-blueprints.zip -d ./docker-compose-production-blueprints'
-usageSnippet: 'Use this skill when you need Docker Compose environments that are stable, secure, and easy to operate.'
+installCommand: "curl -L https://heyclau.de/downloads/skills/docker-compose-production-blueprints.zip -o docker-compose-production-blueprints.zip && unzip -o docker-compose-production-blueprints.zip -d ./docker-compose-production-blueprints"
+usageSnippet: "Use this skill when you need Docker Compose environments that are stable, secure, and easy to operate."
 copySnippet: |-
   # Trigger
   "Apply the Docker Compose production blueprints skill to this stack."
@@ -26,9 +26,9 @@ copySnippet: |-
 skillType: general
 skillLevel: advanced
 verificationStatus: draft
-verifiedAt: '2026-04-10'
+verifiedAt: "2026-04-10"
 retrievalSources:
-  - 'https://docs.docker.com/compose/'
+  - "https://docs.docker.com/compose/"
 testedPlatforms:
   - Claude
   - Codex
@@ -38,7 +38,7 @@ testedPlatforms:
   - Gemini
 prerequisites:
   - Service inventory and dependency map
-  - 'Runtime constraints (CPU, memory, storage, ports)'
+  - "Runtime constraints (CPU, memory, storage, ports)"
   - Existing Compose file or desired target architecture
 tags:
   - docker
@@ -60,6 +60,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Overview
 
 This skill provides consistent production patterns for Docker Compose stacks. It helps AI agents avoid common anti-patterns and produce deployment configs that are safer to run and easier to maintain.
@@ -73,7 +74,9 @@ This skill provides consistent production patterns for Docker Compose stacks. It
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 

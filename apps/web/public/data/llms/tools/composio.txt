@@ -1,0 +1,28 @@
+# Composio
+URL: https://heyclau.de/tools/composio
+Category: tools
+Author: Composio
+Date added: 2026-04-27
+Documentation: https://docs.composio.dev
+Repository: https://github.com/ComposioHQ/composio
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/composio.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/tools/composio
+- Source URLs: https://docs.composio.dev, https://github.com/ComposioHQ/composio, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/composio.mdx, https://composio.dev
+- Brand: Composio
+- Brand domain: composio.dev
+- Brand asset source: brandfetch
+- Author: Composio
+- Last verified: 2026-04-26T23:21:14-06:00
+- Robots: indexable
+## Summary
+Integration platform for connecting AI agents and applications to external tools, APIs, auth, and workflows.
+## Tags
+- tool-integrations
+- agents
+## Content
+## Editorial notes
+Composio is relevant when agent products need durable integrations, auth flows, and action execution across third-party tools.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:replit-agent",
+  "category": "tools",
+  "slug": "replit-agent",
+  "title": "Replit Agent",
+  "author": "Replit",
+  "brandName": "Replit",
+  "brandDomain": "replit.com",
+  "brandIconUrl": "/api/brand-assets/icon/replit.com",
+  "brandAssetSource": "brandfetch",
+  "copyText": "## Editorial notes\n\nReplit Agent is relevant for users who want AI generation, hosting, and iteration in one browser-based environment.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Replit Agent\n\nBrowser-based AI software builder for generating, editing, deploying, and iterating on applications in Replit.",
+  "webUrl": "https://heyclau.de/tools/replit-agent",
+  "canonicalUrl": "https://heyclau.de/tools/replit-agent",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/replit-agent.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/replit-agent",
+  "seoTitle": "Replit Agent for AI app building",
+  "seoDescription": "Replit Agent helps build, edit, deploy, and iterate on applications through Replit's browser-based development platform.",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.replit.com/replitai/agent"
+}

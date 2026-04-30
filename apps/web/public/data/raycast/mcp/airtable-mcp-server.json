@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "mcp:airtable-mcp-server",
+  "category": "mcp",
+  "slug": "airtable-mcp-server",
+  "title": "Airtable MCP Server for Claude",
+  "author": "domdomegg",
+  "brandName": "Airtable",
+  "brandDomain": "airtable.com",
+  "brandIconUrl": "/api/brand-assets/icon/airtable.com",
+  "brandAssetSource": "brandfetch",
+  "copyText": "Install:\nclaude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY -- npx -y airtable-mcp-server && claude mcp list\n\nConfig:\n{\n  \"airtable\": {\n    \"env\": {\n      \"AIRTABLE_API_KEY\": \"${AIRTABLE_API_KEY}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"airtable-mcp-server\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n\nUsage:\n{\n  \"airtable\": {\n    \"env\": {\n      \"AIRTABLE_API_KEY\": \"${AIRTABLE_API_KEY}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"airtable-mcp-server\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
+  "detailMarkdown": "# Airtable MCP Server for Claude\n\nRead and write records, manage bases and tables in Airtable directly from Claude\n\n## Install\n```bash\nclaude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY -- npx -y airtable-mcp-server && claude mcp list\n```\n\n## Config\n```json\n{\n  \"airtable\": {\n    \"env\": {\n      \"AIRTABLE_API_KEY\": \"${AIRTABLE_API_KEY}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"airtable-mcp-server\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n```\n\n## Usage\nclaude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY -- npx -y airtable-mcp-server && claude mcp list",
+  "webUrl": "https://heyclau.de/mcp/airtable-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/airtable-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/airtable-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/airtable-mcp-server",
+  "seoTitle": "Airtable MCP Server for Claude",
+  "seoDescription": "Read and write records, manage bases and tables in Airtable directly from Claude. Discover tools for AI development. HeyClaude adds source links, install...",
+  "repoUrl": "https://github.com/domdomegg/airtable-mcp-server",
+  "documentationUrl": "https://github.com/domdomegg/airtable-mcp-server"
+}

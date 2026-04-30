@@ -3,8 +3,11 @@
   "private": true,
   "packageManager": "pnpm@10.33.0",
   "dependencies": {
+    "@asteasolutions/zod-to-openapi": "^8.5.0",
+    "@heyclaude/registry": "workspace:*",
     "gray-matter": "4.0.3",
-    "marked": "18.0.0"
+    "yaml": "^2.8.3",
+    "zod": "^4.3.6"
   },
   "scripts": {
     "dev": "pnpm --filter web dev",
@@ -15,26 +18,62 @@
     "type-check": "pnpm --filter web type-check",
     "validate:content": "node scripts/validate-content.mjs",
     "validate:content:strict": "node scripts/validate-content.mjs --strict-recommended",
+    "validate:category-spec": "node scripts/validate-category-spec.mjs",
     "validate:packages": "node scripts/validate-download-packages.mjs",
+    "validate:raycast-feed": "node scripts/validate-raycast-feed.mjs",
+    "brand:enrich": "node scripts/enrich-brand-assets.mjs",
+    "validate:deployment-artifacts": "node scripts/validate-deployment-artifacts.mjs",
+    "validate:clean": "node scripts/validate-codebase-clean.mjs",
+    "generate:openapi": "tsx scripts/generate-openapi.ts",
+    "validate:openapi": "tsx scripts/generate-openapi.ts --check",
+    "validate:d1-jobs": "node scripts/validate-d1-jobs.mjs",
+    "validate:tasks": "node scripts/validate-tasks.mjs",
+    "indexnow:submit": "node scripts/submit-indexnow.mjs",
+    "email:render": "tsx scripts/render-email-templates.ts",
+    "validate:emails": "tsx scripts/render-email-templates.ts --check",
+    "resend:sync-templates": "tsx scripts/sync-resend-templates.ts",
+    "mcp:start": "pnpm --filter @heyclaude/mcp start",
+    "validate:mcp-endpoint": "pnpm --filter @heyclaude/mcp validate:endpoint",
+    "test:mcp": "vitest run tests/mcp-server.test.ts",
+    "submission:queue": "node scripts/build-submission-queue.mjs",
+    "test": "vitest run",
+    "test:e2e": "node scripts/run-playwright.mjs",
+    "test:seo-jsonld": "vitest run tests/seo-jsonld.test.ts",
+    "test:commercial-intake": "vitest run tests/commercial-intake.test.ts",
+    "test:registry-artifacts": "vitest run tests/registry-artifacts.test.ts",
     "validate:submission-issue": "node scripts/validate-submission-issue.mjs",
+    "test:submission-intake": "vitest run tests/submission-intake.test.ts",
     "refresh:github-stats": "ENABLE_GITHUB_REPO_STATS=1 node scripts/build-content-index.mjs",
     "changelog:preview": "git cliff --unreleased --config .git-cliff.toml",
     "changelog:generate": "git cliff --config .git-cliff.toml",
     "generate:readme": "node scripts/generate-readme.mjs",
-    "migrate:content": "node scripts/migrate-content.mjs",
+    "validate:readme": "node scripts/generate-readme.mjs --check",
+    "generate:issue-templates": "node scripts/generate-issue-templates.mjs",
+    "validate:issue-templates": "node scripts/generate-issue-templates.mjs --check",
     "audit:content": "node scripts/audit-content.mjs",
-    "export:legacy-votes": "node scripts/export-legacy-vote-seed.mjs --ref=HEAD",
-    "cleanup:legacy-counters": "node scripts/remove-legacy-counters.mjs",
     "sync:votes:d1": "node scripts/sync-votes-to-d1.mjs --mode=both",
     "verify:votes:d1": "node scripts/verify-d1-votes.mjs --mode=both",
-    "restore:hooks": "node scripts/restore-hooks-from-history.mjs",
-    "restore:collections": "node scripts/restore-collections-from-history.mjs",
+    "jobs:admin": "node scripts/manage-d1-jobs.mjs",
+    "jobs:check-sources": "node scripts/check-d1-job-sources.mjs",
     "commitlint": "commitlint --edit",
     "prepare": "husky"
   },
   "devDependencies": {
     "@commitlint/cli": "20.5.0",
     "@commitlint/config-conventional": "20.5.0",
-    "husky": "9.1.7"
+    "@playwright/test": "^1.59.1",
+    "husky": "9.1.7",
+    "prettier": "3.8.3",
+    "react": "19.2.5",
+    "react-dom": "19.2.5",
+    "react-email": "6.0.1",
+    "tsx": "4.21.0",
+    "vitest": "^4.1.5"
+  },
+  "pnpm": {
+    "overrides": {
+      "fast-xml-parser": "5.7.2",
+      "postcss": "8.5.12"
+    }
   }
 }

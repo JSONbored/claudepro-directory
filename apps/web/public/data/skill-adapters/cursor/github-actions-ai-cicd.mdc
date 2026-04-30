@@ -1,0 +1,14 @@
+---
+description: "Build intelligent CI/CD pipelines with GitHub Actions, AI-assisted workflow generation, automated testing, and deployment orchestration."
+globs:
+alwaysApply: false
+---
+# GitHub Actions AI-Powered CI/CD Automation Skill
+Build intelligent CI/CD pipelines with GitHub Actions, AI-assisted workflow generation, automated testing, and deployment orchestration.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/github-actions-ai-cicd.zip -o github-actions-ai-cicd.zip && unzip -o github-actions-ai-cicd.zip -d ./github-actions-ai-cicd
+```
+## Source
+https://heyclau.de/downloads/skills/github-actions-ai-cicd.zip

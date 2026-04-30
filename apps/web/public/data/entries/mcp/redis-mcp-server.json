@@ -1,0 +1,345 @@
+{
+  "schemaVersion": 1,
+  "key": "mcp:redis-mcp-server",
+  "entry": {
+    "category": "mcp",
+    "slug": "redis-mcp-server",
+    "title": "Redis MCP Server for Claude",
+    "description": "Official Redis MCP server providing natural language interface for Redis data management and operations",
+    "seoTitle": "Redis MCP Server for Claude",
+    "seoDescription": "Official Redis MCP server providing natural language interface for Redis data management and operations Discover tools for AI development.",
+    "author": "Redis",
+    "authorProfileUrl": "https://redis.io/",
+    "dateAdded": "2025-09-20",
+    "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+    "tags": [
+      "redis",
+      "cache",
+      "database",
+      "nosql",
+      "official"
+    ],
+    "keywords": [
+      "cache",
+      "claude",
+      "database",
+      "development",
+      "mcp",
+      "mcp servers",
+      "nosql",
+      "official",
+      "redis",
+      "server",
+      "tools",
+      "heyclaude"
+    ],
+    "readingTime": 1,
+    "difficultyScore": 1,
+    "documentationUrl": "https://github.com/redis/mcp-redis",
+    "brandName": "Redis",
+    "brandDomain": "redis.io",
+    "brandIconUrl": "/api/brand-assets/icon/redis.io",
+    "brandAssetSource": "brandfetch",
+    "cardDescription": "Official Redis MCP server providing natural language interface for Redis data management and operations",
+    "installable": true,
+    "installCommand": "uvx --from git+https://github.com/redis/mcp-redis.git redis-mcp-server --url redis://localhost:6379/0 && claude mcp list",
+    "usageSnippet": "uvx --from git+https://github.com/redis/mcp-redis.git redis-mcp-server --url redis://localhost:6379/0 && claude mcp list",
+    "copySnippet": "{\n  \"redis\": {\n    \"args\": [\n      \"--from\",\n      \"git+https://github.com/redis/mcp-redis.git\",\n      \"redis-mcp-server\",\n      \"--url\",\n      \"redis://localhost:6379/0\"\n    ],\n    \"command\": \"uvx\"\n  }\n}",
+    "configSnippet": "{\n  \"redis\": {\n    \"args\": [\n      \"--from\",\n      \"git+https://github.com/redis/mcp-redis.git\",\n      \"redis-mcp-server\",\n      \"--url\",\n      \"redis://localhost:6379/0\"\n    ],\n    \"command\": \"uvx\"\n  }\n}",
+    "estimatedSetupTime": "2 minutes",
+    "difficulty": "beginner",
+    "prerequisites": [
+      "Redis server running and accessible (local or remote)",
+      "Python 3.8+ and uvx package runner (for executing redis-mcp-server)",
+      "Redis connection URL (format: redis://[username]:[password]@host:port/db)",
+      "Network access to Redis server (default port 6379, or custom port)",
+      "Understanding of Redis data structures (strings, hashes, lists, sets, sorted sets, streams)",
+      "Optional: Redis ACL user credentials (for user-based authentication)",
+      "Optional: TLS certificates (for rediss:// secure connections)",
+      "Claude Desktop 0.7.0+ or Claude Code with MCP support",
+      "Understanding of Redis commands and operations",
+      "Understanding of Redis pub/sub and stream processing concepts"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/mcp/redis-mcp-server.mcpb",
+    "downloadTrust": "first-party",
+    "downloadSha256": "53ca24ed61d13c6d40277f385286fcc089c13b173c7829913b02ddb4d669c68a",
+    "body": "## Content\n\nThe official Redis MCP Server provides a natural language interface for AI agents to manage and search data in Redis. Access all Redis data structures (strings, hashes, lists, sets, sorted sets, streams), perform vector similarity search for AI/ML applications, implement pub/sub messaging, manage sessions and caching, create leaderboards, and execute server administration—all through natural language commands. Supports ACL authentication, TLS encryption, and both local and remote Redis instances.\n\n## Features\n\n- String operations with TTL support (expiration management)\n- Hash, list, set, and sorted set management (all Redis data structures)\n- Pub/Sub messaging (real-time publish/subscribe patterns)\n- Stream operations (event sourcing and stream processing)\n- JSON data handling (RedisJSON module support)\n- Vector search capabilities (Redis Vector Search for AI/ML)\n- Server management and monitoring (info, config, and admin commands)\n- Transaction support (MULTI/EXEC for atomic operations)\n- Advanced Redis key-value store management with data structure operations, pub/sub messaging, and performance monitoring\n- Batch operations support for efficient bulk key operations, data management, and cache operations with automatic error handling\n- Real-time Redis monitoring capabilities with connection pooling support for tracking Redis performance and triggering automated workflows\n\n## Use Cases\n\n- High-performance caching solutions (session and data caching)\n- Session management and storage (user session persistence)\n- Real-time messaging with pub/sub (event-driven architectures)\n- Leaderboards and ranking systems (sorted sets for rankings)\n- Stream processing and event sourcing (Redis Streams)\n- Vector similarity search (AI/ML embeddings and RAG)\n- Rate limiting and counters (distributed rate limiting)\n- Distributed locking and coordination (mutex and semaphore patterns)\n- Build automated caching and data management workflows that sync external systems with Redis for real-time data operations and performance optimization\n\n## Installation\n\n### Claude Code\n\n1. Ensure Redis server is running and accessible\n2. Run: uvx --from git+https://github.com/redis/mcp-redis.git redis-mcp-server --url redis://localhost:6379/0\n3. Verify installation: claude mcp list\n4. Test connection: claude mcp status redis\n5. Update connection URL if using remote Redis or authentication\n\n### Claude Desktop\n\n1. Ensure Redis server is running and accessible\n2. Install via Smithery CLI: npx -y @smithery/cli install @redis/mcp-redis --client claude\n3. Or install via uvx: uvx --from git+https://github.com/redis/mcp-redis.git redis-mcp-server\n4. Configure Redis connection URL in Claude Desktop config\n5. Add server configuration to Claude Desktop (see configuration section)\n6. Restart Claude Desktop\n7. Update connection URL if using remote Redis or authentication\n\n## Requirements\n\n- Redis server running and accessible (local or remote)\n- Python 3.8+ and uvx package runner (for executing redis-mcp-server)\n- Redis connection URL (format: redis://[username]:[password]@host:port/db)\n- Network access to Redis server (default port 6379, or custom port)\n- Understanding of Redis data structures (strings, hashes, lists, sets, sorted sets, streams)\n- Optional: Redis ACL user credentials (for user-based authentication)\n- Optional: TLS certificates (for rediss:// secure connections)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Understanding of Redis commands and operations\n- Understanding of Redis pub/sub and stream processing concepts\n\n## Configuration\n\n```json\n{\n  \"redis\": {\n    \"args\": [\n      \"--from\",\n      \"git+https://github.com/redis/mcp-redis.git\",\n      \"redis-mcp-server\",\n      \"--url\",\n      \"redis://localhost:6379/0\"\n    ],\n    \"command\": \"uvx\"\n  }\n}\n```\n\n## Examples\n\n### Store and retrieve cached data with expiration\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Store and retrieve cached data with expiration\"\n```\n\n### Manage user sessions and preferences\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Manage user sessions and preferences\"\n```\n\n### Implement real-time chat with pub/sub\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Implement real-time chat with pub/sub\"\n```\n\n### Create leaderboards with sorted sets\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Create leaderboards with sorted sets\"\n```\n\n### Process events using Redis streams\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Process events using Redis streams\"\n```\n\n### Set and Get Key\n\nStore and retrieve JSON data in Redis with key-value operations\n\n```typescript\n// Set and get Redis key\nawait redis.set(\n  \"user:123\",\n  JSON.stringify({ name: \"John\", email: \"john@example.com\" }),\n);\nconst user = await redis.get(\"user:123\");\n```\n\n## Security\n\n- Redis ACL user management (fine-grained permissions per user)\n- SSL/TLS encryption support (rediss:// for secure connections)\n- Password authentication (requirepass or ACL passwords)\n- Read-only user configurations (ACL users with read-only permissions)\n- Network security controls (firewall rules, bind address restrictions)\n- Redis connection strings and passwords must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- Redis AUTH passwords should be used for all Redis instances to prevent unauthorized access - regularly rotate passwords and use strong authentication\n- Redis key names and data may expose application structure and sensitive information - ensure Redis keys are kept private and not shared in public configurations\n- Rate limiting and connection management are critical for Redis MCP servers - implement proper connection pooling, command timeout handling, and resource monitoring to prevent service disruption\n- Redis pub/sub channels and data may contain sensitive information - ensure pub/sub channels are properly secured and access-controlled according to data privacy requirements\n\n## Troubleshooting\n\n### Connection refused or Redis server not accessible\n\nVerify Redis server is running with `redis-cli ping` (should return PONG). Check connection URL format: `redis://localhost:6379/0` or `redis://user:password@host:port/db`. Confirm network firewall allows port 6379 (or your custom port). Test connection with `redis-cli -u URL` command. For remote servers, verify hostname resolution and network connectivity. Check Redis server logs for connection errors.\n\n### NOAUTH Authentication required error\n\nRedis requires authentication. Add password to connection URL: `redis://:password@host:6379` (empty username) or `redis://username:password@host:6379` (with username for ACL). Use AUTH command in redis-cli to test: `AUTH password` or `AUTH username password`. Verify `requirepass` in redis.conf matches your password. Check ACL user exists with `ACL LIST` command. For ACL users, ensure user has proper permissions.\n\n### NOPERM user has no permissions to run command or access key\n\nACL user lacks required permissions. Grant permissions with `ACL SETUSER username +@all ~*` (all commands, all keys) or specific categories like `+@read +@write` for read/write operations. Check current ACL rules with `ACL GETUSER username`. Verify key patterns allow access with `~key:*` syntax (wildcard patterns). Ensure user has appropriate command categories enabled (e.g., `+@string`, `+@hash`, `+@list`). Review ACL configuration file if using persistent ACL.\n\n### ACL authentication failed or WRONGPASS invalid password\n\nPassword mismatch or ACL configuration issue. Verify password matches ACL user with `ACL GETUSER username` (check `#` password hash). Ensure ACL file loaded correctly (restart Redis after editing ACL file). Check user not flagged `nopass` without valid passwords. View recent security events with `ACL LOG` to see authentication failures. For ACL users, ensure username and password combination is correct. Verify ACL rules are properly formatted in redis.conf or ACL file.\n\n### TLS/SSL connection error or certificate validation failed\n\nUse `rediss://` (note double 's') for TLS connections instead of `redis://`. Add `tls=true` parameter if using connection object. Verify Redis server built with TLS support (`redis-server --version`). Check certificates match CA and have correct file permissions. For client certificate authentication, provide cert and key files. Test TLS connection with `redis-cli --tls --cacert ca.pem -h host -p port`. Verify certificate paths are absolute or relative to working directory. Check certificate expiration dates.\n\n### Redis MCP server authentication errors with passwords\n\nVerify Redis password is correct. Check AUTH configuration in redis.conf. Ensure password format is correct. For Redis 6.0+, verify ACL user permissions if using ACL authentication.\n\n### Redis connection failures or timeout errors\n\nCheck network connectivity to Redis server. Verify Redis is running and accessible. Check firewall rules allow Redis connections (default port 6379). Increase connection timeout values. Verify Redis maxclients setting allows new connections.\n\n### Redis memory limit errors or OOM errors\n\nCheck Redis memory usage with INFO memory command. Verify maxmemory setting and eviction policy. Clear unused keys or increase maxmemory limit. Monitor memory usage patterns and implement key expiration policies.\n\n### Redis MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Redis server is accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+    "sections": [
+      {
+        "title": "Content",
+        "id": "content",
+        "markdown": "The official Redis MCP Server provides a natural language interface for AI agents to manage and search data in Redis. Access all Redis data structures (strings, hashes, lists, sets, sorted sets, streams), perform vector similarity search for AI/ML applications, implement pub/sub messaging, manage sessions and caching, create leaderboards, and execute server administration—all through natural language commands. Supports ACL authentication, TLS encryption, and both local and remote Redis instances.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- String operations with TTL support (expiration management)\n- Hash, list, set, and sorted set management (all Redis data structures)\n- Pub/Sub messaging (real-time publish/subscribe patterns)\n- Stream operations (event sourcing and stream processing)\n- JSON data handling (RedisJSON module support)\n- Vector search capabilities (Redis Vector Search for AI/ML)\n- Server management and monitoring (info, config, and admin commands)\n- Transaction support (MULTI/EXEC for atomic operations)\n- Advanced Redis key-value store management with data structure operations, pub/sub messaging, and performance monitoring\n- Batch operations support for efficient bulk key operations, data management, and cache operations with automatic error handling\n- Real-time Redis monitoring capabilities with connection pooling support for tracking Redis performance and triggering automated workflows",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- High-performance caching solutions (session and data caching)\n- Session management and storage (user session persistence)\n- Real-time messaging with pub/sub (event-driven architectures)\n- Leaderboards and ranking systems (sorted sets for rankings)\n- Stream processing and event sourcing (Redis Streams)\n- Vector similarity search (AI/ML embeddings and RAG)\n- Rate limiting and counters (distributed rate limiting)\n- Distributed locking and coordination (mutex and semaphore patterns)\n- Build automated caching and data management workflows that sync external systems with Redis for real-time data operations and performance optimization",
+        "codeBlocks": []
+      },
+      {
+        "title": "Installation",
+        "id": "installation",
+        "markdown": "### Claude Code\n\n1. Ensure Redis server is running and accessible\n2. Run: uvx --from git+https://github.com/redis/mcp-redis.git redis-mcp-server --url redis://localhost:6379/0\n3. Verify installation: claude mcp list\n4. Test connection: claude mcp status redis\n5. Update connection URL if using remote Redis or authentication\n\n### Claude Desktop\n\n1. Ensure Redis server is running and accessible\n2. Install via Smithery CLI: npx -y @smithery/cli install @redis/mcp-redis --client claude\n3. Or install via uvx: uvx --from git+https://github.com/redis/mcp-redis.git redis-mcp-server\n4. Configure Redis connection URL in Claude Desktop config\n5. Add server configuration to Claude Desktop (see configuration section)\n6. Restart Claude Desktop\n7. Update connection URL if using remote Redis or authentication",
+        "codeBlocks": []
+      },
+      {
+        "title": "Requirements",
+        "id": "requirements",
+        "markdown": "- Redis server running and accessible (local or remote)\n- Python 3.8+ and uvx package runner (for executing redis-mcp-server)\n- Redis connection URL (format: redis://[username]:[password]@host:port/db)\n- Network access to Redis server (default port 6379, or custom port)\n- Understanding of Redis data structures (strings, hashes, lists, sets, sorted sets, streams)\n- Optional: Redis ACL user credentials (for user-based authentication)\n- Optional: TLS certificates (for rediss:// secure connections)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Understanding of Redis commands and operations\n- Understanding of Redis pub/sub and stream processing concepts",
+        "codeBlocks": []
+      },
+      {
+        "title": "Configuration",
+        "id": "configuration",
+        "markdown": "```json\n{\n  \"redis\": {\n    \"args\": [\n      \"--from\",\n      \"git+https://github.com/redis/mcp-redis.git\",\n      \"redis-mcp-server\",\n      \"--url\",\n      \"redis://localhost:6379/0\"\n    ],\n    \"command\": \"uvx\"\n  }\n}\n```",
+        "codeBlocks": [
+          {
+            "language": "json",
+            "code": "{\n  \"redis\": {\n    \"args\": [\n      \"--from\",\n      \"git+https://github.com/redis/mcp-redis.git\",\n      \"redis-mcp-server\",\n      \"--url\",\n      \"redis://localhost:6379/0\"\n    ],\n    \"command\": \"uvx\"\n  }\n}"
+          }
+        ]
+      },
+      {
+        "title": "Examples",
+        "id": "examples",
+        "markdown": "### Store and retrieve cached data with expiration\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Store and retrieve cached data with expiration\"\n```\n\n### Manage user sessions and preferences\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Manage user sessions and preferences\"\n```\n\n### Implement real-time chat with pub/sub\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Implement real-time chat with pub/sub\"\n```\n\n### Create leaderboards with sorted sets\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Create leaderboards with sorted sets\"\n```\n\n### Process events using Redis streams\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Process events using Redis streams\"\n```\n\n### Set and Get Key\n\nStore and retrieve JSON data in Redis with key-value operations\n\n```typescript\n// Set and get Redis key\nawait redis.set(\n  \"user:123\",\n  JSON.stringify({ name: \"John\", email: \"john@example.com\" }),\n);\nconst user = await redis.get(\"user:123\");\n```",
+        "codeBlocks": [
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Store and retrieve cached data with expiration\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Manage user sessions and preferences\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Implement real-time chat with pub/sub\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Create leaderboards with sorted sets\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Process events using Redis streams\""
+          },
+          {
+            "language": "typescript",
+            "code": "// Set and get Redis key\nawait redis.set(\n  \"user:123\",\n  JSON.stringify({ name: \"John\", email: \"john@example.com\" }),\n);\nconst user = await redis.get(\"user:123\");"
+          }
+        ]
+      },
+      {
+        "title": "Security",
+        "id": "security",
+        "markdown": "- Redis ACL user management (fine-grained permissions per user)\n- SSL/TLS encryption support (rediss:// for secure connections)\n- Password authentication (requirepass or ACL passwords)\n- Read-only user configurations (ACL users with read-only permissions)\n- Network security controls (firewall rules, bind address restrictions)\n- Redis connection strings and passwords must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- Redis AUTH passwords should be used for all Redis instances to prevent unauthorized access - regularly rotate passwords and use strong authentication\n- Redis key names and data may expose application structure and sensitive information - ensure Redis keys are kept private and not shared in public configurations\n- Rate limiting and connection management are critical for Redis MCP servers - implement proper connection pooling, command timeout handling, and resource monitoring to prevent service disruption\n- Redis pub/sub channels and data may contain sensitive information - ensure pub/sub channels are properly secured and access-controlled according to data privacy requirements",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "### Connection refused or Redis server not accessible\n\nVerify Redis server is running with `redis-cli ping` (should return PONG). Check connection URL format: `redis://localhost:6379/0` or `redis://user:password@host:port/db`. Confirm network firewall allows port 6379 (or your custom port). Test connection with `redis-cli -u URL` command. For remote servers, verify hostname resolution and network connectivity. Check Redis server logs for connection errors.\n\n### NOAUTH Authentication required error\n\nRedis requires authentication. Add password to connection URL: `redis://:password@host:6379` (empty username) or `redis://username:password@host:6379` (with username for ACL). Use AUTH command in redis-cli to test: `AUTH password` or `AUTH username password`. Verify `requirepass` in redis.conf matches your password. Check ACL user exists with `ACL LIST` command. For ACL users, ensure user has proper permissions.\n\n### NOPERM user has no permissions to run command or access key\n\nACL user lacks required permissions. Grant permissions with `ACL SETUSER username +@all ~*` (all commands, all keys) or specific categories like `+@read +@write` for read/write operations. Check current ACL rules with `ACL GETUSER username`. Verify key patterns allow access with `~key:*` syntax (wildcard patterns). Ensure user has appropriate command categories enabled (e.g., `+@string`, `+@hash`, `+@list`). Review ACL configuration file if using persistent ACL.\n\n### ACL authentication failed or WRONGPASS invalid password\n\nPassword mismatch or ACL configuration issue. Verify password matches ACL user with `ACL GETUSER username` (check `#` password hash). Ensure ACL file loaded correctly (restart Redis after editing ACL file). Check user not flagged `nopass` without valid passwords. View recent security events with `ACL LOG` to see authentication failures. For ACL users, ensure username and password combination is correct. Verify ACL rules are properly formatted in redis.conf or ACL file.\n\n### TLS/SSL connection error or certificate validation failed\n\nUse `rediss://` (note double 's') for TLS connections instead of `redis://`. Add `tls=true` parameter if using connection object. Verify Redis server built with TLS support (`redis-server --version`). Check certificates match CA and have correct file permissions. For client certificate authentication, provide cert and key files. Test TLS connection with `redis-cli --tls --cacert ca.pem -h host -p port`. Verify certificate paths are absolute or relative to working directory. Check certificate expiration dates.\n\n### Redis MCP server authentication errors with passwords\n\nVerify Redis password is correct. Check AUTH configuration in redis.conf. Ensure password format is correct. For Redis 6.0+, verify ACL user permissions if using ACL authentication.\n\n### Redis connection failures or timeout errors\n\nCheck network connectivity to Redis server. Verify Redis is running and accessible. Check firewall rules allow Redis connections (default port 6379). Increase connection timeout values. Verify Redis maxclients setting allows new connections.\n\n### Redis memory limit errors or OOM errors\n\nCheck Redis memory usage with INFO memory command. Verify maxmemory setting and eviction policy. Clear unused keys or increase maxmemory limit. Monitor memory usage patterns and implement key expiration policies.\n\n### Redis MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Redis server is accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Content",
+        "id": "content"
+      },
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      },
+      {
+        "depth": 2,
+        "text": "Installation",
+        "id": "installation"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Code",
+        "id": "claude-code"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Desktop",
+        "id": "claude-desktop"
+      },
+      {
+        "depth": 2,
+        "text": "Requirements",
+        "id": "requirements"
+      },
+      {
+        "depth": 2,
+        "text": "Configuration",
+        "id": "configuration"
+      },
+      {
+        "depth": 2,
+        "text": "Examples",
+        "id": "examples"
+      },
+      {
+        "depth": 3,
+        "text": "Store and retrieve cached data with expiration",
+        "id": "store-and-retrieve-cached-data-with-expiration"
+      },
+      {
+        "depth": 3,
+        "text": "Manage user sessions and preferences",
+        "id": "manage-user-sessions-and-preferences"
+      },
+      {
+        "depth": 3,
+        "text": "Implement real-time chat with pub/sub",
+        "id": "implement-real-time-chat-with-pubsub"
+      },
+      {
+        "depth": 3,
+        "text": "Create leaderboards with sorted sets",
+        "id": "create-leaderboards-with-sorted-sets"
+      },
+      {
+        "depth": 3,
+        "text": "Process events using Redis streams",
+        "id": "process-events-using-redis-streams"
+      },
+      {
+        "depth": 3,
+        "text": "Set and Get Key",
+        "id": "set-and-get-key"
+      },
+      {
+        "depth": 2,
+        "text": "Security",
+        "id": "security"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 3,
+        "text": "Connection refused or Redis server not accessible",
+        "id": "connection-refused-or-redis-server-not-accessible"
+      },
+      {
+        "depth": 3,
+        "text": "NOAUTH Authentication required error",
+        "id": "noauth-authentication-required-error"
+      },
+      {
+        "depth": 3,
+        "text": "NOPERM user has no permissions to run command or access key",
+        "id": "noperm-user-has-no-permissions-to-run-command-or-access-key"
+      },
+      {
+        "depth": 3,
+        "text": "ACL authentication failed or WRONGPASS invalid password",
+        "id": "acl-authentication-failed-or-wrongpass-invalid-password"
+      },
+      {
+        "depth": 3,
+        "text": "TLS/SSL connection error or certificate validation failed",
+        "id": "tlsssl-connection-error-or-certificate-validation-failed"
+      },
+      {
+        "depth": 3,
+        "text": "Redis MCP server authentication errors with passwords",
+        "id": "redis-mcp-server-authentication-errors-with-passwords"
+      },
+      {
+        "depth": 3,
+        "text": "Redis connection failures or timeout errors",
+        "id": "redis-connection-failures-or-timeout-errors"
+      },
+      {
+        "depth": 3,
+        "text": "Redis memory limit errors or OOM errors",
+        "id": "redis-memory-limit-errors-or-oom-errors"
+      },
+      {
+        "depth": 3,
+        "text": "Redis MCP server connection timeouts or network errors",
+        "id": "redis-mcp-server-connection-timeouts-or-network-errors"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "json",
+        "code": "{\n  \"redis\": {\n    \"args\": [\n      \"--from\",\n      \"git+https://github.com/redis/mcp-redis.git\",\n      \"redis-mcp-server\",\n      \"--url\",\n      \"redis://localhost:6379/0\"\n    ],\n    \"command\": \"uvx\"\n  }\n}"
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Store and retrieve cached data with expiration\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Manage user sessions and preferences\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Implement real-time chat with pub/sub\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Create leaderboards with sorted sets\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Process events using Redis streams\""
+      },
+      {
+        "language": "typescript",
+        "code": "// Set and get Redis key\nawait redis.set(\n  \"user:123\",\n  JSON.stringify({ name: \"John\", email: \"john@example.com\" }),\n);\nconst user = await redis.get(\"user:123\");"
+      }
+    ],
+    "filePath": "content/mcp/redis-mcp-server.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/redis-mcp-server.mdx",
+    "repoUrl": "https://github.com/redis/mcp-redis",
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": true,
+    "packageTrust": "first-party",
+    "packageChecksum": "53ca24ed61d13c6d40277f385286fcc089c13b173c7829913b02ddb4d669c68a",
+    "checksumPresent": true,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://github.com/redis/mcp-redis",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/redis-mcp-server.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 2,
+  "key": "skills:supabase-realtime-database",
+  "category": "skills",
+  "slug": "supabase-realtime-database",
+  "title": "Supabase Realtime Database Builder Skill",
+  "author": "JSONbored",
+  "brandName": "Supabase",
+  "brandDomain": "supabase.com",
+  "brandIconUrl": "/api/brand-assets/icon/supabase.com",
+  "brandAssetSource": "brandfetch",
+  "brandVerifiedAt": "2025-10-16",
+  "copyText": "Install:\nnpm install @supabase/supabase-js\n\nUsage:\nnpm install @supabase/supabase-js\n\nAsset:\nimport { createClient } from '@supabase/supabase-js';\nimport { Database } from './types/supabase';\n\nconst supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;\nconst supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;\n\nexport const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);\n\nexport const createAuthenticatedClient = (accessToken: string) => {\n  return createClient<Database>(supabaseUrl, supabaseAnonKey, {\n    global: {\n      headers: {\n        Authorization: `Bearer ${accessToken}`,\n      },\n    },\n  });\n};",
+  "detailMarkdown": "# Supabase Realtime Database Builder Skill\n\nBuild full-stack applications with Supabase Postgres, real-time subscriptions, Edge Functions, and pgvector AI integration for 4M+ developers.\n\n## Install\n```bash\nnpm install @supabase/supabase-js\n```\n\n## Usage\nnpm install @supabase/supabase-js",
+  "webUrl": "https://heyclau.de/skills/supabase-realtime-database",
+  "canonicalUrl": "https://heyclau.de/skills/supabase-realtime-database",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/supabase-realtime-database.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/supabase-realtime-database",
+  "seoTitle": "Supabase Realtime Database Builder Skill",
+  "seoDescription": "Build full-stack applications with Supabase Postgres, real-time subscriptions, Edge Functions, and pgvector AI integration for 4M+ developers. Create complet...",
+  "repoUrl": "",
+  "documentationUrl": "https://supabase.com/docs"
+}

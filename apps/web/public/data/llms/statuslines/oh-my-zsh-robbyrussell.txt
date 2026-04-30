@@ -1,0 +1,547 @@
+# Oh My Zsh Robbyrussell - Statuslines
+URL: https://heyclau.de/statuslines/oh-my-zsh-robbyrussell
+Category: statuslines
+Author: JSONbored
+Date added: 2025-10-23
+Documentation: https://github.com/ohmyzsh/ohmyzsh/wiki/Themes#robbyrussell
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/oh-my-zsh-robbyrussell.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/statuslines/oh-my-zsh-robbyrussell
+- Source URLs: https://github.com/ohmyzsh/ohmyzsh/wiki/Themes#robbyrussell, https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/oh-my-zsh-robbyrussell.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
+## Summary
+Oh-My-Zsh robbyrussell theme replica with iconic arrow prompt, Git status indicators, and directory path for seamless Claude Code shell integration.
+## Tags
+- oh-my-zsh
+- robbyrussell
+- zsh
+- shell-replica
+- git-integration
+- classic
+## Content
+## Features
+- Authentic Oh-My-Zsh robbyrussell theme aesthetics
+- Iconic ➜ arrow prompt character
+- Git branch display with parentheses format: git:(branch)
+- Dirty/clean Git status indicators (✗ for uncommitted changes)
+- Color-coded Git status: green (clean), yellow/red (dirty)
+- Directory basename display (matches zsh %c behavior)
+- Model name integration for Claude Code context
+- Zero dependencies beyond Git and jq
+
+## Use Cases
+- Oh-My-Zsh users wanting familiar prompt in Claude Code
+- Developers switching between shell and AI assistant frequently
+- Teams standardized on robbyrussell theme across tools
+- Visual continuity between terminal prompt and Claude statusline
+- Muscle memory from zsh prompt for instant context recognition
+- Onboarding new team members with familiar zsh prompt aesthetics
+
+## Requirements
+- Claude Code CLI installed and configured
+- Bash shell available (bash 4.0+ recommended for string manipulation and conditional logic)
+- jq command-line JSON processor (jq 1.6+ recommended for safe extraction with // defaults)
+- Git command (optional, for Git branch and status display - statusline works without Git)
+- Terminal with UTF-8 encoding support (required for Unicode arrow character: ➜ and checkmark: ✗)
+- Terminal with ANSI color code support (256-color mode recommended for authentic robbyrussell colors)
+
+## Configuration
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/oh-my-zsh-robbyrussell.sh",
+    "refreshInterval": 500
+  }
+}
+```
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/oh-my-zsh-robbyrussell.sh",
+    "refreshInterval": 500
+  }
+}
+```
+
+## Examples
+### Enhanced Oh My Zsh Robbyrussell with Exit Status
+
+Extended version with exit status indicator matching original robbyrussell theme
+
+```bash
+#!/usr/bin/env bash
+
+# Enhanced Oh-My-Zsh Robbyrussell Theme with Exit Status
+
+read -r input
+
+# Extract exit status from previous command (if available)
+last_exit_status=${LAST_EXIT_STATUS:-0}
+
+dir=$(echo "$input" | jq -r '.workspace.current_dir // .workspace.path // .cwd // "~"' | sed "s|$HOME|~|" | xargs basename)
+model=$(echo "$input" | jq -r '.model.display_name // .model.id // "unknown"')
+
+git_branch=""
+git_dirty=""
+if git rev-parse --git-dir > /dev/null 2>&1; then
+  git_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+  if ! git diff --quiet 2>/dev/null || ! git diff --cached --quiet 2>/dev/null; then
+    git_dirty="✗"
+  fi
+fi
+
+# Colors
+CYAN="\033[38;5;51m"
+GREEN="\033[38;5;82m"
+YELLOW="\033[38;5;226m"
+RED="\033[38;5;196m"
+BOLD_GREEN="\033[1;38;5;82m"
+BOLD_RED="\033[1;38;5;196m"
+RESET="\033[0m"
+
+# Arrow color based on exit status (robbyrussell style)
+if [ $last_exit_status -eq 0 ]; then
+  arrow_color="${BOLD_GREEN}"
+else
+  arrow_color="${BOLD_RED}"
+fi
+
+# Build prompt
+prompt="${arrow_color}➜${RESET}  "
+prompt+="${CYAN}${dir}${RESET} "
+
+if [ -n "$git_branch" ]; then
+  if [ -n "$git_dirty" ]; then
+    prompt+="${YELLOW}git:(${git_branch})${RESET} ${RED}${git_dirty}${RESET} "
+  else
+    prompt+="${GREEN}git:(${git_branch})${RESET} "
+  fi
+fi
+
+prompt+="${CYAN}[${model}]${RESET}"
+
+echo -e "$prompt"
+```
+
+### Oh My Zsh Robbyrussell with Full Path Option
+
+Version with configurable directory display (basename vs full path)
+
+```bash
+#!/usr/bin/env bash
+
+# Oh-My-Zsh Robbyrussell Theme with Full Path Option
+
+read -r input
+
+# Option to show full path (default: basename only, like robbyrussell)
+SHOW_FULL_PATH=${ROBBYRUSSELL_FULL_PATH:-false}
+
+dir=$(echo "$input" | jq -r '.workspace.current_dir // .workspace.path // .cwd // "~"' | sed "s|$HOME|~|")
+
+if [ "$SHOW_FULL_PATH" != "true" ]; then
+  dir=$(basename "$dir")
+fi
+
+model=$(echo "$input" | jq -r '.model.display_name // .model.id // "unknown"')
+
+git_branch=""
+git_dirty=""
+if git rev-parse --git-dir > /dev/null 2>&1; then
+  git_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+  if ! git diff --quiet 2>/dev/null || ! git diff --cached --quiet 2>/dev/null; then
+    git_dirty="✗"
+  fi
+fi
+
+CYAN="\033[38;5;51m"
+GREEN="\033[38;5;82m"
+YELLOW="\033[38;5;226m"
+RED="\033[38;5;196m"
+RESET="\033[0m"
+
+prompt="${CYAN}➜${RESET}  "
+prompt+="${CYAN}${dir}${RESET} "
+
+if [ -n "$git_branch" ]; then
+  if [ -n "$git_dirty" ]; then
+    prompt+="${YELLOW}git:(${git_branch})${RESET} ${RED}${git_dirty}${RESET} "
+  else
+    prompt+="${GREEN}git:(${git_branch})${RESET} "
+  fi
+fi
+
+prompt+="${CYAN}[${model}]${RESET}"
+
+echo -e "$prompt"
+```
+
+### Oh My Zsh Robbyrussell Installation Example
+
+Complete setup script with UTF-8 encoding verification and Unicode arrow character testing
+
+```bash
+#!/bin/bash
+# Installation script for Oh My Zsh Robbyrussell Theme
+
+# Check for jq (required for JSON parsing)
+if ! command -v jq &> /dev/null; then
+    echo "Installing jq for JSON parsing..."
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        brew install jq
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        sudo apt-get install -y jq || sudo yum install -y jq
+    else
+        echo "Please install jq manually: https://stedolan.github.io/jq/"
+    fi
+fi
+
+# Check for Git (optional, for Git status display)
+if ! command -v git &> /dev/null; then
+    echo "Warning: Git not found - Git status will not be displayed"
+    echo "Install Git: macOS (brew install git), Linux (sudo apt-get install git or sudo yum install git)"
+else
+    echo "Git command available: $(git --version)"
+fi
+
+# Verify UTF-8 encoding
+if locale charmap 2>/dev/null | grep -q UTF-8; then
+    echo "UTF-8 encoding verified"
+else
+    echo "Warning: UTF-8 encoding may not be enabled"
+    echo "Set with: export LANG=en_US.UTF-8"
+fi
+
+# Test Unicode arrow character (➜)
+if echo -e '➜' &> /dev/null; then
+    echo "Unicode arrow character supported: ➜"
+else
+    echo "Warning: Unicode arrow character may not display correctly"
+    echo "Terminal may need UTF-8 encoding"
+fi
+
+# Test Unicode checkmark/X (✗)
+if echo -e '✗' &> /dev/null; then
+    echo "Unicode checkmark/X character supported: ✗"
+else
+    echo "Warning: Unicode checkmark/X character may not display correctly"
+fi
+
+# Test basename command
+if command -v basename &> /dev/null; then
+    echo "basename command available"
+else
+    echo "Warning: basename command not found - directory display may not work"
+fi
+
+# Create statuslines directory
+mkdir -p .claude/statuslines
+
+cat > .claude/statuslines/oh-my-zsh-robbyrussell.sh << 'SCRIPT_EOF'
+#!/usr/bin/env bash
+
+# Oh-My-Zsh Robbyrussell Theme Replica for Claude Code
+# Classic robbyrussell prompt: ➜  directory git:(branch) ✗
+
+read -r input
+
+dir=$(echo "$input" | jq -r '.workspace.current_dir // .workspace.path // .cwd // "~"' | sed "s|$HOME|~|" | xargs basename)
+model=$(echo "$input" | jq -r '.model.display_name // .model.id // "unknown"')
+
+git_branch=""
+git_dirty=""
+if git rev-parse --git-dir > /dev/null 2>&1; then
+  git_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+  if ! git diff --quiet 2>/dev/null || ! git diff --cached --quiet 2>/dev/null; then
+    git_dirty="✗"
+  fi
+fi
+
+CYAN="\033[38;5;51m"
+GREEN="\033[38;5;82m"
+YELLOW="\033[38;5;226m"
+RED="\033[38;5;196m"
+RESET="\033[0m"
+
+prompt="${CYAN}➜${RESET}  "
+prompt+="${CYAN}${dir}${RESET} "
+
+if [ -n "$git_branch" ]; then
+  if [ -n "$git_dirty" ]; then
+    prompt+="${YELLOW}git:(${git_branch})${RESET} ${RED}${git_dirty}${RESET} "
+  else
+    prompt+="${GREEN}git:(${git_branch})${RESET} "
+  fi
+fi
+
+prompt+="${CYAN}[${model}]${RESET}"
+
+echo -e "$prompt"
+SCRIPT_EOF
+
+chmod +x .claude/statuslines/oh-my-zsh-robbyrussell.sh
+
+# Add to settings.json
+if [ ! -f .claude/settings.json ]; then
+    echo '{"statusLine":{"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/oh-my-zsh-robbyrussell.sh","refreshInterval":500}}' > .claude/settings.json
+else
+    jq '.statusLine = {"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/oh-my-zsh-robbyrussell.sh","refreshInterval":500}' .claude/settings.json > .claude/settings.json.tmp
+    mv .claude/settings.json.tmp .claude/settings.json
+fi
+
+echo "Oh My Zsh Robbyrussell Theme installed successfully!"
+echo "Note: Ensure terminal supports UTF-8 encoding for arrow character (➜)"
+echo "Test with: echo -e '➜'"
+```
+```bash
+#!/usr/bin/env bash
+
+# Enhanced Oh-My-Zsh Robbyrussell Theme with Exit Status
+
+read -r input
+
+# Extract exit status from previous command (if available)
+last_exit_status=${LAST_EXIT_STATUS:-0}
+
+dir=$(echo "$input" | jq -r '.workspace.current_dir // .workspace.path // .cwd // "~"' | sed "s|$HOME|~|" | xargs basename)
+model=$(echo "$input" | jq -r '.model.display_name // .model.id // "unknown"')
+
+git_branch=""
+git_dirty=""
+if git rev-parse --git-dir > /dev/null 2>&1; then
+  git_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+  if ! git diff --quiet 2>/dev/null || ! git diff --cached --quiet 2>/dev/null; then
+    git_dirty="✗"
+  fi
+fi
+
+# Colors
+CYAN="\033[38;5;51m"
+GREEN="\033[38;5;82m"
+YELLOW="\033[38;5;226m"
+RED="\033[38;5;196m"
+BOLD_GREEN="\033[1;38;5;82m"
+BOLD_RED="\033[1;38;5;196m"
+RESET="\033[0m"
+
+# Arrow color based on exit status (robbyrussell style)
+if [ $last_exit_status -eq 0 ]; then
+  arrow_color="${BOLD_GREEN}"
+else
+  arrow_color="${BOLD_RED}"
+fi
+
+# Build prompt
+prompt="${arrow_color}➜${RESET}  "
+prompt+="${CYAN}${dir}${RESET} "
+
+if [ -n "$git_branch" ]; then
+  if [ -n "$git_dirty" ]; then
+    prompt+="${YELLOW}git:(${git_branch})${RESET} ${RED}${git_dirty}${RESET} "
+  else
+    prompt+="${GREEN}git:(${git_branch})${RESET} "
+  fi
+fi
+
+prompt+="${CYAN}[${model}]${RESET}"
+
+echo -e "$prompt"
+```
+```bash
+#!/usr/bin/env bash
+
+# Oh-My-Zsh Robbyrussell Theme with Full Path Option
+
+read -r input
+
+# Option to show full path (default: basename only, like robbyrussell)
+SHOW_FULL_PATH=${ROBBYRUSSELL_FULL_PATH:-false}
+
+dir=$(echo "$input" | jq -r '.workspace.current_dir // .workspace.path // .cwd // "~"' | sed "s|$HOME|~|")
+
+if [ "$SHOW_FULL_PATH" != "true" ]; then
+  dir=$(basename "$dir")
+fi
+
+model=$(echo "$input" | jq -r '.model.display_name // .model.id // "unknown"')
+
+git_branch=""
+git_dirty=""
+if git rev-parse --git-dir > /dev/null 2>&1; then
+  git_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+  if ! git diff --quiet 2>/dev/null || ! git diff --cached --quiet 2>/dev/null; then
+    git_dirty="✗"
+  fi
+fi
+
+CYAN="\033[38;5;51m"
+GREEN="\033[38;5;82m"
+YELLOW="\033[38;5;226m"
+RED="\033[38;5;196m"
+RESET="\033[0m"
+
+prompt="${CYAN}➜${RESET}  "
+prompt+="${CYAN}${dir}${RESET} "
+
+if [ -n "$git_branch" ]; then
+  if [ -n "$git_dirty" ]; then
+    prompt+="${YELLOW}git:(${git_branch})${RESET} ${RED}${git_dirty}${RESET} "
+  else
+    prompt+="${GREEN}git:(${git_branch})${RESET} "
+  fi
+fi
+
+prompt+="${CYAN}[${model}]${RESET}"
+
+echo -e "$prompt"
+```
+```bash
+#!/bin/bash
+# Installation script for Oh My Zsh Robbyrussell Theme
+
+# Check for jq (required for JSON parsing)
+if ! command -v jq &> /dev/null; then
+    echo "Installing jq for JSON parsing..."
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        brew install jq
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        sudo apt-get install -y jq || sudo yum install -y jq
+    else
+        echo "Please install jq manually: https://stedolan.github.io/jq/"
+    fi
+fi
+
+# Check for Git (optional, for Git status display)
+if ! command -v git &> /dev/null; then
+    echo "Warning: Git not found - Git status will not be displayed"
+    echo "Install Git: macOS (brew install git), Linux (sudo apt-get install git or sudo yum install git)"
+else
+    echo "Git command available: $(git --version)"
+fi
+
+# Verify UTF-8 encoding
+if locale charmap 2>/dev/null | grep -q UTF-8; then
+    echo "UTF-8 encoding verified"
+else
+    echo "Warning: UTF-8 encoding may not be enabled"
+    echo "Set with: export LANG=en_US.UTF-8"
+fi
+
+# Test Unicode arrow character (➜)
+if echo -e '➜' &> /dev/null; then
+    echo "Unicode arrow character supported: ➜"
+else
+    echo "Warning: Unicode arrow character may not display correctly"
+    echo "Terminal may need UTF-8 encoding"
+fi
+
+# Test Unicode checkmark/X (✗)
+if echo -e '✗' &> /dev/null; then
+    echo "Unicode checkmark/X character supported: ✗"
+else
+    echo "Warning: Unicode checkmark/X character may not display correctly"
+fi
+
+# Test basename command
+if command -v basename &> /dev/null; then
+    echo "basename command available"
+else
+    echo "Warning: basename command not found - directory display may not work"
+fi
+
+# Create statuslines directory
+mkdir -p .claude/statuslines
+
+cat > .claude/statuslines/oh-my-zsh-robbyrussell.sh << 'SCRIPT_EOF'
+#!/usr/bin/env bash
+
+# Oh-My-Zsh Robbyrussell Theme Replica for Claude Code
+# Classic robbyrussell prompt: ➜  directory git:(branch) ✗
+
+read -r input
+
+dir=$(echo "$input" | jq -r '.workspace.current_dir // .workspace.path // .cwd // "~"' | sed "s|$HOME|~|" | xargs basename)
+model=$(echo "$input" | jq -r '.model.display_name // .model.id // "unknown"')
+
+git_branch=""
+git_dirty=""
+if git rev-parse --git-dir > /dev/null 2>&1; then
+  git_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+  if ! git diff --quiet 2>/dev/null || ! git diff --cached --quiet 2>/dev/null; then
+    git_dirty="✗"
+  fi
+fi
+
+CYAN="\033[38;5;51m"
+GREEN="\033[38;5;82m"
+YELLOW="\033[38;5;226m"
+RED="\033[38;5;196m"
+RESET="\033[0m"
+
+prompt="${CYAN}➜${RESET}  "
+prompt+="${CYAN}${dir}${RESET} "
+
+if [ -n "$git_branch" ]; then
+  if [ -n "$git_dirty" ]; then
+    prompt+="${YELLOW}git:(${git_branch})${RESET} ${RED}${git_dirty}${RESET} "
+  else
+    prompt+="${GREEN}git:(${git_branch})${RESET} "
+  fi
+fi
+
+prompt+="${CYAN}[${model}]${RESET}"
+
+echo -e "$prompt"
+SCRIPT_EOF
+
+chmod +x .claude/statuslines/oh-my-zsh-robbyrussell.sh
+
+# Add to settings.json
+if [ ! -f .claude/settings.json ]; then
+    echo '{"statusLine":{"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/oh-my-zsh-robbyrussell.sh","refreshInterval":500}}' > .claude/settings.json
+else
+    jq '.statusLine = {"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/oh-my-zsh-robbyrussell.sh","refreshInterval":500}' .claude/settings.json > .claude/settings.json.tmp
+    mv .claude/settings.json.tmp .claude/settings.json
+fi
+
+echo "Oh My Zsh Robbyrussell Theme installed successfully!"
+echo "Note: Ensure terminal supports UTF-8 encoding for arrow character (➜)"
+echo "Test with: echo -e '➜'"
+```
+
+## Troubleshooting
+### Arrow character (➜) showing as box or question mark
+
+Ensure terminal uses UTF-8 encoding. Check: locale | grep UTF-8. Set if needed: export LANG=en_US.UTF-8. Verify font supports Unicode arrows (U+279C). Test: echo -e '➜'. Verify encoding: locale charmap (should be UTF-8). If not supported, modify script to use ASCII alternative: arrow='>'.
+
+### Git status always showing dirty (✗) even with clean repo
+
+Check Git status manually: git status. Verify git diff commands work: git diff --quiet && echo clean (should return 0 for clean). Check staged changes: git diff --cached --quiet && echo clean. Ensure .gitignore not excluding modified files. Clear Git cache if needed: git rm -r --cached . && git add . (use with caution). Verify Git commands: git rev-parse --abbrev-ref HEAD (should return branch name).
+
+### Directory showing full path instead of basename only
+
+Verify basename command available: which basename. Check sed command working: echo ~/foo/bar | sed 's|'$HOME'|~|' | xargs basename (should show 'bar'). Test jq extraction: echo '$input' | jq .workspace.current_dir. Verify xargs: echo 'test' | xargs basename (should return 'test'). Check if path is already basename: basename '/path/to/dir' (should return 'dir').
+
+### Colors incorrect or showing different shades than Oh-My-Zsh
+
+Oh-My-Zsh uses 256-color codes. Verify terminal: tput colors (should be 256). Compare: echo -e '\033[38;5;51mCyan\033[0m' with zsh prompt. Adjust color codes if terminal palette differs. Check color codes: CYAN='\033[38;5;51m' (should be cyan), GREEN='\033[38;5;82m' (should be green). Test colors: echo -e '\033[38;5;51mTest\033[0m' (should show cyan text).
+
+### Git branch not detected despite being in repository
+
+Check Git installed and in PATH: git --version. Verify in repo: git rev-parse --git-dir (should return .git path). Ensure script can execute git: which git. Test branch detection: git rev-parse --abbrev-ref HEAD (should return branch name). Check for detached HEAD: git rev-parse --abbrev-ref HEAD (may return HEAD if detached). Verify Git directory exists: ls -la .git (should show Git directory).
+
+### Model name showing as 'unknown' or incorrect
+
+Check JSON field names: echo '$input' | jq .model.display_name (should return model name). Verify jq extraction: echo '$input' | jq -r '.model.display_name // .model.id // "unknown"'. Check if field exists: echo '$input' | jq 'has("model")'. Verify model field structure: echo '$input' | jq .model (should show object with id/display_name). Update script to check multiple field names if needed.
+
+### Checkmark/X character (✗) not displaying correctly
+
+Verify terminal supports Unicode checkmark/X: echo -e '✗'. If not supported, replace with ASCII: git*dirty='*' or git*dirty='X'. Check terminal encoding: locale charmap (should be UTF-8). Set encoding: export LANG=en_US.UTF-8. Test Unicode: echo -e '✗ ✓' (should display symbols). Alternative: Use ASCII characters like '*' for dirty status.
+
+### Prompt format not matching Oh-My-Zsh robbyrussell exactly
+
+Compare with original: Oh-My-Zsh robbyrussell uses '➜ %c git:(branch) ✗'. Verify spacing: prompt should have two spaces after arrow. Check format: '➜ directory git:(branch) ✗ [model]'. Verify color order: arrow (cyan), directory (cyan), git (green/yellow), dirty (red), model (cyan). Test full prompt: echo -e '\033[38;5;51m➜\033[0m \033[38;5;51mdir\033[0m \033[38;5;82mgit:(main)\033[0m'.

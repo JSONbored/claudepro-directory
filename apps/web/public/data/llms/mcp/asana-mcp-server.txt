@@ -1,0 +1,256 @@
+# Asana MCP Server for Claude
+URL: https://heyclau.de/mcp/asana-mcp-server
+Category: mcp
+Author: Asana
+Date added: 2025-09-18
+Documentation: https://developers.asana.com/docs/using-asanas-model-control-protocol-mcp-server
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/asana-mcp-server.mdx
+Download: /downloads/mcp/asana-mcp-server.mcpb
+## Citation Facts
+- Canonical URL: https://heyclau.de/mcp/asana-mcp-server
+- Source URLs: https://developers.asana.com/docs/using-asanas-model-control-protocol-mcp-server, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/asana-mcp-server.mdx
+- Brand: Asana
+- Brand domain: asana.com
+- Brand asset source: brandfetch
+- Package URL: /downloads/mcp/asana-mcp-server.mcpb
+- Package SHA256: 686fda20bfa3699a449ee489e34d4d57de5279ee41755d346bf90c8289e7a7a1
+- Author: Asana
+- Last verified: 2026-04-28T13:43:35-06:00
+- Robots: indexable
+## Summary
+Interact with Asana workspaces to manage projects and tasks
+## Tags
+- asana
+- project-management
+- tasks
+- team-collaboration
+- workflow
+## Content
+## Content
+Connect Claude to Asana for comprehensive project management and team collaboration.
+
+## Features
+- Create and manage tasks with rich metadata
+- Update project status and milestones
+- Assign team members and collaborators
+- Set due dates and task dependencies
+- Generate progress reports and analytics
+- Advanced Asana project and task management with workspace organization, team collaboration features, and project portfolio tracking
+- Batch operations support for efficient bulk task creation, updates, and assignments with automatic rate limit handling and retry logic
+- Real-time task synchronization capabilities with webhook integration support for monitoring project changes and triggering automated workflows
+- Advanced Asana project and task management with workspace organization, team collaboration features, and project portfolio tracking
+- Batch operations support for efficient bulk task creation, updates, and assignments with automatic rate limit handling and retry logic
+- Real-time task synchronization capabilities with webhook integration support for monitoring project changes and triggering automated workflows
+
+## Use Cases
+- Create tasks from meeting notes
+- Update project timelines and deadlines
+- Assign work to team members efficiently
+- Track milestone progress across projects
+- Generate status reports for stakeholders
+- Build automated project management workflows that sync external systems with Asana projects for real-time task tracking and team coordination
+- Build automated project management workflows that sync external systems with Asana projects for real-time task tracking and team coordination
+
+## Installation
+### Claude Code
+
+1. claude mcp add --transport sse asana https://mcp.asana.com/sse
+2. Verify installation: claude mcp list
+3. Test connection: claude mcp status asana
+
+### Claude Desktop
+
+1. Open Claude Desktop configuration file
+2. Add the Asana server configuration with SSE transport
+3. Restart Claude Desktop
+4. Authenticate via OAuth when prompted
+
+## Requirements
+- OAuth 2.0 authentication (required for MCP server via SSE transport)
+- Asana account with access to at least one workspace
+- Workspace membership with Member role or higher (Guest role insufficient for task creation)
+- Internet connection for accessing Asana API (https://app.asana.com)
+- Claude Desktop 0.7.0+ or Claude Code with MCP support
+- SSE (Server-Sent Events) transport support in MCP client
+- Rate limit awareness: Free tier 150 requests/minute, Paid tier 1,500 requests/minute
+- Understanding of Asana workspace, project, and task structure
+- OAuth scopes: default (access to all endpoints) or specific scopes as needed
+- Access to ~/.mcp-auth directory for OAuth token storage (may need cleanup if authentication fails)
+
+## Configuration
+```json
+{
+  "asana": {
+    "url": "https://mcp.asana.com/sse",
+    "transport": "sse"
+  }
+}
+```
+```json
+{
+  "asana": {
+    "url": "https://mcp.asana.com/sse",
+    "transport": "sse"
+  }
+}
+```
+
+## Examples
+### Create a task for the new feature
+
+Common usage pattern for this MCP server
+
+```plaintext
+Ask Claude: "Create a task for the new feature"
+```
+
+### Show all tasks due this week
+
+Common usage pattern for this MCP server
+
+```plaintext
+Ask Claude: "Show all tasks due this week"
+```
+
+### Update project status to on-track
+
+Common usage pattern for this MCP server
+
+```plaintext
+Ask Claude: "Update project status to on-track"
+```
+
+### Assign task to team member
+
+Common usage pattern for this MCP server
+
+```plaintext
+Ask Claude: "Assign task to team member"
+```
+
+### Create Task with Dependencies
+
+Create a new Asana task with project assignment, dependencies, and due date
+
+```typescript
+// Create Asana task with dependencies
+const task = await asana.createTask({
+  workspace: "1234567890",
+  name: "Complete project documentation",
+  projects: ["9876543210"],
+  dependencies: ["task-id-1", "task-id-2"],
+  due_on: "2025-12-31",
+});
+```
+
+### Create Task with Dependencies
+
+Create a new Asana task with project assignment, dependencies, and due date
+
+```typescript
+// Create Asana task with dependencies
+const task = await asana.createTask({
+  workspace: "1234567890",
+  name: "Complete project documentation",
+  projects: ["9876543210"],
+  dependencies: ["task-id-1", "task-id-2"],
+  due_on: "2025-12-31",
+});
+```
+```plaintext
+Ask Claude: "Create a task for the new feature"
+```
+```plaintext
+Ask Claude: "Show all tasks due this week"
+```
+```plaintext
+Ask Claude: "Update project status to on-track"
+```
+```plaintext
+Ask Claude: "Assign task to team member"
+```
+```typescript
+// Create Asana task with dependencies
+const task = await asana.createTask({
+  workspace: "1234567890",
+  name: "Complete project documentation",
+  projects: ["9876543210"],
+  dependencies: ["task-id-1", "task-id-2"],
+  due_on: "2025-12-31",
+});
+```
+```typescript
+// Create Asana task with dependencies
+const task = await asana.createTask({
+  workspace: "1234567890",
+  name: "Complete project documentation",
+  projects: ["9876543210"],
+  dependencies: ["task-id-1", "task-id-2"],
+  due_on: "2025-12-31",
+});
+```
+
+## Security
+- OAuth authentication for secure access
+- Workspace permissions apply automatically
+- Audit trail maintained for all actions
+- Regular permission reviews recommended
+- Asana API tokens and personal access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management
+- OAuth access tokens should be used for third-party integrations instead of personal access tokens to ensure proper access control and token lifecycle management
+- Asana workspace and project IDs may expose organizational structure and team information - ensure workspace IDs are kept private and not shared in public configurations
+- Rate limiting and API quota management are critical for Asana MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption
+- Asana webhook configurations and payloads may contain sensitive project and task data - ensure webhook endpoints are properly secured with authentication and HTTPS encryption
+- Asana API tokens and personal access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management
+- OAuth access tokens should be used for third-party integrations instead of personal access tokens to ensure proper access control and token lifecycle management
+- Asana workspace and project IDs may expose organizational structure and team information - ensure workspace IDs are kept private and not shared in public configurations
+- Rate limiting and API quota management are critical for Asana MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption
+- Asana webhook configurations and payloads may contain sensitive project and task data - ensure webhook endpoints are properly secured with authentication and HTTPS encryption
+
+## Troubleshooting
+### OAuth authentication fails or connection times out
+
+Remove ~/.mcp-auth directory with `rm -rf ~/.mcp-auth` and re-authenticate. Verify SSE URL https://mcp.asana.com/sse is accessible. Logout and re-login to Asana account if errors persist.
+
+### Insufficient permissions to create or modify tasks
+
+Verify workspace role is Member or higher (not Guest). Check project permissions allow task creation. Contact workspace admin to upgrade access level if needed.
+
+### Rate limit exceeded during bulk task operations
+
+Free tier: 150 req/min limit. Paid tier: 1,500 req/min. Batch operations into groups of 10-20 tasks. Implement delays between batches. Check Retry-After header in 429 responses.
+
+### Tasks not appearing or data appears stale
+
+Run tools/list command to refresh available endpoints. Restart MCP client connection. Verify you're querying correct workspace - switch workspaces if accessing wrong data.
+
+### Asana MCP server authentication errors with personal access tokens
+
+Verify token is valid and not expired. Check token scopes match required permissions. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.
+
+### Rate limit errors when managing large Asana projects
+
+Implement exponential backoff retry logic with jitter. Use batch operations to reduce API calls. Cache frequently accessed data. Monitor rate limit headers and adjust request frequency accordingly.
+
+### Asana workspace or project access denied errors
+
+Verify API token has access to the workspace and projects. Check workspace permissions and project sharing settings. Ensure OAuth scopes include required workspace and project access permissions.
+
+### Asana MCP server connection timeouts or network errors
+
+Check network connectivity and firewall settings. Verify Asana API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.
+
+### Asana MCP server authentication errors with personal access tokens
+
+Verify token is valid and not expired. Check token scopes match required permissions. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.
+
+### Rate limit errors when managing large Asana projects
+
+Implement exponential backoff retry logic with jitter. Use batch operations to reduce API calls. Cache frequently accessed data. Monitor rate limit headers and adjust request frequency accordingly.
+
+### Asana workspace or project access denied errors
+
+Verify API token has access to the workspace and projects. Check workspace permissions and project sharing settings. Ensure OAuth scopes include required workspace and project access permissions.
+
+### Asana MCP server connection timeouts or network errors
+
+Check network connectivity and firewall settings. Verify Asana API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

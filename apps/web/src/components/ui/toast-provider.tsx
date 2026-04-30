@@ -7,7 +7,7 @@ import {
   useCallback,
   useContext,
   useMemo,
-  useState
+  useState,
 } from "react";
 
 import { cn } from "@/lib";
@@ -35,8 +35,10 @@ type ToastContextValue = {
 const ToastContext = createContext<ToastContextValue | null>(null);
 
 function getToastIcon(variant: ToastVariant) {
-  if (variant === "success") return <CheckCircle2 className="size-4 text-emerald-500" />;
-  if (variant === "error") return <TriangleAlert className="size-4 text-red-500" />;
+  if (variant === "success")
+    return <CheckCircle2 className="size-4 text-emerald-500" />;
+  if (variant === "error")
+    return <TriangleAlert className="size-4 text-red-500" />;
   return <Info className="size-4 text-primary" />;
 }
 
@@ -61,22 +63,33 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   const dismissToast = useCallback((id: string) => {
     setToasts((current) =>
-      current.map((item) => (item.id === id ? { ...item, leaving: true } : item))
+      current.map((item) =>
+        item.id === id ? { ...item, leaving: true } : item,
+      ),
     );
     window.setTimeout(() => {
       setToasts((current) => current.filter((item) => item.id !== id));
     }, 220);
   }, []);
 
-  const pushToast = useCallback((toast: ToastInput) => {
-    const id = crypto.randomUUID();
-    const variant = toast.variant ?? "info";
-    setToasts((current) => [
-      ...current,
-      { id, title: toast.title, description: toast.description, variant, leaving: false }
-    ]);
-    window.setTimeout(() => dismissToast(id), 2200);
-  }, [dismissToast]);
+  const pushToast = useCallback(
+    (toast: ToastInput) => {
+      const id = crypto.randomUUID();
+      const variant = toast.variant ?? "info";
+      setToasts((current) => [
+        ...current,
+        {
+          id,
+          title: toast.title,
+          description: toast.description,
+          variant,
+          leaving: false,
+        },
+      ]);
+      window.setTimeout(() => dismissToast(id), 2200);
+    },
+    [dismissToast],
+  );
 
   const value = useMemo(() => ({ pushToast }), [pushToast]);
 
@@ -98,11 +111,18 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           >
             {getToastIcon(toast.variant)}
             <div className="min-w-0 flex-1">
-              <p className={cn("text-sm font-medium", getToastTitleClass(toast.variant))}>
+              <p
+                className={cn(
+                  "text-sm font-medium",
+                  getToastTitleClass(toast.variant),
+                )}
+              >
                 {toast.title}
               </p>
               {toast.description ? (
-                <p className="mt-0.5 text-xs text-muted-foreground">{toast.description}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {toast.description}
+                </p>
               ) : null}
             </div>
             <button

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "mcp:redis-mcp-server",
+  "category": "mcp",
+  "slug": "redis-mcp-server",
+  "title": "Redis MCP Server for Claude",
+  "author": "Redis",
+  "brandName": "Redis",
+  "brandDomain": "redis.io",
+  "brandIconUrl": "/api/brand-assets/icon/redis.io",
+  "brandAssetSource": "brandfetch",
+  "copyText": "Install:\nuvx --from git+https://github.com/redis/mcp-redis.git redis-mcp-server --url redis://localhost:6379/0 && claude mcp list\n\nConfig:\n{\n  \"redis\": {\n    \"args\": [\n      \"--from\",\n      \"git+https://github.com/redis/mcp-redis.git\",\n      \"redis-mcp-server\",\n      \"--url\",\n      \"redis://localhost:6379/0\"\n    ],\n    \"command\": \"uvx\"\n  }\n}\n\nUsage:\n{\n  \"redis\": {\n    \"args\": [\n      \"--from\",\n      \"git+https://github.com/redis/mcp-redis.git\",\n      \"redis-mcp-server\",\n      \"--url\",\n      \"redis://localhost:6379/0\"\n    ],\n    \"command\": \"uvx\"\n  }\n}",
+  "detailMarkdown": "# Redis MCP Server for Claude\n\nOfficial Redis MCP server providing natural language interface for Redis data management and operations\n\n## Install\n```bash\nuvx --from git+https://github.com/redis/mcp-redis.git redis-mcp-server --url redis://localhost:6379/0 && claude mcp list\n```\n\n## Config\n```json\n{\n  \"redis\": {\n    \"args\": [\n      \"--from\",\n      \"git+https://github.com/redis/mcp-redis.git\",\n      \"redis-mcp-server\",\n      \"--url\",\n      \"redis://localhost:6379/0\"\n    ],\n    \"command\": \"uvx\"\n  }\n}\n```\n\n## Usage\nuvx --from git+https://github.com/redis/mcp-redis.git redis-mcp-server --url redis://localhost:6379/0 && claude mcp list",
+  "webUrl": "https://heyclau.de/mcp/redis-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/redis-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/redis-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/redis-mcp-server",
+  "seoTitle": "Redis MCP Server for Claude",
+  "seoDescription": "Official Redis MCP server providing natural language interface for Redis data management and operations Discover tools for AI development.",
+  "repoUrl": "https://github.com/redis/mcp-redis",
+  "documentationUrl": "https://github.com/redis/mcp-redis"
+}

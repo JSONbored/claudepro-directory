@@ -17,8 +17,8 @@ seoDescription: >-
   prevent data loss. This hook runs before file editing operations (Edit, Write,
   Mult...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-09-19'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-09-19"
 installable: true
 installCommand: >-
   mkdir -p .claude/hooks && touch .claude/hooks/auto-save-backup.sh && chmod +x
@@ -79,6 +79,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Features
 
 - Automatic timestamped backups before file modification using ISO 8601 format with nanosecond precision for collision prevention
@@ -129,11 +130,7 @@ robotsFollow: true
   "hooks": {
     "preToolUse": {
       "script": "./.claude/hooks/auto-save-backup.sh",
-      "matchers": [
-        "edit",
-        "write",
-        "multiedit"
-      ]
+      "matchers": ["edit", "write", "multiedit"]
     }
   }
 }
@@ -156,18 +153,18 @@ fi
 # Check if file exists before backing up
 if [ -f "$FILE_PATH" ]; then
   echo "💾 Creating backup for $FILE_PATH..." >&2
-  
+
   # Create backups directory
   mkdir -p .backups
-  
+
   # Generate timestamped backup filename
   BASENAME=$(basename "$FILE_PATH")
   TIMESTAMP=$(date +%Y%m%d_%H%M%S)
   BACKUP_NAME="${BASENAME%.*}_${TIMESTAMP}.${BASENAME##*.}"
-  
+
   # Create backup
   cp "$FILE_PATH" ".backups/$BACKUP_NAME" 2>/dev/null || true
-  
+
   if [ $? -eq 0 ]; then
     echo "✅ Backup created: .backups/$BACKUP_NAME" >&2
   else
@@ -181,6 +178,7 @@ exit 0
 ```
 
 ## Examples
+
 ### Auto Save Backup Hook Script
 
 Complete hook script that creates timestamped backups before file modifications with nanosecond precision
@@ -202,6 +200,7 @@ if [ -f "$FILE_PATH" ]; then
 fi
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable automatic backups before file edits, writes, and multiedits
@@ -223,6 +222,7 @@ Complete hook configuration for .claude/settings.json to enable automatic backup
   }
 }
 ```
+
 ### Backup with Disk Space Management
 
 Enhanced hook script with automatic cleanup of old backups when disk space is limited
@@ -236,17 +236,18 @@ if [ -f "$FILE_PATH" ]; then
   BASENAME=$(basename "$FILE_PATH")
   TIMESTAMP=$(date +%Y%m%d_%H%M%S_%N)
   BACKUP_NAME="${BASENAME%.*}_${TIMESTAMP}.${BASENAME##*.}"
-  
+
   # Check disk space before backup
   AVAILABLE=$(df -BG .backups | tail -1 | awk '{print $4}' | sed 's/G//')
   if [ "$AVAILABLE" -lt 1 ]; then
     find .backups -type f -mtime +30 -delete 2>/dev/null
   fi
-  
+
   cp "$FILE_PATH" ".backups/$BACKUP_NAME" 2>/dev/null || true
 fi
 exit 0
 ```
+
 ### Multiedit Backup Support
 
 Hook script that handles Multiedit operations by backing up all files in the edits array
@@ -267,6 +268,7 @@ if echo "$INPUT" | jq -e ".tool_input.edits" &> /dev/null; then
 fi
 exit 0
 ```
+
 ### Backup with Retention Policy
 
 Advanced hook script with automatic retention policy limiting backups to last 50 versions per file
@@ -277,18 +279,18 @@ INPUT=$(cat)
 FILE_PATH=$(echo "$INPUT" | jq -r ".tool_input.file_path")
 if [ -f "$FILE_PATH" ]; then
   mkdir -p .backups
-  
+
   # Retention policy: keep last 50 backups per file
   BASENAME=$(basename "$FILE_PATH")
   FILE_PREFIX="${BASENAME%.*}_"
-  
+
   # Count existing backups for this file
   BACKUP_COUNT=$(find .backups -name "${FILE_PREFIX}*" | wc -l)
-  
+
   if [ "$BACKUP_COUNT" -ge 50 ]; then
     find .backups -name "${FILE_PREFIX}*" -type f -printf '%T@ %p\n' | sort -n | head -n -50 | cut -d ' ' -f2- | xargs rm -f 2>/dev/null
   fi
-  
+
   TIMESTAMP=$(date +%Y%m%d_%H%M%S_%N)
   BACKUP_NAME="${BASENAME%.*}_${TIMESTAMP}.${BASENAME##*.}"
   cp "$FILE_PATH" ".backups/$BACKUP_NAME" 2>/dev/null || true
@@ -297,27 +299,35 @@ exit 0
 ```
 
 ## Troubleshooting
+
 ### PreToolUse hook runs but backup directory not created
 
 Verify mkdir permissions in project root. Check disk space: df -h. Ensure script runs with correct CWD: pwd >&2 in hook. Create .backups manually if needed: mkdir -p .backups. Check filesystem permissions on project directory.
+
 ### Backup created but original file modification fails after
 
 PreToolUse only creates backup, doesn't block edits. Check subsequent tool execution logs. Verify hook exits with 0 (non-blocking). Review tool output for actual edit errors. Ensure backup operation completes before file modification.
+
 ### Timestamp collisions when editing same file rapidly
 
-Add nanoseconds to timestamp: date +%Y%m%d_%H%M%S_%N. Or use hash suffix: ${TIMESTAMP}_$(md5sum file | cut -c1-8). Implement collision detection and retry logic. Use ISO 8601 format with nanoseconds for better precision.
+Add nanoseconds to timestamp: date +%Y%m%d*%H%M%S*%N. Or use hash suffix: ${TIMESTAMP}_$(md5sum file | cut -c1-8). Implement collision detection and retry logic. Use ISO 8601 format with nanoseconds for better precision.
+
 ### Hook backs up new files that don't exist yet on Write
 
-Verify [ -f "$FILE_PATH" ] check works correctly. Check TOOL_NAME to distinguish edit vs write: if [[ "$TOOL_NAME" == "edit" ]]. Skip backup for new file creation. Use PreToolUse only for Edit operations, not Write.
+Verify [ -f "$FILE_PATH" ] check works correctly. Check TOOL_NAME to distinguish edit vs write: if [["$TOOL_NAME" == "edit"]]. Skip backup for new file creation. Use PreToolUse only for Edit operations, not Write.
+
 ### Backup directory grows unbounded filling disk space
 
-Add retention policy: find .backups -mtime +30 -delete. Implement backup rotation script. Use git for versioning instead. Add size limit checks before creating backups. Limit backups per file: find .backups -name "file_*" | tail -n +50 | xargs rm.
+Add retention policy: find .backups -mtime +30 -delete. Implement backup rotation script. Use git for versioning instead. Add size limit checks before creating backups. Limit backups per file: find .backups -name "file\_\*" | tail -n +50 | xargs rm.
+
 ### Backup operation takes too long on large files
 
 Add file size check before backup: [ $(stat -f%z file) -lt 10000000 ]. Use rsync for large files: rsync -a file .backups/backup_name. Consider excluding large files from backup. Add timeout wrapper: timeout 10s cp file backup.
+
 ### Backup files have wrong permissions or ownership
 
 Use cp -p to preserve permissions: cp -p file backup. Check umask settings. Verify backup directory permissions: chmod 700 .backups. Use rsync -a for better metadata preservation: rsync -a file backup.
+
 ### Multiedit operations only backup first file
 
 Check if FILE_PATH is array in multiedit context. Parse all paths: jq -r '.tool_input.edits[].file_path'. Loop through each file for backup. Verify jq parsing handles arrays correctly. Test with multiple files in edits array.

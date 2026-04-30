@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "mcp:heyclaude-mcp",
+  "category": "mcp",
+  "slug": "heyclaude-mcp",
+  "title": "HeyClaude MCP Server",
+  "author": "HeyClaude Team",
+  "brandName": "HeyClaude",
+  "brandDomain": "heyclau.de",
+  "brandIconUrl": "/favicon.svg",
+  "brandAssetSource": "manual",
+  "copyText": "Install:\nnpx -y mcp-remote https://heyclau.de/api/mcp\n\nConfig:\n{\n  \"mcpServers\": {\n    \"heyclaude\": {\n      \"command\": \"npx\",\n      \"args\": [\"-y\", \"mcp-remote\", \"https://heyclau.de/api/mcp\"]\n    }\n  }\n}\n\nUsage:\n{\n  \"mcpServers\": {\n    \"heyclaude\": {\n      \"command\": \"npx\",\n      \"args\": [\"-y\", \"mcp-remote\", \"https://heyclau.de/api/mcp\"]\n    }\n  }\n}",
+  "detailMarkdown": "# HeyClaude MCP Server\n\nSearch the public HeyClaude registry, fetch entry details, inspect compatibility, and build issue-first submission URLs through MCP.\n\n## Install\n```bash\nnpx -y mcp-remote https://heyclau.de/api/mcp\n```\n\n## Config\n```json\n{\n  \"mcpServers\": {\n    \"heyclaude\": {\n      \"command\": \"npx\",\n      \"args\": [\"-y\", \"mcp-remote\", \"https://heyclau.de/api/mcp\"]\n    }\n  }\n}\n```\n\n## Usage\nnpx -y mcp-remote https://heyclau.de/api/mcp",
+  "webUrl": "https://heyclau.de/mcp/heyclaude-mcp",
+  "canonicalUrl": "https://heyclau.de/mcp/heyclaude-mcp",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/heyclaude-mcp.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/heyclaude-mcp",
+  "seoTitle": "HeyClaude MCP Server for registry search and submissions",
+  "seoDescription": "Use the official HeyClaude MCP server to search registry entries, fetch install guidance, inspect compatibility, and prepare issue-first content submissions.",
+  "repoUrl": "",
+  "documentationUrl": "https://github.com/JSONbored/claudepro-directory/tree/main/packages/mcp"
+}

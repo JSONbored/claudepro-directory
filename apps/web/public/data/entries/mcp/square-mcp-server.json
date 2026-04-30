@@ -1,0 +1,326 @@
+{
+  "schemaVersion": 1,
+  "key": "mcp:square-mcp-server",
+  "entry": {
+    "category": "mcp",
+    "slug": "square-mcp-server",
+    "title": "Square MCP Server for Claude",
+    "description": "Build on Square APIs for payments, inventory, and order management",
+    "seoTitle": "Square MCP Server for Claude",
+    "seoDescription": "Build on Square APIs for payments, inventory, and order management Discover tools for AI development. HeyClaude adds source links, install steps,...",
+    "author": "Square",
+    "dateAdded": "2025-09-18",
+    "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+    "tags": [
+      "payments",
+      "square",
+      "pos",
+      "inventory",
+      "commerce"
+    ],
+    "keywords": [
+      "claude",
+      "commerce",
+      "development",
+      "inventory",
+      "mcp",
+      "mcp servers",
+      "payments",
+      "pos",
+      "server",
+      "square",
+      "tools",
+      "heyclaude"
+    ],
+    "readingTime": 1,
+    "difficultyScore": 6,
+    "documentationUrl": "https://developer.squareup.com/docs/mcp",
+    "brandName": "Square",
+    "brandDomain": "squareup.com",
+    "brandIconUrl": "/api/brand-assets/icon/squareup.com",
+    "brandAssetSource": "brandfetch",
+    "cardDescription": "Build on Square APIs for payments, inventory, and order management",
+    "installable": true,
+    "installCommand": "claude mcp add --transport sse square https://mcp.squareup.com/sse && claude mcp list",
+    "usageSnippet": "claude mcp add --transport sse square https://mcp.squareup.com/sse && claude mcp list",
+    "copySnippet": "{\n  \"square\": {\n    \"url\": \"https://mcp.squareup.com/sse\",\n    \"transport\": \"sse\"\n  }\n}",
+    "configSnippet": "{\n  \"square\": {\n    \"url\": \"https://mcp.squareup.com/sse\",\n    \"transport\": \"sse\"\n  }\n}",
+    "estimatedSetupTime": "1 minute",
+    "difficulty": "beginner",
+    "prerequisites": [
+      "Square merchant account (free or paid plan)",
+      "OAuth authentication setup (for mcp.squareup.com MCP connection)",
+      "Square application registration (in Square Developer Console)",
+      "Network access to mcp.squareup.com (HTTPS required, SSE transport)",
+      "Understanding of Square commerce concepts (payments, orders, inventory, customers)",
+      "Square location ID (active location required for API operations)",
+      "Claude Desktop 0.7.0+ or Claude Code with MCP support",
+      "Understanding of OAuth scopes (ORDERS_READ, PAYMENTS_WRITE, CUSTOMERS_READ, etc.)",
+      "Understanding of Square rate limits (REST API throttling, GraphQL: 10 QPS, complexity limits)",
+      "Optional: PCI compliance knowledge (for payment processing operations)"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/mcp/square-mcp-server.mcpb",
+    "downloadTrust": "first-party",
+    "downloadSha256": "d641dab1566fd2d5550a21872559701a301470bcfdedd9565a77d8090b301316",
+    "body": "## Content\n\nIntegrate Square's commerce platform with Claude for payment processing and business management. Process payments and refunds, manage inventory and catalogs, handle orders and fulfillment, track customer profiles, manage multiple locations, access transaction history, and generate sales reports—all through natural language commands. Supports OAuth authentication, PCI-compliant payment processing, and both sandbox and production environments.\n\n## Features\n\n- Process payments and refunds (secure payment processing)\n- Manage inventory levels and catalogs (real-time inventory management)\n- Handle orders and fulfillment (order lifecycle management)\n- Track customer profiles and history (customer relationship management)\n- Manage multiple business locations (multi-location support)\n- Access transaction history and reports (financial reporting)\n- Manage product catalog and pricing (catalog operations)\n- Process refunds and void transactions (payment reversals)\n- Advanced Square payment and transaction management with point-of-sale integration, inventory tracking, and merchant analytics\n- Batch operations support for efficient bulk payment operations, transaction management, and inventory processing with automatic rate limit handling and retry logic\n- Real-time payment synchronization capabilities with webhook integration support for monitoring Square events and triggering automated workflows\n\n## Use Cases\n\n- Process customer payments efficiently (secure payment acceptance)\n- Update inventory levels in real-time (inventory synchronization)\n- Create customer profiles for marketing (customer data management)\n- Generate sales reports and analytics (business intelligence)\n- Track order fulfillment status (order management)\n- Manage product catalogs and pricing (catalog administration)\n- Process refunds and handle disputes (payment reversals)\n- Monitor multi-location sales performance (enterprise reporting)\n- Build automated payment processing workflows that sync external systems with Square for real-time transaction management and point-of-sale operations\n\n## Installation\n\n### Claude Code\n\n1. Run: claude mcp add --transport sse square https://mcp.squareup.com/sse\n2. Verify installation: claude mcp list\n3. Test connection: claude mcp status square\n4. Authenticate with your Square account (OAuth flow)\n5. Grant required permissions (ORDERS_READ, PAYMENTS_WRITE, etc.)\n\n### Claude Desktop\n\n1. Open Claude Desktop configuration file (see configPath below)\n2. Add the Square server configuration with SSE transport and URL\n3. Restart Claude Desktop\n4. Authenticate with your Square account (OAuth flow)\n5. Grant required permissions (ORDERS_READ, PAYMENTS_WRITE, etc.)\n6. Verify connection in Claude Desktop\n\n## Requirements\n\n- Square merchant account (free or paid plan)\n- OAuth authentication setup (for mcp.squareup.com MCP connection)\n- Square application registration (in Square Developer Console)\n- Network access to mcp.squareup.com (HTTPS required, SSE transport)\n- Understanding of Square commerce concepts (payments, orders, inventory, customers)\n- Square location ID (active location required for API operations)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Understanding of OAuth scopes (ORDERS_READ, PAYMENTS_WRITE, CUSTOMERS_READ, etc.)\n- Understanding of Square rate limits (REST API throttling, GraphQL: 10 QPS, complexity limits)\n- Optional: PCI compliance knowledge (for payment processing operations)\n\n## Configuration\n\n```json\n{\n  \"square\": {\n    \"url\": \"https://mcp.squareup.com/sse\",\n    \"transport\": \"sse\"\n  }\n}\n```\n\n## Examples\n\n### Process a $50 payment\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Process a $50 payment\"\n```\n\n### Check inventory for SKU-123\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Check inventory for SKU-123\"\n```\n\n### Create order for customer\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Create order for customer\"\n```\n\n### Generate today's sales report\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Generate today's sales report\"\n```\n\n### Create Payment\n\nCreate a new Square payment with idempotency key\n\n```typescript\n// Create Square payment\nconst payment = await square.payments.createPayment({\n  source_id: \"source-id\",\n  idempotency_key: \"unique-key\",\n  amount_money: {\n    amount: 1000,\n    currency: \"USD\",\n  },\n});\n```\n\n## Security\n\n- OAuth authentication for secure access (token-based authentication)\n- PCI compliance for payment processing (secure payment handling)\n- Test in sandbox environment first (safe testing before production)\n- Monitor transaction logs (audit trail and security monitoring)\n- Access token expiration management (30-day expiration, refresh token usage)\n- Square API credentials and access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- Square OAuth access tokens should be used for third-party integrations to ensure proper access control, token lifecycle management, and automatic token refresh\n- Square payment, transaction, and location IDs may expose financial data and business information - ensure Square resource identifiers are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Square MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Square webhook configurations and payloads may contain sensitive payment data and transaction information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption\n\n## Troubleshooting\n\n### Rate limit exceeded - 429 RATE_LIMITED error returned\n\nSquare doesn't publish specific REST API rate limits but throttles high request volumes. For GraphQL: maximum 10 queries per second (QPS), max depth 10, max complexity 250 points. Implement exponential backoff with randomized jitter for retries (wait time increases with each retry). Reduce request frequency. Batch operations where possible. Use worker queue system to manage API call frequency. Monitor 429 errors in API Logs. Contact Square support if legitimate traffic blocked. For GraphQL, optimize queries to reduce complexity score.\n\n### Authentication failed - UNAUTHORIZED error using wrong environment\n\nSquare uses separate environments with different base URLs and access tokens. Production: `https://connect.squareup.com/v2` requires production access token. Sandbox: `https://connect.squareupsandbox.com/v2` requires sandbox access token. Use correct access token for environment from Developer Console. Verify application ID matches environment (production vs sandbox). Check token not expired (access tokens expire after 30 days) or revoked. Ensure token has required OAuth scopes for the API endpoint. Verify token corresponds to the correct base URL.\n\n### Sandbox limitations - payment method not supported\n\nSquare Sandbox only supports credit/debit card payments for testing. Afterpay, Cash App Pay, Google Pay, Apple Pay, and other payment methods are not available in Sandbox. Test payment flows in production with real cards after Sandbox validation. Use Sandbox for testing basic payment flows, order management, and inventory operations. For production testing, use small transaction amounts and test cards. Verify payment method availability in production environment before deploying.\n\n### Location permissions insufficient for operation\n\nSquare API operations require an active location. Verify merchant account has active location enabled in Square Dashboard. Check access token has permissions for specific location ID (include location_id in API requests). Ensure user role allows API operations (check OAuth scopes: ORDERS_READ, PAYMENTS_WRITE, etc.). Review location settings in Square Dashboard. Verify location is not archived or disabled. For multi-location accounts, ensure token has access to the target location. Check location capabilities match required operations (e.g., CREDIT_CARD_PROCESSING for payments).\n\n### Square MCP server authentication errors with API credentials\n\nVerify API credentials (Application ID and Access Token) are valid and not expired. Check credentials match the correct environment (sandbox vs production). Ensure credentials format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.\n\n### Square rate limit errors when processing multiple payment requests\n\nImplement exponential backoff retry logic with jitter. Use Square API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed payment data. Square allows 1,000 requests per minute per application.\n\n### Square payment or transaction access denied errors\n\nVerify API credentials have access to the payment or transaction. Check location permissions and merchant account status. Ensure API credentials have required scopes for target operations.\n\n### Square MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Square API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+    "sections": [
+      {
+        "title": "Content",
+        "id": "content",
+        "markdown": "Integrate Square's commerce platform with Claude for payment processing and business management. Process payments and refunds, manage inventory and catalogs, handle orders and fulfillment, track customer profiles, manage multiple locations, access transaction history, and generate sales reports—all through natural language commands. Supports OAuth authentication, PCI-compliant payment processing, and both sandbox and production environments.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Process payments and refunds (secure payment processing)\n- Manage inventory levels and catalogs (real-time inventory management)\n- Handle orders and fulfillment (order lifecycle management)\n- Track customer profiles and history (customer relationship management)\n- Manage multiple business locations (multi-location support)\n- Access transaction history and reports (financial reporting)\n- Manage product catalog and pricing (catalog operations)\n- Process refunds and void transactions (payment reversals)\n- Advanced Square payment and transaction management with point-of-sale integration, inventory tracking, and merchant analytics\n- Batch operations support for efficient bulk payment operations, transaction management, and inventory processing with automatic rate limit handling and retry logic\n- Real-time payment synchronization capabilities with webhook integration support for monitoring Square events and triggering automated workflows",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Process customer payments efficiently (secure payment acceptance)\n- Update inventory levels in real-time (inventory synchronization)\n- Create customer profiles for marketing (customer data management)\n- Generate sales reports and analytics (business intelligence)\n- Track order fulfillment status (order management)\n- Manage product catalogs and pricing (catalog administration)\n- Process refunds and handle disputes (payment reversals)\n- Monitor multi-location sales performance (enterprise reporting)\n- Build automated payment processing workflows that sync external systems with Square for real-time transaction management and point-of-sale operations",
+        "codeBlocks": []
+      },
+      {
+        "title": "Installation",
+        "id": "installation",
+        "markdown": "### Claude Code\n\n1. Run: claude mcp add --transport sse square https://mcp.squareup.com/sse\n2. Verify installation: claude mcp list\n3. Test connection: claude mcp status square\n4. Authenticate with your Square account (OAuth flow)\n5. Grant required permissions (ORDERS_READ, PAYMENTS_WRITE, etc.)\n\n### Claude Desktop\n\n1. Open Claude Desktop configuration file (see configPath below)\n2. Add the Square server configuration with SSE transport and URL\n3. Restart Claude Desktop\n4. Authenticate with your Square account (OAuth flow)\n5. Grant required permissions (ORDERS_READ, PAYMENTS_WRITE, etc.)\n6. Verify connection in Claude Desktop",
+        "codeBlocks": []
+      },
+      {
+        "title": "Requirements",
+        "id": "requirements",
+        "markdown": "- Square merchant account (free or paid plan)\n- OAuth authentication setup (for mcp.squareup.com MCP connection)\n- Square application registration (in Square Developer Console)\n- Network access to mcp.squareup.com (HTTPS required, SSE transport)\n- Understanding of Square commerce concepts (payments, orders, inventory, customers)\n- Square location ID (active location required for API operations)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Understanding of OAuth scopes (ORDERS_READ, PAYMENTS_WRITE, CUSTOMERS_READ, etc.)\n- Understanding of Square rate limits (REST API throttling, GraphQL: 10 QPS, complexity limits)\n- Optional: PCI compliance knowledge (for payment processing operations)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Configuration",
+        "id": "configuration",
+        "markdown": "```json\n{\n  \"square\": {\n    \"url\": \"https://mcp.squareup.com/sse\",\n    \"transport\": \"sse\"\n  }\n}\n```",
+        "codeBlocks": [
+          {
+            "language": "json",
+            "code": "{\n  \"square\": {\n    \"url\": \"https://mcp.squareup.com/sse\",\n    \"transport\": \"sse\"\n  }\n}"
+          }
+        ]
+      },
+      {
+        "title": "Examples",
+        "id": "examples",
+        "markdown": "### Process a $50 payment\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Process a $50 payment\"\n```\n\n### Check inventory for SKU-123\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Check inventory for SKU-123\"\n```\n\n### Create order for customer\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Create order for customer\"\n```\n\n### Generate today's sales report\n\nCommon usage pattern for this MCP server\n\n```plaintext\nAsk Claude: \"Generate today's sales report\"\n```\n\n### Create Payment\n\nCreate a new Square payment with idempotency key\n\n```typescript\n// Create Square payment\nconst payment = await square.payments.createPayment({\n  source_id: \"source-id\",\n  idempotency_key: \"unique-key\",\n  amount_money: {\n    amount: 1000,\n    currency: \"USD\",\n  },\n});\n```",
+        "codeBlocks": [
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Process a $50 payment\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Check inventory for SKU-123\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Create order for customer\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Generate today's sales report\""
+          },
+          {
+            "language": "typescript",
+            "code": "// Create Square payment\nconst payment = await square.payments.createPayment({\n  source_id: \"source-id\",\n  idempotency_key: \"unique-key\",\n  amount_money: {\n    amount: 1000,\n    currency: \"USD\",\n  },\n});"
+          }
+        ]
+      },
+      {
+        "title": "Security",
+        "id": "security",
+        "markdown": "- OAuth authentication for secure access (token-based authentication)\n- PCI compliance for payment processing (secure payment handling)\n- Test in sandbox environment first (safe testing before production)\n- Monitor transaction logs (audit trail and security monitoring)\n- Access token expiration management (30-day expiration, refresh token usage)\n- Square API credentials and access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- Square OAuth access tokens should be used for third-party integrations to ensure proper access control, token lifecycle management, and automatic token refresh\n- Square payment, transaction, and location IDs may expose financial data and business information - ensure Square resource identifiers are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Square MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Square webhook configurations and payloads may contain sensitive payment data and transaction information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "### Rate limit exceeded - 429 RATE_LIMITED error returned\n\nSquare doesn't publish specific REST API rate limits but throttles high request volumes. For GraphQL: maximum 10 queries per second (QPS), max depth 10, max complexity 250 points. Implement exponential backoff with randomized jitter for retries (wait time increases with each retry). Reduce request frequency. Batch operations where possible. Use worker queue system to manage API call frequency. Monitor 429 errors in API Logs. Contact Square support if legitimate traffic blocked. For GraphQL, optimize queries to reduce complexity score.\n\n### Authentication failed - UNAUTHORIZED error using wrong environment\n\nSquare uses separate environments with different base URLs and access tokens. Production: `https://connect.squareup.com/v2` requires production access token. Sandbox: `https://connect.squareupsandbox.com/v2` requires sandbox access token. Use correct access token for environment from Developer Console. Verify application ID matches environment (production vs sandbox). Check token not expired (access tokens expire after 30 days) or revoked. Ensure token has required OAuth scopes for the API endpoint. Verify token corresponds to the correct base URL.\n\n### Sandbox limitations - payment method not supported\n\nSquare Sandbox only supports credit/debit card payments for testing. Afterpay, Cash App Pay, Google Pay, Apple Pay, and other payment methods are not available in Sandbox. Test payment flows in production with real cards after Sandbox validation. Use Sandbox for testing basic payment flows, order management, and inventory operations. For production testing, use small transaction amounts and test cards. Verify payment method availability in production environment before deploying.\n\n### Location permissions insufficient for operation\n\nSquare API operations require an active location. Verify merchant account has active location enabled in Square Dashboard. Check access token has permissions for specific location ID (include location_id in API requests). Ensure user role allows API operations (check OAuth scopes: ORDERS_READ, PAYMENTS_WRITE, etc.). Review location settings in Square Dashboard. Verify location is not archived or disabled. For multi-location accounts, ensure token has access to the target location. Check location capabilities match required operations (e.g., CREDIT_CARD_PROCESSING for payments).\n\n### Square MCP server authentication errors with API credentials\n\nVerify API credentials (Application ID and Access Token) are valid and not expired. Check credentials match the correct environment (sandbox vs production). Ensure credentials format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.\n\n### Square rate limit errors when processing multiple payment requests\n\nImplement exponential backoff retry logic with jitter. Use Square API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed payment data. Square allows 1,000 requests per minute per application.\n\n### Square payment or transaction access denied errors\n\nVerify API credentials have access to the payment or transaction. Check location permissions and merchant account status. Ensure API credentials have required scopes for target operations.\n\n### Square MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Square API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Content",
+        "id": "content"
+      },
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      },
+      {
+        "depth": 2,
+        "text": "Installation",
+        "id": "installation"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Code",
+        "id": "claude-code"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Desktop",
+        "id": "claude-desktop"
+      },
+      {
+        "depth": 2,
+        "text": "Requirements",
+        "id": "requirements"
+      },
+      {
+        "depth": 2,
+        "text": "Configuration",
+        "id": "configuration"
+      },
+      {
+        "depth": 2,
+        "text": "Examples",
+        "id": "examples"
+      },
+      {
+        "depth": 3,
+        "text": "Process a $50 payment",
+        "id": "process-a-50-payment"
+      },
+      {
+        "depth": 3,
+        "text": "Check inventory for SKU-123",
+        "id": "check-inventory-for-sku-123"
+      },
+      {
+        "depth": 3,
+        "text": "Create order for customer",
+        "id": "create-order-for-customer"
+      },
+      {
+        "depth": 3,
+        "text": "Generate today's sales report",
+        "id": "generate-todays-sales-report"
+      },
+      {
+        "depth": 3,
+        "text": "Create Payment",
+        "id": "create-payment"
+      },
+      {
+        "depth": 2,
+        "text": "Security",
+        "id": "security"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 3,
+        "text": "Rate limit exceeded - 429 RATE_LIMITED error returned",
+        "id": "rate-limit-exceeded---429-ratelimited-error-returned"
+      },
+      {
+        "depth": 3,
+        "text": "Authentication failed - UNAUTHORIZED error using wrong environment",
+        "id": "authentication-failed---unauthorized-error-using-wrong-environment"
+      },
+      {
+        "depth": 3,
+        "text": "Sandbox limitations - payment method not supported",
+        "id": "sandbox-limitations---payment-method-not-supported"
+      },
+      {
+        "depth": 3,
+        "text": "Location permissions insufficient for operation",
+        "id": "location-permissions-insufficient-for-operation"
+      },
+      {
+        "depth": 3,
+        "text": "Square MCP server authentication errors with API credentials",
+        "id": "square-mcp-server-authentication-errors-with-api-credentials"
+      },
+      {
+        "depth": 3,
+        "text": "Square rate limit errors when processing multiple payment requests",
+        "id": "square-rate-limit-errors-when-processing-multiple-payment-requests"
+      },
+      {
+        "depth": 3,
+        "text": "Square payment or transaction access denied errors",
+        "id": "square-payment-or-transaction-access-denied-errors"
+      },
+      {
+        "depth": 3,
+        "text": "Square MCP server connection timeouts or network errors",
+        "id": "square-mcp-server-connection-timeouts-or-network-errors"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "json",
+        "code": "{\n  \"square\": {\n    \"url\": \"https://mcp.squareup.com/sse\",\n    \"transport\": \"sse\"\n  }\n}"
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Process a $50 payment\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Check inventory for SKU-123\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Create order for customer\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Generate today's sales report\""
+      },
+      {
+        "language": "typescript",
+        "code": "// Create Square payment\nconst payment = await square.payments.createPayment({\n  source_id: \"source-id\",\n  idempotency_key: \"unique-key\",\n  amount_money: {\n    amount: 1000,\n    currency: \"USD\",\n  },\n});"
+      }
+    ],
+    "filePath": "content/mcp/square-mcp-server.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/square-mcp-server.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": true,
+    "packageTrust": "first-party",
+    "packageChecksum": "d641dab1566fd2d5550a21872559701a301470bcfdedd9565a77d8090b301316",
+    "checksumPresent": true,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://developer.squareup.com/docs/mcp",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/square-mcp-server.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

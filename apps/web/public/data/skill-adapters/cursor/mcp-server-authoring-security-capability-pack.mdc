@@ -1,0 +1,14 @@
+---
+description: "Deep MCP server skill for secure tool design, permissioning, contract stability, and production-grade safety controls."
+globs:
+alwaysApply: false
+---
+# MCP Server Authoring Security Capability Pack Skill
+Expert MCP capability skill for secure server authoring, tool schema discipline, auth boundaries, and adversarial prompt hardening.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/mcp-server-authoring-security-capability-pack.zip -o mcp-server-authoring-security-capability-pack.zip && unzip -o mcp-server-authoring-security-capability-pack.zip -d ./mcp-server-authoring-security-capability-pack
+```
+## Source
+https://heyclau.de/downloads/skills/mcp-server-authoring-security-capability-pack.zip

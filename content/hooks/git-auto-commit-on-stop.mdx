@@ -14,8 +14,8 @@ seoDescription: >-
   ends. This Stop hook provides comprehensive Git automation for development
   sessions...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-09-19'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-09-19"
 installable: true
 installCommand: >-
   mkdir -p .claude/hooks && touch .claude/hooks/git-auto-commit-on-stop.sh &&
@@ -68,6 +68,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Features
 
 - Automatic git commit creation when session ends with comprehensive change detection including untracked files, modified files, added files, deleted files, and renamed files with detailed status analysis
@@ -286,12 +287,12 @@ echo "💾 Creating auto-commit..." >&2
 # Create the commit
 if echo "$COMMIT_BODY" | git commit -F -; then
   echo "✅ Auto-commit successful!" >&2
-  
+
   # Show commit info
   COMMIT_HASH=$(git rev-parse --short HEAD)
   echo "📝 Commit: $COMMIT_HASH" >&2
   echo "🌿 Branch: $CURRENT_BRANCH" >&2
-  
+
   # Check if we should push (optional)
   if [ "$AUTO_PUSH" = "true" ]; then
     echo "📤 Auto-pushing to remote..." >&2
@@ -304,7 +305,7 @@ if echo "$COMMIT_BODY" | git commit -F -; then
   else
     echo "💡 Set AUTO_PUSH=true to automatically push commits" >&2
   fi
-  
+
 else
   echo "❌ Auto-commit failed" >&2
   echo "💡 You may need to resolve conflicts or check git status" >&2
@@ -327,6 +328,7 @@ exit 0
 ```
 
 ## Examples
+
 ### Git Auto Commit On Stop Hook Script
 
 Complete hook script that performs automatic Git commit when development session ends
@@ -355,6 +357,7 @@ else
 fi
 exit 0
 ```
+
 ### Sensitive File Detection and Skip Control
 
 Enhanced hook script for sensitive file detection and environment variable skip control
@@ -387,6 +390,7 @@ git add -A
 git commit -m "Auto-commit: $(date +'%Y-%m-%d %H:%M:%S')"
 exit 0
 ```
+
 ### Detailed Commit Statistics
 
 Enhanced hook script for detailed commit statistics with accurate line count calculations
@@ -421,6 +425,7 @@ git add -A
 git commit -m "$COMMIT_MSG" -m "$COMMIT_BODY"
 exit 0
 ```
+
 ### Automatic Push to Remote
 
 Enhanced hook script for automatic push to remote repository with error handling
@@ -449,27 +454,35 @@ exit 0
 ```
 
 ## Troubleshooting
+
 ### Hook creates commits even when no meaningful changes made
 
 git status --porcelain check shows temp files. Update .gitignore excluding: '.DS_Store', '.swp', 'node_modules/'. Or add file count threshold: 'if [ "$MODIFIED_FILES" -lt 2 ]; then exit 0; fi'. Verify .gitignore patterns match temporary files. Use git status --ignored to check ignored files.
+
 ### Sensitive files (.env) committed despite pattern detection warnings
 
 Pattern match non-blocking by design. Add hard block: 'if [ "$SENSITIVE_FOUND" = true ]; then exit 1; fi' before git add. Or use git-secrets: 'git secrets --scan' pre-commit. Update .gitignore to exclude sensitive file patterns. Use git-secrets or similar tools for automatic detection.
+
 ### Auto-commit fails with empty commit message or malformed body
 
 COMMIT_BODY uses cat with EOF delimiter requiring proper quoting. Replace with: 'git commit -m "Auto-commit: $TIMESTAMP" -m "Files: $FILES_CHANGED" -m "Branch: $CURRENT_BRANCH"' avoiding heredoc issues. Verify commit message variables are not empty. Use git commit with multiple -m flags for multi-line messages.
+
 ### SKIP_AUTO_COMMIT environment variable ignored when set
 
 Variable not exported to subprocess. Use: 'export SKIP_AUTO_COMMIT=true' before Claude session. Or add to shell profile: 'echo "export SKIP_AUTO_COMMIT=true" >> ~/.bashrc'. Verify: 'env | grep SKIP'. Check environment variable is set in correct shell context. Use export command to ensure variable is available to subprocesses.
+
 ### Statistics show zero insertions/deletions despite file changes
 
 git diff --stat fails on binary files or first commit. Add: '--ignore-all-space --ignore-blank-lines' flags. Or use: 'git diff --numstat | awk "{add+=$1; del+=$2} END {print add, del}"' for accurate counts. Verify files are staged before calculating statistics. Check for binary file detection issues.
+
 ### Auto-commit fails on detached HEAD state
 
 Hook doesn't check for detached HEAD. Add check: 'if git symbolic-ref -q HEAD > /dev/null 2>&1; then echo "On branch"; else echo "Detached HEAD - skipping commit"; exit 0; fi'. Verify repository is on a valid branch before committing. Use git checkout to switch to a branch if needed.
+
 ### AUTO_PUSH fails with authentication errors
 
 Git push requires authentication. Configure Git credentials: 'git config --global credential.helper store'. Or use SSH keys: 'ssh-keygen -t ed25519 -C "your@email.com"'. Verify remote URL is correct: 'git remote -v'. Check SSH key is added to Git provider. Use credential helper for HTTPS authentication.
+
 ### Commit messages don't include expected information
 
 Verify commit message generation logic. Check timestamp format: 'date +"%Y-%m-%d %H:%M:%S"'. Verify branch detection: 'git branch --show-current'. Check file statistics calculation. Use git commit with multiple -m flags for structured commit messages. Verify all variables are properly set before commit creation.

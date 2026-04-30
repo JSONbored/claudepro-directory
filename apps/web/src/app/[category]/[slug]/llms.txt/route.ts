@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
-import { getEntry } from "@/lib/content";
-import { renderEntryLlms } from "@/lib/llms-export";
+import { loadTextDataFile } from "@/lib/content";
+import { applySecurityHeaders } from "@/lib/security-headers";
 
 type EntryLlmsRouteProps = {
   params: Promise<{ category: string; slug: string }>;
@@ -11,16 +11,20 @@ export const revalidate = 3600;
 
 export async function GET(_request: Request, { params }: EntryLlmsRouteProps) {
   const { category, slug } = await params;
-  const entry = await getEntry(category, slug);
-
-  if (!entry) {
+  if (!/^[a-z0-9-]+$/.test(category) || !/^[a-z0-9-]+$/.test(slug)) {
     notFound();
   }
+  const body = await loadTextDataFile(`llms/${category}/${slug}.txt`).catch(
+    () => null,
+  );
+  if (!body) notFound();
 
-  return new Response(renderEntryLlms(entry), {
-    headers: {
-      "content-type": "text/plain; charset=utf-8",
-      "cache-control": "public, max-age=3600, stale-while-revalidate=86400"
-    }
+  return new Response(body, {
+    headers: applySecurityHeaders(
+      new Headers({
+        "content-type": "text/plain; charset=utf-8",
+        "cache-control": "public, max-age=3600, stale-while-revalidate=86400",
+      }),
+    ),
   });
 }

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "mcp:clickup-mcp-server",
+  "category": "mcp",
+  "slug": "clickup-mcp-server",
+  "title": "Clickup MCP Server for Claude",
+  "author": "hauptsacheNet",
+  "brandName": "ClickUp",
+  "brandDomain": "clickup.com",
+  "brandIconUrl": "/api/brand-assets/icon/clickup.com",
+  "brandAssetSource": "brandfetch",
+  "copyText": "Install:\nclaude mcp add clickup --env CLICKUP_API_KEY=YOUR_KEY --env CLICKUP_TEAM_ID=YOUR_TEAM_ID -- npx -y @hauptsache.net/clickup-mcp && claude mcp list\n\nConfig:\n{\n  \"clickup\": {\n    \"env\": {\n      \"CLICKUP_API_KEY\": \"${CLICKUP_API_KEY}\",\n      \"CLICKUP_TEAM_ID\": \"${CLICKUP_TEAM_ID}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@hauptsache.net/clickup-mcp\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n\nUsage:\n{\n  \"clickup\": {\n    \"env\": {\n      \"CLICKUP_API_KEY\": \"${CLICKUP_API_KEY}\",\n      \"CLICKUP_TEAM_ID\": \"${CLICKUP_TEAM_ID}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@hauptsache.net/clickup-mcp\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
+  "detailMarkdown": "# Clickup MCP Server for Claude\n\nTask management and project tracking with ClickUp integration\n\n## Install\n```bash\nclaude mcp add clickup --env CLICKUP_API_KEY=YOUR_KEY --env CLICKUP_TEAM_ID=YOUR_TEAM_ID -- npx -y @hauptsache.net/clickup-mcp && claude mcp list\n```\n\n## Config\n```json\n{\n  \"clickup\": {\n    \"env\": {\n      \"CLICKUP_API_KEY\": \"${CLICKUP_API_KEY}\",\n      \"CLICKUP_TEAM_ID\": \"${CLICKUP_TEAM_ID}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@hauptsache.net/clickup-mcp\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n```\n\n## Usage\nclaude mcp add clickup --env CLICKUP_API_KEY=YOUR_KEY --env CLICKUP_TEAM_ID=YOUR_TEAM_ID -- npx -y @hauptsache.net/clickup-mcp && claude mcp list",
+  "webUrl": "https://heyclau.de/mcp/clickup-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/clickup-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/clickup-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/clickup-mcp-server",
+  "seoTitle": "Clickup MCP Server for Claude",
+  "seoDescription": "Task management and project tracking with ClickUp integration Discover tools for AI development. HeyClaude adds source links, install steps, compatibility,...",
+  "repoUrl": "https://github.com/hauptsacheNet/clickup-mcp",
+  "documentationUrl": "https://github.com/hauptsacheNet/clickup-mcp"
+}

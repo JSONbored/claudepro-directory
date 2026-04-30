@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:continue",
+  "category": "tools",
+  "slug": "continue",
+  "title": "Continue",
+  "author": "Continue",
+  "brandName": "Continue",
+  "brandDomain": "continue.dev",
+  "brandIconUrl": "/api/brand-assets/icon/continue.dev",
+  "brandAssetSource": "brandfetch",
+  "copyText": "## Editorial notes\n\nContinue is useful when teams need self-directed model choices, local configuration, and open-source control over AI coding workflows.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Continue\n\nOpen-source AI coding assistant for custom model routing, editor chat, autocomplete, and development workflows.",
+  "webUrl": "https://heyclau.de/tools/continue",
+  "canonicalUrl": "https://heyclau.de/tools/continue",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/continue.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/continue",
+  "seoTitle": "Continue open-source AI coding assistant",
+  "seoDescription": "Continue is an open-source AI coding assistant for editor chat, autocomplete, custom models, and coding workflows. HeyClaude adds source links, install...",
+  "repoUrl": "https://github.com/continuedev/continue",
+  "documentationUrl": "https://docs.continue.dev"
+}

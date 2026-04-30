@@ -1,0 +1,87 @@
+# Ethereum Solidity Security Foundry Skill
+URL: https://heyclau.de/skills/ethereum-solidity-security-foundry
+Category: skills
+Author: JSONbored
+Date added: 2026-04-10
+Documentation: https://ethereum.org/developers/docs/
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/ethereum-solidity-security-foundry.mdx
+Download: /downloads/skills/ethereum-solidity-security-foundry.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/ethereum-solidity-security-foundry
+- Source URLs: https://ethereum.org/developers/docs/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/ethereum-solidity-security-foundry.mdx
+- Package URL: /downloads/skills/ethereum-solidity-security-foundry.zip
+- Package SHA256: 658d185c8a7a5c7981f9d4c0d5bb046f425a567016a35bbd8c8aaaf83284db5e
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-10
+- Robots: indexable
+## Summary
+Build and harden Ethereum smart contracts with Foundry, invariant testing, and battle-tested OpenZeppelin security patterns.
+## Tags
+- ethereum
+- solidity
+- foundry
+- smart-contracts
+- security
+## Content
+## Overview
+This skill gives AI agents a security-first operating model for Ethereum smart contracts. It combines pragmatic architecture guidance with strict testing discipline and deployment safeguards.
+
+## Compatibility
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Prerequisites
+- Contract requirements and threat boundaries
+- Access controls and upgrade policy decisions
+- Testnet deployment pipeline
+
+## What This Skill Delivers
+- Security-centric contract design review
+- Foundry unit, fuzz, and invariant test strategy
+- Common exploit class defenses (reentrancy, auth, oracle, rounding, griefing)
+- Pre-deploy and post-deploy operational checklist
+
+## How to Use This Skill
+1. Define assets, actors, and privileged operations.
+2. Build minimal contract surface area with explicit invariants.
+3. Implement and test against adversarial cases.
+4. Run static/dynamic checks before deployment.
+5. Deploy progressively with monitoring and pause controls.
+
+## Troubleshooting
+**Issue:** Tests pass but invariants fail under fuzzing  
+**Fix:** Revisit state transitions and assumptions around edge-case ordering.
+
+**Issue:** Access control too broad  
+**Fix:** Replace role overreach with least-privilege split roles and delayed admin ops.
+
+**Issue:** Upgrades create storage breakage  
+**Fix:** Add storage layout checks and upgrade simulation in CI before release.
+
+## Knowledge Freshness
+Treat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.
+
+## Retrieval Sources
+- https://ethereum.org/developers/docs/
+
+## Output Contract
+1. Return a concrete plan with implementation order.
+2. Provide production-ready commands/config/code snippets (not placeholders).
+3. Include explicit assumptions and unresolved risks.
+4. Include a verification checklist with pass/fail criteria.
+
+## Quality Gates
+- All commands are copy/paste ready.
+- Security-sensitive steps call out secret handling and least privilege.
+- Version-sensitive guidance cites current docs used.
+- Rollback path is included for risky changes.
+- Final output includes quick validation commands/tests.

@@ -1,0 +1,27 @@
+# Claude Code
+URL: https://heyclau.de/tools/claude-code
+Category: tools
+Author: Anthropic
+Date added: 2026-04-27
+Documentation: https://docs.anthropic.com/en/docs/claude-code/overview
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/claude-code.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/tools/claude-code
+- Source URLs: https://docs.anthropic.com/en/docs/claude-code/overview, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/claude-code.mdx, https://www.anthropic.com/claude-code
+- Brand: Claude Code
+- Brand domain: anthropic.com
+- Brand asset source: brandfetch
+- Author: Anthropic
+- Last verified: 2026-04-26T23:21:14-06:00
+- Robots: indexable
+## Summary
+Anthropic command-line coding agent for codebase questions, edits, tests, and terminal-centered development tasks.
+## Tags
+- claude-code
+- terminal-agent
+## Content
+## Editorial notes
+Claude Code is a core reference point for agentic coding workflows and fits teams that already live in the terminal.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

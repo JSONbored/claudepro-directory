@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:apify",
+  "category": "tools",
+  "slug": "apify",
+  "title": "Apify",
+  "author": "Apify",
+  "brandName": "Apify",
+  "brandDomain": "apify.com",
+  "brandIconUrl": "/api/brand-assets/icon/apify.com",
+  "brandAssetSource": "brandfetch",
+  "copyText": "## Editorial notes\n\nApify is useful for agent builders who need reusable data extraction workflows, web automation actors, and hosted datasets.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Apify\n\nWeb automation and scraping platform with actors, datasets, APIs, and integrations for data extraction workflows.",
+  "webUrl": "https://heyclau.de/tools/apify",
+  "canonicalUrl": "https://heyclau.de/tools/apify",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/apify.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/apify",
+  "seoTitle": "Apify web automation and scraping platform",
+  "seoDescription": "Apify provides actors, datasets, APIs, and integrations for web automation and data extraction workflows. HeyClaude adds source links, install steps,...",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.apify.com"
+}

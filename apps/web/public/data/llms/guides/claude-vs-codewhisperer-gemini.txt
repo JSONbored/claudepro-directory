@@ -1,0 +1,109 @@
+# Claude vs Amazon Q Developer vs Gemini Code AWS Guide 2025
+URL: https://heyclau.de/guides/claude-vs-codewhisperer-gemini
+Category: guides
+Author: JSONbored
+Date added: 2025-10-27
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/claude-vs-codewhisperer-gemini.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/guides/claude-vs-codewhisperer-gemini
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/claude-vs-codewhisperer-gemini.mdx
+- Brand: AWS
+- Brand domain: aws.amazon.com
+- Brand asset source: brandfetch
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
+## Summary
+Compare Claude vs Amazon Q Developer vs Gemini Code for AWS cloud development. Real benchmarks, pricing analysis, and production use cases for selection.
+## Tags
+- comparison
+- cloud-development
+- aws
+- evaluation
+## Content
+## TL;DR
+Comprehensive comparison of Claude Code, Amazon Q Developer (formerly CodeWhisperer), and Google Gemini Code Assist for cloud development. We analyzed platform integration, AWS features, pricing, and real performance metrics to help you choose the best AI coding assistant for your cloud infrastructure needs.
+
+**Key Points:**
+
+- Amazon Q Developer - Deep AWS integration with 250+ services - $19/month
+- Google Gemini Code - 180,000 free completions monthly - $19/month Standard
+- Claude Code - Superior multi-cloud support and code quality - $40-200/month
+- Q Developer wins for AWS-only teams based on native integration and pricing
+
+Choosing the right AI assistant for cloud development impacts productivity and costs. This comparison examines Claude Code, Amazon Q Developer, and Google Gemini Code Assist based on real-world implementations, benchmarks, and enterprise deployments. Each platform shows distinct strengths across AWS services, multi-cloud support, and pricing models.
+
+> **Comparison Overview**
+>
+> **Tools Compared:** Claude Code, Amazon Q Developer, Google Gemini Code Assist  
+> **Use Case Focus:** AWS and cloud infrastructure development  
+> **Comparison Date:** September 2025  
+> **Data Sources:** Enterprise case studies, SWE-bench, METR studies, vendor documentation  
+> **Testing Methodology:** Analysis of real deployments and benchmarks
+
+## Quick Comparison Table
+<!-- Section type: comparison_table -->
+
+## Detailed Platform Analysis
+<!-- Section type: tabs -->
+
+## Performance Benchmarks
+> **Benchmark Methodology**
+>
+> **Testing Period:** Analysis of recent deployments and benchmarks
+>
+> **Test Environment:** AWS Lambda, EC2, GCP Cloud Functions, Azure Functions  
+> **Evaluation Criteria:** Code quality, response time, acceptance rate, security vulnerabilities  
+> **Data Source:** SWE-bench, METR studies, GitClear analysis, enterprise case studies
+
+<!-- Section type: comparison_table -->
+
+## Use Case Analysis
+<!-- Section type: accordion -->
+
+## Real User Experiences
+<!-- Section type: expert_quote -->
+
+> **User Feedback Summary**
+>
+> **Survey Source:** Enterprise deployment analysis
+> **Sample Size:** Large-scale developer survey
+> **Top Satisfaction Factors:** Q Developer AWS integration, Gemini free tier, Claude code quality  
+> **Common Concerns:** Claude pricing, Gemini performance delays, Q Developer multi-cloud limitations
+
+## Decision Framework
+<!-- Section type: feature_grid -->
+
+## Cost Analysis
+<!-- Section type: comparison_table -->
+
+## Migration Considerations
+> **Switching Costs and Considerations**
+>
+> **Data Export:** Q Developer and Claude support code export; Gemini requires manual extraction  
+> **Training Impact:** Teams need 1-2 weeks adapting to new platforms based on surveys  
+> **Integration Changes:** AWS tools require minimal changes for Q Developer adoption  
+> **Downtime Estimate:** Zero downtime for gradual adoption; 2-3 days for full switch
+
+## TL;DR
+Based on comprehensive analysis comparing Claude Code, Amazon Q Developer, and Google Gemini Code Assist, our recommendation for AWS-focused teams is Amazon Q Developer. This choice provides native AWS integration, built-in security scanning, and reasonable pricing while addressing cloud development requirements effectively.
+
+**Key Points:**
+
+- AWS-only teams: Q Developer delivers unmatched native integration at $19/month
+- Multi-cloud enterprises: Claude justifies premium with superior quality and flexibility
+- Budget-conscious teams: Gemini's 180,000 free completions provide exceptional value
+- Hybrid approach: Many organizations combine tools for optimal results
+
+## Related Resources
+<!-- Section type: related_content -->
+
+> **Make Your Decision**
+>
+> **Ready to choose?** Use this comparison data to evaluate which tool best fits your cloud development needs.
+>
+> **Need more specific guidance?** Join our [community](/community) to discuss your requirements with users of all three platforms.
+>
+> **Want hands-on experience?** Q Developer and Gemini offer free tiers for testing. Claude requires subscription but delivers immediate value.
+
+_Last updated: September 2025 | Comparison based on enterprise deployments and official benchmarks | Found this helpful? Share with your team and explore more [AI tool comparisons](/guides/comparisons)._

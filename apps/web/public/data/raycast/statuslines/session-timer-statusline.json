@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 2,
+  "key": "statuslines:session-timer-statusline",
+  "category": "statuslines",
+  "slug": "session-timer-statusline",
+  "title": "Session Timer",
+  "author": "JSONbored",
+  "copyText": "Claude config:\n{\n  \"statusLine\": {\n    \"type\": \"command\",\n    \"command\": \"$CLAUDE_PROJECT_DIR/.claude/statuslines/session-timer-statusline.sh\",\n    \"refreshInterval\": 1000\n  }\n}\n\nUsage:\n⏱  01:23:45 │ sonnet-4.5 │ 🔥 524/min │ $1.23/hr\n\nAsset:\n#!/usr/bin/env bash\n\n# Session Timer Statusline for Claude Code\n# Tracks session duration and productivity metrics\n\n# Read JSON from stdin\nread -r input\n\n# Extract session data\nmodel=$(echo \"$input\" | jq -r '.model // \"unknown\"' | sed 's/claude-//')\ntokens=$(echo \"$input\" | jq -r '.session.totalTokens // 0')\ncost=$(echo \"$input\" | jq -r '.session.estimatedCost // 0' | awk '{printf \"%.3f\", $0}')\nsession_start=$(echo \"$input\" | jq -r '.session.startTime // \"\"')\n\n# Calculate session duration\nif [ -n \"$session_start\" ]; then\n  start_epoch=$(date -j -f \"%Y-%m-%dT%H:%M:%S\" \"${session_start%.*}\" \"+%s\" 2>/dev/null || echo \"0\")\n  current_epoch=$(date +%s)\n  duration=$((current_epoch - start_epoch))\n  \n  # Format duration as HH:MM:SS\n  hours=$((duration / 3600))\n  minutes=$(((duration % 3600) / 60))\n  seconds=$((duration % 60))\n  formatted_time=$(printf \"%02d:%02d:%02d\" $hours $minutes $seconds)\n  \n  # Calculate tokens per minute\n  if [ $duration -gt 0 ]; then\n    tokens_per_min=$((tokens * 60 / duration))\n    \n    # Productivity rating\n    if [ $tokens_per_min -gt 500 ]; then\n      prod_color=\"\\033[32m\"  # Green - high productivity\n      prod_indicator=\"🔥\"\n    elif [ $tokens_per_min -gt 200 ]; then\n      prod_color=\"\\033[33m\"  # Yellow - medium productivity\n      prod_indicator=\"⚡\"\n    else\n      prod_color=\"\\033[36m\"  # Cyan - normal\n      prod_indicator=\"💭\"\n    fi\n  else\n    tokens_per_min=0\n    prod_color=\"\\033[36m\"\n    prod_indicator=\"💭\"\n  fi\n  \n  # Calculate cost per hour\n  if [ $duration -gt 0 ]; then\n    cost_per_hour=$(echo \"$cost * 3600 / $duration\" | bc -l | awk '{printf \"%.2f\", $0}')\n  else\n    cost_per_hour=\"0.00\"\n  fi\nelse\n  formatted_time=\"00:00:00\"\n  tokens_per_min=0\n  cost_per_hour=\"0.00\"\n  prod_indicator=\"💭\"\nfi\n\n# Build statusline\necho -e \"\\033[35m⏱  ${formatted_time}\\033[0m │ \\033[36m${model}\\033[0m │ ${prod_color}${prod_indicator} ${tokens_per_min}/min\\033[0m │ \\033[33m\\$${cost_per_hour}/hr\\033[0m\"",
+  "detailMarkdown": "# Session Timer\n\nTime-tracking statusline showing elapsed session duration, tokens per minute rate, and estimated cost with productivity metrics\n\n## Config\n```json\n{\n  \"statusLine\": {\n    \"type\": \"command\",\n    \"command\": \"$CLAUDE_PROJECT_DIR/.claude/statuslines/session-timer-statusline.sh\",\n    \"refreshInterval\": 1000\n  }\n}\n```\n\n## Usage\n⏱  01:23:45 │ sonnet-4.5 │ 🔥 524/min │ $1.23/hr",
+  "webUrl": "https://heyclau.de/statuslines/session-timer-statusline",
+  "canonicalUrl": "https://heyclau.de/statuslines/session-timer-statusline",
+  "llmsUrl": "https://heyclau.de/data/llms/statuslines/session-timer-statusline.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/statuslines/session-timer-statusline",
+  "seoTitle": "Session Timer",
+  "seoDescription": "Time-tracking statusline showing elapsed session duration, tokens per minute rate, and estimated cost with productivity metrics Discover tools for AI develop...",
+  "repoUrl": "",
+  "documentationUrl": ""
+}

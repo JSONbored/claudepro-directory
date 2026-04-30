@@ -1,0 +1,272 @@
+# FastAPI Python API Development Skill
+URL: https://heyclau.de/skills/fastapi-python-backend
+Category: skills
+Author: JSONbored
+Date added: 2025-10-23
+Documentation: https://fastapi.tiangolo.com/
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/fastapi-python-backend.mdx
+Download: /downloads/skills/fastapi-python-backend.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/fastapi-python-backend
+- Source URLs: https://fastapi.tiangolo.com/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/fastapi-python-backend.mdx
+- Package URL: /downloads/skills/fastapi-python-backend.zip
+- Package SHA256: a62b1a1e1fcee8faa7b1fb5cd68fa3c5112a74337fea3729a6bc5738c24f36d9
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2025-10-23
+- Robots: indexable
+## Summary
+Build high-performance async REST APIs with FastAPI, Python's fastest-growing web framework. Automatic OpenAPI/Swagger documentation, type-safe validation with Pydantic, native async/await support, and dependency injection for clean architecture.
+## Tags
+- fastapi
+- python
+- api
+- async
+- pydantic
+## Content
+## What This Skill Enables
+Claude can build production-ready REST APIs using FastAPI, Python's fastest web framework with automatic OpenAPI documentation and async support. FastAPI combines Python 3.9+ type hints with Pydantic validation for type-safe APIs that rival Node.js performance. With automatic interactive docs, dependency injection, and async/await, FastAPI eliminates boilerplate while maintaining enterprise-grade reliability.
+
+## Compatibility
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Prerequisites
+**Required:**
+
+- Claude Pro subscription or Claude Code CLI
+- Python 3.9+ (3.11+ recommended for best performance)
+- pip or poetry package manager
+- Basic Python knowledge
+
+**What Claude handles automatically:**
+
+- Writing FastAPI route handlers with type hints
+- Creating Pydantic models for request/response validation
+- Adding automatic OpenAPI/Swagger documentation
+- Implementing async endpoints for I/O-bound operations
+- Setting up dependency injection for auth/database
+- Handling errors with custom exception handlers
+- Adding middleware for CORS, logging, rate limiting
+- Structuring large applications with routers
+
+## How to Use This Skill
+### Basic CRUD API
+
+**Prompt:** "Create a FastAPI CRUD API for blog posts with: GET /posts (list), POST /posts (create), GET /posts/{id} (get one), PUT /posts/{id} (update), DELETE /posts/{id} (delete). Use Pydantic for validation."
+
+Claude will:
+
+1. Create FastAPI app with routers
+2. Define Pydantic models for Post
+3. Implement all 5 CRUD endpoints
+4. Add automatic validation
+5. Include OpenAPI docs at /docs
+6. Add error handling for 404s
+7. Return proper HTTP status codes
+
+### Database Integration with SQLAlchemy
+
+**Prompt:** "Build FastAPI app with PostgreSQL using SQLAlchemy ORM. Include: user authentication, database models for users/posts, async queries, connection pooling, and migrations with Alembic."
+
+Claude will:
+
+1. Set up async SQLAlchemy engine
+2. Create database models with relationships
+3. Implement dependency injection for sessions
+4. Add async CRUD operations
+5. Include connection pooling config
+6. Set up Alembic for migrations
+7. Add authentication dependencies
+
+### Authentication & Authorization
+
+**Prompt:** "Create FastAPI auth system with JWT tokens. Include: user registration, login, password hashing with bcrypt, protected routes with dependencies, refresh tokens, and role-based access control."
+
+Claude will:
+
+1. Implement password hashing with passlib
+2. Create JWT token generation/validation
+3. Add OAuth2 password bearer scheme
+4. Build auth dependencies for routes
+5. Implement refresh token rotation
+6. Add role-based access decorators
+7. Include user registration/login endpoints
+
+### Async Background Tasks
+
+**Prompt:** "Build FastAPI endpoint that processes uploaded CSV file in background. Include: file upload validation, background task with progress tracking, webhook notification on completion, and error handling."
+
+Claude will:
+
+1. Create file upload endpoint
+2. Validate CSV format with Pydantic
+3. Launch background task
+4. Add progress tracking with Redis
+5. Implement webhook callback
+6. Handle errors gracefully
+7. Return task ID for status checks
+
+## Tips for Best Results
+1. **Use Type Hints Everywhere**: FastAPI relies on Python type hints for automatic validation and docs. Always specify return types and use `Optional[T]` for nullable fields.
+
+2. **Async for I/O-Bound**: Use `async def` for endpoints that do database queries, API calls, or file operations. FastAPI handles concurrency automatically.
+
+3. **Pydantic for Validation**: Create Pydantic models for request bodies. Never parse JSON manually - let Pydantic handle validation and serialization.
+
+4. **Dependency Injection**: Use FastAPI's `Depends()` for auth, database sessions, pagination, etc. This keeps endpoints clean and testable.
+
+5. **Status Codes Matter**: Use proper HTTP status codes: 201 for created, 204 for deleted, 404 for not found, 422 for validation errors.
+
+6. **OpenAPI Customization**: Add descriptions, examples, and tags to endpoints for better automatic documentation.
+
+## Common Workflows
+### E-Commerce API
+
+```
+"Build FastAPI e-commerce backend:
+1. Products: CRUD with search, filtering, pagination
+2. Cart: session-based with Redis, add/remove items, calculate totals
+3. Orders: create order, payment processing, order history
+4. Auth: JWT-based customer accounts with OAuth2
+5. Admin: protected endpoints for inventory management
+6. Webhooks: Stripe payment notifications
+7. Database: PostgreSQL with async SQLAlchemy
+8. Background tasks: order confirmation emails"
+```
+
+### Real-Time Analytics API
+
+```
+"Create FastAPI analytics dashboard backend:
+1. Ingest endpoint: accept events via POST with Pydantic validation
+2. Time-series storage: TimescaleDB for event data
+3. Aggregation endpoints: metrics by day/week/month
+4. WebSocket: real-time updates for live dashboard
+5. Caching: Redis for frequently-accessed metrics
+6. Rate limiting: per-API-key limits with middleware
+7. Export: CSV/JSON download of filtered data
+8. Admin API: user management, API key generation"
+```
+
+### Multi-Tenant SaaS API
+
+```
+"Build multi-tenant SaaS API with FastAPI:
+1. Tenant isolation: subdomain-based routing
+2. Database: separate schemas per tenant in PostgreSQL
+3. Auth: tenant-scoped JWT tokens
+4. Billing: usage tracking, quota enforcement
+5. API versioning: /v1/, /v2/ with deprecation notices
+6. Rate limiting: per-tenant quotas
+7. Webhooks: tenant-configurable event notifications
+8. Admin: tenant provisioning, feature flags"
+```
+
+### GraphQL + REST Hybrid
+
+```
+"Create FastAPI app with both REST and GraphQL:
+1. REST endpoints: CRUD operations with OpenAPI docs
+2. GraphQL: Strawberry integration for complex queries
+3. DataLoader: batching and caching for N+1 queries
+4. Auth: shared JWT validation across REST/GraphQL
+5. Subscriptions: WebSocket support for real-time data
+6. File uploads: multipart form data handling
+7. Error handling: unified error format
+8. Testing: pytest fixtures for both APIs"
+```
+```text
+"Build FastAPI e-commerce backend:
+1. Products: CRUD with search, filtering, pagination
+2. Cart: session-based with Redis, add/remove items, calculate totals
+3. Orders: create order, payment processing, order history
+4. Auth: JWT-based customer accounts with OAuth2
+5. Admin: protected endpoints for inventory management
+6. Webhooks: Stripe payment notifications
+7. Database: PostgreSQL with async SQLAlchemy
+8. Background tasks: order confirmation emails"
+```
+```text
+"Create FastAPI analytics dashboard backend:
+1. Ingest endpoint: accept events via POST with Pydantic validation
+2. Time-series storage: TimescaleDB for event data
+3. Aggregation endpoints: metrics by day/week/month
+4. WebSocket: real-time updates for live dashboard
+5. Caching: Redis for frequently-accessed metrics
+6. Rate limiting: per-API-key limits with middleware
+7. Export: CSV/JSON download of filtered data
+8. Admin API: user management, API key generation"
+```
+```text
+"Build multi-tenant SaaS API with FastAPI:
+1. Tenant isolation: subdomain-based routing
+2. Database: separate schemas per tenant in PostgreSQL
+3. Auth: tenant-scoped JWT tokens
+4. Billing: usage tracking, quota enforcement
+5. API versioning: /v1/, /v2/ with deprecation notices
+6. Rate limiting: per-tenant quotas
+7. Webhooks: tenant-configurable event notifications
+8. Admin: tenant provisioning, feature flags"
+```
+```text
+"Create FastAPI app with both REST and GraphQL:
+1. REST endpoints: CRUD operations with OpenAPI docs
+2. GraphQL: Strawberry integration for complex queries
+3. DataLoader: batching and caching for N+1 queries
+4. Auth: shared JWT validation across REST/GraphQL
+5. Subscriptions: WebSocket support for real-time data
+6. File uploads: multipart form data handling
+7. Error handling: unified error format
+8. Testing: pytest fixtures for both APIs"
+```
+
+## Troubleshooting
+**Issue:** "Pydantic validation errors not showing custom messages"
+**Solution:** Add Field() with description: `email: str = Field(..., description='Valid email required')`. Use @validator decorator for complex rules. Check Pydantic V2 migration if using FastAPI 0.100+.
+
+**Issue:** "Async endpoints slower than sync"
+**Solution:** Only use async for I/O operations (database, HTTP calls). CPU-bound tasks should use sync functions. Ensure database driver supports async (asyncpg, aiomysql). Check connection pool settings.
+
+**Issue:** "CORS errors in browser"
+**Solution:** Add CORSMiddleware with correct origins: `app.add_middleware(CORSMiddleware, allow_origins=['http://localhost:3000'], allow_credentials=True)`. Don't use wildcard in production.
+
+**Issue:** "Dependency injection not working"
+**Solution:** Ensure dependencies return values, not None. Use `Depends()` in function signature, not inside function body. Check dependency order - dependencies can depend on other dependencies.
+
+**Issue:** "File uploads failing with 413 error"
+**Solution:** Increase max upload size in uvicorn: `uvicorn.run(app, limit_concurrency=100, limit_max_requests=1000, timeout_keep_alive=30)`. For large files, use streaming with `UploadFile`.
+
+## Learn More
+- [FastAPI Official Documentation](https://fastapi.tiangolo.com/)
+- [FastAPI GitHub Repository](https://github.com/fastapi/fastapi)
+- [Pydantic V2 Documentation](https://docs.pydantic.dev/)
+- [SQLAlchemy Async Tutorial](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html)
+- [FastAPI Full Stack Template](https://github.com/fastapi/full-stack-fastapi-template)
+- [FastAPI Best Practices](https://github.com/zhanymkanov/fastapi-best-practices)
+
+## Features
+- Automatic OpenAPI/Swagger documentation generation
+- Native async/await support for high concurrency
+- Pydantic integration for request/response validation
+- Dependency injection system for clean architecture
+- Type-safe APIs with automatic request/response validation
+- WebSocket support for real-time bidirectional communication
+- Built-in testing utilities with TestClient for API testing
+- Background task processing with BackgroundTasks for async operations, task queue integration, and long-running job management without blocking request responses
+
+## Use Cases
+- REST API backends with automatic documentation
+- Microservices with async database operations
+- Real-time APIs with WebSocket support
+- High-performance microservices with async database operations
+- API-first applications with automatic OpenAPI documentation
+- Real-time applications with WebSocket and Server-Sent Events

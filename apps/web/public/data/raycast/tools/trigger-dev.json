@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:trigger-dev",
+  "category": "tools",
+  "slug": "trigger-dev",
+  "title": "Trigger.dev",
+  "author": "Trigger.dev",
+  "brandName": "Trigger.dev",
+  "brandDomain": "trigger.dev",
+  "brandIconUrl": "/api/brand-assets/icon/trigger.dev",
+  "brandAssetSource": "brandfetch",
+  "copyText": "## Editorial notes\n\nTrigger.dev is useful for AI products that need durable background jobs, retries, scheduled work, and observable workflow execution.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Trigger.dev\n\nBackground job and workflow platform for TypeScript applications, long-running tasks, schedules, and durable automation.",
+  "webUrl": "https://heyclau.de/tools/trigger-dev",
+  "canonicalUrl": "https://heyclau.de/tools/trigger-dev",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/trigger-dev.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/trigger-dev",
+  "seoTitle": "Trigger.dev background jobs for AI workflows",
+  "seoDescription": "Trigger.dev supports background jobs, schedules, long-running tasks, and durable workflows for TypeScript applications. HeyClaude adds source links, install...",
+  "repoUrl": "https://github.com/triggerdotdev/trigger.dev",
+  "documentationUrl": "https://trigger.dev/docs"
+}

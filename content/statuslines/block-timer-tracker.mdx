@@ -15,11 +15,11 @@ seoDescription: >-
   warnings, and color-coded indicators to prevent unexpected session
   terminations.
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-23'
-documentationUrl: 'https://docs.claude.com/en/docs/claude-code/statusline'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-23"
+documentationUrl: "https://docs.claude.com/en/docs/claude-code/statusline"
 installable: true
-usageSnippet: '✓ Block: [████████████████░░░░] 3h 42m 15s (74%)'
+usageSnippet: "✓ Block: [████████████████░░░░] 3h 42m 15s (74%)"
 copySnippet: |-
   {
     "statusLine": {
@@ -160,7 +160,7 @@ prerequisites:
   - >-
     jq command-line JSON processor (jq 1.6+ recommended for safe extraction with
     // defaults)
-  - 'date command with epoch conversion support (macOS: -j flag, Linux: -d flag)'
+  - "date command with epoch conversion support (macOS: -j flag, Linux: -d flag)"
   - >-
     Terminal with ANSI color code support (256-color mode recommended for
     color-coded indicators)
@@ -193,6 +193,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Features
 
 - Real-time countdown from 5-hour conversation block limit
@@ -235,8 +236,11 @@ robotsFollow: true
 ```
 
 ## Examples
+
 ### Enhanced Block Timer with Custom Block Limit
+
 Extended version with configurable block limit via environment variable
+
 ```bash
 #!/usr/bin/env bash
 
@@ -305,8 +309,11 @@ elif [ $remaining -le 0 ]; then
   echo "✗ BLOCK EXPIRED: Start new conversation to continue." >&2
 fi
 ```
+
 ### Block Timer with Multiple Warning Thresholds
+
 Enhanced version with configurable warning thresholds at different time intervals
+
 ```bash
 #!/usr/bin/env bash
 
@@ -389,8 +396,11 @@ if [ $remaining -le 0 ]; then
   echo "✗ BLOCK EXPIRED: Start new conversation to continue." >&2
 fi
 ```
+
 ### Block Timer Tracker Installation Example
+
 Complete setup script with date command verification
+
 ```bash
 #!/bin/bash
 # Installation script for Block Timer Tracker
@@ -415,7 +425,7 @@ fi
 
 cat > .claude/statuslines/block-timer-tracker.sh << 'SCRIPT_EOF'
 #!/usr/bin/env bash
-# [Script content from first example]
+# Paste the full statusline script from the primary example above before running this installer.
 SCRIPT_EOF
 
 chmod +x .claude/statuslines/block-timer-tracker.sh
@@ -433,27 +443,35 @@ echo "Note: Script refreshes every 1 second to show real-time countdown."
 ```
 
 ## Troubleshooting
+
 ### Time showing as 0h 00m 00s or EXPIRED immediately on start
 
 Check session.startTime exists in JSON input: echo '$input' | jq .session.startTime. Verify date parsing: macOS (date -j -f '%Y-%m-%dT%H:%M:%SZ' '2025-10-23T10:00:00Z' +%s) or Linux (date -d '2025-10-23T10:00:00Z' +%s). On Linux use -d instead of -j flag. Test date parsing: echo '2025-10-23T10:00:00Z' | xargs -I {} date -j -f '%Y-%m-%dT%H:%M:%SZ' {} +%s (macOS) or date -d {} +%s (Linux).
+
 ### Progress bar showing all filled or all empty incorrectly
 
 Verify BLOCK_LIMIT=18000 (5 hours in seconds). Check percent calculation: echo $((remaining * 100 / BLOCK_LIMIT)). Ensure remaining time calculated correctly from session start. Test: remaining=$((18000 - 9000)); percent=$((remaining * 100 / 18000)); echo $percent (should be 50). Verify bar_filled calculation: bar_filled=$((percent / 5)) (each char = 5%).
+
 ### Warning messages not appearing when time low
 
 Warnings output to stderr (>&2) for alerts. Check stderr visible in terminal. Test: bash statusline.sh 2>&1 | grep WARNING. Ensure percent calculation under 10 triggers warning: if [ $percent -le 10 ] && [ $percent -gt 0 ]. Verify warning condition logic. Check terminal emulator displays stderr output.
+
 ### Colors not displaying, showing escape codes instead
 
 Terminal may not support ANSI colors. Test: echo -e '\033[38;5;46mGreen\033[0m'. Enable color support in terminal settings. For screen/tmux ensure TERM=screen-256color or xterm-256color. Verify echo -e flag is used for escape sequence interpretation. Check terminal emulator color support settings.
+
 ### Countdown refreshing too slowly or appearing static
 
 Decrease refreshInterval to 1000ms (1 second) in configuration: {"refreshInterval": 1000}. Verify script executes on each refresh. Check system clock accurate: date. Test manual execution shows changing countdown: Run script multiple times with different current_time values. Verify Claude Code is calling script on each refresh interval.
+
 ### Time remaining showing negative values
 
 This indicates elapsed time exceeds BLOCK_LIMIT. Check elapsed calculation: elapsed=$((current_time - start_epoch)). Verify start_epoch is correct (not future time). Add protection: if [ $remaining -lt 0 ]; then remaining=0; fi. Check system clock is accurate and not set to future time.
+
 ### Progress bar characters (█ ░) not displaying correctly
 
 Verify terminal supports Unicode characters. Test: echo '█░'. Check terminal font includes block characters. Some terminals require UTF-8 locale: export LANG=en_US.UTF-8. Alternative: Use ASCII characters: # for filled, - for empty. Verify echo command supports Unicode output.
+
 ### Percentage calculation showing incorrect values (e.g., 100% when time remaining)
 
-Verify integer division is working correctly: echo $((100 * 50 / 100)) (should be 50). Check remaining and BLOCK_LIMIT are numeric: echo "$remaining" | grep -E '^[0-9]+$'. Ensure BLOCK_LIMIT > 0 before division. Test calculation: percent=$((remaining * 100 / BLOCK_LIMIT)). Check for integer overflow if values are very large.
+Verify integer division is working correctly: echo $((100 * 50 / 100)) (should be 50). Check remaining and BLOCK_LIMIT are numeric: echo "$remaining" | grep -E '^[0-9]+$'. Ensure BLOCK_LIMIT > 0 before division. Test calculation: percent=$((remaining \* 100 / BLOCK_LIMIT)). Check for integer overflow if values are very large.

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "mcp:kubernetes-mcp-server",
+  "category": "mcp",
+  "slug": "kubernetes-mcp-server",
+  "title": "Kubernetes MCP Server - MCP Servers",
+  "author": "feiskyer",
+  "brandName": "Kubernetes",
+  "brandDomain": "kubernetes.io",
+  "brandIconUrl": "/api/brand-assets/icon/kubernetes.io",
+  "brandAssetSource": "brandfetch",
+  "copyText": "Install:\nclaude mcp add kubernetes --env KUBECONFIG=/path/to/your/kubeconfig -- uvx mcp-kubernetes-server && claude mcp list\n\nConfig:\n{\n  \"kubernetes\": {\n    \"env\": {\n      \"KUBECONFIG\": \"${KUBECONFIG:-~/.kube/config}\"\n    },\n    \"args\": [\n      \"mcp-kubernetes-server\"\n    ],\n    \"command\": \"uvx\"\n  }\n}\n\nUsage:\n{\n  \"kubernetes\": {\n    \"env\": {\n      \"KUBECONFIG\": \"${KUBECONFIG:-~/.kube/config}\"\n    },\n    \"args\": [\n      \"mcp-kubernetes-server\"\n    ],\n    \"command\": \"uvx\"\n  }\n}",
+  "detailMarkdown": "# Kubernetes MCP Server - MCP Servers\n\nKubernetes cluster management and container orchestration through MCP integration\n\n## Install\n```bash\nclaude mcp add kubernetes --env KUBECONFIG=/path/to/your/kubeconfig -- uvx mcp-kubernetes-server && claude mcp list\n```\n\n## Config\n```json\n{\n  \"kubernetes\": {\n    \"env\": {\n      \"KUBECONFIG\": \"${KUBECONFIG:-~/.kube/config}\"\n    },\n    \"args\": [\n      \"mcp-kubernetes-server\"\n    ],\n    \"command\": \"uvx\"\n  }\n}\n```\n\n## Usage\nclaude mcp add kubernetes --env KUBECONFIG=/path/to/your/kubeconfig -- uvx mcp-kubernetes-server && claude mcp list",
+  "webUrl": "https://heyclau.de/mcp/kubernetes-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/kubernetes-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/kubernetes-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/kubernetes-mcp-server",
+  "seoTitle": "Kubernetes MCP Server - MCP Servers",
+  "seoDescription": "Kubernetes cluster management and container orchestration through MCP integration Discover tools for AI development. HeyClaude adds source links, install...",
+  "repoUrl": "https://github.com/feiskyer/mcp-kubernetes-server",
+  "documentationUrl": "https://github.com/feiskyer/mcp-kubernetes-server"
+}

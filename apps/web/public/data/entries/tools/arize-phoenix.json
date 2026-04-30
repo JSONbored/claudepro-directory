@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "key": "tools:arize-phoenix",
+  "entry": {
+    "category": "tools",
+    "slug": "arize-phoenix",
+    "title": "Arize Phoenix",
+    "description": "Open-source observability and evaluation tooling for LLM applications, traces, datasets, and experiments.",
+    "seoTitle": "Arize Phoenix LLM observability",
+    "seoDescription": "Arize Phoenix provides open-source observability and evaluation for LLM applications, traces, datasets, and experiments.",
+    "author": "Arize AI",
+    "dateAdded": "2026-04-27",
+    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+    "tags": [
+      "observability",
+      "evaluation"
+    ],
+    "keywords": [
+      "llm tracing",
+      "ai evaluation",
+      "observability",
+      "evaluation",
+      "tools",
+      "claude",
+      "heyclaude",
+      "arize phoenix"
+    ],
+    "documentationUrl": "https://arize.com/docs/phoenix",
+    "websiteUrl": "https://phoenix.arize.com",
+    "brandName": "Arize Phoenix",
+    "brandDomain": "phoenix.arize.com",
+    "brandIconUrl": "/api/brand-assets/icon/phoenix.arize.com",
+    "brandAssetSource": "brandfetch",
+    "pricingModel": "open-source",
+    "disclosure": "editorial",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Web, Self-hosted",
+    "cardDescription": "Open-source LLM observability and evaluation tooling.",
+    "installable": false,
+    "hasPrerequisites": false,
+    "hasTroubleshooting": false,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Editorial notes\n\nPhoenix is useful for teams that want open-source tracing and evaluation workflows around agent and LLM behavior.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+    "sections": [
+      {
+        "title": "Editorial notes",
+        "id": "editorial-notes",
+        "markdown": "Phoenix is useful for teams that want open-source tracing and evaluation workflows around agent and LLM behavior.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Disclosure",
+        "id": "disclosure",
+        "markdown": "Editorial listing. No paid placement or affiliate link is used.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Editorial notes",
+        "id": "editorial-notes"
+      },
+      {
+        "depth": 2,
+        "text": "Disclosure",
+        "id": "disclosure"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/tools/arize-phoenix.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/arize-phoenix.mdx",
+    "repoUrl": "https://github.com/Arize-ai/phoenix",
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 4,
+    "sourceUrls": [
+      "https://arize.com/docs/phoenix",
+      "https://github.com/Arize-ai/phoenix",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/arize-phoenix.mdx",
+      "https://phoenix.arize.com"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

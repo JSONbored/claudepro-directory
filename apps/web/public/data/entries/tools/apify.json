@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "key": "tools:apify",
+  "entry": {
+    "category": "tools",
+    "slug": "apify",
+    "title": "Apify",
+    "description": "Web automation and scraping platform with actors, datasets, APIs, and integrations for data extraction workflows.",
+    "seoTitle": "Apify web automation and scraping platform",
+    "seoDescription": "Apify provides actors, datasets, APIs, and integrations for web automation and data extraction workflows. HeyClaude adds source links, install steps,...",
+    "author": "Apify",
+    "dateAdded": "2026-04-27",
+    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+    "tags": [
+      "web-automation",
+      "data-extraction"
+    ],
+    "keywords": [
+      "web scraping platform",
+      "automation actors",
+      "web-automation",
+      "data-extraction",
+      "tools",
+      "claude",
+      "heyclaude",
+      "apify"
+    ],
+    "documentationUrl": "https://docs.apify.com",
+    "websiteUrl": "https://apify.com",
+    "brandName": "Apify",
+    "brandDomain": "apify.com",
+    "brandIconUrl": "/api/brand-assets/icon/apify.com",
+    "brandAssetSource": "brandfetch",
+    "pricingModel": "freemium",
+    "disclosure": "editorial",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Web",
+    "cardDescription": "Web automation and scraping platform.",
+    "installable": false,
+    "hasPrerequisites": false,
+    "hasTroubleshooting": false,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Editorial notes\n\nApify is useful for agent builders who need reusable data extraction workflows, web automation actors, and hosted datasets.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+    "sections": [
+      {
+        "title": "Editorial notes",
+        "id": "editorial-notes",
+        "markdown": "Apify is useful for agent builders who need reusable data extraction workflows, web automation actors, and hosted datasets.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Disclosure",
+        "id": "disclosure",
+        "markdown": "Editorial listing. No paid placement or affiliate link is used.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Editorial notes",
+        "id": "editorial-notes"
+      },
+      {
+        "depth": 2,
+        "text": "Disclosure",
+        "id": "disclosure"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/tools/apify.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/apify.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 3,
+    "sourceUrls": [
+      "https://docs.apify.com",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/apify.mdx",
+      "https://apify.com"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

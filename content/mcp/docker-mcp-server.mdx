@@ -13,9 +13,9 @@ seoDescription: >-
   Manage Docker containers, images, and services directly through Claude with
   comprehensive Docker API integration Discover tools for AI development.
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-09-16'
-documentationUrl: 'https://docs.docker.com/engine/api/'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-09-16"
+documentationUrl: "https://docs.docker.com/engine/api/"
 downloadUrl: /downloads/mcp/docker-mcp-server.mcpb
 packageVerified: true
 installable: true
@@ -104,6 +104,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Content
 
 Enable your AI assistants to seamlessly interact with Docker environments through comprehensive container lifecycle management, image operations, and Docker Compose orchestration. Automate deployment workflows, monitor container performance, and manage Docker registries directly through natural language commands.
@@ -166,50 +167,65 @@ Enable your AI assistants to seamlessly interact with Docker environments throug
       "DOCKER_HOST": "${DOCKER_HOST:-unix:///var/run/docker.sock}",
       "DOCKER_API_VERSION": "${DOCKER_API_VERSION:-1.43}"
     },
-    "args": [
-      "-y",
-      "@docker/mcp-server"
-    ],
+    "args": ["-y", "@docker/mcp-server"],
     "command": "npx"
   }
 }
 ```
 
 ## Examples
+
 ### List all running containers and their status
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "List all running containers and their status"
 ```
+
 ### Build a Docker image from a Dockerfile
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Build a Docker image from a Dockerfile"
 ```
+
 ### Start a new container with custom configuration
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Start a new container with custom configuration"
 ```
+
 ### View real-time logs from a specific container
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "View real-time logs from a specific container"
 ```
+
 ### Deploy a multi-service application using Docker Co...
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Deploy a multi-service application using Docker Compose"
 ```
+
 ### Run Container with Environment Variables
+
 Create and start a Docker container with environment variables, port mapping, and volume mounts
+
 ```typescript
 // Run Docker container with environment variables
 const container = await docker.containers.create({
   image: "node:18",
   env: ["NODE_ENV=production", "PORT=3000"],
   ports: [{ host: 8080, container: 3000 }],
-  volumes: [{ host: "./data", container: "/app/data" }]
+  volumes: [{ host: "./data", container: "/app/data" }],
 });
 await container.start();
 ```
@@ -228,27 +244,35 @@ await container.start();
 - Docker webhook configurations and payloads may contain sensitive container and image metadata - ensure webhook endpoints are properly secured with authentication and HTTPS encryption
 
 ## Troubleshooting
+
 ### Permission denied connecting to Docker daemon socket
 
 Add your user to docker group: sudo usermod -a -G docker $USER, then log out and back in. Alternatively, run sudo systemctl start docker to ensure daemon is running.
+
 ### Cannot connect to Docker daemon - connection refused
 
 Start Docker daemon: sudo systemctl start docker (Linux) or launch Docker Desktop (Mac/Windows). Verify daemon is running: docker ps. Check DOCKER_HOST environment variable points to correct socket.
+
 ### Error: /var/run/docker.sock has wrong permissions
 
 Run sudo chmod 666 /var/run/docker.sock (temporary fix) or add user to docker group (permanent). Verify socket file exists: ls -l /var/run/docker.sock.
+
 ### Docker API version mismatch error
 
 Set DOCKER_API_VERSION environment variable to match your Docker version. Run docker version to check API version. Update MCP server config with correct API version (e.g., 1.43).
+
 ### Container operations fail with authentication errors
 
 Run docker login to authenticate with registry. Verify registry credentials are correct. For private registries, ensure network access and check firewall rules don't block Docker registry ports.
+
 ### Docker MCP server authentication errors with Docker API
 
 Verify Docker API credentials are valid. Check TLS certificate configuration for remote Docker daemon. Ensure Docker socket permissions allow access. For remote connections, verify network connectivity and firewall settings.
+
 ### Docker container creation or start failures
 
 Check container resource limits (CPU, memory). Verify image exists and is accessible. Ensure port mappings do not conflict. Check Docker daemon logs for detailed error messages. Verify disk space is available.
+
 ### Docker MCP server connection timeouts or network errors
 
 Check network connectivity to Docker daemon. Verify Docker socket is accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

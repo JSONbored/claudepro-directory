@@ -1,0 +1,28 @@
+# Roo Code
+URL: https://heyclau.de/tools/roo-code
+Category: tools
+Author: Roo Code
+Date added: 2026-04-27
+Documentation: https://docs.roocode.com
+Repository: https://github.com/RooCodeInc/Roo-Code
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/roo-code.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/tools/roo-code
+- Source URLs: https://docs.roocode.com, https://github.com/RooCodeInc/Roo-Code, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/roo-code.mdx, https://roocode.com
+- Brand: Roo Code
+- Brand domain: roocode.com
+- Brand asset source: brandfetch
+- Author: Roo Code
+- Last verified: 2026-04-26T23:21:14-06:00
+- Robots: indexable
+## Summary
+Open-source AI coding agent for VS Code with modes for planning, editing, debugging, and workflow automation.
+## Tags
+- vs-code
+- coding-agent
+## Content
+## Editorial notes
+Roo Code is a good fit when users want mode-specific agent behavior for planning, code edits, debugging, and routine project work.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

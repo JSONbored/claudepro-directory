@@ -1,0 +1,423 @@
+# API Doc Generator
+URL: https://heyclau.de/hooks/api-endpoint-documentation-generator
+Category: hooks
+Author: JSONbored
+Date added: 2025-09-19
+Documentation: https://swagger.io/docs/
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/api-endpoint-documentation-generator.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/hooks/api-endpoint-documentation-generator
+- Source URLs: https://swagger.io/docs/, https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/api-endpoint-documentation-generator.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
+## Summary
+Automatically generates or updates API documentation when endpoint files are modified, supporting OpenAPI 3.1.0, Swagger 2.0, and AsyncAPI 2.0 specifications.
+## Tags
+- api
+- documentation
+- openapi
+- swagger
+- automation
+## Content
+## Features
+- Automatic OpenAPI 3.1.0 and Swagger 2.0 documentation generation from JSDoc annotations using swagger-jsdoc v6+
+- Real-time documentation updates when API files change with automatic endpoint discovery and parameter extraction
+- Support for JavaScript, TypeScript, Python (FastAPI), and Node.js API routes with language-specific documentation tools
+- Multi-format output generation including JSON (OpenAPI spec), YAML, and Markdown documentation formats
+- Response type documentation extraction with automatic schema inference from TypeScript types and Python models
+- Integration with Swagger UI and ReDoc for interactive API documentation with live endpoint testing capabilities
+- FastAPI automatic OpenAPI 3.1.0 generation with built-in /docs and /redoc endpoints for Python APIs
+- Validation and error reporting with failOnErrors option to catch documentation inconsistencies during development
+
+## Use Cases
+- Automatic API documentation in development workflows ensuring docs stay synchronized with code changes
+- Keep OpenAPI 3.1.0 specs synchronized with code changes using real-time generation on file modifications
+- Generate comprehensive documentation for REST API endpoints with parameter, response, and error documentation
+- Maintain up-to-date API reference docs for frontend teams and external API consumers with automated updates
+- Integration with Swagger UI and ReDoc for interactive documentation portals with live API testing
+- CI/CD pipeline integration for validating OpenAPI specifications and generating documentation artifacts automatically
+
+## Installation
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/api-endpoint-documentation-generator.sh
+3. Make executable: chmod +x .claude/hooks/api-endpoint-documentation-generator.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- jq installed (for JSON parsing)
+- swagger-jsdoc ^6.0.0 (for JavaScript/TypeScript: npm i -D swagger-jsdoc) or FastAPI ^0.115.0 (for Python: pip install fastapi)
+- Node.js and npm (for swagger-jsdoc) or Python 3.8+ and pip (for FastAPI) depending on project language
+
+## Hook Configuration
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/api-endpoint-documentation-generator.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/api-endpoint-documentation-generator.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+
+## Hook Script
+```bash
+#!/usr/bin/env bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Check if it's an API-related file
+if [[ "$FILE_PATH" == *routes/* ]] || [[ "$FILE_PATH" == *controllers/* ]] || [[ "$FILE_PATH" == *api/* ]]; then
+  echo "📚 Generating API documentation for $FILE_PATH..."
+
+  # Get file extension
+  EXT="${FILE_PATH##*.}"
+
+  case "$EXT" in
+    js|jsx|ts|tsx)
+      # JavaScript/TypeScript API files
+      if command -v swagger-jsdoc &> /dev/null && [ -f "swaggerDef.js" ]; then
+        echo "Generating Swagger documentation..."
+        npx swagger-jsdoc -d swaggerDef.js -o ./docs/api.json "$FILE_PATH" 2>/dev/null
+        echo "✅ Swagger documentation updated" >&2
+      elif command -v npx &> /dev/null; then
+        echo "Generating JSDoc documentation..."
+        npx jsdoc "$FILE_PATH" -d ./docs/api/ 2>/dev/null
+        echo "✅ JSDoc documentation updated" >&2
+      fi
+      ;;
+    py)
+      # Python API files
+      if command -v pydoc &> /dev/null; then
+        echo "Generating Python API documentation..."
+        python -m pydoc -w "$FILE_PATH" 2>/dev/null
+        echo "✅ Python documentation updated" >&2
+      fi
+      ;;
+  esac
+else
+  echo "File not in API directory, skipping documentation generation" >&2
+fi
+
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Check if it's an API-related file
+if [[ "$FILE_PATH" == *routes/* ]] || [[ "$FILE_PATH" == *controllers/* ]] || [[ "$FILE_PATH" == *api/* ]]; then
+  echo "📚 Generating API documentation for $FILE_PATH..."
+
+  # Get file extension
+  EXT="${FILE_PATH##*.}"
+
+  case "$EXT" in
+    js|jsx|ts|tsx)
+      # JavaScript/TypeScript API files
+      if command -v swagger-jsdoc &> /dev/null && [ -f "swaggerDef.js" ]; then
+        echo "Generating Swagger documentation..."
+        npx swagger-jsdoc -d swaggerDef.js -o ./docs/api.json "$FILE_PATH" 2>/dev/null
+        echo "✅ Swagger documentation updated" >&2
+      elif command -v npx &> /dev/null; then
+        echo "Generating JSDoc documentation..."
+        npx jsdoc "$FILE_PATH" -d ./docs/api/ 2>/dev/null
+        echo "✅ JSDoc documentation updated" >&2
+      fi
+      ;;
+    py)
+      # Python API files
+      if command -v pydoc &> /dev/null; then
+        echo "Generating Python API documentation..."
+        python -m pydoc -w "$FILE_PATH" 2>/dev/null
+        echo "✅ Python documentation updated" >&2
+      fi
+      ;;
+  esac
+else
+  echo "File not in API directory, skipping documentation generation" >&2
+fi
+
+exit 0
+```
+
+## Examples
+### API Endpoint Documentation Generator Hook Script
+
+Complete hook script that generates API documentation for JavaScript, TypeScript, and Python API files using swagger-jsdoc, JSDoc, or FastAPI
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r ".tool_input.file_path // .tool_input.path // \"\"")
+if [ -z "$FILE_PATH" ]; then exit 0; fi
+if [[ "$FILE_PATH" == *routes/* ]] || [[ "$FILE_PATH" == *controllers/* ]] || [[ "$FILE_PATH" == *api/* ]]; then
+  echo "Generating API documentation for $FILE_PATH..." >&2
+  EXT="${FILE_PATH##*.}"
+  case "$EXT" in
+    js|jsx|ts|tsx)
+      if command -v swagger-jsdoc &> /dev/null && [ -f "swaggerDef.js" ]; then
+        npx swagger-jsdoc -d swaggerDef.js -o ./docs/api.json "$FILE_PATH" 2>/dev/null
+        echo "OpenAPI documentation updated" >&2
+      elif command -v npx &> /dev/null; then
+        npx jsdoc "$FILE_PATH" -d ./docs/api/ 2>/dev/null
+        echo "JSDoc documentation updated" >&2
+      fi
+      ;;
+    py)
+      if command -v python &> /dev/null && python -c "import fastapi" 2>/dev/null; then
+        echo "FastAPI OpenAPI docs available at /docs and /redoc endpoints" >&2
+      fi
+      ;;
+  esac
+fi
+exit 0
+```
+
+### Hook Configuration
+
+Complete hook configuration for .claude/settings.json to enable automatic API documentation generation on file writes and edits
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./.claude/hooks/api-endpoint-documentation-generator.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### swagger-jsdoc Configuration with OpenAPI 3.1.0
+
+Example swagger-jsdoc configuration for generating OpenAPI 3.1.0 specification with validation enabled
+
+```javascript
+const swaggerJsdoc = require("swagger-jsdoc");
+const options = {
+  definition: {
+    openapi: "3.1.0",
+    info: {
+      title: "My API",
+      version: "1.0.0",
+    },
+  },
+  apis: ["./src/routes/*.js"],
+  failOnErrors: true,
+};
+const openapiSpecification = swaggerJsdoc(options);
+```
+
+### JSDoc OpenAPI Annotation Example
+
+Example JSDoc annotation for OpenAPI 3.1.0 endpoint documentation using @openapi tag
+
+```javascript
+/**
+ * @openapi
+ * /users:
+ *   get:
+ *     summary: Get all users
+ *     responses:
+ *       200:
+ *         description: List of users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/User'
+ */
+app.get("/users", (req, res) => {
+  res.json([]);
+});
+```
+
+### FastAPI Automatic OpenAPI Generation
+
+Example FastAPI application with automatic OpenAPI 3.1.0 documentation generation
+
+```python
+from fastapi import FastAPI
+app = FastAPI(
+  title="My API",
+  version="1.0.0",
+  openapi_version="3.1.0"
+)
+
+@app.get("/users/")
+async def get_users():
+  return []
+
+# OpenAPI docs automatically available at /docs and /redoc
+```
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r ".tool_input.file_path // .tool_input.path // \"\"")
+if [ -z "$FILE_PATH" ]; then exit 0; fi
+if [[ "$FILE_PATH" == *routes/* ]] || [[ "$FILE_PATH" == *controllers/* ]] || [[ "$FILE_PATH" == *api/* ]]; then
+  echo "Generating API documentation for $FILE_PATH..." >&2
+  EXT="${FILE_PATH##*.}"
+  case "$EXT" in
+    js|jsx|ts|tsx)
+      if command -v swagger-jsdoc &> /dev/null && [ -f "swaggerDef.js" ]; then
+        npx swagger-jsdoc -d swaggerDef.js -o ./docs/api.json "$FILE_PATH" 2>/dev/null
+        echo "OpenAPI documentation updated" >&2
+      elif command -v npx &> /dev/null; then
+        npx jsdoc "$FILE_PATH" -d ./docs/api/ 2>/dev/null
+        echo "JSDoc documentation updated" >&2
+      fi
+      ;;
+    py)
+      if command -v python &> /dev/null && python -c "import fastapi" 2>/dev/null; then
+        echo "FastAPI OpenAPI docs available at /docs and /redoc endpoints" >&2
+      fi
+      ;;
+  esac
+fi
+exit 0
+```
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./.claude/hooks/api-endpoint-documentation-generator.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+```javascript
+const swaggerJsdoc = require("swagger-jsdoc");
+const options = {
+  definition: {
+    openapi: "3.1.0",
+    info: {
+      title: "My API",
+      version: "1.0.0",
+    },
+  },
+  apis: ["./src/routes/*.js"],
+  failOnErrors: true,
+};
+const openapiSpecification = swaggerJsdoc(options);
+```
+```javascript
+/**
+ * @openapi
+ * /users:
+ *   get:
+ *     summary: Get all users
+ *     responses:
+ *       200:
+ *         description: List of users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/User'
+ */
+app.get("/users", (req, res) => {
+  res.json([]);
+});
+```
+```python
+from fastapi import FastAPI
+app = FastAPI(
+  title="My API",
+  version="1.0.0",
+  openapi_version="3.1.0"
+)
+
+@app.get("/users/")
+async def get_users():
+  return []
+
+# OpenAPI docs automatically available at /docs and /redoc
+```
+
+## Troubleshooting
+### Hook triggers but file path pattern match fails
+
+Debug path detection: echo "$FILE_PATH" | grep -E 'routes|controllers|api'. Verify directory structure matches expected patterns. Add custom paths to case statement. Check file extension extraction: EXT="${FILE_PATH##\*.}".
+
+### swagger-jsdoc command not found during execution
+
+Install dependencies: npm i -D swagger-jsdoc@^6.0.0. Verify swaggerDef.js exists in project root. Check node_modules/.bin is in PATH. Use npx for local binaries: npx swagger-jsdoc. Verify package.json includes swagger-jsdoc as devDependency.
+
+### Documentation generates but writes to wrong location
+
+Create docs/api directory: mkdir -p ./docs/api. Verify write permissions on output paths. Check current working directory in hook context: pwd >&2. Use absolute paths for output: -o "$CLAUDE_PROJECT_DIR/docs/api.json".
+
+### PostToolUse fires on all edits not just API files
+
+Enhance path filtering in script. Use stricter regex: [["$FILE_PATH" =~ (routes|api)/.*\.(ts|js)$]]. Add early exit for non-matching paths. Check file extension before processing: if [["$EXT" != "js" && "$EXT" != "ts" && "$EXT" != "py"]]; then exit 0; fi.
+
+### Hook processes file but npx commands timeout silently
+
+Remove 2>/dev/null to see actual errors. Add timeout wrapper: timeout 30s npx swagger-jsdoc. Check for hanging processes: ps aux | grep jsdoc. Verify npm registry access: npm ping. Check network connectivity for package downloads.
+
+### OpenAPI 3.1.0 spec generation fails with validation errors
+
+Enable failOnErrors in swagger-jsdoc options: failOnErrors: true. Check JSDoc annotation syntax matches OpenAPI 3.1.0 format. Verify swaggerDef.js uses openapi: '3.1.0'. Review validation errors in output for specific issues.
+
+### FastAPI OpenAPI docs not updating after code changes
+
+FastAPI generates OpenAPI schema at runtime - restart FastAPI server to see changes. Use auto-reload: uvicorn main:app --reload. Verify FastAPI version supports OpenAPI 3.1.0: pip show fastapi. Check /openapi.json endpoint for current schema.
+
+### swagger-jsdoc generates empty or incomplete documentation
+
+Verify JSDoc annotations use correct @openapi or @swagger tags. Check apis array includes correct file patterns: apis: ['./src/routes/*.js']. Ensure swaggerDef.js configuration is correct. Test with single file first: npx swagger-jsdoc -d swaggerDef.js route.js.

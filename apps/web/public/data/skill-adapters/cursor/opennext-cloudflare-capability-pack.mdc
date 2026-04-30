@@ -1,0 +1,14 @@
+---
+description: "Deep operational skill for running Next.js via OpenNext on Cloudflare Workers with correct caching, bindings, and reliability controls."
+globs:
+alwaysApply: false
+---
+# OpenNext Cloudflare Capability Pack Skill
+Expert OpenNext + Cloudflare capability skill for Next.js on Workers, runtime constraints, cache strategy, and production-safe deploy architecture.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/opennext-cloudflare-capability-pack.zip -o opennext-cloudflare-capability-pack.zip && unzip -o opennext-cloudflare-capability-pack.zip -d ./opennext-cloudflare-capability-pack
+```
+## Source
+https://heyclau.de/downloads/skills/opennext-cloudflare-capability-pack.zip

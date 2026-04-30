@@ -2,15 +2,15 @@
 title: Figma MCP Server for Claude
 slug: figma-mcp-server
 category: mcp
-description: 'Access designs, export assets, and interact with Figma files through Claude'
-cardDescription: 'Access designs, export assets, and interact with Figma files through Claude'
+description: "Access designs, export assets, and interact with Figma files through Claude"
+cardDescription: "Access designs, export assets, and interact with Figma files through Claude"
 seoTitle: Figma MCP Server for Claude
 seoDescription: >-
   Access designs, export assets, and interact with Figma files through Claude
   Discover tools for AI development.
 author: Figma
-dateAdded: '2025-09-18'
-documentationUrl: 'https://help.figma.com/hc/en-us/articles/32132100833559'
+dateAdded: "2025-09-18"
+documentationUrl: "https://help.figma.com/hc/en-us/articles/32132100833559"
 downloadUrl: /downloads/mcp/figma-mcp-server.mcpb
 packageVerified: true
 installable: true
@@ -87,6 +87,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Content
 
 Enable your AI assistants to seamlessly interact with Figma Desktop through the built-in Dev Mode MCP Server. Access design files in real-time, export assets in multiple formats, extract design tokens and specifications, and automate design-to-code workflows directly through natural language commands.
@@ -152,34 +153,49 @@ Enable your AI assistants to seamlessly interact with Figma Desktop through the 
 ```
 
 ## Examples
+
 ### Export all icons from the design system as SVG
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Export all icons from the design system as SVG"
 ```
+
 ### Get the color palette from this Figma file
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Get the color palette from this Figma file"
 ```
+
 ### Extract component specifications for developers
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Extract component specifications for developers"
 ```
+
 ### List all text styles used in the design
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "List all text styles used in the design"
 ```
+
 ### Get File Nodes
+
 Retrieve specific nodes from a Figma file with version control
+
 ```typescript
 // Get Figma file nodes
 const file = await figma.files.get({
   file_key: "file-key",
   version: "latest",
-  ids: ["node-id-1", "node-id-2"]
+  ids: ["node-id-1", "node-id-2"],
 });
 ```
 
@@ -196,30 +212,39 @@ const file = await figma.files.get({
 - Figma Desktop MCP Server runs locally and binds to 127.0.0.1:3845 - ensure local network security and firewall rules prevent unauthorized access to the MCP server endpoint
 
 ## Troubleshooting
+
 ### Invalid sessionId error from MCP endpoint
 
 Change transport type from sse to http in MCP config. Remove old config: claude mcp remove figma-dev-mode-mcp-server, then re-add with http transport at http://127.0.0.1:3845/mcp.
+
 ### HTTP 404 error: MCP server not responding
 
 Ensure Figma Desktop app is running and Dev Mode MCP Server is active. Check Figma preferences to verify MCP Server is enabled. Restart Figma Desktop if server doesn't appear.
+
 ### Connection failed: invalid request body error
 
 Verify you're using http transport, not sse. Update config URL to http://127.0.0.1:3845/mcp. Check request format matches MCP protocol specification for initialize request.
+
 ### Cannot access assets - 404 on asset requests
 
 MCP Server can't serve assets directly from browser. Access assets through Claude Code or configured MCP client. Verify file is open in Figma Desktop and permissions allow export.
+
 ### WSL users cannot connect to local MCP server
 
 Figma MCP binds only to 127.0.0.1 which WSL can't access. Use Windows-native Claude Code installation or configure port forwarding from WSL to Windows host for 127.0.0.1:3845.
+
 ### Figma MCP server authentication errors with API tokens
 
 Verify API token is valid and not expired. Check token permissions match required operations. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.
+
 ### Figma rate limit errors when accessing large files
 
 Implement exponential backoff retry logic with jitter. Use Figma API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed file data. Figma allows 200 requests per minute per token.
+
 ### Figma file or node access denied errors
 
 Verify API token has access to the file. Check file permissions and team membership. Ensure token has required permissions (file read, file write) for target operations.
+
 ### Figma MCP server connection timeouts or network errors
 
 Check network connectivity and firewall settings. Verify Figma API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

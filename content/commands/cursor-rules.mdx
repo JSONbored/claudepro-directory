@@ -14,13 +14,13 @@ seoDescription: >-
   patterns, coding standards, and intelligent context awareness Discover tools
   for ...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-16'
-documentationUrl: 'https://cursor.com/docs/context/rules'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-16"
+documentationUrl: "https://cursor.com/docs/context/rules"
 installable: true
-installCommand: '/cursor-rules [options] <project_type>'
-usageSnippet: '/cursor-rules [options] <project_type>'
-copySnippet: '/cursor-rules [options] <project_type>'
+installCommand: "/cursor-rules [options] <project_type>"
+usageSnippet: "/cursor-rules [options] <project_type>"
+copySnippet: "/cursor-rules [options] <project_type>"
 scriptLanguage: text
 scriptBody: >-
   The `/cursor-rules` command generates comprehensive `.cursorrules` files
@@ -877,8 +877,9 @@ hasPrerequisites: false
 hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
-commandSyntax: '/cursor-rules [options] <project_type>'
+commandSyntax: "/cursor-rules [options] <project_type>"
 ---
+
 The `/cursor-rules` command generates comprehensive `.cursorrules` files tailored to your project's technology stack, coding standards, and architectural patterns for optimal AI-assisted development.
 
 ## Usage
@@ -890,6 +891,7 @@ The `/cursor-rules` command generates comprehensive `.cursorrules` files tailore
 ## Options
 
 ### Project Types
+
 - `--nextjs` - Next.js application (default)
 - `--react` - React application
 - `--node` - Node.js backend
@@ -898,6 +900,7 @@ The `/cursor-rules` command generates comprehensive `.cursorrules` files tailore
 - `--go` - Go project
 
 ### Framework Integration
+
 - `--typescript` - TypeScript project (default: true)
 - `--tailwind` - TailwindCSS styling
 - `--prisma` - Prisma ORM
@@ -905,12 +908,14 @@ The `/cursor-rules` command generates comprehensive `.cursorrules` files tailore
 - `--graphql` - GraphQL APIs
 
 ### Code Standards
+
 - `--strict` - Strict mode with comprehensive checks
 - `--eslint-config=<config>` - ESLint configuration preset
 - `--prettier-config=<config>` - Prettier configuration
 - `--naming-convention=<style>` - Naming convention (camelCase, PascalCase)
 
 ### Features
+
 - `--security-focused` - Include security best practices
 - `--performance-focused` - Include performance optimization rules
 - `--accessibility` - Include WCAG 2.2 guidelines
@@ -921,12 +926,14 @@ The `/cursor-rules` command generates comprehensive `.cursorrules` files tailore
 ### Next.js 15 + React 19 Full-Stack Application
 
 **Command:**
+
 ```
 /cursor-rules --nextjs --typescript --tailwind --prisma --trpc --strict --security-focused --accessibility
 ```
 
 **Generated `.cursorrules`:**
-```markdown
+
+````markdown
 # Next.js 15 + React 19 Project Rules
 
 You are an expert full-stack developer specializing in Next.js 15, React 19, TypeScript, TailwindCSS v4, Prisma, and tRPC.
@@ -946,6 +953,7 @@ You are an expert full-stack developer specializing in Next.js 15, React 19, Typ
 ## Code Style & Conventions
 
 ### TypeScript
+
 - Use TypeScript 5.x with strict mode enabled
 - Never use `any` type - use `unknown` instead
 - Prefer type inference when possible
@@ -968,8 +976,10 @@ function processData(data: DataInput): string {
   return data.value;
 }
 ```
+````
 
 ### React Best Practices
+
 - Use React Server Components by default
 - Only use 'use client' when necessary (interactivity, hooks, browser APIs)
 - Prefer async Server Components for data fetching
@@ -980,7 +990,7 @@ function processData(data: DataInput): string {
 // ✅ Server Component (default)
 export default async function UserProfile({ userId }: { userId: string }) {
   const user = await db.user.findUnique({ where: { id: userId } });
-  
+
   return <div>{user.name}</div>;
 }
 
@@ -996,6 +1006,7 @@ export function Counter() {
 ```
 
 ### File Organization
+
 ```
 app/
 ├── (auth)/
@@ -1025,6 +1036,7 @@ lib/
 ```
 
 ### Naming Conventions
+
 - **Files**: kebab-case for files (`user-profile.tsx`)
 - **Components**: PascalCase (`UserProfile`)
 - **Functions**: camelCase (`getUserById`)
@@ -1035,12 +1047,13 @@ lib/
 ## Security Best Practices
 
 ### Input Validation
+
 - Always validate user input with Zod
 - Sanitize HTML content with DOMPurify
 - Never trust client-side data
 
 ```typescript
-import { z } from 'zod';
+import { z } from "zod";
 
 const userSchema = z.object({
   email: z.string().email().toLowerCase(),
@@ -1054,12 +1067,14 @@ export async function createUser(input: unknown) {
 ```
 
 ### Authentication
+
 - Use better-auth for authentication
 - Implement session management with JWT
 - Apply rate limiting to auth endpoints
 - Use httpOnly, secure cookies
 
 ### API Security
+
 - Implement CSRF protection
 - Use Content Security Policy (CSP)
 - Apply rate limiting
@@ -1067,20 +1082,23 @@ export async function createUser(input: unknown) {
 
 ```typescript
 // app/api/users/[id]/route.ts
-import { auth } from '@/lib/auth';
+import { auth } from "@/lib/auth";
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(
+  req: Request,
+  { params }: { params: { id: string } },
+) {
   const session = await auth();
-  
+
   if (!session?.user) {
-    return new Response('Unauthorized', { status: 401 });
+    return new Response("Unauthorized", { status: 401 });
   }
-  
+
   // Check authorization
-  if (session.user.id !== params.id && session.user.role !== 'admin') {
-    return new Response('Forbidden', { status: 403 });
+  if (session.user.id !== params.id && session.user.role !== "admin") {
+    return new Response("Forbidden", { status: 403 });
   }
-  
+
   // Proceed with request
 }
 ```
@@ -1088,6 +1106,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 ## Performance Optimization
 
 ### React Performance
+
 - Use React.memo() for expensive components
 - Implement useCallback and useMemo appropriately
 - Leverage useTransition for non-urgent updates
@@ -1099,15 +1118,16 @@ import { useTransition, useDeferredValue } from 'react';
 function SearchResults({ query }: { query: string }) {
   const [isPending, startTransition] = useTransition();
   const deferredQuery = useDeferredValue(query);
-  
+
   // Expensive filtering uses deferred value
   const results = filterResults(data, deferredQuery);
-  
+
   return <div style={{ opacity: isPending ? 0.5 : 1 }}>{/* results */}</div>;
 }
 ```
 
 ### Next.js Optimization
+
 - Use Next.js Image component for images
 - Implement dynamic imports for large components
 - Use generateStaticParams for static pages
@@ -1125,6 +1145,7 @@ const HeavyComponent = dynamic(() => import('./heavy-component'));
 ```
 
 ### Database Optimization
+
 - Use Prisma select to fetch only needed fields
 - Implement pagination for large datasets
 - Use database indexes appropriately
@@ -1143,6 +1164,7 @@ const users = await db.user.findMany({
 ## Accessibility (WCAG 2.2 Level AA)
 
 ### Semantic HTML
+
 - Use proper HTML5 semantic elements
 - Implement proper heading hierarchy
 - Use landmark roles appropriately
@@ -1163,6 +1185,7 @@ const users = await db.user.findMany({
 ```
 
 ### ARIA and Keyboard Navigation
+
 - Add ARIA labels to interactive elements
 - Ensure keyboard navigation works
 - Implement focus management
@@ -1180,6 +1203,7 @@ const users = await db.user.findMany({
 ```
 
 ### Color Contrast
+
 - Ensure 4.5:1 contrast ratio for text
 - Use TailwindCSS color utilities
 - Test with accessibility tools
@@ -1187,60 +1211,64 @@ const users = await db.user.findMany({
 ## Testing Strategy
 
 ### Unit Tests (Vitest)
-```typescript
-import { describe, it, expect } from 'vitest';
-import { calculateDiscount } from './pricing';
 
-describe('calculateDiscount', () => {
-  it('should apply basic discount', () => {
+```typescript
+import { describe, it, expect } from "vitest";
+import { calculateDiscount } from "./pricing";
+
+describe("calculateDiscount", () => {
+  it("should apply basic discount", () => {
     expect(calculateDiscount(100, 10)).toBe(10);
   });
-  
-  it('should cap discount at 50%', () => {
+
+  it("should cap discount at 50%", () => {
     expect(calculateDiscount(100, 60)).toBe(50);
   });
 });
 ```
 
 ### E2E Tests (Playwright)
-```typescript
-import { test, expect } from '@playwright/test';
 
-test('user can sign in', async ({ page }) => {
-  await page.goto('/login');
-  await page.fill('input[name="email"]', 'user@example.com');
-  await page.fill('input[name="password"]', 'password123');
+```typescript
+import { test, expect } from "@playwright/test";
+
+test("user can sign in", async ({ page }) => {
+  await page.goto("/login");
+  await page.fill('input[name="email"]', "user@example.com");
+  await page.fill('input[name="password"]', "password123");
   await page.click('button[type="submit"]');
-  
-  await expect(page).toHaveURL('/dashboard');
+
+  await expect(page).toHaveURL("/dashboard");
 });
 ```
 
 ## Error Handling
 
 ### API Error Handling
+
 ```typescript
-import { TRPCError } from '@trpc/server';
+import { TRPCError } from "@trpc/server";
 
 export const userRouter = router({
   getUser: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
       const user = await db.user.findUnique({ where: { id: input.id } });
-      
+
       if (!user) {
         throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'User not found',
+          code: "NOT_FOUND",
+          message: "User not found",
         });
       }
-      
+
       return user;
     }),
 });
 ```
 
 ### UI Error Boundaries
+
 ```typescript
 'use client';
 
@@ -1272,6 +1300,7 @@ export class ErrorBoundary extends Component<
 ## Git Commit Conventions
 
 Follow Conventional Commits:
+
 ```
 feat: Add user authentication
 fix: Resolve login redirect issue
@@ -1284,6 +1313,7 @@ chore: Update dependencies
 ## AI Assistant Instructions
 
 When generating code:
+
 1. Always use TypeScript with proper types
 2. Follow the file organization structure
 3. Implement proper error handling
@@ -1294,19 +1324,23 @@ When generating code:
 8. Suggest tests for new functionality
 
 When reviewing code:
+
 1. Check for type safety violations
 2. Verify security best practices
 3. Ensure accessibility compliance
 4. Identify performance bottlenecks
 5. Suggest improvements for code quality
+
 ```
 
 ### Python + FastAPI Backend
 
 **Command:**
 ```
+
 /cursor-rules --python --strict --security-focused --testing
-```
+
+````
 
 **Generated `.cursorrules`:**
 ```markdown
@@ -1341,9 +1375,10 @@ def get_users(
 ) -> List[User]:
     """Retrieve users with pagination."""
     return db.query(User).limit(limit).offset(offset).all()
-```
+````
 
 ### Async/Await
+
 - Use async functions for I/O operations
 - Properly await all async calls
 - Use `asyncio.gather()` for parallel operations
@@ -1361,19 +1396,20 @@ async def fetch_user_data(user_id: str) -> UserData:
 ```
 
 ### Error Handling
+
 ```python
 from fastapi import HTTPException
 
 @app.get("/users/{user_id}")
 async def get_user(user_id: str) -> User:
     user = await db.get(User, user_id)
-    
+
     if not user:
         raise HTTPException(
             status_code=404,
             detail="User not found"
         )
-    
+
     return user
 ```
 
@@ -1397,6 +1433,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
         raise HTTPException(status_code=401, detail="Invalid credentials")
     return user
 ```
+
 ```
 
 ## Best Practices
@@ -1409,3 +1446,4 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
 6. **Testing**: Specify testing requirements and patterns
 7. **Git Conventions**: Define commit message standards
 8. **AI Instructions**: Guide AI on how to generate and review code
+```

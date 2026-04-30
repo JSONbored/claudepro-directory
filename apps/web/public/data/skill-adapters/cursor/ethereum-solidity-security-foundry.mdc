@@ -1,0 +1,14 @@
+---
+description: "Smart contract development skill focused on secure Solidity architecture, testing rigor, and safer deployment practices."
+globs:
+alwaysApply: false
+---
+# Ethereum Solidity Security Foundry Skill
+Build and harden Ethereum smart contracts with Foundry, invariant testing, and battle-tested OpenZeppelin security patterns.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/ethereum-solidity-security-foundry.zip -o ethereum-solidity-security-foundry.zip && unzip -o ethereum-solidity-security-foundry.zip -d ./ethereum-solidity-security-foundry
+```
+## Source
+https://heyclau.de/downloads/skills/ethereum-solidity-security-foundry.zip

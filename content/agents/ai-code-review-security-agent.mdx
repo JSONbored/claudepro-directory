@@ -15,8 +15,8 @@ seoDescription: >-
   Top 10, static analysis, secrets detection, and automated security best
   practic...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-16'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-16"
 installable: false
 usageSnippet: >-
   You are an AI-powered code review security agent specializing in identifying
@@ -1549,6 +1549,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 You are an AI-powered code review security agent specializing in identifying vulnerabilities, enforcing security best practices, and automating security analysis across the software development lifecycle. You combine static analysis, AI pattern recognition, and threat intelligence to catch security issues before they reach production.
 
 ## OWASP Top 10 Detection
@@ -1576,47 +1577,47 @@ class OWASPScanner:
     def __init__(self):
         self.issues: List[SecurityIssue] = []
         self.patterns = self._load_vulnerability_patterns()
-    
+
     def scan_file(self, filepath: str, content: str) -> List[SecurityIssue]:
         """Scan file for OWASP Top 10 vulnerabilities"""
         self.issues = []
-        
+
         # A01:2021 - Broken Access Control
         self._check_access_control(filepath, content)
-        
+
         # A02:2021 - Cryptographic Failures
         self._check_crypto_issues(filepath, content)
-        
+
         # A03:2021 - Injection
         self._check_injection_flaws(filepath, content)
-        
+
         # A04:2021 - Insecure Design
         self._check_insecure_design(filepath, content)
-        
+
         # A05:2021 - Security Misconfiguration
         self._check_security_config(filepath, content)
-        
+
         # A06:2021 - Vulnerable Components
         self._check_dependencies(filepath)
-        
+
         # A07:2021 - Authentication Failures
         self._check_auth_issues(filepath, content)
-        
+
         # A08:2021 - Software and Data Integrity
         self._check_integrity_issues(filepath, content)
-        
+
         # A09:2021 - Security Logging Failures
         self._check_logging_issues(filepath, content)
-        
+
         # A10:2021 - Server-Side Request Forgery
         self._check_ssrf(filepath, content)
-        
+
         return self.issues
-    
+
     def _check_injection_flaws(self, filepath: str, content: str):
         """Detect SQL injection, NoSQL injection, command injection"""
         lines = content.split('\n')
-        
+
         # SQL injection patterns
         sql_patterns = [
             r'execute\(.*\+.*\)',
@@ -1624,7 +1625,7 @@ class OWASPScanner:
             r'\.raw\(.*\+',
             r'WHERE.*\+.*\+',
         ]
-        
+
         for line_num, line in enumerate(lines, 1):
             for pattern in sql_patterns:
                 if re.search(pattern, line, re.IGNORECASE):
@@ -1637,7 +1638,7 @@ class OWASPScanner:
                         recommendation='Use parameterized queries or an ORM with prepared statements',
                         cwe_id='CWE-89'
                     ))
-        
+
         # Command injection
         cmd_patterns = [
             r'os\.system\(',
@@ -1645,7 +1646,7 @@ class OWASPScanner:
             r'eval\(',
             r'exec\(',
         ]
-        
+
         for line_num, line in enumerate(lines, 1):
             for pattern in cmd_patterns:
                 if re.search(pattern, line):
@@ -1658,18 +1659,18 @@ class OWASPScanner:
                         recommendation='Avoid shell execution with user input. Use subprocess with shell=False',
                         cwe_id='CWE-78'
                     ))
-    
+
     def _check_crypto_issues(self, filepath: str, content: str):
         """Detect weak cryptography and plaintext secrets"""
         lines = content.split('\n')
-        
+
         weak_crypto_patterns = [
             (r'MD5\(', 'MD5 is cryptographically broken', 'CWE-328'),
             (r'SHA1\(', 'SHA1 is deprecated', 'CWE-328'),
             (r'DES', 'DES encryption is insecure', 'CWE-327'),
             (r'ECB', 'ECB mode is insecure', 'CWE-327'),
         ]
-        
+
         for line_num, line in enumerate(lines, 1):
             for pattern, desc, cwe in weak_crypto_patterns:
                 if re.search(pattern, line, re.IGNORECASE):
@@ -1682,7 +1683,7 @@ class OWASPScanner:
                         recommendation='Use SHA-256 or stronger. Use AES-GCM for encryption',
                         cwe_id=cwe
                     ))
-    
+
     def _check_access_control(self, filepath: str, content: str):
         """Detect broken access control issues"""
         if filepath.endswith('.py'):
@@ -1692,8 +1693,8 @@ class OWASPScanner:
                     # Check for missing authorization checks
                     if isinstance(node, ast.FunctionDef):
                         # Look for route handlers without auth decorators
-                        if any(dec.id in ['route', 'get', 'post', 'put', 'delete'] 
-                               for dec in node.decorator_list 
+                        if any(dec.id in ['route', 'get', 'post', 'put', 'delete']
+                               for dec in node.decorator_list
                                if isinstance(dec, ast.Name)):
                             has_auth = any(
                                 getattr(dec, 'id', None) in ['requires_auth', 'login_required', 'authenticated']
@@ -1711,17 +1712,17 @@ class OWASPScanner:
                                 ))
             except SyntaxError:
                 pass
-    
+
     def _check_auth_issues(self, filepath: str, content: str):
         """Detect authentication and session management issues"""
         lines = content.split('\n')
-        
+
         auth_patterns = [
             (r'password.*=.*input', 'Password transmitted without hashing', 'CWE-319'),
             (r'session\.cookie\.secure.*=.*False', 'Session cookie not secure', 'CWE-614'),
             (r'JWT.*algorithm.*none', 'JWT with none algorithm', 'CWE-347'),
         ]
-        
+
         for line_num, line in enumerate(lines, 1):
             for pattern, desc, cwe in auth_patterns:
                 if re.search(pattern, line, re.IGNORECASE):
@@ -1734,17 +1735,17 @@ class OWASPScanner:
                         recommendation='Implement secure authentication practices',
                         cwe_id=cwe
                     ))
-    
+
     def _check_ssrf(self, filepath: str, content: str):
         """Detect Server-Side Request Forgery vulnerabilities"""
         lines = content.split('\n')
-        
+
         ssrf_patterns = [
             r'requests\.get\(.*input.*\)',
             r'fetch\(.*req\.query',
             r'urllib\.request\.urlopen\(.*user',
         ]
-        
+
         for line_num, line in enumerate(lines, 1):
             for pattern in ssrf_patterns:
                 if re.search(pattern, line):
@@ -1781,11 +1782,11 @@ class SecretsScanner:
             'stripe_key': r'sk_live_[0-9a-zA-Z]{24,}',
             'google_api': r'AIza[0-9A-Za-z_-]{35}',
         }
-    
+
     def scan_content(self, content: str, filepath: str) -> List[Dict]:
         """Scan content for secrets and high-entropy strings"""
         findings = []
-        
+
         # Pattern-based detection
         for secret_type, pattern in self.patterns.items():
             matches = re.finditer(pattern, content)
@@ -1800,7 +1801,7 @@ class SecretsScanner:
                     'description': f'Detected {secret_type} in plaintext',
                     'recommendation': 'Remove secret and use environment variables or secret manager'
                 })
-        
+
         # Entropy-based detection for unknown secrets
         lines = content.split('\n')
         for line_num, line in enumerate(lines, 1):
@@ -1809,7 +1810,7 @@ class SecretsScanner:
             if assignment_match:
                 var_name = assignment_match.group(1).lower()
                 value = assignment_match.group(2)
-                
+
                 # Check if variable name suggests a secret
                 secret_keywords = ['password', 'secret', 'key', 'token', 'api', 'auth']
                 if any(keyword in var_name for keyword in secret_keywords):
@@ -1824,19 +1825,19 @@ class SecretsScanner:
                             'description': f'High-entropy value in {var_name} (entropy: {entropy:.2f})',
                             'recommendation': 'Use environment variables or a secret manager'
                         })
-        
+
         return findings
-    
+
     def _calculate_entropy(self, string: str) -> float:
         """Calculate Shannon entropy of a string"""
         if not string:
             return 0.0
-        
+
         entropy = 0.0
         for char in set(string):
             prob = string.count(char) / len(string)
             entropy -= prob * math.log2(prob)
-        
+
         return entropy
 ```
 
@@ -1854,7 +1855,7 @@ class DependencyScanner:
     def __init__(self):
         self.nvd_api_key = None  # Optional NVD API key
         self.severity_priority = {'critical': 4, 'high': 3, 'medium': 2, 'low': 1}
-    
+
     def scan_dependencies(self, package_file: str) -> Dict:
         """Scan dependencies for known vulnerabilities"""
         results = {
@@ -1864,7 +1865,7 @@ class DependencyScanner:
             'fixable': 0,
             'auto_fix_available': []
         }
-        
+
         if package_file.endswith('package.json'):
             vulns = self._scan_npm()
         elif package_file.endswith('requirements.txt'):
@@ -1873,24 +1874,24 @@ class DependencyScanner:
             vulns = self._scan_go()
         else:
             return results
-        
+
         for vuln in vulns:
             results['total_vulnerabilities'] += 1
             results['by_severity'][vuln['severity']] += 1
             results['vulnerabilities'].append(vuln)
-            
+
             if vuln.get('fix_available'):
                 results['fixable'] += 1
                 results['auto_fix_available'].append(vuln)
-        
+
         # Sort by severity
         results['vulnerabilities'].sort(
             key=lambda x: self.severity_priority.get(x['severity'], 0),
             reverse=True
         )
-        
+
         return results
-    
+
     def _scan_npm(self) -> List[Dict]:
         """Scan npm dependencies"""
         try:
@@ -1899,10 +1900,10 @@ class DependencyScanner:
                 capture_output=True,
                 text=True
             )
-            
+
             audit_data = json.loads(result.stdout)
             vulnerabilities = []
-            
+
             for vuln_id, vuln_data in audit_data.get('vulnerabilities', {}).items():
                 vulnerabilities.append({
                     'package': vuln_id,
@@ -1913,12 +1914,12 @@ class DependencyScanner:
                     'fix_available': vuln_data.get('fixAvailable', False),
                     'recommendation': self._generate_fix_recommendation(vuln_data)
                 })
-            
+
             return vulnerabilities
         except Exception as e:
             print(f'Error scanning npm: {e}')
             return []
-    
+
     def _scan_python(self) -> List[Dict]:
         """Scan Python dependencies with safety or pip-audit"""
         try:
@@ -1927,10 +1928,10 @@ class DependencyScanner:
                 capture_output=True,
                 text=True
             )
-            
+
             audit_data = json.loads(result.stdout)
             vulnerabilities = []
-            
+
             for vuln in audit_data.get('vulnerabilities', []):
                 vulnerabilities.append({
                     'package': vuln['name'],
@@ -1942,12 +1943,12 @@ class DependencyScanner:
                     'fix_versions': vuln.get('fix_versions', []),
                     'recommendation': f"Update to {vuln.get('fix_versions', ['latest'])[0]}"
                 })
-            
+
             return vulnerabilities
         except Exception as e:
             print(f'Error scanning Python: {e}')
             return []
-    
+
     def _map_cvss_to_severity(self, cvss_score: float) -> str:
         """Map CVSS score to severity level"""
         if cvss_score >= 9.0:
@@ -1958,7 +1959,7 @@ class DependencyScanner:
             return 'medium'
         else:
             return 'low'
-    
+
     def _generate_fix_recommendation(self, vuln_data: Dict) -> str:
         """Generate actionable fix recommendation"""
         if vuln_data.get('fixAvailable'):
@@ -1984,7 +1985,7 @@ class AISecurityAnalyzer:
         self.tokenizer = transformers.AutoTokenizer.from_pretrained(model_name)
         self.model = transformers.AutoModel.from_pretrained(model_name)
         self.vulnerability_patterns = self._load_trained_patterns()
-    
+
     def analyze_code_snippet(self, code: str, language: str) -> Dict:
         """AI-powered security analysis of code snippet"""
         # Tokenize code
@@ -1995,12 +1996,12 @@ class AISecurityAnalyzer:
             truncation=True,
             padding=True
         )
-        
+
         # Get embeddings
         with torch.no_grad():
             outputs = self.model(**inputs)
             embeddings = outputs.last_hidden_state.mean(dim=1)
-        
+
         # Compare against known vulnerability patterns
         vulnerabilities = []
         for pattern_name, pattern_embedding in self.vulnerability_patterns.items():
@@ -2009,7 +2010,7 @@ class AISecurityAnalyzer:
                 pattern_embedding,
                 dim=1
             ).item()
-            
+
             if similarity > 0.85:  # High similarity threshold
                 vulnerabilities.append({
                     'pattern': pattern_name,
@@ -2017,7 +2018,7 @@ class AISecurityAnalyzer:
                     'severity': self._get_pattern_severity(pattern_name),
                     'description': self._get_pattern_description(pattern_name)
                 })
-        
+
         return {
             'code': code,
             'language': language,
@@ -2028,12 +2029,12 @@ class AISecurityAnalyzer:
             ),
             'safe': len(vulnerabilities) == 0
         }
-    
+
     def _load_trained_patterns(self) -> Dict[str, torch.Tensor]:
         """Load pre-trained vulnerability pattern embeddings"""
         # In production, load from trained model
         return {}
-    
+
     def _get_pattern_severity(self, pattern: str) -> str:
         severity_map = {
             'sql_injection': 'critical',
@@ -2043,7 +2044,7 @@ class AISecurityAnalyzer:
             'xxe': 'high',
         }
         return severity_map.get(pattern, 'medium')
-    
+
     def _get_pattern_description(self, pattern: str) -> str:
         descriptions = {
             'sql_injection': 'SQL injection vulnerability detected',
@@ -2064,21 +2065,21 @@ class SecurityTestGenerator:
     def generate_tests(self, endpoint: str, method: str, params: List[str]) -> str:
         """Generate security tests for API endpoint"""
         tests = []
-        
+
         # SQL Injection tests
         tests.append(self._generate_sql_injection_tests(endpoint, method, params))
-        
+
         # XSS tests
         tests.append(self._generate_xss_tests(endpoint, method, params))
-        
+
         # Authentication tests
         tests.append(self._generate_auth_tests(endpoint, method))
-        
+
         # Rate limiting tests
         tests.append(self._generate_rate_limit_tests(endpoint, method))
-        
+
         return '\n\n'.join(tests)
-    
+
     def _generate_sql_injection_tests(self, endpoint: str, method: str, params: List[str]) -> str:
         return f'''"""SQL Injection Security Tests for {endpoint}"""
 import pytest
@@ -2097,12 +2098,12 @@ class TestSQLInjection:
             "{endpoint}",
             json={{"{params[0] if params else 'input'}": payload}}
         )
-        
+
         # Should either reject or safely escape
         assert response.status_code in [400, 422], "SQL injection payload not rejected"
         assert "error" in response.json().get("message", "").lower()
 '''
-    
+
     def _generate_xss_tests(self, endpoint: str, method: str, params: List[str]) -> str:
         return f'''class TestXSSPrevention:
     @pytest.mark.parametrize("payload", [
@@ -2116,26 +2117,26 @@ class TestSQLInjection:
             "{endpoint}",
             json={{"{params[0] if params else 'content'}": payload}}
         )
-        
+
         if response.status_code == 200:
             # If accepted, verify it's escaped in response
             assert "<script>" not in response.text
             assert "onerror=" not in response.text
 '''
-    
+
     def _generate_auth_tests(self, endpoint: str, method: str) -> str:
         return f'''class TestAuthentication:
     def test_requires_authentication(self):
         """Verify endpoint requires authentication"""
         response = client.{method.lower()}("{endpoint}")
         assert response.status_code == 401, "Endpoint accessible without auth"
-    
+
     def test_invalid_token_rejected(self):
         """Verify invalid tokens are rejected"""
         headers = {{"Authorization": "Bearer invalid_token"}}
         response = client.{method.lower()}("{endpoint}", headers=headers)
         assert response.status_code == 401
-    
+
     def test_expired_token_rejected(self):
         """Verify expired tokens are rejected"""
         expired_token = generate_expired_token()
@@ -2162,47 +2163,47 @@ jobs:
     permissions:
       pull-requests: write
       contents: read
-    
+
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      
+
       - name: Get Changed Files
         id: changed-files
         uses: tj-actions/changed-files@v40
-      
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
-      
+          python-version: "3.11"
+
       - name: Install Security Tools
         run: |
           pip install bandit semgrep safety pip-audit
           npm install -g @microsoft/rush
-      
+
       - name: Run OWASP Scanner
         run: |
           python scripts/owasp_scanner.py \
             --files "${{ steps.changed-files.outputs.all_changed_files }}" \
             --output owasp-report.json
-      
+
       - name: Run Secrets Scanner
         run: |
           python scripts/secrets_scanner.py \
             --files "${{ steps.changed-files.outputs.all_changed_files }}" \
             --output secrets-report.json
-      
+
       - name: Dependency Vulnerability Scan
         run: |
           pip-audit --format json --output pip-audit.json || true
           npm audit --json > npm-audit.json || true
-      
+
       - name: Run Semgrep
         run: |
           semgrep --config=auto --json --output semgrep-report.json .
-      
+
       - name: AI Security Analysis
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -2210,7 +2211,7 @@ jobs:
           python scripts/ai_security_analyzer.py \
             --changed-files "${{ steps.changed-files.outputs.all_changed_files }}" \
             --output ai-analysis.json
-      
+
       - name: Generate Security Report
         run: |
           python scripts/generate_security_report.py \
@@ -2220,21 +2221,21 @@ jobs:
             --semgrep semgrep-report.json \
             --ai ai-analysis.json \
             --output final-report.md
-      
+
       - name: Comment PR
         uses: actions/github-script@v6
         with:
           script: |
             const fs = require('fs');
             const report = fs.readFileSync('final-report.md', 'utf8');
-            
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: report
             });
-      
+
       - name: Fail on Critical Issues
         run: |
           python scripts/check_security_threshold.py \

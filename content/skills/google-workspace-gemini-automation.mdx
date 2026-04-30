@@ -2,17 +2,17 @@
 title: Google Workspace Gemini Automation Skill
 slug: google-workspace-gemini-automation
 category: skills
-description: 'Create useful Gemini-powered Google Workspace automations for docs, sheets, email triage, and internal workflow productivity.'
-cardDescription: 'Build practical Gemini + Workspace automations with safeguards, auditability, and business-ready output quality.'
+description: "Create useful Gemini-powered Google Workspace automations for docs, sheets, email triage, and internal workflow productivity."
+cardDescription: "Build practical Gemini + Workspace automations with safeguards, auditability, and business-ready output quality."
 seoTitle: Google Workspace Gemini Automation Skill
-seoDescription: 'Reusable AI skill for Gemini-powered Google Workspace automation, including Docs, Sheets, and communication workflows.'
+seoDescription: "Reusable AI skill for Gemini-powered Google Workspace automation, including Docs, Sheets, and communication workflows."
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2026-04-10'
-documentationUrl: 'https://ai.google.dev/gemini-api/docs'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2026-04-10"
+documentationUrl: "https://ai.google.dev/gemini-api/docs"
 downloadUrl: /downloads/skills/google-workspace-gemini-automation.zip
 installable: true
-installCommand: 'curl -L https://heyclau.de/downloads/skills/google-workspace-gemini-automation.zip -o google-workspace-gemini-automation.zip && unzip -o google-workspace-gemini-automation.zip -d ./google-workspace-gemini-automation'
+installCommand: "curl -L https://heyclau.de/downloads/skills/google-workspace-gemini-automation.zip -o google-workspace-gemini-automation.zip && unzip -o google-workspace-gemini-automation.zip -d ./google-workspace-gemini-automation"
 usageSnippet: Use this skill for high-leverage internal productivity automations powered by Gemini and Google Workspace tools.
 copySnippet: |-
   # Trigger
@@ -26,9 +26,9 @@ copySnippet: |-
 skillType: general
 skillLevel: advanced
 verificationStatus: draft
-verifiedAt: '2026-04-10'
+verifiedAt: "2026-04-10"
 retrievalSources:
-  - 'https://ai.google.dev/gemini-api/docs'
+  - "https://ai.google.dev/gemini-api/docs"
 testedPlatforms:
   - Claude
   - Codex
@@ -60,6 +60,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Overview
 
 This skill helps AI agents build practical Google Workspace automations using Gemini. It focuses on workflows teams actually run: reporting, triage, routing, summarization, and structured content generation.
@@ -73,7 +74,9 @@ This skill helps AI agents build practical Google Workspace automations using Ge
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 

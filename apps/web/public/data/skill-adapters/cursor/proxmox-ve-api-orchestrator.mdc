@@ -1,0 +1,14 @@
+---
+description: "Proxmox automation skill for repeatable VM/LXC operations, backups, and cluster-safe workflows."
+globs:
+alwaysApply: false
+---
+# Proxmox VE API Orchestrator Skill
+Orchestrate Proxmox VM and LXC lifecycle operations via API with safe sequencing, capacity checks, and rollback-aware automation.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/proxmox-ve-api-orchestrator.zip -o proxmox-ve-api-orchestrator.zip && unzip -o proxmox-ve-api-orchestrator.zip -d ./proxmox-ve-api-orchestrator
+```
+## Source
+https://heyclau.de/downloads/skills/proxmox-ve-api-orchestrator.zip

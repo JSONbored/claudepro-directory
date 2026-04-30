@@ -1,0 +1,11 @@
+HeyClaude registry update: {{VERSION_OR_DATE}}
+
+{{SUMMARY}}
+
+{{CHANGE_LIST}}
+
+{{API_FEED_NOTE}}
+{{CHANGELOG_URL}}
+
+You are receiving this because you subscribed to HeyClaude.
+{{RESEND_UNSUBSCRIBE}}

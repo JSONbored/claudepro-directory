@@ -14,13 +14,13 @@ seoDescription: >-
   patterns, and dependencies before major refactors or feature implementations
   Discove...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-25'
-documentationUrl: 'https://docs.claude.com/en/docs/claude-code/analysis'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-25"
+documentationUrl: "https://docs.claude.com/en/docs/claude-code/analysis"
 installable: true
-installCommand: '/context-analyzer [scope] [options]'
-usageSnippet: '/context-analyzer [scope] [options]'
-copySnippet: '/context-analyzer [scope] [options]'
+installCommand: "/context-analyzer [scope] [options]"
+usageSnippet: "/context-analyzer [scope] [options]"
+copySnippet: "/context-analyzer [scope] [options]"
 tags:
   - context-analysis
   - codebase-understanding
@@ -48,8 +48,9 @@ hasPrerequisites: false
 hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
-commandSyntax: '/context-analyzer [scope] [options]'
+commandSyntax: "/context-analyzer [scope] [options]"
 ---
+
 The `/context-analyzer` command performs deep codebase analysis using Claude's agentic search to understand architecture, patterns, and dependencies for informed decision-making.
 
 ## Features
@@ -96,12 +97,14 @@ The `/context-analyzer` command performs deep codebase analysis using Claude's a
 ### Full Codebase Analysis
 
 **Command:**
+
 ```bash
 /context-analyzer --full --all
 ```
 
 **Analysis Report:**
-```
+
+````
 [Context Analysis: Full Codebase]
 [Using Agentic Search to scan project...]
 
@@ -194,23 +197,26 @@ Detected Patterns:
      const data = await db.query();
      return <div>{data}</div>;
    }
-   ```
+````
 
 2. Form Handling (react-hook-form + Zod):
+
    ```typescript
    // Pattern found in 15 files
    const form = useForm({
-     resolver: zodResolver(schema)
+     resolver: zodResolver(schema),
    });
    ```
 
 3. tRPC API Calls:
+
    ```typescript
    // Pattern found in 38 files
    const { data, isLoading } = trpc.users.list.useQuery();
    ```
 
 4. Error Boundaries:
+
    ```typescript
    // Pattern found in 8 layouts
    <ErrorBoundary fallback={<ErrorPage />}>
@@ -222,7 +228,7 @@ Detected Patterns:
    ```typescript
    // Pattern found in 12 routes
    const session = await auth();
-   if (!session) redirect('/login');
+   if (!session) redirect("/login");
    ```
 
 ====================
@@ -230,53 +236,59 @@ DEPENDENCY ANALYSIS
 ====================
 
 High Coupling (Needs Refactoring):
-  - auth.service.ts → 23 files depend on it
-  - db/client.ts → 45 files import directly
-  - utils/validation.ts → 18 files
+
+- auth.service.ts → 23 files depend on it
+- db/client.ts → 45 files import directly
+- utils/validation.ts → 18 files
 
 Low Coupling (Good):
-  - components/ui/* → Self-contained
-  - hooks/* → Independent
+
+- components/ui/\* → Self-contained
+- hooks/\* → Independent
 
 Circular Dependencies: None detected ✓
 
 External Dependencies:
-  - Production: 45 packages
-  - Development: 28 packages
-  - Total bundle size: 287 KB (gzipped)
+
+- Production: 45 packages
+- Development: 28 packages
+- Total bundle size: 287 KB (gzipped)
 
 Heaviest Dependencies:
-  1. next: 105 KB
-  2. react-dom: 42 KB  
-  3. framer-motion: 38 KB
-  4. @trpc/client: 28 KB
+
+1. next: 105 KB
+2. react-dom: 42 KB
+3. framer-motion: 38 KB
+4. @trpc/client: 28 KB
 
 ====================
 CODE QUALITY
 ====================
 
 Metrics:
-  - Test Coverage: 78% (target: 80%)
-  - TypeScript Errors: 0
-  - Linting Warnings: 3
-  - Duplicate Code: 2.1%
-  - Complexity (avg): 4.2 (good)
+
+- Test Coverage: 78% (target: 80%)
+- TypeScript Errors: 0
+- Linting Warnings: 3
+- Duplicate Code: 2.1%
+- Complexity (avg): 4.2 (good)
 
 Technical Debt:
-  🟡 Medium Debt (Manageable)
-  
-  Priority Issues:
-  1. auth.service.ts high coupling (23 dependencies)
-  2. 3 components exceed 250 lines
-  3. 5 files missing JSDoc comments
-  4. 2% test coverage gap
+🟡 Medium Debt (Manageable)
+
+Priority Issues:
+
+1. auth.service.ts high coupling (23 dependencies)
+2. 3 components exceed 250 lines
+3. 5 files missing JSDoc comments
+4. 2% test coverage gap
 
 Strengths:
-  ✓ Consistent naming conventions
-  ✓ Strong TypeScript usage (strict mode)
-  ✓ Good file organization
-  ✓ Modern React patterns
-  ✓ Proper error handling
+✓ Consistent naming conventions
+✓ Strong TypeScript usage (strict mode)
+✓ Good file organization
+✓ Modern React patterns
+✓ Proper error handling
 
 ====================
 RECOMMENDATIONS
@@ -313,6 +325,7 @@ Minor technical debt is manageable. Ready for feature
 development with recommended refactorings noted above.
 
 Key Findings:
+
 - Strong TypeScript foundation
 - Consistent React 19 patterns
 - Good test coverage (close to target)
@@ -320,19 +333,22 @@ Key Findings:
 - Clear architecture
 
 Recommended Next Steps:
+
 1. Address auth.service.ts coupling
 2. Reach 80% test coverage
 3. Proceed with feature development
-```
+
+````
 
 ### Module-Specific Analysis
 
 **Command:**
 ```bash
 /context-analyzer --module=authentication --detailed
-```
+````
 
 **Report:**
+
 ```
 [Authentication Module Analysis]
 
@@ -457,11 +473,13 @@ Estimated Effort: 2-3 days
 ### Before Refactoring Analysis
 
 **Command:**
+
 ```bash
 /context-analyzer --directory=src/components/dashboard --architecture
 ```
 
 **Use Case: Planning Refactor**
+
 ```
 [Pre-Refactoring Analysis]
 
@@ -499,6 +517,7 @@ Ready to proceed? (y/n)
 ## Use Cases
 
 ### 1. Onboarding New Developers
+
 ```bash
 /context-analyzer --full --summary
 
@@ -512,6 +531,7 @@ Result: Productive in hours, not days
 ```
 
 ### 2. Pre-Refactoring Planning
+
 ```bash
 /context-analyzer --module=payments --dependencies
 
@@ -525,6 +545,7 @@ Result: Informed refactoring decisions
 ```
 
 ### 3. Technical Debt Assessment
+
 ```bash
 /context-analyzer --full --quality
 
@@ -538,6 +559,7 @@ Result: Data-driven planning
 ```
 
 ### 4. Architecture Documentation
+
 ```bash
 /context-analyzer --architecture --save-to=ARCHITECTURE.md
 
@@ -575,6 +597,7 @@ Result: Up-to-date documentation
 ## Integration with Other Commands
 
 ### Context Analysis → Plan Mode
+
 ```bash
 /context-analyzer --module=authentication --dependencies
 # Understand current architecture
@@ -584,6 +607,7 @@ Result: Up-to-date documentation
 ```
 
 ### Context Analysis → TDD
+
 ```bash
 /context-analyzer --file=payment.service.ts --quality
 # Identify untested code paths
@@ -593,6 +617,7 @@ Result: Up-to-date documentation
 ```
 
 ### Context Analysis → Subagents
+
 ```bash
 /context-analyzer --full --quality
 # Identify refactoring needs

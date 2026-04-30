@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "key": "tools:claude-code",
+  "entry": {
+    "category": "tools",
+    "slug": "claude-code",
+    "title": "Claude Code",
+    "description": "Anthropic command-line coding agent for codebase questions, edits, tests, and terminal-centered development tasks.",
+    "seoTitle": "Claude Code terminal coding agent",
+    "seoDescription": "Claude Code is Anthropic's terminal coding agent for codebase questions, edits, tests, and development workflows. HeyClaude adds source links, install...",
+    "author": "Anthropic",
+    "dateAdded": "2026-04-27",
+    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+    "tags": [
+      "claude-code",
+      "terminal-agent"
+    ],
+    "keywords": [
+      "claude code",
+      "terminal agent",
+      "tools",
+      "claude",
+      "heyclaude"
+    ],
+    "documentationUrl": "https://docs.anthropic.com/en/docs/claude-code/overview",
+    "websiteUrl": "https://www.anthropic.com/claude-code",
+    "brandName": "Claude Code",
+    "brandDomain": "anthropic.com",
+    "brandIconUrl": "/api/brand-assets/icon/anthropic.com",
+    "brandAssetSource": "brandfetch",
+    "pricingModel": "paid",
+    "disclosure": "heyclaude_pick",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "macOS, Windows, Linux",
+    "cardDescription": "Terminal coding agent for Claude-powered development.",
+    "installable": false,
+    "hasPrerequisites": false,
+    "hasTroubleshooting": false,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Editorial notes\n\nClaude Code is a core reference point for agentic coding workflows and fits teams that already live in the terminal.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+    "sections": [
+      {
+        "title": "Editorial notes",
+        "id": "editorial-notes",
+        "markdown": "Claude Code is a core reference point for agentic coding workflows and fits teams that already live in the terminal.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Disclosure",
+        "id": "disclosure",
+        "markdown": "Editorial listing. No paid placement or affiliate link is used.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Editorial notes",
+        "id": "editorial-notes"
+      },
+      {
+        "depth": 2,
+        "text": "Disclosure",
+        "id": "disclosure"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/tools/claude-code.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/claude-code.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": true,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 3,
+    "sourceUrls": [
+      "https://docs.anthropic.com/en/docs/claude-code/overview",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/claude-code.mdx",
+      "https://www.anthropic.com/claude-code"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

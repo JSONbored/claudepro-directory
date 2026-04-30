@@ -9,13 +9,13 @@ import { siteConfig } from "@/lib/site";
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-border/80 py-14">
+    <footer className="border-t border-border/80 bg-background/95 py-14">
       <div className="container-shell grid gap-10 md:grid-cols-[1.6fr_1fr_1fr_1.35fr]">
         <div className="space-y-4">
           <BrandWordmark />
           <p className="max-w-xl text-sm leading-7 text-muted-foreground">
-            A GitHub-native directory for Claude agents, MCP servers, reusable skills,
-            workflow hooks, commands, and practical guides.
+            A GitHub-native directory for Claude agents, MCP servers, reusable
+            skills, workflow hooks, commands, and practical guides.
           </p>
           <div className="flex flex-wrap items-center gap-2 pt-1">
             <a
@@ -38,8 +38,16 @@ export function SiteFooter() {
               </a>
               <a
                 href={siteConfig.twitterUrl}
-                target={siteConfig.twitterUrl.startsWith("http") ? "_blank" : undefined}
-                rel={siteConfig.twitterUrl.startsWith("http") ? "noreferrer" : undefined}
+                target={
+                  siteConfig.twitterUrl.startsWith("http")
+                    ? "_blank"
+                    : undefined
+                }
+                rel={
+                  siteConfig.twitterUrl.startsWith("http")
+                    ? "noreferrer"
+                    : undefined
+                }
                 className="inline-flex size-9 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition hover:border-primary/35 hover:text-foreground"
                 aria-label="Open Twitter/X"
               >
@@ -47,8 +55,16 @@ export function SiteFooter() {
               </a>
               <a
                 href={siteConfig.discordUrl}
-                target={siteConfig.discordUrl.startsWith("http") ? "_blank" : undefined}
-                rel={siteConfig.discordUrl.startsWith("http") ? "noreferrer" : undefined}
+                target={
+                  siteConfig.discordUrl.startsWith("http")
+                    ? "_blank"
+                    : undefined
+                }
+                rel={
+                  siteConfig.discordUrl.startsWith("http")
+                    ? "noreferrer"
+                    : undefined
+                }
                 className="inline-flex size-9 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition hover:border-primary/35 hover:text-foreground"
                 aria-label="Open Discord"
               >
@@ -59,17 +75,86 @@ export function SiteFooter() {
         </div>
         <div className="space-y-3 text-sm text-muted-foreground">
           <p className="font-medium text-foreground">Navigation</p>
-          <Link href="/browse" className="block transition hover:text-foreground">Browse</Link>
-          <Link href="/jobs" className="block transition hover:text-foreground">Jobs</Link>
-          <Link href="/about" className="block transition hover:text-foreground">About</Link>
-          <Link href="/submit" className="block transition hover:text-foreground">Submit</Link>
+          <Link
+            href="/browse"
+            className="block transition hover:text-foreground"
+          >
+            Browse
+          </Link>
+          <Link
+            href="/tools"
+            className="block transition hover:text-foreground"
+          >
+            Tools
+          </Link>
+          <Link href="/jobs" className="block transition hover:text-foreground">
+            Jobs
+          </Link>
+          <Link
+            href="/about"
+            className="block transition hover:text-foreground"
+          >
+            About
+          </Link>
+          <Link
+            href="/submit"
+            className="block transition hover:text-foreground"
+          >
+            Submit
+          </Link>
+          <Link
+            href="/advertise"
+            className="block transition hover:text-foreground"
+          >
+            Advertise
+          </Link>
+          <Link
+            href="/api-docs"
+            className="block transition hover:text-foreground"
+          >
+            API
+          </Link>
+          <Link
+            href="/contributors"
+            className="block transition hover:text-foreground"
+          >
+            Contributors
+          </Link>
+          <Link
+            href="/trending"
+            className="block transition hover:text-foreground"
+          >
+            Trending
+          </Link>
+          <Link
+            href="/ecosystem"
+            className="block transition hover:text-foreground"
+          >
+            Ecosystem
+          </Link>
+          <Link
+            href="/claim"
+            className="block transition hover:text-foreground"
+          >
+            Claim/update
+          </Link>
         </div>
         <div className="space-y-3 text-sm text-muted-foreground">
           <p className="font-medium text-foreground">Project</p>
-          <a href={siteConfig.githubUrl} target="_blank" rel="noreferrer" className="block transition hover:text-foreground">
+          <a
+            href={siteConfig.githubUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="block transition hover:text-foreground"
+          >
             GitHub
           </a>
-          <a href={`${siteConfig.githubUrl}/issues`} target="_blank" rel="noreferrer" className="block transition hover:text-foreground">
+          <a
+            href={`${siteConfig.githubUrl}/issues`}
+            target="_blank"
+            rel="noreferrer"
+            className="block transition hover:text-foreground"
+          >
             Issues
           </a>
         </div>

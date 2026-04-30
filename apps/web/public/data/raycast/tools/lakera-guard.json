@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:lakera-guard",
+  "category": "tools",
+  "slug": "lakera-guard",
+  "title": "Lakera Guard",
+  "author": "Lakera",
+  "brandName": "Lakera Guard",
+  "brandDomain": "lakera.ai",
+  "brandIconUrl": "/api/brand-assets/icon/lakera.ai",
+  "brandAssetSource": "brandfetch",
+  "copyText": "## Editorial notes\n\nLakera Guard is relevant for teams that need runtime protection and policy checks around LLM application inputs and outputs.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Lakera Guard\n\nAI security platform for detecting prompt injection, unsafe content, data leakage, and LLM application abuse.",
+  "webUrl": "https://heyclau.de/tools/lakera-guard",
+  "canonicalUrl": "https://heyclau.de/tools/lakera-guard",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/lakera-guard.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/lakera-guard",
+  "seoTitle": "Lakera Guard AI security for LLM apps",
+  "seoDescription": "Lakera Guard helps detect prompt injection, unsafe content, data leakage, and abuse in LLM applications. HeyClaude adds source links, install steps,...",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.lakera.ai"
+}

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:pipedream",
+  "category": "tools",
+  "slug": "pipedream",
+  "title": "Pipedream",
+  "author": "Pipedream",
+  "brandName": "Pipedream",
+  "brandDomain": "pipedream.com",
+  "brandIconUrl": "/api/brand-assets/icon/pipedream.com",
+  "brandAssetSource": "brandfetch",
+  "copyText": "## Editorial notes\n\nPipedream is useful when agent workflows need event triggers, API glue, and custom code steps without building a full backend.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Pipedream\n\nWorkflow automation platform for connecting APIs, building event-driven automations, and integrating developer tools.",
+  "webUrl": "https://heyclau.de/tools/pipedream",
+  "canonicalUrl": "https://heyclau.de/tools/pipedream",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/pipedream.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/pipedream",
+  "seoTitle": "Pipedream workflow automation for AI teams",
+  "seoDescription": "Pipedream connects APIs and services for event-driven automations, workflows, and developer integrations. HeyClaude adds source links, install steps,...",
+  "repoUrl": "",
+  "documentationUrl": "https://pipedream.com/docs"
+}

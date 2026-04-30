@@ -1,0 +1,14 @@
+---
+description: "Deep Proxmox API skill for reliable infrastructure automation with safe sequencing and operational guardrails."
+globs:
+alwaysApply: false
+---
+# Proxmox VE API Capability Pack Skill
+Expert Proxmox VE API capability skill for VM/LXC lifecycle orchestration, task polling, auth safety, and cluster-aware operations.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/proxmox-ve-api-capability-pack.zip -o proxmox-ve-api-capability-pack.zip && unzip -o proxmox-ve-api-capability-pack.zip -d ./proxmox-ve-api-capability-pack
+```
+## Source
+https://heyclau.de/downloads/skills/proxmox-ve-api-capability-pack.zip

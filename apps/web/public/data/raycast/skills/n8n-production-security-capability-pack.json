@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 2,
+  "key": "skills:n8n-production-security-capability-pack",
+  "category": "skills",
+  "slug": "n8n-production-security-capability-pack",
+  "title": "n8n Production Security Capability Pack Skill",
+  "author": "JSONbored",
+  "brandName": "n8n",
+  "brandDomain": "n8n.io",
+  "brandIconUrl": "/api/brand-assets/icon/n8n.io",
+  "brandAssetSource": "brandfetch",
+  "brandVerifiedAt": "2026-04-10",
+  "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/n8n-production-security-capability-pack.zip -o n8n-production-security-capability-pack.zip && unzip -o n8n-production-security-capability-pack.zip -d ./n8n-production-security-capability-pack\n\nUsage:\nUse this skill when deploying or auditing n8n workflows that involve AI nodes, sensitive data, or external side effects.\n\nAsset:\n# Trigger\n\"Apply the n8n production security capability pack to this workflow stack.\"\n\n# Required output\n1) Threat model\n2) Credential and access control map\n3) Workflow hardening checklist\n4) Incident response and audit plan",
+  "detailMarkdown": "# n8n Production Security Capability Pack Skill\n\nExpert n8n capability skill focused on secure production operation, workflow isolation, secret hygiene, and abuse-resistant automation design.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/n8n-production-security-capability-pack.zip -o n8n-production-security-capability-pack.zip && unzip -o n8n-production-security-capability-pack.zip -d ./n8n-production-security-capability-pack\n```\n\n## Usage\nUse this skill when deploying or auditing n8n workflows that involve AI nodes, sensitive data, or external side effects.",
+  "webUrl": "https://heyclau.de/skills/n8n-production-security-capability-pack",
+  "canonicalUrl": "https://heyclau.de/skills/n8n-production-security-capability-pack",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/n8n-production-security-capability-pack.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/n8n-production-security-capability-pack",
+  "seoTitle": "n8n Production Security Capability Pack Skill",
+  "seoDescription": "Advanced AI skill for securing n8n in production with workflow guardrails, credential controls, and operational hardening practices.",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.n8n.io/hosting/securing/"
+}

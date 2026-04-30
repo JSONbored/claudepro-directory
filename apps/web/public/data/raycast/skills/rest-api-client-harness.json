@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 2,
+  "key": "skills:rest-api-client-harness",
+  "category": "skills",
+  "slug": "rest-api-client-harness",
+  "title": "REST API Client Harness Skill",
+  "author": "JSONbored",
+  "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/rest-api-client-harness.zip -o rest-api-client-harness.zip && unzip -o rest-api-client-harness.zip -d ./rest-api-client-harness\n\nUsage:\nClaude can interact with REST APIs: make requests, handle authentication (API keys, OAuth, JWT), paginate through results, handle rate limits with retries, and process responses. Build API integration scripts, test endpoints, and extract data from web services.\n\nAsset:\nimport { setTimeout as delay } from 'node:timers/promises';\nimport { fetch } from 'undici';\n\nasync function fetchAll(url, token) {\n  let next = url;\n  const items = [];\n  while (next) {\n    const res = await fetch(next, { headers: { Authorization: `Bearer ${token}` } });\n    if (!res.ok) {\n      if (res.status >= 500) { await delay(1000); continue; }\n      throw new Error(`HTTP ${res.status}`);\n    }\n    const data = await res.json();\n    items.push(...data.items);\n    next = data.next;\n  }\n  return items;\n}",
+  "detailMarkdown": "# REST API Client Harness Skill\n\nExplore and script against REST APIs with comprehensive authentication support (API keys, OAuth 2.0, JWT Bearer tokens, Basic Auth), pagination utilities (cursor-based, offset-based, page-based), retry logic with exponential backoff and jitter, error handling for HTTP status codes, rate limiting with Retry-After hea...\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/rest-api-client-harness.zip -o rest-api-client-harness.zip && unzip -o rest-api-client-harness.zip -d ./rest-api-client-harness\n```\n\n## Usage\nClaude can interact with REST APIs: make requests, handle authentication (API keys, OAuth, JWT), paginate through results, handle rate limits with retries, and process responses. Build API integration scripts, test endpoints, and extract data from web services.",
+  "webUrl": "https://heyclau.de/skills/rest-api-client-harness",
+  "canonicalUrl": "https://heyclau.de/skills/rest-api-client-harness",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/rest-api-client-harness.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/rest-api-client-harness",
+  "seoTitle": "REST API Client Harness Skill",
+  "seoDescription": "Explore and script against REST APIs with comprehensive authentication support (API keys, OAuth 2.0, JWT Bearer tokens, Basic Auth), pagination utilities (cu...",
+  "repoUrl": "",
+  "documentationUrl": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview"
+}

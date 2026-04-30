@@ -13,12 +13,12 @@ seoDescription: >-
   Clean, performance-optimized statusline with Powerline glyphs showing model,
   directory, and token count Discover tools for AI development.
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-01'
-repoUrl: 'https://github.com/powerline/powerline'
-documentationUrl: 'https://github.com/powerline/powerline'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-01"
+repoUrl: "https://github.com/powerline/powerline"
+documentationUrl: "https://github.com/powerline/powerline"
 installable: true
-usageSnippet: ' claude-sonnet-4.5  ~/projects/my-app   1,234 '
+usageSnippet: " claude-sonnet-4.5  ~/projects/my-app   1,234 "
 copySnippet: |-
   {
     "statusLine": {
@@ -127,6 +127,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Features
 
 - Powerline-style separators and glyphs
@@ -169,8 +170,11 @@ robotsFollow: true
 ```
 
 ## Examples
+
 ### Enhanced Minimal Powerline with Git Branch
+
 Extended version including git branch information
+
 ```bash
 #!/usr/bin/env bash
 
@@ -218,8 +222,11 @@ statusline="${statusline} ${TOKEN_BG} ${tokens_formatted} ${RESET}${TOKEN_FG}${S
 
 echo -e "$statusline"
 ```
+
 ### Minimal Powerline with Custom Colors
+
 Version with configurable color scheme via environment variables
+
 ```bash
 #!/usr/bin/env bash
 
@@ -257,8 +264,11 @@ RESET="\033[0m"
 
 echo -e "${MODEL_BG} ${model} ${RESET}${MODEL_FG}${SEP}${RESET} ${DIR_BG} ${dir} ${RESET}${DIR_FG}${SEP}${RESET} ${TOKEN_BG} ${tokens_formatted} ${RESET}${TOKEN_FG}${SEP}${RESET}"
 ```
+
 ### Minimal Powerline Statusline Installation Example
+
 Complete setup script with Powerline font verification and color testing
+
 ```bash
 #!/bin/bash
 # Installation script for Minimal Powerline Statusline
@@ -346,27 +356,35 @@ echo "Customize colors: export POWERLINE_MODEL_BG=111 POWERLINE_DIR_BG=246"
 ```
 
 ## Troubleshooting
+
 ### Powerline separators showing as boxes or question marks
 
 Install a Nerd Font (e.g., FiraCode Nerd Font, Hack Nerd Font) or Powerline-patched font and configure your terminal to use it. Verify with: echo -e '\ue0b0'. Download fonts: https://www.nerdfonts.com/ or https://github.com/powerline/fonts. For VS Code: Set 'terminal.integrated.fontFamily' to your Nerd Font. For iTerm2: Preferences > Profiles > Text > Font > Select Nerd Font.
+
 ### Colors not displaying correctly
 
 Ensure terminal supports 256 colors. Test with: tput colors (should return 256). Set TERM=xterm-256color if needed: export TERM=xterm-256color. For tmux/screen use: export TERM=screen-256color. Add to ~/.bashrc or ~/.zshrc for persistence. Verify color codes work: echo -e '\033[48;5;111mTEST\033[0m' (should show colored background).
+
 ### jq command not found error
 
 Install jq: macOS (brew install jq), Linux (sudo apt-get install jq or sudo yum install jq), or download from https://jqlang.github.io/jq/. Verify installation: which jq. Test jq: echo '{"test":123}' | jq .test (should return 123). Check jq version: jq --version (should be 1.6+).
+
 ### tput colors shows 8 but terminal supports 256 colors
 
 Set TERM explicitly: export TERM=xterm-256color. Test: env TERM=xterm-256color tput colors (should show 256). For tmux/screen use TERM=screen-256color. Add to shell profile (~/.bashrc or ~/.zshrc) for persistence. Check terminal emulator settings - some require explicit 256-color mode. Restart terminal after setting TERM.
+
 ### Powerline separators misaligned or cut off at edges
 
 Install Powerline-patched font from github.com/powerline/fonts. U+E0B0-U+E0B3 require patched fonts. For VS Code, enable GPU acceleration for better rendering. Check terminal font size and line height settings. Verify font is monospace and properly configured. Test separator: echo -e '\ue0b0' (should show right-pointing triangle).
+
 ### Model name not displaying or showing 'unknown'
 
 Check JSON input: echo '$input' | jq .model. Verify model.display_name exists: echo '$input' | jq .model.display_name. Check alternative: echo '$input' | jq .model.id. Verify sed command works: echo 'claude-sonnet-4.5' | sed 's/claude-//' (should return sonnet-4.5). Check model field structure in Claude Code JSON output.
+
 ### Directory path not shortening home directory
 
 Verify HOME environment variable: echo $HOME. Check sed replacement: echo '/Users/username/project' | sed "s|$HOME|~|". Verify workspace path extraction: echo '$input' | jq '.workspace.current_dir'. Check path format - script expects absolute paths. Verify directory exists: ls -d "$dir".
+
 ### Token count not displaying or showing 0
 
 Check JSON input structure: echo '$input' | jq .. Verify cost.total_tokens exists: echo '$input' | jq .cost.total_tokens. Check alternative field: echo '$input' | jq .session.totalTokens. Verify jq is installed: which jq. Test with sample JSON: echo '{"cost":{"total_tokens":1234}}' | jq -r '.cost.total_tokens // 0' (should return 1234). Check thousands separator: printf '%'d 1234 (should return 1,234 on systems with locale support).

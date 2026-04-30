@@ -1,0 +1,826 @@
+# Go Module Tidy - Hooks
+URL: https://heyclau.de/hooks/go-module-tidy
+Category: hooks
+Author: JSONbored
+Date added: 2025-09-19
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/go-module-tidy.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/hooks/go-module-tidy
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/go-module-tidy.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
+## Summary
+Automatically runs go mod tidy when Go files or go.mod are modified to keep dependencies clean.
+## Tags
+- go
+- golang
+- modules
+- dependencies
+- cleanup
+## Content
+## Features
+- Automatic go mod tidy execution for Go file and go.mod changes with automatic module root detection by walking up directory tree to find go.mod, dependency cleanup removing unused dependencies and adding missing imports, and dependency change tracking with before/after dependency counts
+- Go vet integration for static analysis and error detection with comprehensive code quality checking including common Go issues detection, error checking, and static analysis warnings with actionable error messages
+- Module dependency validation and inconsistency detection with go.mod syntax validation using go mod edit -json, build verification with go list ./..., and module integrity checking with go mod verify for checksum validation
+- Unused dependency cleanup and missing import resolution with automatic dependency addition for missing imports, dependency removal for unused dependencies, and indirect dependency analysis with recommendations for direct dependencies
+- Go workspace and multi-module project support with go.work file detection, workspace synchronization using go work sync, and multi-module dependency management with workspace-aware operations
+- Dependency vulnerability scanning with go list for dependency analysis and govulncheck integration (when available) for security checking including known vulnerability detection and security recommendations
+- Module cache optimization and cleanup suggestions with dependency count analysis (warnings for large dependency counts), module cache management recommendations (go clean -modcache), and replace directive analysis with production readiness warnings
+- Build constraint and Go version compatibility checking with Go version detection (go version), compatibility validation, and gofmt formatting checks with unformatted file detection and goimports integration for import formatting
+
+## Use Cases
+- Automated Go dependency management in development workflows automatically running go mod tidy when Go files or go.mod are modified to maintain clean dependencies and resolve import issues without manual intervention
+- Go module cleanup and optimization in CI/CD pipelines automatically cleaning dependencies, verifying checksums, and checking for vulnerabilities before builds to ensure consistent and secure builds
+- Multi-module workspace maintenance and synchronization automatically detecting Go workspaces (go.work) and synchronizing workspace modules to maintain consistency across multiple modules in monorepo setups
+- Go codebase quality assurance with integrated static analysis automatically running go vet, gofmt checks, and goimports validation to ensure code quality and formatting standards are maintained
+- Dependency security and vulnerability management automatically scanning for known vulnerabilities using govulncheck and providing security recommendations to prevent security issues in production
+- Development workflow integration seamlessly integrating Go module management into development workflows without manual go mod tidy execution or separate dependency management tools
+
+## Installation
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/go-module-tidy.sh
+3. Make executable: chmod +x .claude/hooks/go-module-tidy.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+- Claude Code CLI installed
+- Project directory initialized
+- Go 1.16+ installed and in PATH
+- Bash shell available
+- govulncheck (optional, for vulnerability scanning)
+- goimports (optional, for import formatting)
+
+## Hook Configuration
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/go-module-tidy.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/go-module-tidy.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+
+## Hook Script
+```bash
+#!/usr/bin/env bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Check if this is a Go-related file
+if [[ "$FILE_PATH" == *.go ]] || [[ "$FILE_PATH" == *go.mod ]] || [[ "$FILE_PATH" == *go.sum ]] || [[ "$FILE_PATH" == *go.work* ]]; then
+  echo "🔧 Go Module Maintenance for: $(basename "$FILE_PATH")" >&2
+
+  # Find the Go module root
+  MODULE_DIR="$(dirname "$FILE_PATH")"
+
+  # Walk up the directory tree to find go.mod
+  while [ "$MODULE_DIR" != "/" ] && [ ! -f "$MODULE_DIR/go.mod" ]; do
+    MODULE_DIR="$(dirname "$MODULE_DIR")"
+  done
+
+  if [ ! -f "$MODULE_DIR/go.mod" ]; then
+    echo "⚠️ No go.mod found - not a Go module" >&2
+    exit 0
+  fi
+
+  echo "📁 Go module root: $MODULE_DIR" >&2
+  cd "$MODULE_DIR"
+
+  # Check if Go is installed
+  if ! command -v go &> /dev/null; then
+    echo "❌ Go is not installed or not in PATH" >&2
+    exit 1
+  fi
+
+  GO_VERSION=$(go version | cut -d' ' -f3 2>/dev/null || echo "unknown")
+  echo "🐹 Go version: $GO_VERSION" >&2
+
+  # Initialize maintenance counters
+  ERRORS=0
+  WARNINGS=0
+  FIXED=0
+
+  # Function to report issues
+  report_issue() {
+    local level="$1"
+    local message="$2"
+
+    case "$level" in
+      "ERROR")
+        echo "❌ ERROR: $message" >&2
+        ERRORS=$((ERRORS + 1))
+        ;;
+      "WARNING")
+        echo "⚠️ WARNING: $message" >&2
+        WARNINGS=$((WARNINGS + 1))
+        ;;
+      "FIXED")
+        echo "✅ FIXED: $message" >&2
+        FIXED=$((FIXED + 1))
+        ;;
+      "INFO")
+        echo "ℹ️ INFO: $message" >&2
+        ;;
+    esac
+  }
+
+  # 1. Pre-tidy Module Analysis
+  echo "📊 Analyzing module state..." >&2
+
+  # Check go.mod syntax
+  if ! go mod edit -json > /dev/null 2>&1; then
+    report_issue "ERROR" "go.mod has syntax errors"
+    exit 1
+  else
+    echo "   ✅ go.mod syntax is valid" >&2
+  fi
+
+  # Get current dependencies before tidy
+  DEPS_BEFORE=$(go list -m all 2>/dev/null | wc -l | xargs || echo "0")
+  echo "   📦 Dependencies before tidy: $DEPS_BEFORE" >&2
+
+  # Check for any build errors
+  if go list ./... > /dev/null 2>&1; then
+    echo "   ✅ Module builds successfully" >&2
+  else
+    report_issue "WARNING" "Module has build issues that may affect dependency resolution"
+  fi
+
+  # 2. Run go mod tidy
+  echo "🧹 Running go mod tidy..." >&2
+
+  if go mod tidy; then
+    report_issue "FIXED" "go mod tidy completed successfully"
+
+    # Check dependencies after tidy
+    DEPS_AFTER=$(go list -m all 2>/dev/null | wc -l | xargs || echo "0")
+    DEPS_CHANGE=$((DEPS_AFTER - DEPS_BEFORE))
+
+    if [ "$DEPS_CHANGE" -gt 0 ]; then
+      echo "   📈 Added $DEPS_CHANGE dependencies" >&2
+    elif [ "$DEPS_CHANGE" -lt 0 ]; then
+      echo "   📉 Removed $((DEPS_CHANGE * -1)) dependencies" >&2
+    else
+      echo "   📦 No dependency changes" >&2
+    fi
+
+  else
+    report_issue "ERROR" "go mod tidy failed"
+  fi
+
+  # 3. Verify go.sum integrity
+  echo "🔐 Verifying module checksums..." >&2
+
+  if go mod verify; then
+    echo "   ✅ All module checksums verified" >&2
+  else
+    report_issue "ERROR" "Module checksum verification failed"
+  fi
+
+  # 4. Check for vulnerabilities (if govulncheck is available)
+  if command -v govulncheck &> /dev/null; then
+    echo "🛡️ Scanning for vulnerabilities..." >&2
+
+    if govulncheck ./... 2>/dev/null; then
+      echo "   ✅ No known vulnerabilities found" >&2
+    else
+      report_issue "WARNING" "Potential vulnerabilities detected - run 'govulncheck ./...' for details"
+    fi
+  else
+    echo "   💡 Install govulncheck for vulnerability scanning: go install golang.org/x/vuln/cmd/govulncheck@latest" >&2
+  fi
+
+  # 5. Run go vet for Go source files
+  if [[ "$FILE_PATH" == *.go ]]; then
+    echo "🔍 Running go vet..." >&2
+
+    if go vet ./...; then
+      echo "   ✅ go vet passed - no issues found" >&2
+    else
+      report_issue "WARNING" "go vet found potential issues"
+    fi
+
+    # Check for common Go issues
+    echo "🔍 Additional Go code analysis..." >&2
+
+    # Check for gofmt issues
+    UNFORMATTED=$(find . -name '*.go' -not -path './vendor/*' -exec gofmt -l {} \; 2>/dev/null)
+    if [ -n "$UNFORMATTED" ]; then
+      report_issue "WARNING" "Some files are not gofmt formatted"
+      echo "$UNFORMATTED" | head -5 | while read file; do
+        echo "     $file" >&2
+      done
+    else
+      echo "   ✅ All Go files are properly formatted" >&2
+    fi
+
+    # Check imports with goimports if available
+    if command -v goimports &> /dev/null; then
+      IMPORT_ISSUES=$(find . -name '*.go' -not -path './vendor/*' -exec goimports -l {} \; 2>/dev/null)
+      if [ -n "$IMPORT_ISSUES" ]; then
+        report_issue "WARNING" "Some files have import formatting issues"
+      else
+        echo "   ✅ All imports are properly formatted" >&2
+      fi
+    fi
+  fi
+
+  # 6. Module cleanup suggestions
+  echo "🧹 Module optimization check..." >&2
+
+  # Check for indirect dependencies that could be direct
+  INDIRECT_COUNT=$(go list -m all | grep -c '// indirect' || echo "0")
+  if [ "$INDIRECT_COUNT" -gt 0 ]; then
+    echo "   📊 Indirect dependencies: $INDIRECT_COUNT" >&2
+    echo "   💡 Review if any indirect deps should be direct" >&2
+  fi
+
+  # Check for replace directives
+  REPLACE_COUNT=$(grep -c '^replace ' go.mod 2>/dev/null || echo "0")
+  if [ "$REPLACE_COUNT" -gt 0 ]; then
+    echo "   🔄 Replace directives: $REPLACE_COUNT" >&2
+    echo "   💡 Review replace directives for production readiness" >&2
+  fi
+
+  # 7. Workspace support
+  if [ -f "go.work" ]; then
+    echo "🏢 Go workspace detected" >&2
+
+    if go work sync; then
+      echo "   ✅ Workspace synced successfully" >&2
+    else
+      report_issue "WARNING" "Workspace sync issues detected"
+    fi
+  fi
+
+  # 8. Module cache suggestions
+  if [ "$DEPS_AFTER" -gt 50 ]; then
+    echo "💡 Large dependency count - consider 'go clean -modcache' if disk space is low" >&2
+  fi
+
+  # 9. Generate Summary Report
+  echo "" >&2
+  echo "📋 Go Module Maintenance Summary:" >&2
+  echo "================================" >&2
+  echo "   📄 Module: $(basename "$(pwd)")" >&2
+  echo "   🐹 Go: $GO_VERSION" >&2
+  echo "   📦 Dependencies: $DEPS_AFTER" >&2
+  echo "   ✅ Fixed: $FIXED" >&2
+  echo "   ⚠️ Warnings: $WARNINGS" >&2
+  echo "   ❌ Errors: $ERRORS" >&2
+
+  if [ "$ERRORS" -eq 0 ] && [ "$WARNINGS" -eq 0 ]; then
+    echo "   🎉 Status: EXCELLENT - Module is clean and optimized" >&2
+  elif [ "$ERRORS" -eq 0 ]; then
+    echo "   ✅ Status: GOOD - Minor warnings to review" >&2
+  else
+    echo "   ❌ Status: NEEDS ATTENTION - Errors require fixing" >&2
+  fi
+
+  echo "" >&2
+  echo "💡 Go Module Best Practices:" >&2
+  echo "   • Run 'go mod tidy' regularly to keep dependencies clean" >&2
+  echo "   • Use 'go mod why <module>' to understand dependency reasons" >&2
+  echo "   • Update dependencies with 'go get -u ./...' carefully" >&2
+  echo "   • Consider using 'go mod graph' for dependency visualization" >&2
+  echo "   • Pin important dependencies to specific versions" >&2
+
+  # Exit with error if there are critical issues
+  if [ "$ERRORS" -gt 0 ]; then
+    echo "⚠️ Go module maintenance completed with errors" >&2
+    exit 1
+  fi
+
+else
+  # Not a Go file, exit silently
+  exit 0
+fi
+
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Check if this is a Go-related file
+if [[ "$FILE_PATH" == *.go ]] || [[ "$FILE_PATH" == *go.mod ]] || [[ "$FILE_PATH" == *go.sum ]] || [[ "$FILE_PATH" == *go.work* ]]; then
+  echo "🔧 Go Module Maintenance for: $(basename "$FILE_PATH")" >&2
+
+  # Find the Go module root
+  MODULE_DIR="$(dirname "$FILE_PATH")"
+
+  # Walk up the directory tree to find go.mod
+  while [ "$MODULE_DIR" != "/" ] && [ ! -f "$MODULE_DIR/go.mod" ]; do
+    MODULE_DIR="$(dirname "$MODULE_DIR")"
+  done
+
+  if [ ! -f "$MODULE_DIR/go.mod" ]; then
+    echo "⚠️ No go.mod found - not a Go module" >&2
+    exit 0
+  fi
+
+  echo "📁 Go module root: $MODULE_DIR" >&2
+  cd "$MODULE_DIR"
+
+  # Check if Go is installed
+  if ! command -v go &> /dev/null; then
+    echo "❌ Go is not installed or not in PATH" >&2
+    exit 1
+  fi
+
+  GO_VERSION=$(go version | cut -d' ' -f3 2>/dev/null || echo "unknown")
+  echo "🐹 Go version: $GO_VERSION" >&2
+
+  # Initialize maintenance counters
+  ERRORS=0
+  WARNINGS=0
+  FIXED=0
+
+  # Function to report issues
+  report_issue() {
+    local level="$1"
+    local message="$2"
+
+    case "$level" in
+      "ERROR")
+        echo "❌ ERROR: $message" >&2
+        ERRORS=$((ERRORS + 1))
+        ;;
+      "WARNING")
+        echo "⚠️ WARNING: $message" >&2
+        WARNINGS=$((WARNINGS + 1))
+        ;;
+      "FIXED")
+        echo "✅ FIXED: $message" >&2
+        FIXED=$((FIXED + 1))
+        ;;
+      "INFO")
+        echo "ℹ️ INFO: $message" >&2
+        ;;
+    esac
+  }
+
+  # 1. Pre-tidy Module Analysis
+  echo "📊 Analyzing module state..." >&2
+
+  # Check go.mod syntax
+  if ! go mod edit -json > /dev/null 2>&1; then
+    report_issue "ERROR" "go.mod has syntax errors"
+    exit 1
+  else
+    echo "   ✅ go.mod syntax is valid" >&2
+  fi
+
+  # Get current dependencies before tidy
+  DEPS_BEFORE=$(go list -m all 2>/dev/null | wc -l | xargs || echo "0")
+  echo "   📦 Dependencies before tidy: $DEPS_BEFORE" >&2
+
+  # Check for any build errors
+  if go list ./... > /dev/null 2>&1; then
+    echo "   ✅ Module builds successfully" >&2
+  else
+    report_issue "WARNING" "Module has build issues that may affect dependency resolution"
+  fi
+
+  # 2. Run go mod tidy
+  echo "🧹 Running go mod tidy..." >&2
+
+  if go mod tidy; then
+    report_issue "FIXED" "go mod tidy completed successfully"
+
+    # Check dependencies after tidy
+    DEPS_AFTER=$(go list -m all 2>/dev/null | wc -l | xargs || echo "0")
+    DEPS_CHANGE=$((DEPS_AFTER - DEPS_BEFORE))
+
+    if [ "$DEPS_CHANGE" -gt 0 ]; then
+      echo "   📈 Added $DEPS_CHANGE dependencies" >&2
+    elif [ "$DEPS_CHANGE" -lt 0 ]; then
+      echo "   📉 Removed $((DEPS_CHANGE * -1)) dependencies" >&2
+    else
+      echo "   📦 No dependency changes" >&2
+    fi
+
+  else
+    report_issue "ERROR" "go mod tidy failed"
+  fi
+
+  # 3. Verify go.sum integrity
+  echo "🔐 Verifying module checksums..." >&2
+
+  if go mod verify; then
+    echo "   ✅ All module checksums verified" >&2
+  else
+    report_issue "ERROR" "Module checksum verification failed"
+  fi
+
+  # 4. Check for vulnerabilities (if govulncheck is available)
+  if command -v govulncheck &> /dev/null; then
+    echo "🛡️ Scanning for vulnerabilities..." >&2
+
+    if govulncheck ./... 2>/dev/null; then
+      echo "   ✅ No known vulnerabilities found" >&2
+    else
+      report_issue "WARNING" "Potential vulnerabilities detected - run 'govulncheck ./...' for details"
+    fi
+  else
+    echo "   💡 Install govulncheck for vulnerability scanning: go install golang.org/x/vuln/cmd/govulncheck@latest" >&2
+  fi
+
+  # 5. Run go vet for Go source files
+  if [[ "$FILE_PATH" == *.go ]]; then
+    echo "🔍 Running go vet..." >&2
+
+    if go vet ./...; then
+      echo "   ✅ go vet passed - no issues found" >&2
+    else
+      report_issue "WARNING" "go vet found potential issues"
+    fi
+
+    # Check for common Go issues
+    echo "🔍 Additional Go code analysis..." >&2
+
+    # Check for gofmt issues
+    UNFORMATTED=$(find . -name '*.go' -not -path './vendor/*' -exec gofmt -l {} \; 2>/dev/null)
+    if [ -n "$UNFORMATTED" ]; then
+      report_issue "WARNING" "Some files are not gofmt formatted"
+      echo "$UNFORMATTED" | head -5 | while read file; do
+        echo "     $file" >&2
+      done
+    else
+      echo "   ✅ All Go files are properly formatted" >&2
+    fi
+
+    # Check imports with goimports if available
+    if command -v goimports &> /dev/null; then
+      IMPORT_ISSUES=$(find . -name '*.go' -not -path './vendor/*' -exec goimports -l {} \; 2>/dev/null)
+      if [ -n "$IMPORT_ISSUES" ]; then
+        report_issue "WARNING" "Some files have import formatting issues"
+      else
+        echo "   ✅ All imports are properly formatted" >&2
+      fi
+    fi
+  fi
+
+  # 6. Module cleanup suggestions
+  echo "🧹 Module optimization check..." >&2
+
+  # Check for indirect dependencies that could be direct
+  INDIRECT_COUNT=$(go list -m all | grep -c '// indirect' || echo "0")
+  if [ "$INDIRECT_COUNT" -gt 0 ]; then
+    echo "   📊 Indirect dependencies: $INDIRECT_COUNT" >&2
+    echo "   💡 Review if any indirect deps should be direct" >&2
+  fi
+
+  # Check for replace directives
+  REPLACE_COUNT=$(grep -c '^replace ' go.mod 2>/dev/null || echo "0")
+  if [ "$REPLACE_COUNT" -gt 0 ]; then
+    echo "   🔄 Replace directives: $REPLACE_COUNT" >&2
+    echo "   💡 Review replace directives for production readiness" >&2
+  fi
+
+  # 7. Workspace support
+  if [ -f "go.work" ]; then
+    echo "🏢 Go workspace detected" >&2
+
+    if go work sync; then
+      echo "   ✅ Workspace synced successfully" >&2
+    else
+      report_issue "WARNING" "Workspace sync issues detected"
+    fi
+  fi
+
+  # 8. Module cache suggestions
+  if [ "$DEPS_AFTER" -gt 50 ]; then
+    echo "💡 Large dependency count - consider 'go clean -modcache' if disk space is low" >&2
+  fi
+
+  # 9. Generate Summary Report
+  echo "" >&2
+  echo "📋 Go Module Maintenance Summary:" >&2
+  echo "================================" >&2
+  echo "   📄 Module: $(basename "$(pwd)")" >&2
+  echo "   🐹 Go: $GO_VERSION" >&2
+  echo "   📦 Dependencies: $DEPS_AFTER" >&2
+  echo "   ✅ Fixed: $FIXED" >&2
+  echo "   ⚠️ Warnings: $WARNINGS" >&2
+  echo "   ❌ Errors: $ERRORS" >&2
+
+  if [ "$ERRORS" -eq 0 ] && [ "$WARNINGS" -eq 0 ]; then
+    echo "   🎉 Status: EXCELLENT - Module is clean and optimized" >&2
+  elif [ "$ERRORS" -eq 0 ]; then
+    echo "   ✅ Status: GOOD - Minor warnings to review" >&2
+  else
+    echo "   ❌ Status: NEEDS ATTENTION - Errors require fixing" >&2
+  fi
+
+  echo "" >&2
+  echo "💡 Go Module Best Practices:" >&2
+  echo "   • Run 'go mod tidy' regularly to keep dependencies clean" >&2
+  echo "   • Use 'go mod why <module>' to understand dependency reasons" >&2
+  echo "   • Update dependencies with 'go get -u ./...' carefully" >&2
+  echo "   • Consider using 'go mod graph' for dependency visualization" >&2
+  echo "   • Pin important dependencies to specific versions" >&2
+
+  # Exit with error if there are critical issues
+  if [ "$ERRORS" -gt 0 ]; then
+    echo "⚠️ Go module maintenance completed with errors" >&2
+    exit 1
+  fi
+
+else
+  # Not a Go file, exit silently
+  exit 0
+fi
+
+exit 0
+```
+
+## Examples
+### Go Module Tidy Hook Script
+
+Complete hook script that performs automatic go mod tidy when Go files are modified
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+if [[ "$FILE_PATH" == *.go ]] || [[ "$FILE_PATH" == *go.mod ]]; then
+  MODULE_DIR="$(dirname "$FILE_PATH")"
+  while [ "$MODULE_DIR" != "/" ] && [ ! -f "$MODULE_DIR/go.mod" ]; do
+    MODULE_DIR="$(dirname "$MODULE_DIR")"
+  done
+  if [ -f "$MODULE_DIR/go.mod" ]; then
+    cd "$MODULE_DIR"
+    if command -v go &> /dev/null; then
+      go mod tidy
+      go mod verify
+    fi
+  fi
+fi
+exit 0
+```
+
+### Hook Configuration
+
+Complete hook configuration for .claude/settings.json to enable Go module management
+
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/go-module-tidy.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+
+### Go Vet and Formatting Checks
+
+Enhanced hook script for Go vet integration and formatting validation
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.go ]]; then
+  MODULE_DIR="$(dirname "$FILE_PATH")"
+  while [ "$MODULE_DIR" != "/" ] && [ ! -f "$MODULE_DIR/go.mod" ]; do
+    MODULE_DIR="$(dirname "$MODULE_DIR")"
+  done
+  if [ -f "$MODULE_DIR/go.mod" ]; then
+    cd "$MODULE_DIR"
+    if command -v go &> /dev/null; then
+      go vet ./...
+      UNFORMATTED=$(find . -name '*.go' -not -path './vendor/*' -exec gofmt -l {} \; 2>/dev/null)
+      if [ -n "$UNFORMATTED" ]; then
+        echo "⚠️ Some files are not gofmt formatted" >&2
+      fi
+    fi
+  fi
+fi
+exit 0
+```
+
+### Dependency Vulnerability Scanning
+
+Enhanced hook script for dependency vulnerability scanning with govulncheck
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.go ]] || [[ "$FILE_PATH" == *go.mod ]]; then
+  MODULE_DIR="$(dirname "$FILE_PATH")"
+  while [ "$MODULE_DIR" != "/" ] && [ ! -f "$MODULE_DIR/go.mod" ]; do
+    MODULE_DIR="$(dirname "$MODULE_DIR")"
+  done
+  if [ -f "$MODULE_DIR/go.mod" ]; then
+    cd "$MODULE_DIR"
+    if command -v govulncheck &> /dev/null; then
+      if ! govulncheck ./... 2>/dev/null; then
+        echo "⚠️ Potential vulnerabilities detected - run 'govulncheck ./...' for details" >&2
+      fi
+    else
+      echo "💡 Install govulncheck: go install golang.org/x/vuln/cmd/govulncheck@latest" >&2
+    fi
+  fi
+fi
+exit 0
+```
+
+### Go Workspace Synchronization
+
+Enhanced hook script for Go workspace synchronization with go work sync
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *go.work* ]]; then
+  MODULE_DIR="$(dirname "$FILE_PATH")"
+  while [ "$MODULE_DIR" != "/" ] && [ ! -f "$MODULE_DIR/go.work" ]; do
+    MODULE_DIR="$(dirname "$MODULE_DIR")"
+  done
+  if [ -f "$MODULE_DIR/go.work" ]; then
+    cd "$MODULE_DIR"
+    if command -v go &> /dev/null; then
+      if go work sync; then
+        echo "✅ Workspace synced successfully" >&2
+      else
+        echo "⚠️ Workspace sync issues detected" >&2
+      fi
+    fi
+  fi
+fi
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+if [[ "$FILE_PATH" == *.go ]] || [[ "$FILE_PATH" == *go.mod ]]; then
+  MODULE_DIR="$(dirname "$FILE_PATH")"
+  while [ "$MODULE_DIR" != "/" ] && [ ! -f "$MODULE_DIR/go.mod" ]; do
+    MODULE_DIR="$(dirname "$MODULE_DIR")"
+  done
+  if [ -f "$MODULE_DIR/go.mod" ]; then
+    cd "$MODULE_DIR"
+    if command -v go &> /dev/null; then
+      go mod tidy
+      go mod verify
+    fi
+  fi
+fi
+exit 0
+```
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/go-module-tidy.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.go ]]; then
+  MODULE_DIR="$(dirname "$FILE_PATH")"
+  while [ "$MODULE_DIR" != "/" ] && [ ! -f "$MODULE_DIR/go.mod" ]; do
+    MODULE_DIR="$(dirname "$MODULE_DIR")"
+  done
+  if [ -f "$MODULE_DIR/go.mod" ]; then
+    cd "$MODULE_DIR"
+    if command -v go &> /dev/null; then
+      go vet ./...
+      UNFORMATTED=$(find . -name '*.go' -not -path './vendor/*' -exec gofmt -l {} \; 2>/dev/null)
+      if [ -n "$UNFORMATTED" ]; then
+        echo "⚠️ Some files are not gofmt formatted" >&2
+      fi
+    fi
+  fi
+fi
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.go ]] || [[ "$FILE_PATH" == *go.mod ]]; then
+  MODULE_DIR="$(dirname "$FILE_PATH")"
+  while [ "$MODULE_DIR" != "/" ] && [ ! -f "$MODULE_DIR/go.mod" ]; do
+    MODULE_DIR="$(dirname "$MODULE_DIR")"
+  done
+  if [ -f "$MODULE_DIR/go.mod" ]; then
+    cd "$MODULE_DIR"
+    if command -v govulncheck &> /dev/null; then
+      if ! govulncheck ./... 2>/dev/null; then
+        echo "⚠️ Potential vulnerabilities detected - run 'govulncheck ./...' for details" >&2
+      fi
+    else
+      echo "💡 Install govulncheck: go install golang.org/x/vuln/cmd/govulncheck@latest" >&2
+    fi
+  fi
+fi
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *go.work* ]]; then
+  MODULE_DIR="$(dirname "$FILE_PATH")"
+  while [ "$MODULE_DIR" != "/" ] && [ ! -f "$MODULE_DIR/go.work" ]; do
+    MODULE_DIR="$(dirname "$MODULE_DIR")"
+  done
+  if [ -f "$MODULE_DIR/go.work" ]; then
+    cd "$MODULE_DIR"
+    if command -v go &> /dev/null; then
+      if go work sync; then
+        echo "✅ Workspace synced successfully" >&2
+      else
+        echo "⚠️ Workspace sync issues detected" >&2
+      fi
+    fi
+  fi
+fi
+exit 0
+```
+
+## Troubleshooting
+### Hook fails to find go.mod in nested module subdirectories
+
+Script walks up directories but may hit root before finding go.mod. Ensure MODULE_DIR search starts from FILE_PATH directory: cd $(dirname "$FILE_PATH") before the while loop to guarantee proper traversal. Verify directory traversal logic. Test with nested module structures.
+
+### Go mod tidy hangs when network unavailable for dependency downloads
+
+Add timeout to go commands: timeout 30s go mod tidy to prevent infinite hangs. Set GOPROXY=off to use only local cache, or configure module cache directory with GOMODCACHE for offline operation. Check network connectivity. Use go env GOPROXY to verify proxy settings.
+
+### Workspace sync errors when go.work references missing modules
+
+Script runs 'go work sync' without validation. Add existence checks: go work edit -json | jq -r '.Use[].DiskPath' | while read dir; do [ -d "$dir" ] || echo "Missing: $dir"; done before syncing. Verify all workspace modules exist. Check go.work file syntax.
+
+### PostToolUse timing causes stale go.sum checksums on rapid changes
+
+Hook runs after each write but go.sum updates may lag. Add explicit go.sum validation: go mod verify before tidy: if verification fails, run go mod tidy -v to refresh checksums and rebuild module graph. Verify go.sum file is up to date. Check for concurrent go mod operations.
+
+### Context lost when cd changes directory breaking relative path access
+
+Script changes to MODULE_DIR but hook execution happens per-file. Store original: ORIG_DIR=$(pwd) and restore after: cd "$ORIG_DIR" or use absolute paths: FILE_ABS=$(realpath "$FILE_PATH") throughout script. Verify directory context is preserved. Test with files in different directories.
+
+### go vet reports false positives for valid Go code
+
+go vet has known limitations. Review go vet output carefully. Use go vet -v for verbose output. Consider using golangci-lint for more comprehensive analysis. Add go vet skip patterns for known false positives. Verify Go version compatibility with go vet.
+
+### govulncheck not found but vulnerability scanning is expected
+
+Install govulncheck: go install golang.org/x/vuln/cmd/govulncheck@latest. Verify installation: command -v govulncheck. Add to PATH if installed but not found. Check Go version compatibility (requires Go 1.18+). Use go install with specific version if needed.
+
+### Module cache grows too large consuming disk space
+
+Use go clean -modcache to clean module cache. Set GOMODCACHE environment variable to control cache location. Monitor cache size: du -sh $(go env GOMODCACHE). Consider periodic cache cleanup. Use go mod download -x for verbose download information.

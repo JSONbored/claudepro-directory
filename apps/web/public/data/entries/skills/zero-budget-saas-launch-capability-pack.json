@@ -1,0 +1,273 @@
+{
+  "schemaVersion": 1,
+  "key": "skills:zero-budget-saas-launch-capability-pack",
+  "entry": {
+    "category": "skills",
+    "slug": "zero-budget-saas-launch-capability-pack",
+    "title": "Zero-Budget SaaS Launch Capability Pack Skill",
+    "description": "Expert zero-budget launch capability pack for building and shipping SaaS using free-tier infrastructure and constrained execution plans.",
+    "seoTitle": "Zero-Budget SaaS Launch Capability Pack Skill",
+    "seoDescription": "Advanced AI skill for launching SaaS with minimal budget, free-tier infrastructure, and durable growth experiments. HeyClaude adds source links, install...",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2026-04-11",
+    "contentUpdatedAt": "2026-04-27T02:57:15-06:00",
+    "tags": [
+      "saas",
+      "bootstrap",
+      "growth",
+      "cost-optimization",
+      "capability-pack"
+    ],
+    "keywords": [
+      "zero budget saas",
+      "free tier launch",
+      "bootstrap product execution",
+      "lean mvp roadmap",
+      "saas",
+      "bootstrap",
+      "growth",
+      "cost-optimization",
+      "capability-pack",
+      "skills",
+      "claude",
+      "heyclaude"
+    ],
+    "readingTime": 8,
+    "difficultyScore": 81,
+    "documentationUrl": "https://developers.cloudflare.com/workers/",
+    "cardDescription": "Launch lean SaaS products with free-tier stacks, strict scope control, and measurable traction loops.",
+    "installable": true,
+    "installCommand": "curl -L https://heyclau.de/downloads/skills/zero-budget-saas-launch-capability-pack.zip -o zero-budget-saas-launch-capability-pack.zip && unzip -o zero-budget-saas-launch-capability-pack.zip -d ./zero-budget-saas-launch-capability-pack",
+    "usageSnippet": "Use this skill to design and execute a constrained SaaS launch with no paid infrastructure dependencies.",
+    "copySnippet": "# Trigger\n\"Apply the zero-budget SaaS launch capability pack.\"\n\n# Required output\n1) Free-tier architecture map\n2) MVP scope and cut-list\n3) Distribution and traffic loop\n4) Revenue trigger milestones",
+    "skillType": "capability-pack",
+    "skillLevel": "expert",
+    "verificationStatus": "validated",
+    "verifiedAt": "2026-04-11",
+    "retrievalSources": [
+      "https://developers.cloudflare.com/workers/",
+      "https://vercel.com/docs",
+      "https://resend.com/docs"
+    ],
+    "testedPlatforms": [
+      "Claude",
+      "Codex",
+      "OpenClaw",
+      "Cursor",
+      "Windsurf",
+      "Gemini"
+    ],
+    "prerequisites": [
+      "Product hypothesis",
+      "Free-tier account access",
+      "Launch KPI targets"
+    ],
+    "hasPrerequisites": true,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/skills/zero-budget-saas-launch-capability-pack.zip",
+    "skillPackage": {
+      "format": "agent-skill",
+      "entrypoint": "SKILL.md",
+      "downloadUrl": "/downloads/skills/zero-budget-saas-launch-capability-pack.zip",
+      "sha256": "77fa0891ce8a4bc6ffcc8a8ab9a2110d7a8ea5e073630f3912fefae2f4cc1e6f"
+    },
+    "platformCompatibility": [
+      {
+        "platform": "Claude",
+        "supportLevel": "native-skill",
+        "installPath": ".claude/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Codex",
+        "supportLevel": "native-skill",
+        "installPath": ".agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Windsurf",
+        "supportLevel": "native-skill",
+        "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Gemini",
+        "supportLevel": "native-skill",
+        "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Cursor",
+        "supportLevel": "adapter",
+        "installPath": ".cursor/rules/<skill-name>.mdc",
+        "adapterPath": "/data/skill-adapters/cursor/zero-budget-saas-launch-capability-pack.mdc",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Generic AGENTS",
+        "supportLevel": "manual-context",
+        "installPath": "AGENTS.md or tool-specific context file",
+        "verifiedAt": "2026-04-11"
+      }
+    ],
+    "downloadTrust": "first-party",
+    "downloadSha256": "77fa0891ce8a4bc6ffcc8a8ab9a2110d7a8ea5e073630f3912fefae2f4cc1e6f",
+    "body": "## Knowledge Freshness\n\nThis capability pack is pinned to documentation verified on **2026-04-11**.\n\n## Retrieval Sources\n\n- https://developers.cloudflare.com/workers/\n- https://vercel.com/docs\n- https://resend.com/docs\n\n## Core Workflow\n\n1. Define minimal paid-free architecture constraints.\n2. Cut scope to one painful user workflow.\n3. Build MVP with observability and fallback paths.\n4. Ship distribution loop before expansion features.\n5. Track revenue triggers and reinvest only on proof.\n\n## Overview\n\nThis skill enables practical bootstrap execution where money is constrained and time must be allocated to high-signal work only.\n\n## Capability Scope\n\n- Free-tier architecture planning\n- MVP cut-list and sequence control\n- Distribution loop design\n- Early monetization checkpointing\n- Cost-risk tradeoff governance\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Production Rules\n\n- Keep MVP scope to a single painful workflow.\n- Do not add paid dependencies before revenue validation.\n- Instrument conversion and retention signals from day one.\n- Drop low-signal features quickly when metrics miss thresholds.\n\n## Troubleshooting\n\n**Issue:** Free-tier limits break reliability  \n**Fix:** add graceful degradation and hard usage thresholds.\n\n**Issue:** Feature creep stalls launch  \n**Fix:** enforce strict cut-list with deadline lock.\n\n**Issue:** Traffic arrives but no conversion  \n**Fix:** tighten problem/offer fit and simplify CTA path.\n\n## Output Contract\n\n1. MVP architecture and scope map.\n2. Launch sequence with dependency order.\n3. Distribution and monetization loop.\n4. KPI dashboard and next-step gates.",
+    "sections": [
+      {
+        "title": "Knowledge Freshness",
+        "id": "knowledge-freshness",
+        "markdown": "This capability pack is pinned to documentation verified on **2026-04-11**.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Retrieval Sources",
+        "id": "retrieval-sources",
+        "markdown": "- https://developers.cloudflare.com/workers/\n- https://vercel.com/docs\n- https://resend.com/docs",
+        "codeBlocks": []
+      },
+      {
+        "title": "Core Workflow",
+        "id": "core-workflow",
+        "markdown": "1. Define minimal paid-free architecture constraints.\n2. Cut scope to one painful user workflow.\n3. Build MVP with observability and fallback paths.\n4. Ship distribution loop before expansion features.\n5. Track revenue triggers and reinvest only on proof.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Overview",
+        "id": "overview",
+        "markdown": "This skill enables practical bootstrap execution where money is constrained and time must be allocated to high-signal work only.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Capability Scope",
+        "id": "capability-scope",
+        "markdown": "- Free-tier architecture planning\n- MVP cut-list and sequence control\n- Distribution loop design\n- Early monetization checkpointing\n- Cost-risk tradeoff governance",
+        "codeBlocks": []
+      },
+      {
+        "title": "Compatibility",
+        "id": "compatibility",
+        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Production Rules",
+        "id": "production-rules",
+        "markdown": "- Keep MVP scope to a single painful workflow.\n- Do not add paid dependencies before revenue validation.\n- Instrument conversion and retention signals from day one.\n- Drop low-signal features quickly when metrics miss thresholds.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "**Issue:** Free-tier limits break reliability  \n**Fix:** add graceful degradation and hard usage thresholds.\n\n**Issue:** Feature creep stalls launch  \n**Fix:** enforce strict cut-list with deadline lock.\n\n**Issue:** Traffic arrives but no conversion  \n**Fix:** tighten problem/offer fit and simplify CTA path.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Output Contract",
+        "id": "output-contract",
+        "markdown": "1. MVP architecture and scope map.\n2. Launch sequence with dependency order.\n3. Distribution and monetization loop.\n4. KPI dashboard and next-step gates.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Knowledge Freshness",
+        "id": "knowledge-freshness"
+      },
+      {
+        "depth": 2,
+        "text": "Retrieval Sources",
+        "id": "retrieval-sources"
+      },
+      {
+        "depth": 2,
+        "text": "Core Workflow",
+        "id": "core-workflow"
+      },
+      {
+        "depth": 2,
+        "text": "Overview",
+        "id": "overview"
+      },
+      {
+        "depth": 2,
+        "text": "Capability Scope",
+        "id": "capability-scope"
+      },
+      {
+        "depth": 2,
+        "text": "Compatibility",
+        "id": "compatibility"
+      },
+      {
+        "depth": 3,
+        "text": "Native",
+        "id": "native"
+      },
+      {
+        "depth": 3,
+        "text": "Manual Adaptation",
+        "id": "manual-adaptation"
+      },
+      {
+        "depth": 2,
+        "text": "Production Rules",
+        "id": "production-rules"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 2,
+        "text": "Output Contract",
+        "id": "output-contract"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/skills/zero-budget-saas-launch-capability-pack.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/zero-budget-saas-launch-capability-pack.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": true,
+    "packageTrust": "first-party",
+    "packageChecksum": "77fa0891ce8a4bc6ffcc8a8ab9a2110d7a8ea5e073630f3912fefae2f4cc1e6f",
+    "checksumPresent": true,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://developers.cloudflare.com/workers/",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/zero-budget-saas-launch-capability-pack.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-11",
+    "adapterGenerated": true,
+    "platforms": [
+      "Claude",
+      "Codex",
+      "Windsurf",
+      "Gemini",
+      "Cursor",
+      "Generic AGENTS"
+    ],
+    "supportLevels": [
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "adapter",
+      "manual-context"
+    ]
+  }
+}

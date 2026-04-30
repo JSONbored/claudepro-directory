@@ -15,13 +15,13 @@ seoDescription: >-
   red-green-refactor cycles, automatic test generation, and AI-guided iteration
   until all te...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-25'
-documentationUrl: 'https://docs.claude.com/en/docs/claude-code/testing'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-25"
+documentationUrl: "https://docs.claude.com/en/docs/claude-code/testing"
 installable: true
-installCommand: '/tdd-workflow [feature] [options]'
-usageSnippet: '/tdd-workflow [feature] [options]'
-copySnippet: '/tdd-workflow [feature] [options]'
+installCommand: "/tdd-workflow [feature] [options]"
+usageSnippet: "/tdd-workflow [feature] [options]"
+copySnippet: "/tdd-workflow [feature] [options]"
 tags:
   - tdd
   - testing
@@ -48,8 +48,9 @@ hasPrerequisites: false
 hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
-commandSyntax: '/tdd-workflow [feature] [options]'
+commandSyntax: "/tdd-workflow [feature] [options]"
 ---
+
 The `/tdd-workflow` command implements test-driven development (TDD) in Claude Code with AI-assisted red-green-refactor cycles, preventing hallucination through test-anchored iteration.
 
 ## Features
@@ -100,6 +101,7 @@ The `/tdd-workflow` command implements test-driven development (TDD) in Claude C
 ### Basic TDD Workflow - User Authentication
 
 **Command:**
+
 ```bash
 /tdd-workflow "user authentication service with email/password" --unit
 ```
@@ -107,80 +109,88 @@ The `/tdd-workflow` command implements test-driven development (TDD) in Claude C
 **TDD Cycle:**
 
 **Phase 1: RED (Write Failing Tests)**
+
 ```typescript
 // Claude generates: tests/unit/auth.service.test.ts
-import { describe, it, expect, beforeEach } from 'vitest';
-import { AuthService } from '@/services/auth.service';
+import { describe, it, expect, beforeEach } from "vitest";
+import { AuthService } from "@/services/auth.service";
 
-describe('AuthService', () => {
+describe("AuthService", () => {
   let authService: AuthService;
 
   beforeEach(() => {
     authService = new AuthService();
   });
 
-  describe('login', () => {
-    it('should return user token for valid credentials', async () => {
+  describe("login", () => {
+    it("should return user token for valid credentials", async () => {
       const result = await authService.login({
-        email: 'user@example.com',
-        password: 'ValidPass123'
+        email: "user@example.com",
+        password: "ValidPass123",
       });
 
-      expect(result).toHaveProperty('token');
-      expect(result).toHaveProperty('user');
-      expect(result.user.email).toBe('user@example.com');
+      expect(result).toHaveProperty("token");
+      expect(result).toHaveProperty("user");
+      expect(result.user.email).toBe("user@example.com");
     });
 
-    it('should throw error for invalid email', async () => {
+    it("should throw error for invalid email", async () => {
       await expect(
-        authService.login({ email: 'invalid', password: 'pass' })
-      ).rejects.toThrow('Invalid email format');
+        authService.login({ email: "invalid", password: "pass" }),
+      ).rejects.toThrow("Invalid email format");
     });
 
-    it('should throw error for incorrect password', async () => {
+    it("should throw error for incorrect password", async () => {
       await expect(
-        authService.login({ email: 'user@example.com', password: 'wrong' })
-      ).rejects.toThrow('Invalid credentials');
+        authService.login({ email: "user@example.com", password: "wrong" }),
+      ).rejects.toThrow("Invalid credentials");
     });
 
-    it('should hash password before comparison', async () => {
-      const loginSpy = vi.spyOn(authService, 'comparePassword');
-      await authService.login({ email: 'user@example.com', password: 'pass' });
-      
-      expect(loginSpy).toHaveBeenCalledWith('pass', expect.any(String));
+    it("should hash password before comparison", async () => {
+      const loginSpy = vi.spyOn(authService, "comparePassword");
+      await authService.login({ email: "user@example.com", password: "pass" });
+
+      expect(loginSpy).toHaveBeenCalledWith("pass", expect.any(String));
     });
   });
 
-  describe('register', () => {
-    it('should create new user and return token', async () => {
+  describe("register", () => {
+    it("should create new user and return token", async () => {
       const result = await authService.register({
-        email: 'new@example.com',
-        password: 'ValidPass123',
-        name: 'New User'
+        email: "new@example.com",
+        password: "ValidPass123",
+        name: "New User",
       });
 
-      expect(result).toHaveProperty('token');
-      expect(result.user.email).toBe('new@example.com');
+      expect(result).toHaveProperty("token");
+      expect(result.user.email).toBe("new@example.com");
     });
 
-    it('should reject weak passwords', async () => {
+    it("should reject weak passwords", async () => {
       await expect(
-        authService.register({ email: 'user@example.com', password: '123' })
-      ).rejects.toThrow('Password must be at least 8 characters');
+        authService.register({ email: "user@example.com", password: "123" }),
+      ).rejects.toThrow("Password must be at least 8 characters");
     });
 
-    it('should reject duplicate emails', async () => {
-      await authService.register({ email: 'dup@example.com', password: 'ValidPass123' });
-      
+    it("should reject duplicate emails", async () => {
+      await authService.register({
+        email: "dup@example.com",
+        password: "ValidPass123",
+      });
+
       await expect(
-        authService.register({ email: 'dup@example.com', password: 'ValidPass123' })
-      ).rejects.toThrow('Email already exists');
+        authService.register({
+          email: "dup@example.com",
+          password: "ValidPass123",
+        }),
+      ).rejects.toThrow("Email already exists");
     });
   });
 });
 ```
 
 **Run Tests (Expect Failures):**
+
 ```bash
 pnpm test auth.service.test.ts
 
@@ -197,21 +207,22 @@ pnpm test auth.service.test.ts
 Claude: "Tests written and failing as expected. Proceeding to GREEN phase."
 
 **Phase 2: GREEN (Implement Minimum Code to Pass)**
+
 ```typescript
 // Claude generates: src/services/auth.service.ts
-import { hash, compare } from 'bcrypt';
-import { sign } from 'jsonwebtoken';
-import { z } from 'zod';
+import { hash, compare } from "bcrypt";
+import { sign } from "jsonwebtoken";
+import { z } from "zod";
 
 const loginSchema = z.object({
-  email: z.string().email('Invalid email format'),
-  password: z.string().min(1)
+  email: z.string().email("Invalid email format"),
+  password: z.string().min(1),
 });
 
 const registerSchema = z.object({
-  email: z.string().email('Invalid email format'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  name: z.string().min(1)
+  email: z.string().email("Invalid email format"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  name: z.string().min(1),
 });
 
 interface User {
@@ -226,22 +237,22 @@ export class AuthService {
 
   async login(credentials: { email: string; password: string }) {
     const validated = loginSchema.parse(credentials);
-    
+
     const user = Array.from(this.users.values()).find(
-      u => u.email === validated.email
+      (u) => u.email === validated.email,
     );
 
     if (!user) {
-      throw new Error('Invalid credentials');
+      throw new Error("Invalid credentials");
     }
 
     const passwordMatch = await this.comparePassword(
       validated.password,
-      user.passwordHash
+      user.passwordHash,
     );
 
     if (!passwordMatch) {
-      throw new Error('Invalid credentials');
+      throw new Error("Invalid credentials");
     }
 
     const token = this.generateToken(user);
@@ -251,16 +262,18 @@ export class AuthService {
       user: {
         id: user.id,
         email: user.email,
-        name: user.name
-      }
+        name: user.name,
+      },
     };
   }
 
   async register(data: { email: string; password: string; name: string }) {
     const validated = registerSchema.parse(data);
 
-    if (Array.from(this.users.values()).some(u => u.email === validated.email)) {
-      throw new Error('Email already exists');
+    if (
+      Array.from(this.users.values()).some((u) => u.email === validated.email)
+    ) {
+      throw new Error("Email already exists");
     }
 
     const passwordHash = await hash(validated.password, 10);
@@ -268,7 +281,7 @@ export class AuthService {
       id: crypto.randomUUID(),
       email: validated.email,
       name: validated.name,
-      passwordHash
+      passwordHash,
     };
 
     this.users.set(user.id, user);
@@ -280,8 +293,8 @@ export class AuthService {
       user: {
         id: user.id,
         email: user.email,
-        name: user.name
-      }
+        name: user.name,
+      },
     };
   }
 
@@ -290,14 +303,15 @@ export class AuthService {
   }
 
   private generateToken(user: User): string {
-    return sign({ userId: user.id }, process.env.JWT_SECRET || 'dev-secret', {
-      expiresIn: '7d'
+    return sign({ userId: user.id }, process.env.JWT_SECRET || "dev-secret", {
+      expiresIn: "7d",
     });
   }
 }
 ```
 
 **Run Tests Again:**
+
 ```bash
 pnpm test auth.service.test.ts
 
@@ -324,25 +338,26 @@ Test Coverage:
 Claude: "All tests passing! Coverage: 95.2%. Proceeding to REFACTOR phase."
 
 **Phase 3: REFACTOR (Optimize While Keeping Tests Green)**
+
 ```typescript
 // Claude refactors for better organization
 export class AuthService {
   private users: Map<string, User> = new Map();
   private readonly saltRounds = 10;
-  private readonly tokenExpiry = '7d';
+  private readonly tokenExpiry = "7d";
 
   async login(credentials: LoginCredentials): Promise<AuthResult> {
     const validated = this.validateLoginCredentials(credentials);
     const user = await this.findUserByEmail(validated.email);
     await this.verifyPassword(validated.password, user.passwordHash);
-    
+
     return this.createAuthResult(user);
   }
 
   async register(data: RegisterData): Promise<AuthResult> {
     const validated = this.validateRegisterData(data);
     await this.ensureEmailNotExists(validated.email);
-    
+
     const user = await this.createUser(validated);
     return this.createAuthResult(user);
   }
@@ -352,9 +367,9 @@ export class AuthService {
   }
 
   private async findUserByEmail(email: string): Promise<User> {
-    const user = Array.from(this.users.values()).find(u => u.email === email);
+    const user = Array.from(this.users.values()).find((u) => u.email === email);
     if (!user) {
-      throw new Error('Invalid credentials');
+      throw new Error("Invalid credentials");
     }
     return user;
   }
@@ -362,14 +377,14 @@ export class AuthService {
   private async verifyPassword(password: string, hash: string): Promise<void> {
     const match = await compare(password, hash);
     if (!match) {
-      throw new Error('Invalid credentials');
+      throw new Error("Invalid credentials");
     }
   }
 
   private createAuthResult(user: User): AuthResult {
     return {
       token: this.generateToken(user),
-      user: this.sanitizeUser(user)
+      user: this.sanitizeUser(user),
     };
   }
 
@@ -378,6 +393,7 @@ export class AuthService {
 ```
 
 **Run Tests After Refactor:**
+
 ```bash
 pnpm test auth.service.test.ts
 
@@ -390,19 +406,21 @@ Claude: "Refactoring complete. All tests green. Ready for commit."
 ### Integration Testing Workflow
 
 **Command:**
+
 ```bash
 /tdd-workflow "user registration API endpoint" --integration
 ```
 
 **Generated Integration Tests:**
+
 ```typescript
 // tests/integration/auth.api.test.ts
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import request from 'supertest';
-import { app } from '@/app';
-import { db } from '@/lib/db';
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import request from "supertest";
+import { app } from "@/app";
+import { db } from "@/lib/db";
 
-describe('POST /api/auth/register', () => {
+describe("POST /api/auth/register", () => {
   beforeAll(async () => {
     await db.migrate.latest();
   });
@@ -412,51 +430,53 @@ describe('POST /api/auth/register', () => {
     await db.destroy();
   });
 
-  it('should register new user and return 201', async () => {
-    const response = await request(app)
-      .post('/api/auth/register')
-      .send({
-        email: 'newuser@example.com',
-        password: 'ValidPass123',
-        name: 'New User'
-      });
+  it("should register new user and return 201", async () => {
+    const response = await request(app).post("/api/auth/register").send({
+      email: "newuser@example.com",
+      password: "ValidPass123",
+      name: "New User",
+    });
 
     expect(response.status).toBe(201);
-    expect(response.body).toHaveProperty('token');
-    expect(response.body.user.email).toBe('newuser@example.com');
+    expect(response.body).toHaveProperty("token");
+    expect(response.body.user.email).toBe("newuser@example.com");
   });
 
-  it('should return 400 for invalid email format', async () => {
+  it("should return 400 for invalid email format", async () => {
     const response = await request(app)
-      .post('/api/auth/register')
-      .send({ email: 'invalid', password: 'pass', name: 'User' });
+      .post("/api/auth/register")
+      .send({ email: "invalid", password: "pass", name: "User" });
 
     expect(response.status).toBe(400);
-    expect(response.body.error).toContain('Invalid email');
+    expect(response.body.error).toContain("Invalid email");
   });
 
-  it('should return 409 for duplicate email', async () => {
-    await request(app)
-      .post('/api/auth/register')
-      .send({ email: 'dup@example.com', password: 'ValidPass123', name: 'User' });
+  it("should return 409 for duplicate email", async () => {
+    await request(app).post("/api/auth/register").send({
+      email: "dup@example.com",
+      password: "ValidPass123",
+      name: "User",
+    });
 
-    const response = await request(app)
-      .post('/api/auth/register')
-      .send({ email: 'dup@example.com', password: 'ValidPass123', name: 'User2' });
+    const response = await request(app).post("/api/auth/register").send({
+      email: "dup@example.com",
+      password: "ValidPass123",
+      name: "User2",
+    });
 
     expect(response.status).toBe(409);
-    expect(response.body.error).toContain('already exists');
+    expect(response.body.error).toContain("already exists");
   });
 
-  it('should store hashed password in database', async () => {
-    const password = 'PlainPassword123';
-    
-    await request(app)
-      .post('/api/auth/register')
-      .send({ email: 'hash@example.com', password, name: 'User' });
+  it("should store hashed password in database", async () => {
+    const password = "PlainPassword123";
 
-    const user = await db('users').where({ email: 'hash@example.com' }).first();
-    
+    await request(app)
+      .post("/api/auth/register")
+      .send({ email: "hash@example.com", password, name: "User" });
+
+    const user = await db("users").where({ email: "hash@example.com" }).first();
+
     expect(user.password).not.toBe(password);
     expect(user.password).toMatch(/^\$2[aby]\$/);
   });
@@ -466,38 +486,42 @@ describe('POST /api/auth/register', () => {
 ### E2E Testing Workflow with Playwright
 
 **Command:**
+
 ```bash
 /tdd-workflow "complete user registration flow" --e2e --playwright
 ```
 
 **Generated E2E Tests:**
+
 ```typescript
 // tests/e2e/auth.spec.ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test.describe('User Registration Flow', () => {
-  test('should complete full registration process', async ({ page }) => {
+test.describe("User Registration Flow", () => {
+  test("should complete full registration process", async ({ page }) => {
     // Navigate to registration page
-    await page.goto('/register');
+    await page.goto("/register");
 
     // Fill registration form
-    await page.fill('[name="email"]', 'e2e@example.com');
-    await page.fill('[name="password"]', 'ValidPass123');
-    await page.fill('[name="confirmPassword"]', 'ValidPass123');
-    await page.fill('[name="name"]', 'E2E User');
+    await page.fill('[name="email"]', "e2e@example.com");
+    await page.fill('[name="password"]', "ValidPass123");
+    await page.fill('[name="confirmPassword"]', "ValidPass123");
+    await page.fill('[name="name"]', "E2E User");
 
     // Submit form
     await page.click('[type="submit"]');
 
     // Verify redirect to dashboard
-    await expect(page).toHaveURL('/dashboard');
+    await expect(page).toHaveURL("/dashboard");
 
     // Verify user name displayed
-    await expect(page.locator('[data-testid="user-name"]')).toHaveText('E2E User');
+    await expect(page.locator('[data-testid="user-name"]')).toHaveText(
+      "E2E User",
+    );
   });
 
-  test('should show validation errors for invalid inputs', async ({ page }) => {
-    await page.goto('/register');
+  test("should show validation errors for invalid inputs", async ({ page }) => {
+    await page.goto("/register");
 
     // Submit empty form
     await page.click('[type="submit"]');
@@ -507,23 +531,26 @@ test.describe('User Registration Flow', () => {
     await expect(page.locator('[data-testid="password-error"]')).toBeVisible();
   });
 
-  test('should persist session after registration', async ({ page, context }) => {
-    await page.goto('/register');
-    
+  test("should persist session after registration", async ({
+    page,
+    context,
+  }) => {
+    await page.goto("/register");
+
     // Register user
-    await page.fill('[name="email"]', 'session@example.com');
-    await page.fill('[name="password"]', 'ValidPass123');
-    await page.fill('[name="confirmPassword"]', 'ValidPass123');
-    await page.fill('[name="name"]', 'Session User');
+    await page.fill('[name="email"]', "session@example.com");
+    await page.fill('[name="password"]', "ValidPass123");
+    await page.fill('[name="confirmPassword"]', "ValidPass123");
+    await page.fill('[name="name"]', "Session User");
     await page.click('[type="submit"]');
 
     // Verify cookies set
     const cookies = await context.cookies();
-    expect(cookies.find(c => c.name === 'auth_token')).toBeDefined();
+    expect(cookies.find((c) => c.name === "auth_token")).toBeDefined();
 
     // Reload page - should stay authenticated
     await page.reload();
-    await expect(page).toHaveURL('/dashboard');
+    await expect(page).toHaveURL("/dashboard");
   });
 });
 ```
@@ -531,6 +558,7 @@ test.describe('User Registration Flow', () => {
 ### Full Test Pyramid Workflow
 
 **Command:**
+
 ```bash
 /tdd-workflow "payment processing feature" --full --min-coverage=90
 ```
@@ -554,6 +582,7 @@ test.describe('User Registration Flow', () => {
    - Error handling UX
 
 **Coverage Report:**
+
 ```
 Test Results:
   Unit: 45 tests passing
@@ -573,6 +602,7 @@ Target: 90% - PASSED ✓
 ## TDD Best Practices
 
 ### 1. Write Tests First (Always)
+
 ```bash
 # Claude will REFUSE to implement before tests exist
 User: "Implement user authentication"
@@ -587,34 +617,36 @@ Starting with test creation..."
 ```
 
 ### 2. Test Behavior, Not Implementation
+
 ```typescript
 // ❌ Bad: Testing implementation details
-it('should call bcrypt.hash with saltRounds=10', () => {
+it("should call bcrypt.hash with saltRounds=10", () => {
   expect(bcrypt.hash).toHaveBeenCalledWith(password, 10);
 });
 
 // ✅ Good: Testing behavior
-it('should store hashed password', async () => {
+it("should store hashed password", async () => {
   await authService.register({ email, password });
   const user = await db.users.findOne({ email });
-  
+
   expect(user.password).not.toBe(password);
   expect(await bcrypt.compare(password, user.password)).toBe(true);
 });
 ```
 
 ### 3. Descriptive Test Names
+
 ```typescript
 // ✅ Clear test names following Given-When-Then
-describe('AuthService', () => {
-  describe('when user provides valid credentials', () => {
-    it('should return auth token and user data', async () => {
+describe("AuthService", () => {
+  describe("when user provides valid credentials", () => {
+    it("should return auth token and user data", async () => {
       // test
     });
   });
 
-  describe('when password is incorrect', () => {
-    it('should throw InvalidCredentialsError', async () => {
+  describe("when password is incorrect", () => {
+    it("should throw InvalidCredentialsError", async () => {
       // test
     });
   });
@@ -622,23 +654,25 @@ describe('AuthService', () => {
 ```
 
 ### 4. Arrange-Act-Assert Pattern
+
 ```typescript
-it('should update user email', async () => {
+it("should update user email", async () => {
   // Arrange: Set up test data
-  const user = await createTestUser({ email: 'old@example.com' });
-  
+  const user = await createTestUser({ email: "old@example.com" });
+
   // Act: Perform action
-  await userService.updateEmail(user.id, 'new@example.com');
-  
+  await userService.updateEmail(user.id, "new@example.com");
+
   // Assert: Verify outcome
   const updated = await userService.findById(user.id);
-  expect(updated.email).toBe('new@example.com');
+  expect(updated.email).toBe("new@example.com");
 });
 ```
 
 ## Anti-Hallucination Benefits
 
 ### Problem: LLM Scope Drift
+
 ```bash
 User: "Add user authentication"
 
@@ -648,6 +682,7 @@ Claude (without TDD):
 ```
 
 ### Solution: Test-Anchored Iteration
+
 ```bash
 Claude (with TDD):
 1. Writes tests ONLY for requested features
@@ -664,12 +699,14 @@ Claude (with TDD):
 ```
 
 **Behavior:**
+
 - Monitors file changes
 - Re-runs affected tests automatically
 - Shows real-time coverage updates
 - Alerts when tests fail
 
 **Terminal Output:**
+
 ```
 Watching: src/**/*.ts, tests/**/*.test.ts
 
@@ -691,6 +728,7 @@ Coverage: 85.1% (↓ 2.2%)
 ## Configuration
 
 ### Custom Test Runner
+
 ```json
 // .claude/tdd.config.json
 {

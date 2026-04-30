@@ -1,0 +1,14 @@
+---
+description: "Build high-performance async REST APIs with FastAPI, Python's fastest-growing web framework."
+globs:
+alwaysApply: false
+---
+# FastAPI Python API Development Skill
+Build high-performance async REST APIs with FastAPI, Python's fastest-growing web framework. Automatic OpenAPI/Swagger documentation, type-safe validation with Pydantic, native async/await support, and dependency injection for clean architecture.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+pip install fastapi uvicorn[standard] pydantic sqlalchemy
+```
+## Source
+https://heyclau.de/downloads/skills/fastapi-python-backend.zip

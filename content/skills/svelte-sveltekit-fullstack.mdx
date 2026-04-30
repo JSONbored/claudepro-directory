@@ -2,14 +2,14 @@
 title: Svelte SvelteKit Full-Stack Development Skill
 slug: svelte-sveltekit-fullstack
 category: skills
-description: 'Build full-stack web apps with Svelte and SvelteKit. Minimal runtime overhead, reactive components, and server-side rendering. The most admired frontend framework of 2025. Svelte compiles components to vanilla JavaScript at build time, resulting in zero runtime overhead and exceptional performance.'
-cardDescription: 'Build full-stack web apps with Svelte and SvelteKit. Minimal runtime overhead, reactive components, and server-side rendering.'
+description: "Build full-stack web apps with Svelte and SvelteKit. Minimal runtime overhead, reactive components, and server-side rendering. The most admired frontend framework of 2025. Svelte compiles components to vanilla JavaScript at build time, resulting in zero runtime overhead and exceptional performance."
+cardDescription: "Build full-stack web apps with Svelte and SvelteKit. Minimal runtime overhead, reactive components, and server-side rendering."
 seoTitle: Svelte SvelteKit Full-Stack Development Skill
-seoDescription: 'Build full-stack web apps with Svelte and SvelteKit. Minimal runtime overhead, reactive components, and server-side rendering. The most admired frontend fram...'
+seoDescription: "Build full-stack web apps with Svelte and SvelteKit. Minimal runtime overhead, reactive components, and server-side rendering. The most admired frontend fram..."
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-23'
-documentationUrl: 'https://kit.svelte.dev/'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-23"
+documentationUrl: "https://kit.svelte.dev/"
 downloadUrl: /downloads/skills/svelte-sveltekit-fullstack.zip
 installable: true
 installCommand: npm create svelte@latest my-app
@@ -34,9 +34,9 @@ copySnippet: |-
 skillType: general
 skillLevel: advanced
 verificationStatus: draft
-verifiedAt: '2025-10-23'
+verifiedAt: "2025-10-23"
 retrievalSources:
-  - 'https://kit.svelte.dev/'
+  - "https://kit.svelte.dev/"
 testedPlatforms:
   - Claude
   - Codex
@@ -46,11 +46,11 @@ testedPlatforms:
   - Gemini
 prerequisites:
   - Node.js 18+ (20+ recommended)
-  - '@sveltejs/kit ^2.0.0'
+  - "@sveltejs/kit ^2.0.0"
   - svelte ^4.0.0
   - vite ^5.0.0
   - Node.js 18+ runtime environment for running SvelteKit development server and build processes
-  - 'Package manager (npm, pnpm, yarn, or bun) for installing SvelteKit dependencies and managing project packages'
+  - "Package manager (npm, pnpm, yarn, or bun) for installing SvelteKit dependencies and managing project packages"
 tags:
   - svelte
   - sveltekit
@@ -80,6 +80,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## What This Skill Enables
 
 Claude can build reactive web applications using Svelte's compile-time approach and SvelteKit's full-stack framework. Svelte compiles components to vanilla JavaScript at build time, resulting in minimal runtime overhead and exceptional performance. SvelteKit adds file-based routing, server-side rendering, API routes, and adapters for any platform. From simple components to production apps with authentication and databases, Claude handles the Svelte ecosystem end-to-end.
@@ -93,18 +94,21 @@ Claude can build reactive web applications using Svelte's compile-time approach 
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
-
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 
 **Required:**
+
 - Claude Pro subscription or Claude Code CLI
 - Node.js 18+ (20+ recommended)
 - npm or pnpm package manager
 - Basic JavaScript knowledge
 
 **What Claude handles automatically:**
+
 - Creating reactive Svelte components with stores
 - Building SvelteKit routes with +page.svelte files
 - Implementing server-side logic in +page.server.ts
@@ -121,6 +125,7 @@ Claude can build reactive web applications using Svelte's compile-time approach 
 **Prompt:** "Create Svelte component for user profile with: editable bio, avatar upload with preview, reactive form validation, and optimistic UI updates. Use Svelte stores for state."
 
 Claude will:
+
 1. Create component with $: reactive statements
 2. Set up writable stores for form state
 3. Add two-way binding with bind:value
@@ -134,6 +139,7 @@ Claude will:
 **Prompt:** "Build SvelteKit blog with: file-based routing, Markdown posts with frontmatter, server-side API routes for CRUD, authentication with JWT, and SQLite database with Prisma."
 
 Claude will:
+
 1. Set up SvelteKit project structure
 2. Create +page.svelte routes
 3. Add +page.server.ts load functions
@@ -147,6 +153,7 @@ Claude will:
 **Prompt:** "Create SvelteKit form for product creation with: server-side validation, progressive enhancement (works without JS), file uploads, and optimistic UI. Show errors next to fields."
 
 Claude will:
+
 1. Create form in +page.svelte
 2. Add form action in +page.server.ts
 3. Implement server-side validation
@@ -160,6 +167,7 @@ Claude will:
 **Prompt:** "Build real-time analytics dashboard with Svelte: WebSocket connection, reactive charts with Chart.js, derived stores for calculated metrics, and auto-refreshing data every 30s."
 
 Claude will:
+
 1. Set up WebSocket in SvelteKit
 2. Create writable stores for data
 3. Add derived stores for calculations
@@ -185,6 +193,7 @@ Claude will:
 ## Common Workflows
 
 ### E-Commerce Store
+
 ```
 "Build SvelteKit e-commerce with:
 1. Product catalog: +page.svelte with load function, search/filter
@@ -198,6 +207,7 @@ Claude will:
 ```
 
 ### SaaS Dashboard
+
 ```
 "Create multi-tenant SvelteKit SaaS:
 1. Auth: +hooks.server.ts for session management
@@ -211,6 +221,7 @@ Claude will:
 ```
 
 ### Static Site Generator
+
 ```
 "Build Svelte static site generator:
 1. Content: Markdown files with frontmatter
@@ -224,6 +235,7 @@ Claude will:
 ```
 
 ### Real-Time Collaboration
+
 ```
 "Build collaborative doc editor with Svelte:
 1. Editor: rich text with ProseMirror

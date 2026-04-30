@@ -1,0 +1,345 @@
+{
+  "schemaVersion": 1,
+  "key": "skills:audio-transcription-summarization",
+  "entry": {
+    "category": "skills",
+    "slug": "audio-transcription-summarization",
+    "title": "Audio Transcription + Summarization Skill",
+    "description": "Transcribe audio files (MP3, WAV, M4A, etc.) using OpenAI Whisper AI and ffmpeg to produce structured, timestamped transcripts with automatic summarization and action item extraction. Supports multilingual transcription, speaker diarization, and meeting minutes generation.",
+    "seoTitle": "Audio Transcription + Summarization Skill",
+    "seoDescription": "Transcribe audio files (MP3, WAV, M4A, etc.) using OpenAI Whisper AI and ffmpeg to produce structured, timestamped transcripts with automatic summarization a...",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2025-10-15",
+    "contentUpdatedAt": "2026-04-27T02:57:15-06:00",
+    "tags": [
+      "audio",
+      "transcription",
+      "whisper",
+      "ffmpeg"
+    ],
+    "keywords": [
+      "and",
+      "audio",
+      "claude",
+      "development",
+      "ffmpeg",
+      "skills",
+      "summarization",
+      "tools",
+      "transcription",
+      "whisper",
+      "heyclaude",
+      "audio transcription summarization skill"
+    ],
+    "readingTime": 3,
+    "difficultyScore": 71,
+    "documentationUrl": "https://github.com/openai/whisper",
+    "cardDescription": "Transcribe audio files (MP3, WAV, M4A, etc.) using OpenAI Whisper AI and ffmpeg to produce structured, timestamped transcripts with autom...",
+    "installable": true,
+    "installCommand": "pip install openai-whisper",
+    "usageSnippet": "pip install openai-whisper",
+    "copySnippet": "# Convert to mono 16kHz WAV\nffmpeg -i input.mp3 -ar 16000 -ac 1 input.wav\n\n# Python whisper (pip install -U openai-whisper)\nwhisper input.wav --model small --language en --output_format txt",
+    "skillType": "general",
+    "skillLevel": "advanced",
+    "verificationStatus": "draft",
+    "verifiedAt": "2025-10-15",
+    "retrievalSources": [
+      "https://github.com/openai/whisper"
+    ],
+    "testedPlatforms": [
+      "Claude",
+      "Codex",
+      "OpenClaw",
+      "Cursor",
+      "Windsurf",
+      "Gemini"
+    ],
+    "prerequisites": [
+      "ffmpeg",
+      "Python 3.11+ or whisper.cpp",
+      "openai-whisper (pip) or whisper.cpp binary",
+      "Sufficient disk space for model downloads (Whisper models range from 39MB small to 1.5GB large model)",
+      "Audio file access permissions - read access to input audio files and write access for transcription output files",
+      "System resources: Minimum 4GB RAM for small model, 8GB+ recommended for medium/large models, GPU optional but recommended for faster processing"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/skills/audio-transcription-summarization.zip",
+    "skillPackage": {
+      "format": "agent-skill",
+      "entrypoint": "SKILL.md",
+      "downloadUrl": "/downloads/skills/audio-transcription-summarization.zip",
+      "sha256": "227f513fd69287b909f5b20d191418d4bc515aa4593508058a42e6d3bdf1ba4c"
+    },
+    "platformCompatibility": [
+      {
+        "platform": "Claude",
+        "supportLevel": "native-skill",
+        "installPath": ".claude/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-15"
+      },
+      {
+        "platform": "Codex",
+        "supportLevel": "native-skill",
+        "installPath": ".agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-15"
+      },
+      {
+        "platform": "Windsurf",
+        "supportLevel": "native-skill",
+        "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-15"
+      },
+      {
+        "platform": "Gemini",
+        "supportLevel": "native-skill",
+        "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-15"
+      },
+      {
+        "platform": "Cursor",
+        "supportLevel": "adapter",
+        "installPath": ".cursor/rules/<skill-name>.mdc",
+        "adapterPath": "/data/skill-adapters/cursor/audio-transcription-summarization.mdc",
+        "verifiedAt": "2025-10-15"
+      },
+      {
+        "platform": "Generic AGENTS",
+        "supportLevel": "manual-context",
+        "installPath": "AGENTS.md or tool-specific context file",
+        "verifiedAt": "2025-10-15"
+      }
+    ],
+    "downloadTrust": "first-party",
+    "downloadSha256": "227f513fd69287b909f5b20d191418d4bc515aa4593508058a42e6d3bdf1ba4c",
+    "body": "## What This Skill Enables\n\nClaude can transcribe audio files (MP3, WAV, M4A, etc.) and generate structured summaries with timestamps, action items, and speaker identification. This skill leverages Whisper AI and ffmpeg through Claude's Code Interpreter to process audio locally.\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Prerequisites\n\n**Required:**\n\n- Claude Pro subscription\n- Code Interpreter feature enabled in Claude Desktop settings\n- Audio file uploaded to conversation (drag and drop)\n\n**What Claude handles automatically:**\n\n- Installing and running Whisper AI models\n- Audio format conversion with ffmpeg\n- Timestamp extraction and alignment\n- Summary generation and structuring\n\n## How to Use This Skill\n\n### Basic Transcription\n\n**Prompt:** \"Transcribe this audio file and give me a clean text transcript.\"\n\nClaude will:\n\n1. Detect the audio format\n2. Convert to optimal format for transcription\n3. Run Whisper AI transcription\n4. Return formatted text\n\n### Timestamped Summary\n\n**Prompt:** \"Transcribe this meeting recording and create a timestamped summary with key discussion points every 5 minutes.\"\n\nClaude will:\n\n1. Transcribe the full audio\n2. Chunk by time intervals\n3. Summarize each segment\n4. Present with timestamps\n\n### Action Items Extraction\n\n**Prompt:** \"Transcribe this audio and extract all action items, decisions, and to-dos mentioned.\"\n\nClaude will:\n\n1. Transcribe the audio\n2. Analyze for actionable items\n3. List action items with timestamps\n4. Identify who was assigned what (if mentioned)\n\n### Speaker Diarization\n\n**Prompt:** \"Transcribe this conversation and identify different speakers. Label them as Speaker 1, Speaker 2, etc.\"\n\nClaude will:\n\n1. Detect speaker changes in the audio\n2. Segment by speaker\n3. Label each segment\n4. Present as a conversation transcript\n\n## Tips for Best Results\n\n1. **Audio Quality Matters**: Clear audio with minimal background noise produces better transcriptions\n2. **File Size**: For files over 25MB, mention if you want a specific time range transcribed first\n3. **Language**: Specify the language if it's not English (e.g., \"Transcribe this Spanish audio...\")\n4. **Model Selection**: For better accuracy on difficult audio, ask Claude to use the \"medium\" or \"large\" Whisper model\n5. **Post-Processing**: Ask Claude to clean up transcription artifacts like repeated words or filler sounds\n\n## Common Workflows\n\n### Meeting Minutes Generation\n\n```\n\"Transcribe this meeting and create:\n1. Attendee list (if mentioned)\n2. Key discussion topics with timestamps\n3. Decisions made\n4. Action items with owners\n5. Next steps\"\n```\n\n### Podcast Summary\n\n```\n\"Transcribe this podcast episode and create:\n1. Episode summary (2-3 sentences)\n2. Main topics discussed with timestamps\n3. Key quotes\n4. Chapters (every 10 minutes)\"\n```\n\n### Interview Transcription\n\n```\n\"Transcribe this interview with speaker labels.\nFormat as Q&A with:\n- Interviewer questions highlighted\n- Interviewee responses\n- Notable quotes pulled out\"\n```\n\n## Troubleshooting\n\n**Issue:** Transcription is inaccurate\n**Solution:** Ask Claude to use a larger Whisper model or pre-process the audio for noise reduction\n\n**Issue:** Wrong language detected\n**Solution:** Explicitly specify the language in your prompt (\"Transcribe this French audio...\")\n\n**Issue:** Timestamps are off\n**Solution:** Ask Claude to re-align timestamps or specify the desired timestamp interval\n\n**Issue:** Speaker diarization missing\n**Solution:** Request it explicitly: \"Please identify different speakers and label them\"\n\n## Learn More\n\n- [Whisper AI by OpenAI](https://github.com/openai/whisper) - The underlying transcription model\n- [ffmpeg Audio Processing](https://ffmpeg.org/ffmpeg-filters.html#Audio-Filters) - Audio format conversion details\n- [Claude Code Interpreter](https://www.anthropic.com/news/code-interpreter) - How Claude executes code\n- [Simon Willison's Analysis](https://simonwillison.net/2025/Oct/10/claude-skills/) - Deep dive into Claude's skills\n\n## Features\n\n- Local processing via Whisper\n- Format conversion with ffmpeg\n- Timestamped notes and action items\n- Optional speaker labels\n- Multilingual support (99 languages with auto-detection)\n- Word-level timestamp accuracy\n- Multiple output formats (TXT, VTT, SRT, JSON)\n- Real-time streaming transcription support with live audio processing, continuous transcription updates, and low-latency transcription for live events or meetings\n\n## Use Cases\n\n- Summarize meetings and podcasts\n- Generate action items\n- Create searchable transcripts\n- Generate meeting minutes with action items\n- Create accessible transcripts for video content\n- Extract insights from podcast episodes",
+    "sections": [
+      {
+        "title": "What This Skill Enables",
+        "id": "what-this-skill-enables",
+        "markdown": "Claude can transcribe audio files (MP3, WAV, M4A, etc.) and generate structured summaries with timestamps, action items, and speaker identification. This skill leverages Whisper AI and ffmpeg through Claude's Code Interpreter to process audio locally.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Compatibility",
+        "id": "compatibility",
+        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Prerequisites",
+        "id": "prerequisites",
+        "markdown": "**Required:**\n\n- Claude Pro subscription\n- Code Interpreter feature enabled in Claude Desktop settings\n- Audio file uploaded to conversation (drag and drop)\n\n**What Claude handles automatically:**\n\n- Installing and running Whisper AI models\n- Audio format conversion with ffmpeg\n- Timestamp extraction and alignment\n- Summary generation and structuring",
+        "codeBlocks": []
+      },
+      {
+        "title": "How to Use This Skill",
+        "id": "how-to-use-this-skill",
+        "markdown": "### Basic Transcription\n\n**Prompt:** \"Transcribe this audio file and give me a clean text transcript.\"\n\nClaude will:\n\n1. Detect the audio format\n2. Convert to optimal format for transcription\n3. Run Whisper AI transcription\n4. Return formatted text\n\n### Timestamped Summary\n\n**Prompt:** \"Transcribe this meeting recording and create a timestamped summary with key discussion points every 5 minutes.\"\n\nClaude will:\n\n1. Transcribe the full audio\n2. Chunk by time intervals\n3. Summarize each segment\n4. Present with timestamps\n\n### Action Items Extraction\n\n**Prompt:** \"Transcribe this audio and extract all action items, decisions, and to-dos mentioned.\"\n\nClaude will:\n\n1. Transcribe the audio\n2. Analyze for actionable items\n3. List action items with timestamps\n4. Identify who was assigned what (if mentioned)\n\n### Speaker Diarization\n\n**Prompt:** \"Transcribe this conversation and identify different speakers. Label them as Speaker 1, Speaker 2, etc.\"\n\nClaude will:\n\n1. Detect speaker changes in the audio\n2. Segment by speaker\n3. Label each segment\n4. Present as a conversation transcript",
+        "codeBlocks": []
+      },
+      {
+        "title": "Tips for Best Results",
+        "id": "tips-for-best-results",
+        "markdown": "1. **Audio Quality Matters**: Clear audio with minimal background noise produces better transcriptions\n2. **File Size**: For files over 25MB, mention if you want a specific time range transcribed first\n3. **Language**: Specify the language if it's not English (e.g., \"Transcribe this Spanish audio...\")\n4. **Model Selection**: For better accuracy on difficult audio, ask Claude to use the \"medium\" or \"large\" Whisper model\n5. **Post-Processing**: Ask Claude to clean up transcription artifacts like repeated words or filler sounds",
+        "codeBlocks": []
+      },
+      {
+        "title": "Common Workflows",
+        "id": "common-workflows",
+        "markdown": "### Meeting Minutes Generation\n\n```\n\"Transcribe this meeting and create:\n1. Attendee list (if mentioned)\n2. Key discussion topics with timestamps\n3. Decisions made\n4. Action items with owners\n5. Next steps\"\n```\n\n### Podcast Summary\n\n```\n\"Transcribe this podcast episode and create:\n1. Episode summary (2-3 sentences)\n2. Main topics discussed with timestamps\n3. Key quotes\n4. Chapters (every 10 minutes)\"\n```\n\n### Interview Transcription\n\n```\n\"Transcribe this interview with speaker labels.\nFormat as Q&A with:\n- Interviewer questions highlighted\n- Interviewee responses\n- Notable quotes pulled out\"\n```",
+        "codeBlocks": [
+          {
+            "language": "text",
+            "code": "\"Transcribe this meeting and create:\n1. Attendee list (if mentioned)\n2. Key discussion topics with timestamps\n3. Decisions made\n4. Action items with owners\n5. Next steps\""
+          },
+          {
+            "language": "text",
+            "code": "\"Transcribe this podcast episode and create:\n1. Episode summary (2-3 sentences)\n2. Main topics discussed with timestamps\n3. Key quotes\n4. Chapters (every 10 minutes)\""
+          },
+          {
+            "language": "text",
+            "code": "\"Transcribe this interview with speaker labels.\nFormat as Q&A with:\n- Interviewer questions highlighted\n- Interviewee responses\n- Notable quotes pulled out\""
+          }
+        ]
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "**Issue:** Transcription is inaccurate\n**Solution:** Ask Claude to use a larger Whisper model or pre-process the audio for noise reduction\n\n**Issue:** Wrong language detected\n**Solution:** Explicitly specify the language in your prompt (\"Transcribe this French audio...\")\n\n**Issue:** Timestamps are off\n**Solution:** Ask Claude to re-align timestamps or specify the desired timestamp interval\n\n**Issue:** Speaker diarization missing\n**Solution:** Request it explicitly: \"Please identify different speakers and label them\"",
+        "codeBlocks": []
+      },
+      {
+        "title": "Learn More",
+        "id": "learn-more",
+        "markdown": "- [Whisper AI by OpenAI](https://github.com/openai/whisper) - The underlying transcription model\n- [ffmpeg Audio Processing](https://ffmpeg.org/ffmpeg-filters.html#Audio-Filters) - Audio format conversion details\n- [Claude Code Interpreter](https://www.anthropic.com/news/code-interpreter) - How Claude executes code\n- [Simon Willison's Analysis](https://simonwillison.net/2025/Oct/10/claude-skills/) - Deep dive into Claude's skills",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Local processing via Whisper\n- Format conversion with ffmpeg\n- Timestamped notes and action items\n- Optional speaker labels\n- Multilingual support (99 languages with auto-detection)\n- Word-level timestamp accuracy\n- Multiple output formats (TXT, VTT, SRT, JSON)\n- Real-time streaming transcription support with live audio processing, continuous transcription updates, and low-latency transcription for live events or meetings",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Summarize meetings and podcasts\n- Generate action items\n- Create searchable transcripts\n- Generate meeting minutes with action items\n- Create accessible transcripts for video content\n- Extract insights from podcast episodes",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "What This Skill Enables",
+        "id": "what-this-skill-enables"
+      },
+      {
+        "depth": 2,
+        "text": "Compatibility",
+        "id": "compatibility"
+      },
+      {
+        "depth": 3,
+        "text": "Native",
+        "id": "native"
+      },
+      {
+        "depth": 3,
+        "text": "Manual Adaptation",
+        "id": "manual-adaptation"
+      },
+      {
+        "depth": 2,
+        "text": "Prerequisites",
+        "id": "prerequisites"
+      },
+      {
+        "depth": 2,
+        "text": "How to Use This Skill",
+        "id": "how-to-use-this-skill"
+      },
+      {
+        "depth": 3,
+        "text": "Basic Transcription",
+        "id": "basic-transcription"
+      },
+      {
+        "depth": 3,
+        "text": "Timestamped Summary",
+        "id": "timestamped-summary"
+      },
+      {
+        "depth": 3,
+        "text": "Action Items Extraction",
+        "id": "action-items-extraction"
+      },
+      {
+        "depth": 3,
+        "text": "Speaker Diarization",
+        "id": "speaker-diarization"
+      },
+      {
+        "depth": 2,
+        "text": "Tips for Best Results",
+        "id": "tips-for-best-results"
+      },
+      {
+        "depth": 2,
+        "text": "Common Workflows",
+        "id": "common-workflows"
+      },
+      {
+        "depth": 3,
+        "text": "Meeting Minutes Generation",
+        "id": "meeting-minutes-generation"
+      },
+      {
+        "depth": 3,
+        "text": "Podcast Summary",
+        "id": "podcast-summary"
+      },
+      {
+        "depth": 3,
+        "text": "Interview Transcription",
+        "id": "interview-transcription"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 2,
+        "text": "Learn More",
+        "id": "learn-more"
+      },
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "text",
+        "code": "\"Transcribe this meeting and create:\n1. Attendee list (if mentioned)\n2. Key discussion topics with timestamps\n3. Decisions made\n4. Action items with owners\n5. Next steps\""
+      },
+      {
+        "language": "text",
+        "code": "\"Transcribe this podcast episode and create:\n1. Episode summary (2-3 sentences)\n2. Main topics discussed with timestamps\n3. Key quotes\n4. Chapters (every 10 minutes)\""
+      },
+      {
+        "language": "text",
+        "code": "\"Transcribe this interview with speaker labels.\nFormat as Q&A with:\n- Interviewer questions highlighted\n- Interviewee responses\n- Notable quotes pulled out\""
+      }
+    ],
+    "filePath": "content/skills/audio-transcription-summarization.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/audio-transcription-summarization.mdx",
+    "repoUrl": "https://github.com/openai/whisper",
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": true,
+    "packageTrust": "first-party",
+    "packageChecksum": "227f513fd69287b909f5b20d191418d4bc515aa4593508058a42e6d3bdf1ba4c",
+    "checksumPresent": true,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://github.com/openai/whisper",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/audio-transcription-summarization.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2025-10-15",
+    "adapterGenerated": true,
+    "platforms": [
+      "Claude",
+      "Codex",
+      "Windsurf",
+      "Gemini",
+      "Cursor",
+      "Generic AGENTS"
+    ],
+    "supportLevels": [
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "adapter",
+      "manual-context"
+    ]
+  }
+}

@@ -1,0 +1,48 @@
+---
+title: Prompt-to-asset
+slug: prompt-to-asset
+category: mcp
+description: MCP server that generates production-ready visual assets by routing requests across 30+ image generation models. Handles app icons, favicons, OG images, logos, and wordmarks. Validates output for WCAG contrast and palette consistency. Zero API key required for first run via Pollinations and Stable Horde free tiers.
+cardDescription: Generate app icons, favicons, OG images, and logos via 30+ image models. No API key required for first run.
+seoTitle: Prompt-to-asset MCP Server for Claude Visual Assets
+seoDescription: Generate app icons, favicons, OG images, logos, and wordmarks from Claude with the Prompt-to-asset MCP server and 30+ image models.
+author: MohamedAbdallah-14
+authorProfileUrl: https://github.com/MohamedAbdallah-14
+dateAdded: "2026-04-25"
+repoUrl: https://github.com/MohamedAbdallah-14/prompt-to-asset
+documentationUrl: https://github.com/MohamedAbdallah-14/prompt-to-asset#readme
+installable: true
+installCommand: npx -y prompt-to-asset
+usageSnippet: claude mcp add prompt-to-asset -- npx -y prompt-to-asset
+configSnippet: |-
+  {
+    "mcpServers": {
+      "prompt-to-asset": {
+        "command": "npx",
+        "args": ["-y", "prompt-to-asset"]
+      }
+    }
+  }
+tags:
+  - mcp
+  - image-generation
+  - design-tools
+  - visual-assets
+  - icons
+  - favicons
+  - og-images
+keywords:
+  - prompt to asset mcp
+  - claude image generation
+  - app icon generator
+  - og image generator
+  - design tools mcp
+---
+
+## Overview
+
+MCP server that generates production-ready visual assets by routing requests across 30+ image generation models. Handles app icons, favicons, OG images, logos, and wordmarks. Validates output for WCAG contrast and palette consistency. Zero API key required for first run via Pollinations and Stable Horde free tiers.
+
+## Usage
+
+claude mcp add prompt-to-asset -- npx -y prompt-to-asset

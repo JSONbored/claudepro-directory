@@ -2,17 +2,17 @@
 title: MCP Server Security Hardening Skill
 slug: mcp-server-security-hardening
 category: skills
-description: 'Secure MCP servers with strict tool boundaries, auth controls, dependency hygiene, and abuse-resistant runtime policies.'
-cardDescription: 'Harden Model Context Protocol servers with practical controls for auth, tool scope, input validation, and supply-chain risk.'
+description: "Secure MCP servers with strict tool boundaries, auth controls, dependency hygiene, and abuse-resistant runtime policies."
+cardDescription: "Harden Model Context Protocol servers with practical controls for auth, tool scope, input validation, and supply-chain risk."
 seoTitle: MCP Server Security Hardening Skill for AI Engineers
-seoDescription: 'Reusable security skill for MCP server hardening, including auth, tool permissions, validation, logging, and incident response.'
+seoDescription: "Reusable security skill for MCP server hardening, including auth, tool permissions, validation, logging, and incident response."
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2026-04-10'
-documentationUrl: 'https://modelcontextprotocol.io/specification/2025-06-18'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2026-04-10"
+documentationUrl: "https://modelcontextprotocol.io/specification/2025-06-18"
 downloadUrl: /downloads/skills/mcp-server-security-hardening.zip
 installable: true
-installCommand: 'curl -L https://heyclau.de/downloads/skills/mcp-server-security-hardening.zip -o mcp-server-security-hardening.zip && unzip -o mcp-server-security-hardening.zip -d ./mcp-server-security-hardening'
+installCommand: "curl -L https://heyclau.de/downloads/skills/mcp-server-security-hardening.zip -o mcp-server-security-hardening.zip && unzip -o mcp-server-security-hardening.zip -d ./mcp-server-security-hardening"
 usageSnippet: Apply this skill before exposing any MCP server to third-party clients or shared environments.
 copySnippet: |-
   # Trigger
@@ -26,9 +26,9 @@ copySnippet: |-
 skillType: general
 skillLevel: advanced
 verificationStatus: draft
-verifiedAt: '2026-04-10'
+verifiedAt: "2026-04-10"
 retrievalSources:
-  - 'https://modelcontextprotocol.io/specification/2025-06-18'
+  - "https://modelcontextprotocol.io/specification/2025-06-18"
 testedPlatforms:
   - Claude
   - Codex
@@ -38,7 +38,7 @@ testedPlatforms:
   - Gemini
 prerequisites:
   - Existing MCP server implementation (local or remote)
-  - 'Access to server config, dependency manifest, and deployment settings'
+  - "Access to server config, dependency manifest, and deployment settings"
   - Ability to run integration tests after hardening
 tags:
   - mcp
@@ -62,6 +62,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Overview
 
 This skill provides a production security baseline for MCP servers. It focuses on the practical risks that matter most in real deployments: over-permissive tools, weak authentication, unsafe input handling, dependency drift, and missing audit trails.
@@ -75,7 +76,9 @@ This skill provides a production security baseline for MCP servers. It focuses o
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 

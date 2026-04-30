@@ -2,15 +2,15 @@
 title: Audio Transcription + Summarization Skill
 slug: audio-transcription-summarization
 category: skills
-description: 'Transcribe audio files (MP3, WAV, M4A, etc.) using OpenAI Whisper AI and ffmpeg to produce structured, timestamped transcripts with automatic summarization and action item extraction. Supports multilingual transcription, speaker diarization, and meeting minutes generation.'
-cardDescription: 'Transcribe audio files (MP3, WAV, M4A, etc.) using OpenAI Whisper AI and ffmpeg to produce structured, timestamped transcripts with autom...'
+description: "Transcribe audio files (MP3, WAV, M4A, etc.) using OpenAI Whisper AI and ffmpeg to produce structured, timestamped transcripts with automatic summarization and action item extraction. Supports multilingual transcription, speaker diarization, and meeting minutes generation."
+cardDescription: "Transcribe audio files (MP3, WAV, M4A, etc.) using OpenAI Whisper AI and ffmpeg to produce structured, timestamped transcripts with autom..."
 seoTitle: Audio Transcription + Summarization Skill
-seoDescription: 'Transcribe audio files (MP3, WAV, M4A, etc.) using OpenAI Whisper AI and ffmpeg to produce structured, timestamped transcripts with automatic summarization a...'
+seoDescription: "Transcribe audio files (MP3, WAV, M4A, etc.) using OpenAI Whisper AI and ffmpeg to produce structured, timestamped transcripts with automatic summarization a..."
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-15'
-repoUrl: 'https://github.com/openai/whisper'
-documentationUrl: 'https://github.com/openai/whisper'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-15"
+repoUrl: "https://github.com/openai/whisper"
+documentationUrl: "https://github.com/openai/whisper"
 downloadUrl: /downloads/skills/audio-transcription-summarization.zip
 installable: true
 installCommand: pip install openai-whisper
@@ -24,9 +24,9 @@ copySnippet: |-
 skillType: general
 skillLevel: advanced
 verificationStatus: draft
-verifiedAt: '2025-10-15'
+verifiedAt: "2025-10-15"
 retrievalSources:
-  - 'https://github.com/openai/whisper'
+  - "https://github.com/openai/whisper"
 testedPlatforms:
   - Claude
   - Codex
@@ -40,7 +40,7 @@ prerequisites:
   - openai-whisper (pip) or whisper.cpp binary
   - Sufficient disk space for model downloads (Whisper models range from 39MB small to 1.5GB large model)
   - Audio file access permissions - read access to input audio files and write access for transcription output files
-  - 'System resources: Minimum 4GB RAM for small model, 8GB+ recommended for medium/large models, GPU optional but recommended for faster processing'
+  - "System resources: Minimum 4GB RAM for small model, 8GB+ recommended for medium/large models, GPU optional but recommended for faster processing"
 tags:
   - audio
   - transcription
@@ -66,6 +66,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## What This Skill Enables
 
 Claude can transcribe audio files (MP3, WAV, M4A, etc.) and generate structured summaries with timestamps, action items, and speaker identification. This skill leverages Whisper AI and ffmpeg through Claude's Code Interpreter to process audio locally.
@@ -79,17 +80,20 @@ Claude can transcribe audio files (MP3, WAV, M4A, etc.) and generate structured 
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
-
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 
 **Required:**
+
 - Claude Pro subscription
 - Code Interpreter feature enabled in Claude Desktop settings
 - Audio file uploaded to conversation (drag and drop)
 
 **What Claude handles automatically:**
+
 - Installing and running Whisper AI models
 - Audio format conversion with ffmpeg
 - Timestamp extraction and alignment
@@ -102,6 +106,7 @@ Claude can transcribe audio files (MP3, WAV, M4A, etc.) and generate structured 
 **Prompt:** "Transcribe this audio file and give me a clean text transcript."
 
 Claude will:
+
 1. Detect the audio format
 2. Convert to optimal format for transcription
 3. Run Whisper AI transcription
@@ -112,6 +117,7 @@ Claude will:
 **Prompt:** "Transcribe this meeting recording and create a timestamped summary with key discussion points every 5 minutes."
 
 Claude will:
+
 1. Transcribe the full audio
 2. Chunk by time intervals
 3. Summarize each segment
@@ -122,6 +128,7 @@ Claude will:
 **Prompt:** "Transcribe this audio and extract all action items, decisions, and to-dos mentioned."
 
 Claude will:
+
 1. Transcribe the audio
 2. Analyze for actionable items
 3. List action items with timestamps
@@ -132,6 +139,7 @@ Claude will:
 **Prompt:** "Transcribe this conversation and identify different speakers. Label them as Speaker 1, Speaker 2, etc."
 
 Claude will:
+
 1. Detect speaker changes in the audio
 2. Segment by speaker
 3. Label each segment
@@ -148,6 +156,7 @@ Claude will:
 ## Common Workflows
 
 ### Meeting Minutes Generation
+
 ```
 "Transcribe this meeting and create:
 1. Attendee list (if mentioned)
@@ -158,6 +167,7 @@ Claude will:
 ```
 
 ### Podcast Summary
+
 ```
 "Transcribe this podcast episode and create:
 1. Episode summary (2-3 sentences)
@@ -167,6 +177,7 @@ Claude will:
 ```
 
 ### Interview Transcription
+
 ```
 "Transcribe this interview with speaker labels.
 Format as Q&A with:

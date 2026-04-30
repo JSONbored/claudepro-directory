@@ -1,0 +1,14 @@
+---
+description: "Optimize frontend build performance with Vite's lightning-fast HMR, code splitting, and tree-shaking."
+globs:
+alwaysApply: false
+---
+# Vite Frontend Build Performance Optimization Skill
+Optimize frontend build performance with Vite's lightning-fast HMR, code splitting, and tree-shaking. Modern build tooling that has replaced Webpack as the developer favorite.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+npm create vite@latest my-app
+```
+## Source
+https://heyclau.de/downloads/skills/vite-build-optimization.zip

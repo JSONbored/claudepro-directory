@@ -1,0 +1,262 @@
+{
+  "schemaVersion": 1,
+  "key": "skills:heyclaude-content-submission-factory",
+  "entry": {
+    "category": "skills",
+    "slug": "heyclaude-content-submission-factory",
+    "title": "HeyClaude Content Submission Factory",
+    "description": "Prepare complete, source-backed HeyClaude content submissions for agents, MCP servers, tools, skills, rules, commands, hooks, guides, collections, and statuslines.",
+    "seoTitle": "HeyClaude Content Submission Factory Skill",
+    "seoDescription": "Reusable skill for preparing high-quality HeyClaude registry submissions with MCP schema checks, brand metadata, sources, SEO, and review-ready issue content.",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2026-04-30",
+    "contentUpdatedAt": "2026-04-30T03:53:43-06:00",
+    "tags": [
+      "heyclaude",
+      "submissions",
+      "registry",
+      "content-workflow",
+      "seo"
+    ],
+    "keywords": [
+      "submit content to heyclaude",
+      "heyclaude registry submission",
+      "ai directory content fields",
+      "github issue submission",
+      "registry seo metadata",
+      "heyclaude",
+      "submissions",
+      "registry",
+      "content-workflow",
+      "seo",
+      "skills",
+      "claude"
+    ],
+    "readingTime": 6,
+    "difficultyScore": 52,
+    "documentationUrl": "https://heyclau.de/submit",
+    "cardDescription": "Create validated HeyClaude submission drafts with MCP-assisted schema checks, brand metadata, source URLs, SEO fields, and issue-first review notes.",
+    "installable": true,
+    "installCommand": "curl -L https://heyclau.de/downloads/skills/heyclaude-content-submission-factory.zip -o heyclaude-content-submission-factory.zip && unzip -o heyclaude-content-submission-factory.zip -d ./heyclaude-content-submission-factory",
+    "usageSnippet": "Use this skill when preparing a new HeyClaude content submission or improving an existing registry entry.",
+    "copySnippet": "# Trigger\n\"Prepare a complete HeyClaude content submission for this resource.\"\n\n# Required output\n1) Recommended category and category-fit rationale\n2) Review-ready HeyClaude submission fields\n3) MCP validation and duplicate-search notes when available\n4) Source and brand metadata\n5) SEO and citation notes\n6) GitHub issue-first submission URL",
+    "skillType": "general",
+    "skillLevel": "advanced",
+    "verificationStatus": "validated",
+    "verifiedAt": "2026-04-30",
+    "retrievalSources": [
+      "https://heyclau.de/submit",
+      "https://heyclau.de/submissions",
+      "https://github.com/JSONbored/claudepro-directory/issues/new/choose"
+    ],
+    "testedPlatforms": [
+      "Claude",
+      "Codex",
+      "Windsurf",
+      "Gemini",
+      "Cursor",
+      "Generic AGENTS"
+    ],
+    "prerequisites": [
+      "Canonical source URL for the resource",
+      "Category candidate or content type",
+      "Short description of what the resource does"
+    ],
+    "hasPrerequisites": true,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/skills/heyclaude-content-submission-factory.zip",
+    "skillPackage": {
+      "format": "agent-skill",
+      "entrypoint": "SKILL.md",
+      "downloadUrl": "/downloads/skills/heyclaude-content-submission-factory.zip",
+      "sha256": "88d6c896b5b0ddee6e77f15448c0d9a42e91541f1915f31d4c7327303fd50b6c"
+    },
+    "platformCompatibility": [
+      {
+        "platform": "Claude",
+        "supportLevel": "native-skill",
+        "installPath": ".claude/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-30"
+      },
+      {
+        "platform": "Codex",
+        "supportLevel": "native-skill",
+        "installPath": ".agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-30"
+      },
+      {
+        "platform": "Windsurf",
+        "supportLevel": "native-skill",
+        "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-30"
+      },
+      {
+        "platform": "Gemini",
+        "supportLevel": "native-skill",
+        "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-30"
+      },
+      {
+        "platform": "Cursor",
+        "supportLevel": "adapter",
+        "installPath": ".cursor/rules/<skill-name>.mdc",
+        "adapterPath": "/data/skill-adapters/cursor/heyclaude-content-submission-factory.mdc",
+        "verifiedAt": "2026-04-30"
+      },
+      {
+        "platform": "Generic AGENTS",
+        "supportLevel": "manual-context",
+        "installPath": "AGENTS.md or tool-specific context file",
+        "verifiedAt": "2026-04-30"
+      }
+    ],
+    "downloadTrust": "first-party",
+    "downloadSha256": "88d6c896b5b0ddee6e77f15448c0d9a42e91541f1915f31d4c7327303fd50b6c",
+    "body": "## Knowledge Freshness\n\nThis skill is pinned to HeyClaude issue-first submission behavior verified on **2026-04-30**.\n\n## Retrieval Sources\n\n- https://heyclau.de/submit\n- https://heyclau.de/submissions\n- https://github.com/JSONbored/claudepro-directory/issues/new/choose\n\n## Core Workflow\n\n1. Identify the best HeyClaude category from the evidence, not from the submitter's guess.\n2. Collect a canonical source URL and any official docs, repo, package, or demo URLs.\n3. Extract only public, non-secret facts.\n4. If the HeyClaude MCP server is available, call `get_submission_schema`, `search_duplicate_entries`, `validate_submission_draft`, and `build_submission_urls` instead of guessing field shape.\n5. Add brand metadata when safe: `brandName`, `brandDomain`, and official source links.\n6. Write a concise original description and card description.\n7. Draft SEO metadata from the resource title, category, tags, and source-backed value.\n8. Produce issue-first submission fields and a prefilled HeyClaude or GitHub submission URL.\n\n## Category Scope\n\n- Agents\n- MCP servers\n- Tools\n- Skills\n- Rules\n- Commands\n- Hooks\n- Guides\n- Collections\n- Statuslines\n\nJobs are intentionally out of scope. Job listings use HeyClaude's jobs lead and review workflow.\n\n## MCP-Assisted Path\n\nWhen an MCP client has the HeyClaude MCP server configured, use it as the source of truth for registry submission structure:\n\n- `get_submission_schema` for required and optional fields by category.\n- `search_duplicate_entries` before drafting a new listing.\n- `validate_submission_draft` to catch malformed fields before handoff.\n- `build_submission_urls` to generate review URLs without creating GitHub issues directly.\n\nIf the MCP server is unavailable, continue with the issue-first draft packet and explicitly mark validation as manual.\n\n## Review Rules\n\n- Do not auto-publish registry content.\n- Do not create PRs, create GitHub issues, write files, or mutate local project config.\n- Do not include private repo names, credentials, tokens, internal URLs, or unpublished customer information.\n- Do not mirror full third-party pages. Use original summaries and canonical source links.\n- Do not claim platform compatibility, validation, package checksums, or first-party status unless source evidence supports it.\n\n## Output Shape\n\nReturn a compact submission packet:\n\n```yaml\ncategory: mcp\ntitle: Example MCP Server\nslug: example-mcp-server\ndescription: Short source-backed summary.\ncardDescription: One-line preview text.\nsourceUrl: https://example.com/docs/mcp\ndocumentationUrl: https://example.com/docs\nrepoUrl: https://github.com/example/example\nbrandName: Example\nbrandDomain: example.com\ntags:\n  - mcp\n  - automation\nseoTitle: Example MCP Server for Claude\nseoDescription: Source-backed description suitable for search previews.\nmcpValidation:\n  schemaChecked: true\n  duplicateSearch: \"No likely duplicate found.\"\n  submitUrl: https://heyclau.de/submit?...\n  githubIssueUrl: https://github.com/JSONbored/claudepro-directory/issues/new?...\nmaintainerNotes: Why this belongs in HeyClaude and what still needs review.\n```\n\n## Troubleshooting\n\n**Issue:** The category is ambiguous  \n**Fix:** Prefer the category that matches the install or usage surface. An MCP server is not a skill unless it ships a valid `SKILL.md` skill package.\n\n**Issue:** The source page is mostly marketing copy  \n**Fix:** Use docs, repo, package, or release pages as supporting sources, and mark unsupported claims as unverified.\n\n**Issue:** Brand domain is unclear  \n**Fix:** Leave brand fields blank rather than guessing from GitHub, docs subdomains, or mirrors.",
+    "sections": [
+      {
+        "title": "Knowledge Freshness",
+        "id": "knowledge-freshness",
+        "markdown": "This skill is pinned to HeyClaude issue-first submission behavior verified on **2026-04-30**.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Retrieval Sources",
+        "id": "retrieval-sources",
+        "markdown": "- https://heyclau.de/submit\n- https://heyclau.de/submissions\n- https://github.com/JSONbored/claudepro-directory/issues/new/choose",
+        "codeBlocks": []
+      },
+      {
+        "title": "Core Workflow",
+        "id": "core-workflow",
+        "markdown": "1. Identify the best HeyClaude category from the evidence, not from the submitter's guess.\n2. Collect a canonical source URL and any official docs, repo, package, or demo URLs.\n3. Extract only public, non-secret facts.\n4. If the HeyClaude MCP server is available, call `get_submission_schema`, `search_duplicate_entries`, `validate_submission_draft`, and `build_submission_urls` instead of guessing field shape.\n5. Add brand metadata when safe: `brandName`, `brandDomain`, and official source links.\n6. Write a concise original description and card description.\n7. Draft SEO metadata from the resource title, category, tags, and source-backed value.\n8. Produce issue-first submission fields and a prefilled HeyClaude or GitHub submission URL.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Category Scope",
+        "id": "category-scope",
+        "markdown": "- Agents\n- MCP servers\n- Tools\n- Skills\n- Rules\n- Commands\n- Hooks\n- Guides\n- Collections\n- Statuslines\n\nJobs are intentionally out of scope. Job listings use HeyClaude's jobs lead and review workflow.",
+        "codeBlocks": []
+      },
+      {
+        "title": "MCP-Assisted Path",
+        "id": "mcp-assisted-path",
+        "markdown": "When an MCP client has the HeyClaude MCP server configured, use it as the source of truth for registry submission structure:\n\n- `get_submission_schema` for required and optional fields by category.\n- `search_duplicate_entries` before drafting a new listing.\n- `validate_submission_draft` to catch malformed fields before handoff.\n- `build_submission_urls` to generate review URLs without creating GitHub issues directly.\n\nIf the MCP server is unavailable, continue with the issue-first draft packet and explicitly mark validation as manual.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Review Rules",
+        "id": "review-rules",
+        "markdown": "- Do not auto-publish registry content.\n- Do not create PRs, create GitHub issues, write files, or mutate local project config.\n- Do not include private repo names, credentials, tokens, internal URLs, or unpublished customer information.\n- Do not mirror full third-party pages. Use original summaries and canonical source links.\n- Do not claim platform compatibility, validation, package checksums, or first-party status unless source evidence supports it.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Output Shape",
+        "id": "output-shape",
+        "markdown": "Return a compact submission packet:\n\n```yaml\ncategory: mcp\ntitle: Example MCP Server\nslug: example-mcp-server\ndescription: Short source-backed summary.\ncardDescription: One-line preview text.\nsourceUrl: https://example.com/docs/mcp\ndocumentationUrl: https://example.com/docs\nrepoUrl: https://github.com/example/example\nbrandName: Example\nbrandDomain: example.com\ntags:\n  - mcp\n  - automation\nseoTitle: Example MCP Server for Claude\nseoDescription: Source-backed description suitable for search previews.\nmcpValidation:\n  schemaChecked: true\n  duplicateSearch: \"No likely duplicate found.\"\n  submitUrl: https://heyclau.de/submit?...\n  githubIssueUrl: https://github.com/JSONbored/claudepro-directory/issues/new?...\nmaintainerNotes: Why this belongs in HeyClaude and what still needs review.\n```",
+        "codeBlocks": [
+          {
+            "language": "yaml",
+            "code": "category: mcp\ntitle: Example MCP Server\nslug: example-mcp-server\ndescription: Short source-backed summary.\ncardDescription: One-line preview text.\nsourceUrl: https://example.com/docs/mcp\ndocumentationUrl: https://example.com/docs\nrepoUrl: https://github.com/example/example\nbrandName: Example\nbrandDomain: example.com\ntags:\n  - mcp\n  - automation\nseoTitle: Example MCP Server for Claude\nseoDescription: Source-backed description suitable for search previews.\nmcpValidation:\n  schemaChecked: true\n  duplicateSearch: \"No likely duplicate found.\"\n  submitUrl: https://heyclau.de/submit?...\n  githubIssueUrl: https://github.com/JSONbored/claudepro-directory/issues/new?...\nmaintainerNotes: Why this belongs in HeyClaude and what still needs review."
+          }
+        ]
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "**Issue:** The category is ambiguous  \n**Fix:** Prefer the category that matches the install or usage surface. An MCP server is not a skill unless it ships a valid `SKILL.md` skill package.\n\n**Issue:** The source page is mostly marketing copy  \n**Fix:** Use docs, repo, package, or release pages as supporting sources, and mark unsupported claims as unverified.\n\n**Issue:** Brand domain is unclear  \n**Fix:** Leave brand fields blank rather than guessing from GitHub, docs subdomains, or mirrors.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Knowledge Freshness",
+        "id": "knowledge-freshness"
+      },
+      {
+        "depth": 2,
+        "text": "Retrieval Sources",
+        "id": "retrieval-sources"
+      },
+      {
+        "depth": 2,
+        "text": "Core Workflow",
+        "id": "core-workflow"
+      },
+      {
+        "depth": 2,
+        "text": "Category Scope",
+        "id": "category-scope"
+      },
+      {
+        "depth": 2,
+        "text": "MCP-Assisted Path",
+        "id": "mcp-assisted-path"
+      },
+      {
+        "depth": 2,
+        "text": "Review Rules",
+        "id": "review-rules"
+      },
+      {
+        "depth": 2,
+        "text": "Output Shape",
+        "id": "output-shape"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "yaml",
+        "code": "category: mcp\ntitle: Example MCP Server\nslug: example-mcp-server\ndescription: Short source-backed summary.\ncardDescription: One-line preview text.\nsourceUrl: https://example.com/docs/mcp\ndocumentationUrl: https://example.com/docs\nrepoUrl: https://github.com/example/example\nbrandName: Example\nbrandDomain: example.com\ntags:\n  - mcp\n  - automation\nseoTitle: Example MCP Server for Claude\nseoDescription: Source-backed description suitable for search previews.\nmcpValidation:\n  schemaChecked: true\n  duplicateSearch: \"No likely duplicate found.\"\n  submitUrl: https://heyclau.de/submit?...\n  githubIssueUrl: https://github.com/JSONbored/claudepro-directory/issues/new?...\nmaintainerNotes: Why this belongs in HeyClaude and what still needs review."
+      }
+    ],
+    "filePath": "content/skills/heyclaude-content-submission-factory.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/heyclaude-content-submission-factory.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": true,
+    "packageTrust": "first-party",
+    "packageChecksum": "88d6c896b5b0ddee6e77f15448c0d9a42e91541f1915f31d4c7327303fd50b6c",
+    "checksumPresent": true,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://heyclau.de/submit",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/heyclaude-content-submission-factory.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-30",
+    "adapterGenerated": true,
+    "platforms": [
+      "Claude",
+      "Codex",
+      "Windsurf",
+      "Gemini",
+      "Cursor",
+      "Generic AGENTS"
+    ],
+    "supportLevels": [
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "adapter",
+      "manual-context"
+    ]
+  }
+}

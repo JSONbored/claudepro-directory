@@ -1,0 +1,87 @@
+# Playwright MCP Browser Automation Engineer Skill
+URL: https://heyclau.de/skills/playwright-mcp-browser-automation-engineer
+Category: skills
+Author: JSONbored
+Date added: 2026-04-10
+Documentation: https://playwright.dev/docs/getting-started-mcp
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/playwright-mcp-browser-automation-engineer.mdx
+Download: /downloads/skills/playwright-mcp-browser-automation-engineer.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/playwright-mcp-browser-automation-engineer
+- Source URLs: https://playwright.dev/docs/getting-started-mcp, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/playwright-mcp-browser-automation-engineer.mdx
+- Package URL: /downloads/skills/playwright-mcp-browser-automation-engineer.zip
+- Package SHA256: debb75ce2997bba8fcd5fbe24eb7b8cae6cfec0f34f8619611134906f2993b1e
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-10
+- Robots: indexable
+## Summary
+Build resilient browser automations using Playwright MCP with robust selectors, retries, and deterministic task execution.
+## Tags
+- playwright
+- mcp
+- browser-automation
+- testing
+- ai-agents
+## Content
+## Overview
+This skill turns browser automation requests into deterministic workflows. It emphasizes robust selectors, explicit waits, idempotent actions, and forensic artifacts for fast debugging.
+
+## Compatibility
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Prerequisites
+- Stable environment URLs (dev/stage/prod)
+- Clear task objective and completion criteria
+- Permission-safe test accounts
+
+## What This Skill Delivers
+- Workflow decomposition into atomic browser steps
+- Selector hierarchy strategy (semantic > role > data attr > css fallback)
+- Retry/backoff and timeout policy
+- Artifact capture plan for diagnostics
+
+## How to Use This Skill
+1. Define task intent and completion assertions.
+2. Build selector map with priority/fallback order.
+3. Add deterministic waits and post-action checks.
+4. Attach failure artifacts for every critical step.
+5. Run replay validation to verify flake resistance.
+
+## Troubleshooting
+**Issue:** Selectors break after UI updates  
+**Fix:** Prefer role/data attributes and maintain fallback selector chains.
+
+**Issue:** Workflow fails intermittently  
+**Fix:** Replace fixed sleeps with condition-based waits and bounded retries.
+
+**Issue:** Hard to diagnose failures  
+**Fix:** Persist trace, screenshot, and action logs per step with correlation IDs.
+
+## Knowledge Freshness
+Treat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.
+
+## Retrieval Sources
+- https://playwright.dev/docs/getting-started-mcp
+
+## Output Contract
+1. Return a concrete plan with implementation order.
+2. Provide production-ready commands/config/code snippets (not placeholders).
+3. Include explicit assumptions and unresolved risks.
+4. Include a verification checklist with pass/fail criteria.
+
+## Quality Gates
+- All commands are copy/paste ready.
+- Security-sensitive steps call out secret handling and least privilege.
+- Version-sensitive guidance cites current docs used.
+- Rollback path is included for risky changes.
+- Final output includes quick validation commands/tests.

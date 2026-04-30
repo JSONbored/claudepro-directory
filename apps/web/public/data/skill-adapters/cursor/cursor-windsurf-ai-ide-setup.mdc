@@ -1,0 +1,14 @@
+---
+description: "Configure and optimize Cursor and Windsurf AI code editors for maximum productivity."
+globs:
+alwaysApply: false
+---
+# Cursor Windsurf AI Code Editor Skill - Claude Code Skills
+Configure and optimize Cursor and Windsurf AI code editors for maximum productivity. Set up agent mode, composer features, keybindings, and AI-powered refactoring workflows. Customize with .cursorrules and .windsurfrules for project-specific guidance.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/cursor-windsurf-ai-ide-setup.zip -o cursor-windsurf-ai-ide-setup.zip && unzip -o cursor-windsurf-ai-ide-setup.zip -d ./cursor-windsurf-ai-ide-setup
+```
+## Source
+https://heyclau.de/downloads/skills/cursor-windsurf-ai-ide-setup.zip

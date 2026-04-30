@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 2,
+  "key": "skills:mintlify-documentation-automation",
+  "category": "skills",
+  "slug": "mintlify-documentation-automation",
+  "title": "Mintlify AI Documentation Automation Skill",
+  "author": "JSONbored",
+  "copyText": "Install:\nnpm install -g mintlify\n\nUsage:\nnpm install -g mintlify\n\nAsset:\n---\ntitle: Get User\ndescription: Retrieve a user by their unique identifier\napi: GET /api/users/{userId}\n---\n\n# Get User\n\nRetrieves a user by their unique identifier.\n\n## Path Parameters\n\n<ParamField path=\"userId\" type=\"string\" required>\n  The user's unique identifier\n</ParamField>\n\n## Response\n\n<ResponseField name=\"id\" type=\"string\" required>\n  Unique user identifier\n</ResponseField>\n\n<ResponseField name=\"email\" type=\"string\" required>\n  User's email address\n</ResponseField>\n\n## Code Examples\n\n<CodeGroup>\n\n```typescript TypeScript SDK\nimport { getUser } from '@yourapp/sdk';\nconst user = await getUser('user_123');\n```\n\n```python Python\nimport requests\nresponse = requests.get('https://api.yourapp.com/users/user_123')\n```\n\n</CodeGroup>",
+  "detailMarkdown": "# Mintlify AI Documentation Automation Skill\n\nAutomate beautiful, searchable documentation creation with Mintlify - the modern AI-native documentation platform.\n\n## Install\n```bash\nnpm install -g mintlify\n```\n\n## Usage\nnpm install -g mintlify",
+  "webUrl": "https://heyclau.de/skills/mintlify-documentation-automation",
+  "canonicalUrl": "https://heyclau.de/skills/mintlify-documentation-automation",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/mintlify-documentation-automation.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/mintlify-documentation-automation",
+  "seoTitle": "Mintlify AI Documentation Automation Skill",
+  "seoDescription": "Automate beautiful, searchable documentation creation with Mintlify - the modern AI-native documentation platform. Generate comprehensive API reference docum...",
+  "repoUrl": "",
+  "documentationUrl": "https://mintlify.com/docs"
+}

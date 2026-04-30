@@ -13,8 +13,8 @@ seoDescription: >-
   reasoning chains, thinking budget optimization, and industry-leading 74.5%
   accuracy.
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-27'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-27"
 installable: false
 usageSnippet: >-
   This tutorial teaches you to implement Claude 4's extended thinking API with
@@ -29,7 +29,11 @@ tags:
   - advanced
   - api-implementation
   - production-ready
-keywords: []
+keywords:
+  - claude extended thinking
+  - claude 4 tutorial
+  - reasoning prompts
+  - advanced claude workflows
 readingTime: 4
 difficultyScore: 52
 hasTroubleshooting: true
@@ -38,6 +42,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## TL;DR
 
 This tutorial teaches you to implement Claude 4's extended thinking API with up to 500K token reasoning chains in 25 minutes. You'll learn thinking budget optimization that cuts costs by 60%, build multi-hour coding workflows achieving 74.5% SWE-bench accuracy, and master the hybrid reasoning model that outperforms GPT-5 in sustained tasks. Perfect for developers and AI engineers who want to leverage Claude's most advanced 2025 feature for complex problem-solving.
@@ -52,13 +57,13 @@ This tutorial teaches you to implement Claude 4's extended thinking API with up 
 Master Claude 4's revolutionary extended thinking API that enables reasoning chains up to 500K tokens. By completion, you'll have a production-ready implementation achieving 74.5% accuracy on complex coding tasks and understand how companies like GitHub, Cursor, and Replit leverage this technology for 54% productivity gains. This guide includes 6 practical examples, 8 code samples, and 4 real-world production patterns.
 
 > **Tutorial Requirements**
-> 
+>
 > **Prerequisites:** Basic API knowledge, Python or JavaScript experience
-> 
+>
 > **Time Required:** 25 minutes active work
-> 
+>
 > **Tools Needed:** Anthropic API key, code editor, terminal
-> 
+>
 > **Outcome:** Working extended thinking implementation with 60% cost optimization
 
 ## What You'll Learn
@@ -68,16 +73,12 @@ Master Claude 4's revolutionary extended thinking API that enables reasoning cha
 ## Step-by-Step Tutorial
 
 1. **Step 1: Setup and Basic Configuration**
-   
 
 2. **Step 2: Implement Thinking Budget Control**
-   
 
 3. **Step 3: Testing with Real Workloads**
-   
 
 4. **Step 4: Production Optimization and Caching**
-   
 
 ## Key Concepts Explained
 
@@ -92,27 +93,27 @@ Understanding these concepts ensures you can adapt this tutorial to your specifi
 ## Troubleshooting Guide
 
 > **Common Issues and Solutions**
-> 
+>
 > **Issue 1: "Rate limit exceeded after 2 complex prompts"**
-> 
+>
 > **Solution:** Upgrade from Pro ($20) to Max tier ($100-200/month). Pro tier aggressively limits extended thinking requests. This fixes token allocation restrictions and prevents workflow interruptions.
-> 
+>
 > **Issue 2: "Thinking blocks appear as 'redacted_thinking' (5% of responses)"**
-> 
+>
 > **Solution:** This is normal safety filtering. The final response remains unaffected. Continue using the output as these blocks don't impact quality or accuracy.
-> 
+>
 > **Issue 3: "Response timeout on requests over 21,333 tokens"**
-> 
+>
 > **Solution:** Enable streaming for all production requests. Streaming is mandatory for extended thinking to prevent timeouts and provide real-time feedback.
 
 ## Advanced Techniques
 
 > **Professional Tips**
-> 
+>
 > **Performance Optimization:** Combine Sonnet 4 for routine tasks with selective Opus 4.1 deployment reduces costs by 60-70% while maintaining output quality. GitHub and Cursor use this hybrid approach.
-> 
+>
 > **Security Best Practice:** Always preserve thinking blocks in multi-turn conversations for audit trails. Never modify or reorder thinking sequences as this causes API validation errors.
-> 
+>
 > **Scalability Pattern:** For enterprise deployments like Carlyle Group's 50% accuracy improvements, implement four-tier access control (Read-Only, Command, Write, Admin) with thinking budget limits per tier.
 
 ## Validation and Testing
@@ -130,14 +131,15 @@ Understanding these concepts ensures you can adapt this tutorial to your specifi
 <!-- Section type: related_content -->
 
 > **Tutorial Complete!**
-> 
+>
 > **Congratulations!** You've mastered Claude 4's extended thinking API and can now build production systems achieving 74.5% coding accuracy.
-> 
+>
 > **What you achieved:**
+>
 > - ✅ Implemented extended thinking with 1K-200K token budgets
 > - ✅ Reduced operational costs by 60-70% with smart optimization
 > - ✅ Built production workflows matching GitHub and Cursor's implementations
-> 
+>
 > **Ready for more?** Explore our [tutorials collection](/guides/tutorials) to continue learning and discover how teams achieve 54% productivity gains with extended thinking.
 
-*Last updated: September 2025 | Found this helpful? Share it with your team and explore more [Claude tutorials](/guides/tutorials).*
+_Last updated: September 2025 | Found this helpful? Share it with your team and explore more [Claude tutorials](/guides/tutorials)._

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "key": "mcp:jam-mcp-server",
+  "category": "mcp",
+  "slug": "jam-mcp-server",
+  "title": "Jam MCP Server for Claude",
+  "author": "Jam",
+  "brandName": "Jam",
+  "brandDomain": "jam.dev",
+  "brandIconUrl": "/api/brand-assets/icon/jam.dev",
+  "brandAssetSource": "brandfetch",
+  "copyText": "Install:\nclaude mcp list && claude mcp status jam\n\nConfig:\n{\n  \"jam\": {\n    \"url\": \"https://mcp.jam.dev/mcp\",\n    \"transport\": \"http\"\n  }\n}\n\nUsage:\n{\n  \"jam\": {\n    \"url\": \"https://mcp.jam.dev/mcp\",\n    \"transport\": \"http\"\n  }\n}",
+  "detailMarkdown": "# Jam MCP Server for Claude\n\nDebug faster with AI agents that access video recordings, console logs, and network requests\n\n## Install\n```bash\nclaude mcp list && claude mcp status jam\n```\n\n## Config\n```json\n{\n  \"jam\": {\n    \"url\": \"https://mcp.jam.dev/mcp\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status jam",
+  "webUrl": "https://heyclau.de/mcp/jam-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/jam-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/jam-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/jam-mcp-server",
+  "seoTitle": "Jam MCP Server for Claude",
+  "seoDescription": "Debug faster with AI agents that access video recordings, console logs, and network requests Discover tools for AI development.",
+  "repoUrl": "",
+  "documentationUrl": "https://jam.dev/docs/debug-a-jam/mcp"
+}

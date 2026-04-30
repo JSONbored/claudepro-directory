@@ -1,0 +1,28 @@
+# Vercel AI SDK
+URL: https://heyclau.de/tools/vercel-ai-sdk
+Category: tools
+Author: Vercel
+Date added: 2026-04-27
+Documentation: https://ai-sdk.dev/docs
+Repository: https://github.com/vercel/ai
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/vercel-ai-sdk.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/tools/vercel-ai-sdk
+- Source URLs: https://ai-sdk.dev/docs, https://github.com/vercel/ai, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/vercel-ai-sdk.mdx, https://ai-sdk.dev
+- Brand: Vercel AI SDK
+- Brand domain: ai-sdk.dev
+- Brand asset source: brandfetch
+- Author: Vercel
+- Last verified: 2026-04-26T23:21:14-06:00
+- Robots: indexable
+## Summary
+TypeScript toolkit for building AI applications with model providers, streaming UI, tools, agents, and framework adapters.
+## Tags
+- ai-sdk
+- typescript
+## Content
+## Editorial notes
+Vercel AI SDK is a core building block for TypeScript teams shipping AI interfaces and streaming model interactions.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

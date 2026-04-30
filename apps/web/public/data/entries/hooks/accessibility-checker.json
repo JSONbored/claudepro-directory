@@ -1,0 +1,304 @@
+{
+  "schemaVersion": 1,
+  "key": "hooks:accessibility-checker",
+  "entry": {
+    "category": "hooks",
+    "slug": "accessibility-checker",
+    "title": "Accessibility Checker - Claude Code Hooks",
+    "description": "Automated accessibility testing and compliance checking for web applications following WCAG 2.1 and WCAG 2.2 guidelines. This hook automatically runs accessibility scans on HTML files after they are written or edited, using axe-core for comprehensive WCAG compliance testing.",
+    "seoTitle": "Accessibility Checker - Claude Code Hooks",
+    "seoDescription": "Automated accessibility testing and compliance checking for web applications following WCAG 2.1 and WCAG 2.2 guidelines. This hook automatically runs accessi...",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2025-09-19",
+    "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+    "tags": [
+      "accessibility",
+      "a11y",
+      "wcag",
+      "testing",
+      "compliance"
+    ],
+    "keywords": [
+      "a11y",
+      "accessibility",
+      "checker",
+      "claude",
+      "compliance",
+      "development",
+      "hooks",
+      "testing",
+      "tools",
+      "wcag",
+      "heyclaude",
+      "accessibility checker - claude code hooks"
+    ],
+    "readingTime": 1,
+    "difficultyScore": 0,
+    "documentationUrl": "https://www.w3.org/WAI/WCAG21/quickref/",
+    "cardDescription": "Automated accessibility testing and compliance checking for web applications following WCAG 2.1 and WCAG 2.2 guidelines.",
+    "installable": true,
+    "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/accessibility-checker.sh && chmod +x .claude/hooks/accessibility-checker.sh",
+    "usageSnippet": "mkdir -p .claude/hooks && touch .claude/hooks/accessibility-checker.sh && chmod +x .claude/hooks/accessibility-checker.sh",
+    "copySnippet": "{\n  \"hooks\": {\n    \"postToolUse\": {\n      \"script\": \"./.claude/hooks/accessibility-checker.sh\",\n      \"matchers\": [\n        \"write\",\n        \"edit\"\n      ]\n    }\n  }\n}",
+    "configSnippet": "{\n  \"hooks\": {\n    \"postToolUse\": {\n      \"script\": \"./.claude/hooks/accessibility-checker.sh\",\n      \"matchers\": [\n        \"write\",\n        \"edit\"\n      ]\n    }\n  }\n}",
+    "scriptLanguage": "bash",
+    "scriptBody": "#!/usr/bin/env bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\nif [ -z \"$FILE_PATH\" ]; then\n  exit 0\nfi\n\n# Check if it's an HTML file\nif [[ \"$FILE_PATH\" != *.html ]]; then\n  exit 0\nfi\n\necho \"🔍 Running accessibility checks on $FILE_PATH...\"\n\n# Check for basic accessibility issues\nif command -v axe &> /dev/null; then\n  echo \"Running axe-core accessibility scan...\"\n  axe \"$FILE_PATH\" --format json 2>/dev/null | jq -r '.violations[] | \"⚠️ \" + .id + \": \" + .description'\n  echo \"✅ Accessibility scan completed\" >&2\nelse\n  # Basic checks without axe\n  echo \"Running basic accessibility checks...\"\n  \n  # Check for missing alt attributes\n  if grep -q '<img[^>]*>' \"$FILE_PATH\" && ! grep -q 'alt=' \"$FILE_PATH\"; then\n    echo \"⚠️ Images without alt attributes found\" >&2\n  fi\n  \n  # Check for missing labels\n  if grep -q '<input[^>]*>' \"$FILE_PATH\" && ! grep -q 'aria-label\\|<label' \"$FILE_PATH\"; then\n    echo \"⚠️ Form inputs without labels found\" >&2\n  fi\n  \n  echo \"✅ Basic accessibility checks completed\" >&2\nfi\n\nexit 0",
+    "trigger": "PostToolUse",
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Features\n\n- Automated WCAG 2.1 and WCAG 2.2 compliance testing with axe-core for comprehensive accessibility scanning\n- Color contrast analysis and validation against WCAG AA and AAA standards for text and UI elements\n- Keyboard navigation testing to ensure all interactive elements are keyboard accessible\n- Screen reader compatibility checks for ARIA attributes, semantic HTML, and assistive technology support\n- Image accessibility validation for missing alt attributes, decorative image detection, and proper labeling\n- Comprehensive accessibility reporting with violation details, impact levels, and remediation guidance\n- Fallback basic accessibility checks when axe-core is not installed, ensuring hooks work in all environments\n- Real-time accessibility feedback during development with immediate violation detection and reporting\n\n## Use Cases\n\n- Automated accessibility testing in CI/CD pipelines to catch violations before deployment\n- Pre-deployment WCAG compliance validation ensuring all HTML files meet accessibility standards\n- Real-time accessibility feedback during development with immediate violation detection on file edits\n- Color contrast validation for design systems ensuring text meets WCAG contrast ratio requirements\n- Screen reader compatibility testing for ARIA attributes and semantic HTML structure validation\n- Accessibility audit automation for large codebases with batch processing and violation aggregation\n\n## Installation\n\n1. Create hooks directory: mkdir -p .claude/hooks\n2. Create hook file: touch .claude/hooks/accessibility-checker.sh\n3. Make executable: chmod +x .claude/hooks/accessibility-checker.sh\n4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json\n5. Alternative: Use the interactive /hooks command in Claude Code\n\n### Config paths\n\n- Local (not committed): `.claude/settings.local.json`\n- User settings (global): `~/.claude/settings.json`\n- Project-wide (committed): `.claude/settings.json`\n\n## Requirements\n\n- Claude Code CLI installed\n- Project directory initialized\n- Bash shell available\n- jq installed (for JSON parsing)\n- axe-core CLI installed (optional, for advanced scanning: npm i -g @axe-core/cli)\n- Node.js and npm (for axe-core CLI installation and usage, if using advanced scanning)\n\n## Hook Configuration\n\n```json\n{\n  \"hooks\": {\n    \"postToolUse\": {\n      \"script\": \"./.claude/hooks/accessibility-checker.sh\",\n      \"matchers\": [\"write\", \"edit\"]\n    }\n  }\n}\n```\n\n## Hook Script\n\n```bash\n#!/usr/bin/env bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\nif [ -z \"$FILE_PATH\" ]; then\n  exit 0\nfi\n\n# Check if it's an HTML file\nif [[ \"$FILE_PATH\" != *.html ]]; then\n  exit 0\nfi\n\necho \"🔍 Running accessibility checks on $FILE_PATH...\"\n\n# Check for basic accessibility issues\nif command -v axe &> /dev/null; then\n  echo \"Running axe-core accessibility scan...\"\n  axe \"$FILE_PATH\" --format json 2>/dev/null | jq -r '.violations[] | \"⚠️ \" + .id + \": \" + .description'\n  echo \"✅ Accessibility scan completed\" >&2\nelse\n  # Basic checks without axe\n  echo \"Running basic accessibility checks...\"\n\n  # Check for missing alt attributes\n  if grep -q '<img[^>]*>' \"$FILE_PATH\" && ! grep -q 'alt=' \"$FILE_PATH\"; then\n    echo \"⚠️ Images without alt attributes found\" >&2\n  fi\n\n  # Check for missing labels\n  if grep -q '<input[^>]*>' \"$FILE_PATH\" && ! grep -q 'aria-label\\|<label' \"$FILE_PATH\"; then\n    echo \"⚠️ Form inputs without labels found\" >&2\n  fi\n\n  echo \"✅ Basic accessibility checks completed\" >&2\nfi\n\nexit 0\n```\n\n## Examples\n\n### Accessibility Checker Hook Script\n\nComplete hook script that runs accessibility checks on HTML files using axe-core or fallback basic checks\n\n```bash\n#!/usr/bin/env bash\nINPUT=$(cat)\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path // .tool_input.path // \\\"\\\"\")\nif [ -z \"$FILE_PATH\" ]; then exit 0; fi\nif [[ \"$FILE_PATH\" != *.html ]]; then exit 0; fi\necho \"Running accessibility checks on $FILE_PATH...\" >&2\nif command -v axe &> /dev/null; then\n  axe \"$FILE_PATH\" --format json 2>/dev/null | jq -r \".violations[] | .id + \": \" + .description\"\nelse\n  if grep -q \"<img[^>]*>\" \"$FILE_PATH\" && ! grep -q \"alt=\" \"$FILE_PATH\"; then\n    echo \"Images without alt attributes found\" >&2\n  fi\nfi\nexit 0\n```\n\n### Hook Configuration\n\nComplete hook configuration for .claude/settings.json to enable accessibility checking on file writes and edits\n\n```json\n{\n  \"hooks\": {\n    \"PostToolUse\": [\n      {\n        \"matcher\": \"Write|Edit\",\n        \"hooks\": [\n          {\n            \"type\": \"command\",\n            \"command\": \"./.claude/hooks/accessibility-checker.sh\"\n          }\n        ]\n      }\n    ]\n  }\n}\n```\n\n### Enhanced Accessibility Checker with Violation Blocking\n\nAdvanced hook script that blocks critical accessibility violations and provides detailed violation reporting\n\n```bash\n#!/usr/bin/env bash\nINPUT=$(cat)\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path\")\nif [[ \"$FILE_PATH\" != *.html ]]; then exit 0; fi\nif command -v axe &> /dev/null; then\n  RESULTS=$(axe \"$FILE_PATH\" --format json 2>/dev/null)\n  VIOLATIONS=$(echo \"$RESULTS\" | jq -r \".violations | length\")\n  if [ \"$VIOLATIONS\" -gt 0 ]; then\n    echo \"Found $VIOLATIONS accessibility violations\" >&2\n    CRITICAL=$(echo \"$RESULTS\" | jq -r \"[.violations[] | select(.impact == \\\"critical\\\")] | length\")\n    if [ \"$CRITICAL\" -gt 0 ]; then exit 2; fi\n  fi\nfi\nexit 0\n```\n\n### Color Contrast Validation Hook\n\nSpecialized hook for validating color contrast ratios against WCAG standards for design system compliance\n\n```bash\n#!/usr/bin/env bash\nINPUT=$(cat)\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path\")\nif [[ \"$FILE_PATH\" != *.html ]]; then exit 0; fi\nif command -v axe &> /dev/null; then\n  axe \"$FILE_PATH\" --format json --rules color-contrast 2>/dev/null | \\\n    jq -r \".violations[] | select(.id == \\\"color-contrast\\\") | .description\" >&2\nfi\nexit 0\n```\n\n### ARIA Validation Hook\n\nSpecialized hook for validating ARIA attributes and ensuring proper screen reader compatibility\n\n```bash\n#!/usr/bin/env bash\nINPUT=$(cat)\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path\")\nif [[ \"$FILE_PATH\" != *.html ]]; then exit 0; fi\nif command -v axe &> /dev/null; then\n  RESULTS=$(axe \"$FILE_PATH\" --format json --rules aria-allowed-attr,aria-required-attr 2>/dev/null)\n  ARIA_VIOLATIONS=$(echo \"$RESULTS\" | jq -r \"[.violations[] | select(.id | startswith(\\\"aria\\\"))] | length\")\n  if [ \"$ARIA_VIOLATIONS\" -gt 0 ]; then\n    echo \"ARIA violations detected\" >&2\n  fi\nfi\nexit 0\n```\n\n## Troubleshooting\n\n### Hook executes on non-HTML files wasting resources\n\nVerify file extension check works: grep 'html' hook-file. Ensure matcher filters to .html files only. Add extension validation before processing. Check FILE_PATH extraction: echo \"$FILE_PATH\" | grep -E '\\.html$'.\n\n### Axe-core not found but script expects it installed\n\nInstall globally: npm i -g @axe-core/cli. Or add fallback checks in script. Verify command availability: which axe. Add installation to project setup docs. Check npm global path: npm config get prefix.\n\n### PostToolUse hook runs after Write but no output shown\n\nCheck stderr redirection in hook script. Verify echo statements use >&2 for user feedback. Test with: bash hook-file <<< '{\"tool_name\":\"write\",\"tool_input\":{\"file_path\":\"test.html\"}}'. Ensure hook script has execute permissions: chmod +x hook-file.\n\n### Hook captures stdin but file_path extraction fails\n\nDebug jq parsing: echo \"$INPUT\" | jq -r '.tool_input.file_path'. Verify JSON structure matches expected format. Add fallback paths for nested inputs: .tool_input.file_path // .tool_input.path // \"\". Test jq installation: jq --version.\n\n### Accessibility violations detected but build continues\n\nChange exit 0 to exit 1 on violations if blocking desired. Add violation count threshold. Use jq to filter critical issues: jq 'select(.impact==\"critical\")'. Configure exit codes: 0=success, 2=block. Check hook decision return format for PreToolUse hooks.\n\n### Axe-core scan takes too long on large HTML files\n\nAdd timeout wrapper: timeout 30s axe file.html. Implement file size check before scanning: [ $(stat -f%z file.html) -lt 1000000 ]. Use axe rules filtering to run only specific rules: --rules color-contrast,label. Consider running scans asynchronously in CI/CD.\n\n### Color contrast violations not detected by axe-core\n\nColor contrast requires visual rendering - axe-core CLI may not detect all contrast issues. Use browser-based testing for accurate results. Verify axe-core version supports color-contrast rule: axe --version. Consider using @axe-core/cli with headless browser mode for better detection.\n\n### Hook works locally but fails in CI/CD environment\n\nVerify axe-core installation in CI environment: which axe. Check PATH includes npm global bin directory. Install dependencies in CI: npm ci && npm i -g @axe-core/cli. Ensure jq is available: jq --version. Check file permissions and working directory in CI context.",
+    "sections": [
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Automated WCAG 2.1 and WCAG 2.2 compliance testing with axe-core for comprehensive accessibility scanning\n- Color contrast analysis and validation against WCAG AA and AAA standards for text and UI elements\n- Keyboard navigation testing to ensure all interactive elements are keyboard accessible\n- Screen reader compatibility checks for ARIA attributes, semantic HTML, and assistive technology support\n- Image accessibility validation for missing alt attributes, decorative image detection, and proper labeling\n- Comprehensive accessibility reporting with violation details, impact levels, and remediation guidance\n- Fallback basic accessibility checks when axe-core is not installed, ensuring hooks work in all environments\n- Real-time accessibility feedback during development with immediate violation detection and reporting",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Automated accessibility testing in CI/CD pipelines to catch violations before deployment\n- Pre-deployment WCAG compliance validation ensuring all HTML files meet accessibility standards\n- Real-time accessibility feedback during development with immediate violation detection on file edits\n- Color contrast validation for design systems ensuring text meets WCAG contrast ratio requirements\n- Screen reader compatibility testing for ARIA attributes and semantic HTML structure validation\n- Accessibility audit automation for large codebases with batch processing and violation aggregation",
+        "codeBlocks": []
+      },
+      {
+        "title": "Installation",
+        "id": "installation",
+        "markdown": "1. Create hooks directory: mkdir -p .claude/hooks\n2. Create hook file: touch .claude/hooks/accessibility-checker.sh\n3. Make executable: chmod +x .claude/hooks/accessibility-checker.sh\n4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json\n5. Alternative: Use the interactive /hooks command in Claude Code\n\n### Config paths\n\n- Local (not committed): `.claude/settings.local.json`\n- User settings (global): `~/.claude/settings.json`\n- Project-wide (committed): `.claude/settings.json`",
+        "codeBlocks": []
+      },
+      {
+        "title": "Requirements",
+        "id": "requirements",
+        "markdown": "- Claude Code CLI installed\n- Project directory initialized\n- Bash shell available\n- jq installed (for JSON parsing)\n- axe-core CLI installed (optional, for advanced scanning: npm i -g @axe-core/cli)\n- Node.js and npm (for axe-core CLI installation and usage, if using advanced scanning)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Hook Configuration",
+        "id": "hook-configuration",
+        "markdown": "```json\n{\n  \"hooks\": {\n    \"postToolUse\": {\n      \"script\": \"./.claude/hooks/accessibility-checker.sh\",\n      \"matchers\": [\"write\", \"edit\"]\n    }\n  }\n}\n```",
+        "codeBlocks": [
+          {
+            "language": "json",
+            "code": "{\n  \"hooks\": {\n    \"postToolUse\": {\n      \"script\": \"./.claude/hooks/accessibility-checker.sh\",\n      \"matchers\": [\"write\", \"edit\"]\n    }\n  }\n}"
+          }
+        ]
+      },
+      {
+        "title": "Hook Script",
+        "id": "hook-script",
+        "markdown": "```bash\n#!/usr/bin/env bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\nif [ -z \"$FILE_PATH\" ]; then\n  exit 0\nfi\n\n# Check if it's an HTML file\nif [[ \"$FILE_PATH\" != *.html ]]; then\n  exit 0\nfi\n\necho \"🔍 Running accessibility checks on $FILE_PATH...\"\n\n# Check for basic accessibility issues\nif command -v axe &> /dev/null; then\n  echo \"Running axe-core accessibility scan...\"\n  axe \"$FILE_PATH\" --format json 2>/dev/null | jq -r '.violations[] | \"⚠️ \" + .id + \": \" + .description'\n  echo \"✅ Accessibility scan completed\" >&2\nelse\n  # Basic checks without axe\n  echo \"Running basic accessibility checks...\"\n\n  # Check for missing alt attributes\n  if grep -q '<img[^>]*>' \"$FILE_PATH\" && ! grep -q 'alt=' \"$FILE_PATH\"; then\n    echo \"⚠️ Images without alt attributes found\" >&2\n  fi\n\n  # Check for missing labels\n  if grep -q '<input[^>]*>' \"$FILE_PATH\" && ! grep -q 'aria-label\\|<label' \"$FILE_PATH\"; then\n    echo \"⚠️ Form inputs without labels found\" >&2\n  fi\n\n  echo \"✅ Basic accessibility checks completed\" >&2\nfi\n\nexit 0\n```",
+        "codeBlocks": [
+          {
+            "language": "bash",
+            "code": "#!/usr/bin/env bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\nif [ -z \"$FILE_PATH\" ]; then\n  exit 0\nfi\n\n# Check if it's an HTML file\nif [[ \"$FILE_PATH\" != *.html ]]; then\n  exit 0\nfi\n\necho \"🔍 Running accessibility checks on $FILE_PATH...\"\n\n# Check for basic accessibility issues\nif command -v axe &> /dev/null; then\n  echo \"Running axe-core accessibility scan...\"\n  axe \"$FILE_PATH\" --format json 2>/dev/null | jq -r '.violations[] | \"⚠️ \" + .id + \": \" + .description'\n  echo \"✅ Accessibility scan completed\" >&2\nelse\n  # Basic checks without axe\n  echo \"Running basic accessibility checks...\"\n\n  # Check for missing alt attributes\n  if grep -q '<img[^>]*>' \"$FILE_PATH\" && ! grep -q 'alt=' \"$FILE_PATH\"; then\n    echo \"⚠️ Images without alt attributes found\" >&2\n  fi\n\n  # Check for missing labels\n  if grep -q '<input[^>]*>' \"$FILE_PATH\" && ! grep -q 'aria-label\\|<label' \"$FILE_PATH\"; then\n    echo \"⚠️ Form inputs without labels found\" >&2\n  fi\n\n  echo \"✅ Basic accessibility checks completed\" >&2\nfi\n\nexit 0"
+          }
+        ]
+      },
+      {
+        "title": "Examples",
+        "id": "examples",
+        "markdown": "### Accessibility Checker Hook Script\n\nComplete hook script that runs accessibility checks on HTML files using axe-core or fallback basic checks\n\n```bash\n#!/usr/bin/env bash\nINPUT=$(cat)\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path // .tool_input.path // \\\"\\\"\")\nif [ -z \"$FILE_PATH\" ]; then exit 0; fi\nif [[ \"$FILE_PATH\" != *.html ]]; then exit 0; fi\necho \"Running accessibility checks on $FILE_PATH...\" >&2\nif command -v axe &> /dev/null; then\n  axe \"$FILE_PATH\" --format json 2>/dev/null | jq -r \".violations[] | .id + \": \" + .description\"\nelse\n  if grep -q \"<img[^>]*>\" \"$FILE_PATH\" && ! grep -q \"alt=\" \"$FILE_PATH\"; then\n    echo \"Images without alt attributes found\" >&2\n  fi\nfi\nexit 0\n```\n\n### Hook Configuration\n\nComplete hook configuration for .claude/settings.json to enable accessibility checking on file writes and edits\n\n```json\n{\n  \"hooks\": {\n    \"PostToolUse\": [\n      {\n        \"matcher\": \"Write|Edit\",\n        \"hooks\": [\n          {\n            \"type\": \"command\",\n            \"command\": \"./.claude/hooks/accessibility-checker.sh\"\n          }\n        ]\n      }\n    ]\n  }\n}\n```\n\n### Enhanced Accessibility Checker with Violation Blocking\n\nAdvanced hook script that blocks critical accessibility violations and provides detailed violation reporting\n\n```bash\n#!/usr/bin/env bash\nINPUT=$(cat)\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path\")\nif [[ \"$FILE_PATH\" != *.html ]]; then exit 0; fi\nif command -v axe &> /dev/null; then\n  RESULTS=$(axe \"$FILE_PATH\" --format json 2>/dev/null)\n  VIOLATIONS=$(echo \"$RESULTS\" | jq -r \".violations | length\")\n  if [ \"$VIOLATIONS\" -gt 0 ]; then\n    echo \"Found $VIOLATIONS accessibility violations\" >&2\n    CRITICAL=$(echo \"$RESULTS\" | jq -r \"[.violations[] | select(.impact == \\\"critical\\\")] | length\")\n    if [ \"$CRITICAL\" -gt 0 ]; then exit 2; fi\n  fi\nfi\nexit 0\n```\n\n### Color Contrast Validation Hook\n\nSpecialized hook for validating color contrast ratios against WCAG standards for design system compliance\n\n```bash\n#!/usr/bin/env bash\nINPUT=$(cat)\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path\")\nif [[ \"$FILE_PATH\" != *.html ]]; then exit 0; fi\nif command -v axe &> /dev/null; then\n  axe \"$FILE_PATH\" --format json --rules color-contrast 2>/dev/null | \\\n    jq -r \".violations[] | select(.id == \\\"color-contrast\\\") | .description\" >&2\nfi\nexit 0\n```\n\n### ARIA Validation Hook\n\nSpecialized hook for validating ARIA attributes and ensuring proper screen reader compatibility\n\n```bash\n#!/usr/bin/env bash\nINPUT=$(cat)\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path\")\nif [[ \"$FILE_PATH\" != *.html ]]; then exit 0; fi\nif command -v axe &> /dev/null; then\n  RESULTS=$(axe \"$FILE_PATH\" --format json --rules aria-allowed-attr,aria-required-attr 2>/dev/null)\n  ARIA_VIOLATIONS=$(echo \"$RESULTS\" | jq -r \"[.violations[] | select(.id | startswith(\\\"aria\\\"))] | length\")\n  if [ \"$ARIA_VIOLATIONS\" -gt 0 ]; then\n    echo \"ARIA violations detected\" >&2\n  fi\nfi\nexit 0\n```",
+        "codeBlocks": [
+          {
+            "language": "bash",
+            "code": "#!/usr/bin/env bash\nINPUT=$(cat)\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path // .tool_input.path // \\\"\\\"\")\nif [ -z \"$FILE_PATH\" ]; then exit 0; fi\nif [[ \"$FILE_PATH\" != *.html ]]; then exit 0; fi\necho \"Running accessibility checks on $FILE_PATH...\" >&2\nif command -v axe &> /dev/null; then\n  axe \"$FILE_PATH\" --format json 2>/dev/null | jq -r \".violations[] | .id + \": \" + .description\"\nelse\n  if grep -q \"<img[^>]*>\" \"$FILE_PATH\" && ! grep -q \"alt=\" \"$FILE_PATH\"; then\n    echo \"Images without alt attributes found\" >&2\n  fi\nfi\nexit 0"
+          },
+          {
+            "language": "json",
+            "code": "{\n  \"hooks\": {\n    \"PostToolUse\": [\n      {\n        \"matcher\": \"Write|Edit\",\n        \"hooks\": [\n          {\n            \"type\": \"command\",\n            \"command\": \"./.claude/hooks/accessibility-checker.sh\"\n          }\n        ]\n      }\n    ]\n  }\n}"
+          },
+          {
+            "language": "bash",
+            "code": "#!/usr/bin/env bash\nINPUT=$(cat)\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path\")\nif [[ \"$FILE_PATH\" != *.html ]]; then exit 0; fi\nif command -v axe &> /dev/null; then\n  RESULTS=$(axe \"$FILE_PATH\" --format json 2>/dev/null)\n  VIOLATIONS=$(echo \"$RESULTS\" | jq -r \".violations | length\")\n  if [ \"$VIOLATIONS\" -gt 0 ]; then\n    echo \"Found $VIOLATIONS accessibility violations\" >&2\n    CRITICAL=$(echo \"$RESULTS\" | jq -r \"[.violations[] | select(.impact == \\\"critical\\\")] | length\")\n    if [ \"$CRITICAL\" -gt 0 ]; then exit 2; fi\n  fi\nfi\nexit 0"
+          },
+          {
+            "language": "bash",
+            "code": "#!/usr/bin/env bash\nINPUT=$(cat)\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path\")\nif [[ \"$FILE_PATH\" != *.html ]]; then exit 0; fi\nif command -v axe &> /dev/null; then\n  axe \"$FILE_PATH\" --format json --rules color-contrast 2>/dev/null | \\\n    jq -r \".violations[] | select(.id == \\\"color-contrast\\\") | .description\" >&2\nfi\nexit 0"
+          },
+          {
+            "language": "bash",
+            "code": "#!/usr/bin/env bash\nINPUT=$(cat)\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path\")\nif [[ \"$FILE_PATH\" != *.html ]]; then exit 0; fi\nif command -v axe &> /dev/null; then\n  RESULTS=$(axe \"$FILE_PATH\" --format json --rules aria-allowed-attr,aria-required-attr 2>/dev/null)\n  ARIA_VIOLATIONS=$(echo \"$RESULTS\" | jq -r \"[.violations[] | select(.id | startswith(\\\"aria\\\"))] | length\")\n  if [ \"$ARIA_VIOLATIONS\" -gt 0 ]; then\n    echo \"ARIA violations detected\" >&2\n  fi\nfi\nexit 0"
+          }
+        ]
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "### Hook executes on non-HTML files wasting resources\n\nVerify file extension check works: grep 'html' hook-file. Ensure matcher filters to .html files only. Add extension validation before processing. Check FILE_PATH extraction: echo \"$FILE_PATH\" | grep -E '\\.html$'.\n\n### Axe-core not found but script expects it installed\n\nInstall globally: npm i -g @axe-core/cli. Or add fallback checks in script. Verify command availability: which axe. Add installation to project setup docs. Check npm global path: npm config get prefix.\n\n### PostToolUse hook runs after Write but no output shown\n\nCheck stderr redirection in hook script. Verify echo statements use >&2 for user feedback. Test with: bash hook-file <<< '{\"tool_name\":\"write\",\"tool_input\":{\"file_path\":\"test.html\"}}'. Ensure hook script has execute permissions: chmod +x hook-file.\n\n### Hook captures stdin but file_path extraction fails\n\nDebug jq parsing: echo \"$INPUT\" | jq -r '.tool_input.file_path'. Verify JSON structure matches expected format. Add fallback paths for nested inputs: .tool_input.file_path // .tool_input.path // \"\". Test jq installation: jq --version.\n\n### Accessibility violations detected but build continues\n\nChange exit 0 to exit 1 on violations if blocking desired. Add violation count threshold. Use jq to filter critical issues: jq 'select(.impact==\"critical\")'. Configure exit codes: 0=success, 2=block. Check hook decision return format for PreToolUse hooks.\n\n### Axe-core scan takes too long on large HTML files\n\nAdd timeout wrapper: timeout 30s axe file.html. Implement file size check before scanning: [ $(stat -f%z file.html) -lt 1000000 ]. Use axe rules filtering to run only specific rules: --rules color-contrast,label. Consider running scans asynchronously in CI/CD.\n\n### Color contrast violations not detected by axe-core\n\nColor contrast requires visual rendering - axe-core CLI may not detect all contrast issues. Use browser-based testing for accurate results. Verify axe-core version supports color-contrast rule: axe --version. Consider using @axe-core/cli with headless browser mode for better detection.\n\n### Hook works locally but fails in CI/CD environment\n\nVerify axe-core installation in CI environment: which axe. Check PATH includes npm global bin directory. Install dependencies in CI: npm ci && npm i -g @axe-core/cli. Ensure jq is available: jq --version. Check file permissions and working directory in CI context.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      },
+      {
+        "depth": 2,
+        "text": "Installation",
+        "id": "installation"
+      },
+      {
+        "depth": 3,
+        "text": "Config paths",
+        "id": "config-paths"
+      },
+      {
+        "depth": 2,
+        "text": "Requirements",
+        "id": "requirements"
+      },
+      {
+        "depth": 2,
+        "text": "Hook Configuration",
+        "id": "hook-configuration"
+      },
+      {
+        "depth": 2,
+        "text": "Hook Script",
+        "id": "hook-script"
+      },
+      {
+        "depth": 2,
+        "text": "Examples",
+        "id": "examples"
+      },
+      {
+        "depth": 3,
+        "text": "Accessibility Checker Hook Script",
+        "id": "accessibility-checker-hook-script"
+      },
+      {
+        "depth": 3,
+        "text": "Hook Configuration",
+        "id": "hook-configuration-2"
+      },
+      {
+        "depth": 3,
+        "text": "Enhanced Accessibility Checker with Violation Blocking",
+        "id": "enhanced-accessibility-checker-with-violation-blocking"
+      },
+      {
+        "depth": 3,
+        "text": "Color Contrast Validation Hook",
+        "id": "color-contrast-validation-hook"
+      },
+      {
+        "depth": 3,
+        "text": "ARIA Validation Hook",
+        "id": "aria-validation-hook"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 3,
+        "text": "Hook executes on non-HTML files wasting resources",
+        "id": "hook-executes-on-non-html-files-wasting-resources"
+      },
+      {
+        "depth": 3,
+        "text": "Axe-core not found but script expects it installed",
+        "id": "axe-core-not-found-but-script-expects-it-installed"
+      },
+      {
+        "depth": 3,
+        "text": "PostToolUse hook runs after Write but no output shown",
+        "id": "posttooluse-hook-runs-after-write-but-no-output-shown"
+      },
+      {
+        "depth": 3,
+        "text": "Hook captures stdin but file_path extraction fails",
+        "id": "hook-captures-stdin-but-filepath-extraction-fails"
+      },
+      {
+        "depth": 3,
+        "text": "Accessibility violations detected but build continues",
+        "id": "accessibility-violations-detected-but-build-continues"
+      },
+      {
+        "depth": 3,
+        "text": "Axe-core scan takes too long on large HTML files",
+        "id": "axe-core-scan-takes-too-long-on-large-html-files"
+      },
+      {
+        "depth": 3,
+        "text": "Color contrast violations not detected by axe-core",
+        "id": "color-contrast-violations-not-detected-by-axe-core"
+      },
+      {
+        "depth": 3,
+        "text": "Hook works locally but fails in CI/CD environment",
+        "id": "hook-works-locally-but-fails-in-cicd-environment"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "json",
+        "code": "{\n  \"hooks\": {\n    \"postToolUse\": {\n      \"script\": \"./.claude/hooks/accessibility-checker.sh\",\n      \"matchers\": [\"write\", \"edit\"]\n    }\n  }\n}"
+      },
+      {
+        "language": "bash",
+        "code": "#!/usr/bin/env bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\nif [ -z \"$FILE_PATH\" ]; then\n  exit 0\nfi\n\n# Check if it's an HTML file\nif [[ \"$FILE_PATH\" != *.html ]]; then\n  exit 0\nfi\n\necho \"🔍 Running accessibility checks on $FILE_PATH...\"\n\n# Check for basic accessibility issues\nif command -v axe &> /dev/null; then\n  echo \"Running axe-core accessibility scan...\"\n  axe \"$FILE_PATH\" --format json 2>/dev/null | jq -r '.violations[] | \"⚠️ \" + .id + \": \" + .description'\n  echo \"✅ Accessibility scan completed\" >&2\nelse\n  # Basic checks without axe\n  echo \"Running basic accessibility checks...\"\n\n  # Check for missing alt attributes\n  if grep -q '<img[^>]*>' \"$FILE_PATH\" && ! grep -q 'alt=' \"$FILE_PATH\"; then\n    echo \"⚠️ Images without alt attributes found\" >&2\n  fi\n\n  # Check for missing labels\n  if grep -q '<input[^>]*>' \"$FILE_PATH\" && ! grep -q 'aria-label\\|<label' \"$FILE_PATH\"; then\n    echo \"⚠️ Form inputs without labels found\" >&2\n  fi\n\n  echo \"✅ Basic accessibility checks completed\" >&2\nfi\n\nexit 0"
+      },
+      {
+        "language": "bash",
+        "code": "#!/usr/bin/env bash\nINPUT=$(cat)\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path // .tool_input.path // \\\"\\\"\")\nif [ -z \"$FILE_PATH\" ]; then exit 0; fi\nif [[ \"$FILE_PATH\" != *.html ]]; then exit 0; fi\necho \"Running accessibility checks on $FILE_PATH...\" >&2\nif command -v axe &> /dev/null; then\n  axe \"$FILE_PATH\" --format json 2>/dev/null | jq -r \".violations[] | .id + \": \" + .description\"\nelse\n  if grep -q \"<img[^>]*>\" \"$FILE_PATH\" && ! grep -q \"alt=\" \"$FILE_PATH\"; then\n    echo \"Images without alt attributes found\" >&2\n  fi\nfi\nexit 0"
+      },
+      {
+        "language": "json",
+        "code": "{\n  \"hooks\": {\n    \"PostToolUse\": [\n      {\n        \"matcher\": \"Write|Edit\",\n        \"hooks\": [\n          {\n            \"type\": \"command\",\n            \"command\": \"./.claude/hooks/accessibility-checker.sh\"\n          }\n        ]\n      }\n    ]\n  }\n}"
+      },
+      {
+        "language": "bash",
+        "code": "#!/usr/bin/env bash\nINPUT=$(cat)\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path\")\nif [[ \"$FILE_PATH\" != *.html ]]; then exit 0; fi\nif command -v axe &> /dev/null; then\n  RESULTS=$(axe \"$FILE_PATH\" --format json 2>/dev/null)\n  VIOLATIONS=$(echo \"$RESULTS\" | jq -r \".violations | length\")\n  if [ \"$VIOLATIONS\" -gt 0 ]; then\n    echo \"Found $VIOLATIONS accessibility violations\" >&2\n    CRITICAL=$(echo \"$RESULTS\" | jq -r \"[.violations[] | select(.impact == \\\"critical\\\")] | length\")\n    if [ \"$CRITICAL\" -gt 0 ]; then exit 2; fi\n  fi\nfi\nexit 0"
+      },
+      {
+        "language": "bash",
+        "code": "#!/usr/bin/env bash\nINPUT=$(cat)\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path\")\nif [[ \"$FILE_PATH\" != *.html ]]; then exit 0; fi\nif command -v axe &> /dev/null; then\n  axe \"$FILE_PATH\" --format json --rules color-contrast 2>/dev/null | \\\n    jq -r \".violations[] | select(.id == \\\"color-contrast\\\") | .description\" >&2\nfi\nexit 0"
+      },
+      {
+        "language": "bash",
+        "code": "#!/usr/bin/env bash\nINPUT=$(cat)\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path\")\nif [[ \"$FILE_PATH\" != *.html ]]; then exit 0; fi\nif command -v axe &> /dev/null; then\n  RESULTS=$(axe \"$FILE_PATH\" --format json --rules aria-allowed-attr,aria-required-attr 2>/dev/null)\n  ARIA_VIOLATIONS=$(echo \"$RESULTS\" | jq -r \"[.violations[] | select(.id | startswith(\\\"aria\\\"))] | length\")\n  if [ \"$ARIA_VIOLATIONS\" -gt 0 ]; then\n    echo \"ARIA violations detected\" >&2\n  fi\nfi\nexit 0"
+      }
+    ],
+    "filePath": "content/hooks/accessibility-checker.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/accessibility-checker.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://www.w3.org/WAI/WCAG21/quickref/",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/accessibility-checker.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

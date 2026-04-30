@@ -11,7 +11,9 @@ export function ThemeToggle() {
   const [theme, setTheme] = useState<ThemeMode>("dark");
 
   useEffect(() => {
-    setTheme(document.documentElement.classList.contains("dark") ? "dark" : "light");
+    setTheme(
+      document.documentElement.classList.contains("dark") ? "dark" : "light",
+    );
   }, []);
 
   const toggle = () => {
@@ -36,20 +38,26 @@ export function ThemeToggle() {
       <span
         className={cn(
           "theme-toggle-icon-wrap",
-          theme === "dark" ? "theme-toggle-icon-wrap-dark" : "theme-toggle-icon-wrap-light"
+          theme === "dark"
+            ? "theme-toggle-icon-wrap-dark"
+            : "theme-toggle-icon-wrap-light",
         )}
         aria-hidden
       >
         <SunMedium
           className={cn(
             "theme-toggle-icon theme-toggle-icon-sun",
-            theme === "dark" ? "theme-toggle-icon-hidden" : "theme-toggle-icon-visible"
+            theme === "dark"
+              ? "theme-toggle-icon-hidden"
+              : "theme-toggle-icon-visible",
           )}
         />
         <MoonStar
           className={cn(
             "theme-toggle-icon theme-toggle-icon-moon",
-            theme === "dark" ? "theme-toggle-icon-visible" : "theme-toggle-icon-hidden"
+            theme === "dark"
+              ? "theme-toggle-icon-visible"
+              : "theme-toggle-icon-hidden",
           )}
         />
       </span>

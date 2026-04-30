@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "key": "tools:make",
+  "entry": {
+    "category": "tools",
+    "slug": "make",
+    "title": "Make",
+    "description": "Visual automation platform for building integrations, scenarios, API workflows, and AI-connected business processes.",
+    "seoTitle": "Make visual workflow automation for AI teams",
+    "seoDescription": "Make helps build visual integrations, scenarios, API workflows, and AI-connected business processes. HeyClaude adds source links, install steps,...",
+    "author": "Make",
+    "dateAdded": "2026-04-27",
+    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+    "tags": [
+      "workflow-automation",
+      "integrations"
+    ],
+    "keywords": [
+      "visual automation",
+      "business workflows",
+      "workflow-automation",
+      "integrations",
+      "tools",
+      "claude",
+      "heyclaude",
+      "make"
+    ],
+    "documentationUrl": "https://www.make.com/en/help",
+    "websiteUrl": "https://www.make.com",
+    "brandName": "Make",
+    "brandDomain": "make.com",
+    "brandIconUrl": "/api/brand-assets/icon/make.com",
+    "brandAssetSource": "brandfetch",
+    "pricingModel": "freemium",
+    "disclosure": "editorial",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "cardDescription": "Visual automation platform for integrations and AI workflows.",
+    "installable": false,
+    "hasPrerequisites": false,
+    "hasTroubleshooting": false,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Editorial notes\n\nMake fits teams that prefer visual automation scenarios and integration workflows for AI-adjacent business processes.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+    "sections": [
+      {
+        "title": "Editorial notes",
+        "id": "editorial-notes",
+        "markdown": "Make fits teams that prefer visual automation scenarios and integration workflows for AI-adjacent business processes.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Disclosure",
+        "id": "disclosure",
+        "markdown": "Editorial listing. No paid placement or affiliate link is used.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Editorial notes",
+        "id": "editorial-notes"
+      },
+      {
+        "depth": 2,
+        "text": "Disclosure",
+        "id": "disclosure"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/tools/make.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/make.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 3,
+    "sourceUrls": [
+      "https://www.make.com/en/help",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/make.mdx",
+      "https://www.make.com"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
+  }
+}

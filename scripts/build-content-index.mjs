@@ -1,88 +1,100 @@
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
+import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
-import matter from "gray-matter";
-import { marked } from "marked";
+import { categorySpec, buildRegistryArtifactSet } from "@heyclaude/registry";
 import {
-  extractCodeBlocks,
-  extractHeadings,
-  extractSections,
-  headingId,
-  inferSectionBooleans,
-  inferStructuredFields,
-  normalizeBody
-} from "./content-schema.mjs";
+  buildContentEntryFromMdx,
+  DEFAULT_DIRECTORY_REPO_URL,
+  parseGitHubRepo,
+} from "@heyclaude/registry/content-builder";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, "..");
 const contentRoot = path.join(repoRoot, "content");
 const generatedDir = path.join(repoRoot, "apps/web/src/generated");
 const publicDataDir = path.join(repoRoot, "apps/web/public/data");
-const outputFile = path.join(publicDataDir, "content-index.json");
-const directoryOutputFile = path.join(publicDataDir, "directory-index.json");
+const entryDataDir = path.join(publicDataDir, "entries");
+const entryLlmsDir = path.join(publicDataDir, "llms");
+const raycastDetailDir = path.join(publicDataDir, "raycast");
 const siteStatsFile = path.join(generatedDir, "site-stats.json");
-const legacyVoteSeedFile = path.join(contentRoot, "data/legacy-vote-seed.json");
-const generatedLegacyVoteSeedFile = path.join(generatedDir, "legacy-vote-seed.json");
-const skillsDownloadsDir = path.join(repoRoot, "apps/web/public/downloads/skills");
+const skillsDownloadsDir = path.join(
+  repoRoot,
+  "apps/web/public/downloads/skills",
+);
 const mcpDownloadsDir = path.join(repoRoot, "apps/web/public/downloads/mcp");
-const DIRECTORY_REPO_URL = "https://github.com/JSONbored/claudepro-directory";
 const ENABLE_GITHUB_REPO_STATS = process.env.ENABLE_GITHUB_REPO_STATS === "1";
-const categories = fs
-  .readdirSync(contentRoot, { withFileTypes: true })
-  .filter((entry) => entry.isDirectory() && entry.name !== "data")
-  .map((entry) => entry.name);
+const buildLockDir = path.join(repoRoot, ".build-content-index.lock");
+const categories = categorySpec.categoryOrder.filter((category) =>
+  fs.existsSync(path.join(contentRoot, category)),
+);
 
-marked.setOptions({
-  gfm: true,
-  breaks: false
-});
-
-const renderer = new marked.Renderer();
-renderer.heading = ({ tokens, depth }) => {
-  const text = tokens.map((token) => token.raw).join("").trim();
-  const id = headingId(text);
-  return `<h${depth} id="${id}">${text}</h${depth}>`;
-};
-
-function buildGitHubUrl(filePath) {
-  const relative = path.relative(repoRoot, filePath).replaceAll(path.sep, "/");
-  return `https://github.com/JSONbored/claudepro-directory/blob/main/${relative}`;
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }
 
-function parseGitHubRepo(repoUrl) {
-  if (!repoUrl) return null;
+async function withBuildLock(callback) {
+  const staleAfterMs = 10 * 60 * 1000;
+  const startedAt = Date.now();
 
-  try {
-    const url = new URL(repoUrl);
-    if (url.hostname !== "github.com") return null;
+  while (true) {
+    try {
+      fs.mkdirSync(buildLockDir);
+      fs.writeFileSync(
+        path.join(buildLockDir, "owner.json"),
+        `${JSON.stringify({ pid: process.pid, createdAt: new Date().toISOString() }, null, 2)}\n`,
+      );
 
-    const parts = url.pathname.split("/").filter(Boolean);
-    if (parts.length < 2) return null;
+      try {
+        return await callback();
+      } finally {
+        fs.rmSync(buildLockDir, { recursive: true, force: true });
+      }
+    } catch (error) {
+      if (error?.code !== "EEXIST") throw error;
 
-    const owner = parts[0];
-    const repo = parts[1].replace(/\.git$/, "");
+      let lockIsStale = false;
+      try {
+        const stats = fs.statSync(buildLockDir);
+        lockIsStale = Date.now() - stats.mtimeMs > staleAfterMs;
+      } catch {
+        lockIsStale = true;
+      }
 
-    return { owner, repo, key: `${owner}/${repo}`, url: `https://github.com/${owner}/${repo}` };
-  } catch {
-    return null;
+      if (lockIsStale) {
+        fs.rmSync(buildLockDir, { recursive: true, force: true });
+        continue;
+      }
+
+      if (Date.now() - startedAt > staleAfterMs) {
+        throw new Error("Timed out waiting for build-content-index lock");
+      }
+
+      await sleep(250);
+    }
   }
 }
 
 async function fetchGitHubRepoStats(repo) {
   const headers = {
     Accept: "application/vnd.github+json",
-    "X-GitHub-Api-Version": "2022-11-28"
+    "X-GitHub-Api-Version": "2022-11-28",
   };
 
   if (process.env.GITHUB_TOKEN) {
     headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
   }
 
-  const response = await fetch(`https://api.github.com/repos/${repo.owner}/${repo.repo}`, {
-    headers
-  });
+  const response = await fetch(
+    `https://api.github.com/repos/${repo.owner}/${repo.repo}`,
+    {
+      headers,
+    },
+  );
 
   if (!response.ok) {
     const fallback = await fetchShieldsStars(repo);
@@ -90,7 +102,7 @@ async function fetchGitHubRepoStats(repo) {
       return {
         stars: fallback,
         forks: undefined,
-        updatedAt: undefined
+        updatedAt: undefined,
       };
     }
 
@@ -99,52 +111,32 @@ async function fetchGitHubRepoStats(repo) {
 
   const data = await response.json();
   return {
-    stars: typeof data.stargazers_count === "number" ? data.stargazers_count : undefined,
+    stars:
+      typeof data.stargazers_count === "number"
+        ? data.stargazers_count
+        : undefined,
     forks: typeof data.forks_count === "number" ? data.forks_count : undefined,
-    updatedAt: typeof data.updated_at === "string" ? data.updated_at : undefined
+    updatedAt:
+      typeof data.updated_at === "string" ? data.updated_at : undefined,
   };
 }
 
 async function fetchShieldsStars(repo) {
   try {
     const response = await fetch(
-      `https://img.shields.io/github/stars/${repo.owner}/${repo.repo}.json`
+      `https://img.shields.io/github/stars/${repo.owner}/${repo.repo}.json`,
     );
 
     if (!response.ok) return null;
     const data = await response.json();
-    const value = Number.parseFloat(String(data.value || data.message || "").replace(/[^\d.]/g, ""));
+    const value = Number.parseFloat(
+      String(data.value || data.message || "").replace(/[^\d.]/g, ""),
+    );
 
     return Number.isFinite(value) ? Math.round(value) : null;
   } catch {
     return null;
   }
-}
-
-function normalizeDownloadUrl(downloadUrl) {
-  if (!downloadUrl) return "";
-  return downloadUrl;
-}
-
-function isFirstPartyPackage(data = {}) {
-  return data.packageVerified === true;
-}
-
-function isLocalDownloadUrl(downloadUrl) {
-  return String(downloadUrl || "").startsWith("/downloads/");
-}
-
-function localDownloadSourcePath(downloadUrl) {
-  const normalized = String(downloadUrl || "");
-  if (normalized.startsWith("/downloads/skills/")) {
-    return path.join(contentRoot, "skills", path.basename(normalized));
-  }
-
-  if (normalized.startsWith("/downloads/mcp/")) {
-    return path.join(contentRoot, "mcp", path.basename(normalized));
-  }
-
-  return null;
 }
 
 function sha256File(filePath) {
@@ -153,8 +145,31 @@ function sha256File(filePath) {
   return hash.digest("hex");
 }
 
+function gitContentUpdatedAt(filePath) {
+  try {
+    const relativePath = path.relative(repoRoot, filePath);
+    const output = execFileSync(
+      "git",
+      ["log", "--no-merges", "-1", "--format=%aI", "--", relativePath],
+      {
+        cwd: repoRoot,
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+      },
+    ).trim();
+    return output || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function ensureDir(dir) {
   fs.mkdirSync(dir, { recursive: true });
+}
+
+function resetGeneratedJsonDir(dir) {
+  fs.rmSync(dir, { recursive: true, force: true });
+  ensureDir(dir);
 }
 
 function writeFileIfChanged(filePath, content) {
@@ -167,6 +182,19 @@ function writeFileIfChanged(filePath, content) {
   fs.writeFileSync(tempFile, content);
   fs.renameSync(tempFile, filePath);
   return true;
+}
+
+function writeJsonFile(filePath, value) {
+  ensureDir(path.dirname(filePath));
+  return writeFileIfChanged(filePath, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+function writeTextFile(filePath, value) {
+  ensureDir(path.dirname(filePath));
+  return writeFileIfChanged(
+    filePath,
+    value.endsWith("\n") ? value : `${value}\n`,
+  );
 }
 
 function copyFileIfChanged(sourcePath, destPath) {
@@ -189,7 +217,7 @@ for (const fileName of fs.readdirSync(path.join(contentRoot, "skills"))) {
   if (!fileName.endsWith(".zip")) continue;
   copyFileIfChanged(
     path.join(contentRoot, "skills", fileName),
-    path.join(skillsDownloadsDir, fileName)
+    path.join(skillsDownloadsDir, fileName),
   );
 }
 
@@ -197,7 +225,7 @@ for (const fileName of fs.readdirSync(path.join(contentRoot, "mcp"))) {
   if (!fileName.endsWith(".mcpb")) continue;
   copyFileIfChanged(
     path.join(contentRoot, "mcp", fileName),
-    path.join(mcpDownloadsDir, fileName)
+    path.join(mcpDownloadsDir, fileName),
   );
 }
 
@@ -205,7 +233,7 @@ async function main() {
   const entries = [];
   const repoStats = new Map();
   const reposToFetch = new Map();
-  const directoryRepo = parseGitHubRepo(DIRECTORY_REPO_URL);
+  const directoryRepo = parseGitHubRepo(DEFAULT_DIRECTORY_REPO_URL);
 
   if (directoryRepo) {
     reposToFetch.set(directoryRepo.key, directoryRepo);
@@ -221,136 +249,27 @@ async function main() {
     for (const fileName of files) {
       const filePath = path.join(categoryDir, fileName);
       const source = fs.readFileSync(filePath, "utf8");
-      const { data, content } = matter(source);
-      const body = normalizeBody(content, category);
-      const headings = extractHeadings(body);
-      const codeBlocks = extractCodeBlocks(body);
-      const sections = extractSections(body);
-      const inferred = inferStructuredFields(data, body, category);
-      const sectionFlags = inferSectionBooleans(body);
-      const repoUrl = inferred.repoUrl ? String(inferred.repoUrl) : "";
-      const githubRepo = parseGitHubRepo(repoUrl);
-      const downloadUrl = normalizeDownloadUrl(data.downloadUrl ? String(data.downloadUrl) : "");
-      const localDownloadPath = isLocalDownloadUrl(downloadUrl)
-        ? localDownloadSourcePath(downloadUrl)
-        : null;
-      const firstPartyPackage = isFirstPartyPackage(data);
-      const downloadTrust = downloadUrl
-        ? localDownloadPath && firstPartyPackage
-          ? "first-party"
-          : "external"
-        : null;
-      const downloadSha256 =
-        localDownloadPath && fs.existsSync(localDownloadPath)
-          ? sha256File(localDownloadPath)
-          : null;
+      const entry = buildContentEntryFromMdx({
+        category,
+        fileName,
+        filePath,
+        source,
+        repoRoot,
+        contentRoot,
+        contentUpdatedAt: gitContentUpdatedAt(filePath),
+        getLocalDownloadSha256(localDownloadPath) {
+          return fs.existsSync(localDownloadPath)
+            ? sha256File(localDownloadPath)
+            : null;
+        },
+      });
+      const githubRepo = parseGitHubRepo(entry.repoUrl);
 
       if (githubRepo) {
         reposToFetch.set(githubRepo.key, githubRepo);
       }
 
-      entries.push({
-        category,
-        slug: String(data.slug ?? fileName.replace(/\.mdx$/, "")),
-        title: String(data.title ?? fileName.replace(/\.mdx$/, "")),
-        description: String(data.description ?? ""),
-        seoTitle: data.seoTitle ? String(data.seoTitle) : undefined,
-        seoDescription: data.seoDescription ? String(data.seoDescription) : undefined,
-        author: data.author ? String(data.author) : undefined,
-        authorProfileUrl: data.authorProfileUrl
-          ? String(data.authorProfileUrl)
-          : undefined,
-        dateAdded: data.dateAdded ? String(data.dateAdded) : undefined,
-        tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
-        keywords: Array.isArray(data.keywords) ? data.keywords.map(String) : [],
-        readingTime:
-          typeof data.readingTime === "number" ? data.readingTime : undefined,
-        difficultyScore:
-          typeof data.difficultyScore === "number" ? data.difficultyScore : undefined,
-        documentationUrl: data.documentationUrl
-          ? String(data.documentationUrl)
-          : undefined,
-        cardDescription: inferred.cardDescription || undefined,
-        installable: inferred.installable,
-        installCommand: inferred.installCommand || undefined,
-        usageSnippet: inferred.usageSnippet || undefined,
-        copySnippet: inferred.copySnippet || undefined,
-        configSnippet: inferred.configSnippet || undefined,
-        commandSyntax:
-          inferred.commandSyntax ||
-          (data.commandSyntax ? String(data.commandSyntax) : undefined),
-        argumentHint: data.argumentHint ? String(data.argumentHint) : undefined,
-        allowedTools: Array.isArray(data.allowedTools)
-          ? data.allowedTools.map(String)
-          : undefined,
-        scriptLanguage: inferred.scriptLanguage || undefined,
-        scriptBody: inferred.scriptBody || undefined,
-        trigger: inferred.trigger || undefined,
-        items: Array.isArray(data.items)
-          ? data.items.map((item) => ({
-              slug: String(item.slug),
-              category: String(item.category)
-            }))
-          : undefined,
-        installationOrder: Array.isArray(data.installationOrder)
-          ? data.installationOrder.map(String)
-          : undefined,
-        estimatedSetupTime: data.estimatedSetupTime
-          ? String(data.estimatedSetupTime)
-          : undefined,
-        difficulty: data.difficulty ? String(data.difficulty) : undefined,
-        skillType: inferred.skillType || undefined,
-        skillLevel: inferred.skillLevel || undefined,
-        verificationStatus: inferred.verificationStatus || undefined,
-        verifiedAt: inferred.verifiedAt || undefined,
-        retrievalSources:
-          Array.isArray(inferred.retrievalSources) && inferred.retrievalSources.length
-            ? inferred.retrievalSources
-            : undefined,
-        testedPlatforms:
-          Array.isArray(inferred.testedPlatforms) && inferred.testedPlatforms.length
-            ? inferred.testedPlatforms
-            : undefined,
-        prerequisites: Array.isArray(data.prerequisites)
-          ? data.prerequisites.map(String)
-          : undefined,
-        hasPrerequisites:
-          typeof data.hasPrerequisites === "boolean"
-            ? data.hasPrerequisites
-            : sectionFlags.hasPrerequisites,
-        hasTroubleshooting:
-          typeof data.hasTroubleshooting === "boolean"
-            ? data.hasTroubleshooting
-            : sectionFlags.hasTroubleshooting,
-        hasBreakingChanges:
-          typeof data.hasBreakingChanges === "boolean"
-            ? data.hasBreakingChanges
-            : undefined,
-        robotsIndex:
-          typeof data.robotsIndex === "boolean" ? data.robotsIndex : undefined,
-        robotsFollow:
-          typeof data.robotsFollow === "boolean" ? data.robotsFollow : undefined,
-        packageVerified:
-          typeof data.packageVerified === "boolean" ? data.packageVerified : undefined,
-        downloadUrl,
-        downloadTrust,
-        downloadSha256,
-        body,
-        sections: sections.map((section) => ({
-          title: section.title,
-          id: section.id,
-          markdown: section.markdown,
-          codeBlocks: extractCodeBlocks(section.markdown)
-        })),
-        headings,
-        codeBlocks,
-        filePath: path.relative(repoRoot, filePath).replaceAll(path.sep, "/"),
-        githubUrl: buildGitHubUrl(filePath),
-        repoUrl: githubRepo?.url ?? null,
-        githubStars: null,
-        githubForks: null,
-        repoUpdatedAt: null
-      });
+      entries.push(entry);
     }
   }
 
@@ -360,9 +279,11 @@ async function main() {
         try {
           repoStats.set(repo.key, await fetchGitHubRepoStats(repo));
         } catch (error) {
-          console.warn(`Could not fetch GitHub stats for ${repo.key}: ${error.message}`);
+          console.warn(
+            `Could not fetch GitHub stats for ${repo.key}: ${error.message}`,
+          );
         }
-      })
+      }),
     );
   }
 
@@ -380,59 +301,57 @@ async function main() {
 
   entries.sort((left, right) => left.title.localeCompare(right.title));
 
-  const directoryEntries = entries.map((entry) => {
-    const {
-      body: _body,
-      sections: _sections,
-      headings: _headings,
-      codeBlocks: _codeBlocks,
-      scriptBody: _scriptBody,
-      ...directoryEntry
-    } = entry;
-    return directoryEntry;
+  resetGeneratedJsonDir(entryDataDir);
+  resetGeneratedJsonDir(entryLlmsDir);
+  resetGeneratedJsonDir(raycastDetailDir);
+
+  const artifactFiles = buildRegistryArtifactSet(entries, {
+    siteUrl: "https://heyclau.de",
+    siteName: "HeyClaude",
+    siteDescription:
+      "The Claude directory for agents, MCP servers, skills, commands, hooks, rules, guides, collections, and statuslines.",
+  });
+  const artifactResults = artifactFiles.map((file) => {
+    const outputPath = path.join(publicDataDir, file.path);
+    const wrote =
+      file.type === "json"
+        ? writeJsonFile(outputPath, file.value)
+        : writeTextFile(outputPath, file.value);
+    return { ...file, wrote, outputPath };
   });
 
-  const payload = `${JSON.stringify(entries, null, 2)}\n`;
-  const wroteContentIndex = writeFileIfChanged(outputFile, payload);
-  const directoryPayload = `${JSON.stringify(directoryEntries, null, 2)}\n`;
-  const wroteDirectoryIndex = writeFileIfChanged(directoryOutputFile, directoryPayload);
-
-  const directoryStats = directoryRepo ? repoStats.get(directoryRepo.key) : null;
+  const directoryStats = directoryRepo
+    ? repoStats.get(directoryRepo.key)
+    : null;
   const siteStatsPayload = {
-    directoryRepo: DIRECTORY_REPO_URL,
+    directoryRepo: DEFAULT_DIRECTORY_REPO_URL,
     githubStars: directoryStats?.stars ?? null,
     githubForks: directoryStats?.forks ?? null,
-    repoUpdatedAt: directoryStats?.updatedAt ?? null
+    repoUpdatedAt: directoryStats?.updatedAt ?? null,
   };
   const wroteSiteStats = writeFileIfChanged(
     siteStatsFile,
-    `${JSON.stringify(siteStatsPayload, null, 2)}\n`
+    `${JSON.stringify(siteStatsPayload, null, 2)}\n`,
   );
-
-  const rawLegacySeed = fs.existsSync(legacyVoteSeedFile)
-    ? JSON.parse(fs.readFileSync(legacyVoteSeedFile, "utf8"))
-    : { votes: {} };
-  const votes =
-    rawLegacySeed && typeof rawLegacySeed === "object" && typeof rawLegacySeed.votes === "object"
-      ? rawLegacySeed.votes
-      : {};
-  const wroteLegacySeed = writeFileIfChanged(
-    generatedLegacyVoteSeedFile,
-    `${JSON.stringify(votes, null, 2)}\n`
-  );
-
+  for (const result of artifactResults.filter(
+    (file) => !file.path.includes("/"),
+  )) {
+    console.log(
+      `${result.wrote ? "Wrote" : "Unchanged"} ${path.relative(repoRoot, result.outputPath)}`,
+    );
+  }
   console.log(
-    `${wroteContentIndex ? "Wrote" : "Unchanged"} ${entries.length} entries to ${path.relative(repoRoot, outputFile)}`
+    `Wrote ${artifactResults.filter((file) => file.path.startsWith("entries/")).length} entry detail files to ${path.relative(repoRoot, entryDataDir)}`,
   );
   console.log(
-    `${wroteDirectoryIndex ? "Wrote" : "Unchanged"} ${directoryEntries.length} entries to ${path.relative(repoRoot, directoryOutputFile)}`
+    `Wrote ${artifactResults.filter((file) => file.path.startsWith("llms/")).length} entry LLM files to ${path.relative(repoRoot, entryLlmsDir)}`,
   );
   console.log(
-    `${wroteSiteStats ? "Wrote" : "Unchanged"} ${path.relative(repoRoot, siteStatsFile)}`
+    `Wrote ${artifactResults.filter((file) => file.path.startsWith("raycast/")).length} Raycast detail files to ${path.relative(repoRoot, raycastDetailDir)}`,
   );
   console.log(
-    `${wroteLegacySeed ? "Wrote" : "Unchanged"} ${path.relative(repoRoot, generatedLegacyVoteSeedFile)}`
+    `${wroteSiteStats ? "Wrote" : "Unchanged"} ${path.relative(repoRoot, siteStatsFile)}`,
   );
 }
 
-await main();
+await withBuildLock(main);

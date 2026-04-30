@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 2,
+  "key": "skills:ai-business-idea-validation-capability-pack",
+  "category": "skills",
+  "slug": "ai-business-idea-validation-capability-pack",
+  "title": "AI Business Idea Validation Capability Pack Skill",
+  "author": "JSONbored",
+  "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/ai-business-idea-validation-capability-pack.zip -o ai-business-idea-validation-capability-pack.zip && unzip -o ai-business-idea-validation-capability-pack.zip -d ./ai-business-idea-validation-capability-pack\n\nUsage:\nUse this skill to validate AI product ideas against demand, pain intensity, willingness-to-pay, and execution constraints.\n\nAsset:\n# Trigger\n\"Apply the AI business idea validation capability pack.\"\n\n# Required output\n1) Problem and buyer segmentation\n2) Demand signals and competitor map\n3) Pricing and offer hypothesis\n4) Go/no-go decision with evidence",
+  "detailMarkdown": "# AI Business Idea Validation Capability Pack Skill\n\nExpert business-validation capability pack for testing AI product ideas, market demand, pricing readiness, and launch feasibility.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/ai-business-idea-validation-capability-pack.zip -o ai-business-idea-validation-capability-pack.zip && unzip -o ai-business-idea-validation-capability-pack.zip -d ./ai-business-idea-validation-capability-pack\n```\n\n## Usage\nUse this skill to validate AI product ideas against demand, pain intensity, willingness-to-pay, and execution constraints.",
+  "webUrl": "https://heyclau.de/skills/ai-business-idea-validation-capability-pack",
+  "canonicalUrl": "https://heyclau.de/skills/ai-business-idea-validation-capability-pack",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/ai-business-idea-validation-capability-pack.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/ai-business-idea-validation-capability-pack",
+  "seoTitle": "AI Business Idea Validation Capability Pack Skill",
+  "seoDescription": "Advanced AI skill for market validation, pricing experiments, and zero-to-one launch decision frameworks for AI products.",
+  "repoUrl": "",
+  "documentationUrl": "https://www.ycombinator.com/library"
+}
