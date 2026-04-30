@@ -49,6 +49,10 @@
     "./schemas": {
       "types": "./src/schemas.d.ts",
       "default": "./src/schemas.js"
+    },
+    "./submissions": {
+      "types": "./src/submissions.d.ts",
+      "default": "./src/submissions.js"
     }
   },
   "bin": {

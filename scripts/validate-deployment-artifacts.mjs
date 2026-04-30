@@ -3,6 +3,7 @@ const requiredPaths = [
   "/data/search-index.json",
   "/data/raycast-index.json",
   "/data/feeds/index.json",
+  "/data/submission-spec.json",
 ];
 const indexNowKeyPath = "/48486ebc7ddc47af875118345161ae70.txt";
 const requiredRenderedPaths = ["/sitemap.xml", "/robots.txt", "/api/jobs"];
@@ -89,7 +90,12 @@ for (const pathname of requiredPaths) {
       continue;
     }
     const entries = readEntries(payload);
-    if (pathname !== "/data/feeds/index.json" && !Array.isArray(entries)) {
+    if (
+      !["/data/feeds/index.json", "/data/submission-spec.json"].includes(
+        pathname,
+      ) &&
+      !Array.isArray(entries)
+    ) {
       fail(`${pathname} must return an envelope with entries`);
     }
   } catch (error) {
@@ -172,6 +178,24 @@ try {
 }
 
 try {
+  const submissionSpec = await fetchJson(baseUrl, "/data/submission-spec.json");
+  if (!submissionSpec?.categories?.skills) {
+    fail("/data/submission-spec.json must expose category submission schemas");
+  }
+  if (
+    !submissionSpec?.issueTemplates?.skills?.labels?.includes(
+      "content-submission",
+    )
+  ) {
+    fail(
+      "/data/submission-spec.json must expose generated issue template labels",
+    );
+  }
+} catch (error) {
+  fail(error instanceof Error ? error.message : String(error));
+}
+
+try {
   const jobs = await fetchJson(baseUrl, "/api/jobs");
   if (!jobs || typeof jobs !== "object") {
     fail("/api/jobs did not return a JSON object");
@@ -199,6 +223,9 @@ try {
   if (!toolNames.includes("search_registry")) {
     fail("/api/mcp must expose read-only registry tools");
   }
+  if (!toolNames.includes("build_submission_urls")) {
+    fail("/api/mcp must expose read-only submission helper tools");
+  }
 
   const search = await fetchMcpJson(baseUrl, {
     jsonrpc: "2.0",
@@ -212,6 +239,37 @@ try {
   const result = JSON.parse(search?.result?.content?.[0]?.text || "{}");
   if (result?.ok !== true || !Array.isArray(result.entries)) {
     fail("/api/mcp search_registry tool did not return entries");
+  }
+
+  const submission = await fetchMcpJson(baseUrl, {
+    jsonrpc: "2.0",
+    id: 3,
+    method: "tools/call",
+    params: {
+      name: "build_submission_urls",
+      arguments: {
+        fields: {
+          category: "mcp",
+          name: "Deployment Validation MCP",
+          docs_url: "https://example.com/docs",
+          description:
+            "Deployment validation draft for the HeyClaude MCP submission helper.",
+          install_command: "npx -y deployment-validation-mcp",
+          usage_snippet: "Use this draft to validate MCP route behavior.",
+        },
+      },
+    },
+  });
+  const submissionResult = JSON.parse(
+    submission?.result?.content?.[0]?.text || "{}",
+  );
+  if (
+    submissionResult?.ok !== true ||
+    !String(submissionResult.githubIssueUrl || "").includes(
+      "template=submit-mcp.yml",
+    )
+  ) {
+    fail("/api/mcp build_submission_urls tool did not return issue URLs");
   }
 } catch (error) {
   fail(error instanceof Error ? error.message : String(error));

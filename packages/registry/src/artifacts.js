@@ -9,6 +9,7 @@ import {
 } from "./quality.js";
 import { renderCorpusLlms, renderEntryLlms } from "./llms.js";
 import { buildEntryJsonLdSnapshot } from "./seo.js";
+import { buildSubmissionSpecs } from "./submission-spec.js";
 
 export const ENTRY_SCHEMA_VERSION = 1;
 export const RAYCAST_SCHEMA_VERSION = 2;
@@ -786,6 +787,11 @@ export function buildRegistryArtifactSet(entries, params = {}) {
       path: "feeds/index.json",
       type: "json",
       value: buildDistributionFeedIndex(entries, { siteUrl }),
+    },
+    {
+      path: "submission-spec.json",
+      type: "json",
+      value: buildSubmissionSpecs(),
     },
     {
       path: "content-quality-report.json",

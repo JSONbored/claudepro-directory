@@ -50,16 +50,19 @@ describe("HeyClaude read-only MCP helpers", () => {
       "workspace:*",
     );
     expect(packageJson.exports).toHaveProperty("./server");
+    expect(packageJson.exports).toHaveProperty("./submissions");
   });
 
-  it("exposes only read-only registry tools", () => {
+  it("exposes only read-only registry and submission helper tools", () => {
     expect(TOOL_DEFINITIONS.map((tool) => tool.name)).toEqual(
       READ_ONLY_TOOL_NAMES,
     );
     expect(Object.keys(TOOL_INPUT_SCHEMAS)).toEqual(READ_ONLY_TOOL_NAMES);
     for (const tool of TOOL_DEFINITIONS) {
-      expect(tool.name).not.toMatch(/create|submit|publish|write|delete|pr/i);
-      expect(tool.description).toMatch(/read-only|fetch|search|list/i);
+      expect(tool.name).not.toMatch(/create|publish|write|delete|pr/i);
+      expect(tool.description).toMatch(
+        /read-only|fetch|search|list|validate|build|guidance/i,
+      );
       expect(tool.inputSchema).toEqual(jsonSchemaForTool(tool.name));
       expect(tool.inputSchema).toMatchObject({
         type: "object",
@@ -200,6 +203,139 @@ describe("HeyClaude read-only MCP helpers", () => {
     expect(adapter.content).toContain(
       "Cursor does not natively install Agent Skills",
     );
+  });
+
+  it("serves the canonical submission spec through MCP", async () => {
+    const submissionSpec = JSON.parse(
+      fs.readFileSync(path.join(dataDir, "submission-spec.json"), "utf8"),
+    ) as {
+      categories: Record<string, { fields: Array<{ id: string }> }>;
+      issueTemplates: Record<string, unknown>;
+    };
+
+    expect(Object.keys(submissionSpec.categories)).toEqual(
+      expect.arrayContaining(["agents", "mcp", "skills", "guides"]),
+    );
+
+    const result = await callRegistryTool(
+      "get_submission_schema",
+      { category: "skills" },
+      { dataDir },
+    );
+    expect(result).toMatchObject({
+      ok: true,
+      category: "skills",
+      schema: {
+        template: "submit-skill.yml",
+      },
+      issueTemplate: {
+        labels: expect.arrayContaining(["content-submission", "skills"]),
+      },
+    });
+    expect(result.schema.fields.map((field: any) => field.id)).toEqual(
+      submissionSpec.categories.skills.fields.map((field) => field.id),
+    );
+  });
+
+  it("validates submission drafts and builds review URLs without GitHub writes", async () => {
+    const fields = {
+      category: "skills",
+      name: "Example Submission Skill",
+      source_url: "https://example.com/docs",
+      brand_domain: "example.com",
+      description:
+        "Create a complete HeyClaude-ready skill submission draft from source material.",
+      usage_snippet: "Use this skill to prepare a reviewed submission.",
+      skill_type: "workflow",
+      skill_level: "intermediate",
+      verification_status: "validated",
+      download_url: "https://example.com/example-skill.zip",
+      tags: ["heyclaude", "submissions"],
+    };
+
+    await expect(
+      callRegistryTool("validate_submission_draft", { fields }, { dataDir }),
+    ).resolves.toMatchObject({
+      ok: true,
+      valid: true,
+      category: "skills",
+      slug: "example-submission-skill",
+      issuePreview: {
+        title: "Submit Skill: Example Submission Skill",
+        labels: expect.arrayContaining(["content-submission", "skills"]),
+      },
+    });
+
+    const urls = await callRegistryTool(
+      "build_submission_urls",
+      { fields, includeIssueBody: true },
+      { dataDir },
+    );
+    expect(urls).toMatchObject({
+      ok: true,
+      valid: true,
+      submitUrl: expect.stringContaining("https://heyclau.de/submit"),
+      githubIssueUrl: expect.stringContaining(
+        "https://github.com/JSONbored/claudepro-directory/issues/new",
+      ),
+      issueDraft: {
+        title: "Submit Skill: Example Submission Skill",
+        labels: expect.arrayContaining(["content-submission", "skills"]),
+      },
+    });
+    expect(urls.githubIssueUrl).toContain("template=submit-skill.yml");
+    expect(urls.issueDraft.body).toContain("### Brand domain");
+    expect(JSON.stringify(urls)).not.toMatch(/token|secret|authorization/i);
+  });
+
+  it("finds likely duplicate entries before submission", async () => {
+    const duplicate = await callRegistryTool(
+      "search_duplicate_entries",
+      {
+        category: skill.category,
+        slug: skill.slug,
+        title: skill.title,
+        limit: 3,
+      },
+      { dataDir },
+    );
+    expect(duplicate).toMatchObject({
+      ok: true,
+      count: expect.any(Number),
+      matches: [
+        expect.objectContaining({
+          key: `${skill.category}:${skill.slug}`,
+          reasons: expect.arrayContaining(["slug", "title"]),
+        }),
+      ],
+    });
+  });
+
+  it("rejects malformed submission helper arguments from Zod schemas", async () => {
+    await expect(
+      callRegistryTool(
+        "build_submission_urls",
+        {
+          fields: {
+            category: "skills",
+            name: "Unsafe",
+            unexpected: "value",
+          },
+        },
+        { dataDir },
+      ),
+    ).resolves.toMatchObject({
+      ok: false,
+      error: {
+        code: "invalid_request",
+        details: [
+          expect.objectContaining({
+            path: "fields",
+            code: "unrecognized_keys",
+          }),
+        ],
+      },
+    });
   });
 
   it("lists distribution feeds from the manifest and feed index", async () => {

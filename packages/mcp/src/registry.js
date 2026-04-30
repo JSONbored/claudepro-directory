@@ -12,6 +12,13 @@ import {
   jsonSchemaForTool,
   parseToolArguments,
 } from "./schemas.js";
+import {
+  buildSubmissionUrlsFromSpec,
+  getCategorySubmissionGuidanceFromSpec,
+  getSubmissionSchemaFromSpec,
+  searchDuplicateEntries,
+  validateSubmissionDraftFromSpec,
+} from "./submissions.js";
 
 const repoRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -41,6 +48,11 @@ export const READ_ONLY_TOOL_NAMES = [
   "get_install_guidance",
   "get_platform_adapter",
   "list_distribution_feeds",
+  "get_submission_schema",
+  "validate_submission_draft",
+  "search_duplicate_entries",
+  "build_submission_urls",
+  "get_category_submission_guidance",
 ];
 
 export const TOOL_DEFINITIONS = [
@@ -79,6 +91,36 @@ export const TOOL_DEFINITIONS = [
     description:
       "List read-only HeyClaude registry feeds, category feeds, platform feeds, and artifact locations.",
     inputSchema: jsonSchemaForTool("list_distribution_feeds"),
+  },
+  {
+    name: "get_submission_schema",
+    description:
+      "Fetch read-only HeyClaude submission schemas and GitHub issue template fields by category.",
+    inputSchema: jsonSchemaForTool("get_submission_schema"),
+  },
+  {
+    name: "validate_submission_draft",
+    description:
+      "Validate a HeyClaude content submission draft locally without creating GitHub issues or publishing content.",
+    inputSchema: jsonSchemaForTool("validate_submission_draft"),
+  },
+  {
+    name: "search_duplicate_entries",
+    description:
+      "Search generated registry artifacts for likely duplicate entries before a user opens a submission issue.",
+    inputSchema: jsonSchemaForTool("search_duplicate_entries"),
+  },
+  {
+    name: "build_submission_urls",
+    description:
+      "Build prefilled HeyClaude submit and GitHub issue URLs for a validated submission draft without making write calls.",
+    inputSchema: jsonSchemaForTool("build_submission_urls"),
+  },
+  {
+    name: "get_category_submission_guidance",
+    description:
+      "Fetch category-specific HeyClaude contribution guidance, required fields, and review expectations.",
+    inputSchema: jsonSchemaForTool("get_category_submission_guidance"),
   },
 ];
 
@@ -372,6 +414,39 @@ export async function listDistributionFeeds(args = {}, options = {}) {
   };
 }
 
+async function readSubmissionSpec(options = {}) {
+  return readJsonArtifact("submission-spec.json", options);
+}
+
+export async function getSubmissionSchema(args = {}, options = {}) {
+  return getSubmissionSchemaFromSpec(await readSubmissionSpec(options), args);
+}
+
+export async function validateSubmissionDraft(args = {}, options = {}) {
+  return validateSubmissionDraftFromSpec(
+    await readSubmissionSpec(options),
+    args,
+  );
+}
+
+export async function searchDuplicateRegistryEntries(args = {}, options = {}) {
+  const searchIndex = unwrapEntries(
+    await readJsonArtifact("search-index.json", options),
+  );
+  return searchDuplicateEntries(searchIndex, args);
+}
+
+export async function buildSubmissionUrls(args = {}, options = {}) {
+  return buildSubmissionUrlsFromSpec(await readSubmissionSpec(options), args);
+}
+
+export async function getCategorySubmissionGuidance(args = {}, options = {}) {
+  return getCategorySubmissionGuidanceFromSpec(
+    await readSubmissionSpec(options),
+    args,
+  );
+}
+
 export async function callRegistryTool(name, args = {}, options = {}) {
   if (!READ_ONLY_TOOL_NAMES.includes(name)) {
     return invalid(`Unknown read-only HeyClaude MCP tool: ${name}`);
@@ -404,5 +479,15 @@ export async function callRegistryTool(name, args = {}, options = {}) {
       return getPlatformAdapter(parsedArgs, options);
     case "list_distribution_feeds":
       return listDistributionFeeds(parsedArgs, options);
+    case "get_submission_schema":
+      return getSubmissionSchema(parsedArgs, options);
+    case "validate_submission_draft":
+      return validateSubmissionDraft(parsedArgs, options);
+    case "search_duplicate_entries":
+      return searchDuplicateRegistryEntries(parsedArgs, options);
+    case "build_submission_urls":
+      return buildSubmissionUrls(parsedArgs, options);
+    case "get_category_submission_guidance":
+      return getCategorySubmissionGuidance(parsedArgs, options);
   }
 }

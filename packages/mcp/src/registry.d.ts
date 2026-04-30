@@ -46,6 +46,31 @@ export function listDistributionFeeds(
   options?: RegistryArtifactLoaders,
 ): Promise<RegistryToolResult>;
 
+export function getSubmissionSchema(
+  args?: Record<string, unknown>,
+  options?: RegistryArtifactLoaders,
+): Promise<RegistryToolResult>;
+
+export function validateSubmissionDraft(
+  args?: Record<string, unknown>,
+  options?: RegistryArtifactLoaders,
+): Promise<RegistryToolResult>;
+
+export function searchDuplicateRegistryEntries(
+  args?: Record<string, unknown>,
+  options?: RegistryArtifactLoaders,
+): Promise<RegistryToolResult>;
+
+export function buildSubmissionUrls(
+  args?: Record<string, unknown>,
+  options?: RegistryArtifactLoaders,
+): Promise<RegistryToolResult>;
+
+export function getCategorySubmissionGuidance(
+  args?: Record<string, unknown>,
+  options?: RegistryArtifactLoaders,
+): Promise<RegistryToolResult>;
+
 export function callRegistryTool(
   name: string,
   args?: Record<string, unknown>,
@@ -59,6 +84,12 @@ export {
   InstallGuidanceInputSchema,
   PlatformAdapterInputSchema,
   ListDistributionFeedsInputSchema,
+  SubmissionFieldsSchema,
+  GetSubmissionSchemaInputSchema,
+  ValidateSubmissionDraftInputSchema,
+  SearchDuplicateEntriesInputSchema,
+  BuildSubmissionUrlsInputSchema,
+  CategorySubmissionGuidanceInputSchema,
   TOOL_INPUT_SCHEMAS,
   jsonSchemaForTool,
   parseToolArguments,

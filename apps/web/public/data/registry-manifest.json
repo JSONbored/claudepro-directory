@@ -3169,6 +3169,11 @@
       "type": "json",
       "sha256": "696ab4a3b1963b59731987fdfe0fd79c5d90fa09a1e18bb231d44c19e4cff077"
     },
+    "submission-spec.json": {
+      "path": "/data/submission-spec.json",
+      "type": "json",
+      "sha256": "e7ef3029d83283bcfe7d2278545ea391186f1c838e2d7e3a4ad1065fac594780"
+    },
     "content-quality-report.json": {
       "path": "/data/content-quality-report.json",
       "type": "json",

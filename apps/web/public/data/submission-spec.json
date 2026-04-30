@@ -1,0 +1,2044 @@
+{
+  "schemaVersion": 2,
+  "categories": {
+    "agents": {
+      "schemaVersion": 2,
+      "category": "agents",
+      "label": "Agents",
+      "description": "Specialized Claude agents and expert roles.",
+      "template": "submit-agent.yml",
+      "fields": [
+        {
+          "id": "name",
+          "label": "Name",
+          "type": "text",
+          "required": true,
+          "placeholder": "Human-readable listing name"
+        },
+        {
+          "id": "slug",
+          "label": "Slug",
+          "type": "text",
+          "required": true,
+          "placeholder": "kebab-case-slug",
+          "helpText": "Kebab-case only. Maintainers may adjust before merge."
+        },
+        {
+          "id": "category",
+          "label": "Category",
+          "type": "category",
+          "required": true
+        },
+        {
+          "id": "github_url",
+          "label": "GitHub URL",
+          "type": "url",
+          "required": false,
+          "placeholder": "https://github.com/owner/repo"
+        },
+        {
+          "id": "docs_url",
+          "label": "Docs URL",
+          "type": "url",
+          "required": false,
+          "placeholder": "https://..."
+        },
+        {
+          "id": "brand_name",
+          "label": "Brand name",
+          "type": "text",
+          "required": false,
+          "placeholder": "Asana, Anthropic, Linear",
+          "helpText": "Optional provider name for logo matching and contributor review."
+        },
+        {
+          "id": "brand_domain",
+          "label": "Brand domain",
+          "type": "text",
+          "required": false,
+          "placeholder": "asana.com",
+          "helpText": "Optional canonical provider domain. Do not use GitHub or docs hosting domains unless that is the brand."
+        },
+        {
+          "id": "author",
+          "label": "Author",
+          "type": "text",
+          "required": false,
+          "placeholder": "GitHub handle, company, or maintainer name"
+        },
+        {
+          "id": "contact_email",
+          "label": "Public contact",
+          "type": "text",
+          "required": false,
+          "placeholder": "@github-handle or email if you want it public",
+          "helpText": "Optional. This is copied into a public GitHub issue, so do not include private contact details."
+        },
+        {
+          "id": "tags",
+          "label": "Tags",
+          "type": "text",
+          "required": false,
+          "placeholder": "claude, mcp, automation",
+          "helpText": "Comma-separated."
+        },
+        {
+          "id": "description",
+          "label": "Description",
+          "type": "textarea",
+          "required": true,
+          "placeholder": "Explain what this does, why it matters, and when to use it."
+        },
+        {
+          "id": "card_description",
+          "label": "Card description",
+          "type": "textarea",
+          "required": true,
+          "placeholder": "Short browse-card preview text."
+        },
+        {
+          "id": "full_copyable_content",
+          "label": "Full copyable content",
+          "type": "textarea",
+          "required": true,
+          "render": "markdown",
+          "placeholder": "Paste the complete usable prompt, config, script, or rule."
+        }
+      ]
+    },
+    "rules": {
+      "schemaVersion": 2,
+      "category": "rules",
+      "label": "Rules",
+      "description": "Prompt guardrails, project rules, and operating constraints.",
+      "template": "submit-rule.yml",
+      "fields": [
+        {
+          "id": "name",
+          "label": "Name",
+          "type": "text",
+          "required": true,
+          "placeholder": "Human-readable listing name"
+        },
+        {
+          "id": "slug",
+          "label": "Slug",
+          "type": "text",
+          "required": true,
+          "placeholder": "kebab-case-slug",
+          "helpText": "Kebab-case only. Maintainers may adjust before merge."
+        },
+        {
+          "id": "category",
+          "label": "Category",
+          "type": "category",
+          "required": true
+        },
+        {
+          "id": "github_url",
+          "label": "GitHub URL",
+          "type": "url",
+          "required": false,
+          "placeholder": "https://github.com/owner/repo"
+        },
+        {
+          "id": "docs_url",
+          "label": "Docs URL",
+          "type": "url",
+          "required": false,
+          "placeholder": "https://..."
+        },
+        {
+          "id": "brand_name",
+          "label": "Brand name",
+          "type": "text",
+          "required": false,
+          "placeholder": "Asana, Anthropic, Linear",
+          "helpText": "Optional provider name for logo matching and contributor review."
+        },
+        {
+          "id": "brand_domain",
+          "label": "Brand domain",
+          "type": "text",
+          "required": false,
+          "placeholder": "asana.com",
+          "helpText": "Optional canonical provider domain. Do not use GitHub or docs hosting domains unless that is the brand."
+        },
+        {
+          "id": "author",
+          "label": "Author",
+          "type": "text",
+          "required": false,
+          "placeholder": "GitHub handle, company, or maintainer name"
+        },
+        {
+          "id": "contact_email",
+          "label": "Public contact",
+          "type": "text",
+          "required": false,
+          "placeholder": "@github-handle or email if you want it public",
+          "helpText": "Optional. This is copied into a public GitHub issue, so do not include private contact details."
+        },
+        {
+          "id": "tags",
+          "label": "Tags",
+          "type": "text",
+          "required": false,
+          "placeholder": "claude, mcp, automation",
+          "helpText": "Comma-separated."
+        },
+        {
+          "id": "description",
+          "label": "Description",
+          "type": "textarea",
+          "required": true,
+          "placeholder": "Explain what this does, why it matters, and when to use it."
+        },
+        {
+          "id": "card_description",
+          "label": "Card description",
+          "type": "textarea",
+          "required": true,
+          "placeholder": "Short browse-card preview text."
+        },
+        {
+          "id": "full_copyable_content",
+          "label": "Full copyable content",
+          "type": "textarea",
+          "required": true,
+          "render": "markdown",
+          "placeholder": "Paste the complete usable prompt, config, script, or rule."
+        }
+      ]
+    },
+    "mcp": {
+      "schemaVersion": 2,
+      "category": "mcp",
+      "label": "MCP Servers",
+      "description": "Model Context Protocol servers and integrations.",
+      "template": "submit-mcp.yml",
+      "fields": [
+        {
+          "id": "name",
+          "label": "Name",
+          "type": "text",
+          "required": true,
+          "placeholder": "Human-readable listing name"
+        },
+        {
+          "id": "slug",
+          "label": "Slug",
+          "type": "text",
+          "required": true,
+          "placeholder": "kebab-case-slug",
+          "helpText": "Kebab-case only. Maintainers may adjust before merge."
+        },
+        {
+          "id": "category",
+          "label": "Category",
+          "type": "category",
+          "required": true
+        },
+        {
+          "id": "github_url",
+          "label": "GitHub URL",
+          "type": "url",
+          "required": false,
+          "placeholder": "https://github.com/owner/repo"
+        },
+        {
+          "id": "docs_url",
+          "label": "Docs URL",
+          "type": "url",
+          "required": false,
+          "placeholder": "https://..."
+        },
+        {
+          "id": "brand_name",
+          "label": "Brand name",
+          "type": "text",
+          "required": false,
+          "placeholder": "Asana, Anthropic, Linear",
+          "helpText": "Optional provider name for logo matching and contributor review."
+        },
+        {
+          "id": "brand_domain",
+          "label": "Brand domain",
+          "type": "text",
+          "required": false,
+          "placeholder": "asana.com",
+          "helpText": "Optional canonical provider domain. Do not use GitHub or docs hosting domains unless that is the brand."
+        },
+        {
+          "id": "author",
+          "label": "Author",
+          "type": "text",
+          "required": false,
+          "placeholder": "GitHub handle, company, or maintainer name"
+        },
+        {
+          "id": "contact_email",
+          "label": "Public contact",
+          "type": "text",
+          "required": false,
+          "placeholder": "@github-handle or email if you want it public",
+          "helpText": "Optional. This is copied into a public GitHub issue, so do not include private contact details."
+        },
+        {
+          "id": "tags",
+          "label": "Tags",
+          "type": "text",
+          "required": false,
+          "placeholder": "claude, mcp, automation",
+          "helpText": "Comma-separated."
+        },
+        {
+          "id": "description",
+          "label": "Description",
+          "type": "textarea",
+          "required": true,
+          "placeholder": "Explain what this does, why it matters, and when to use it."
+        },
+        {
+          "id": "card_description",
+          "label": "Card description",
+          "type": "textarea",
+          "required": true,
+          "placeholder": "Short browse-card preview text."
+        },
+        {
+          "id": "install_command",
+          "label": "Install command",
+          "type": "text",
+          "required": true,
+          "placeholder": "npx -y @org/package"
+        },
+        {
+          "id": "usage_snippet",
+          "label": "Usage snippet",
+          "type": "textarea",
+          "required": true,
+          "render": "markdown",
+          "placeholder": "Show how someone actually uses this."
+        },
+        {
+          "id": "config_snippet",
+          "label": "Config snippet",
+          "type": "textarea",
+          "required": false,
+          "render": "markdown"
+        }
+      ]
+    },
+    "skills": {
+      "schemaVersion": 2,
+      "category": "skills",
+      "label": "Skills",
+      "description": "Installable skill packs and reusable capabilities.",
+      "template": "submit-skill.yml",
+      "fields": [
+        {
+          "id": "name",
+          "label": "Name",
+          "type": "text",
+          "required": true,
+          "placeholder": "Human-readable listing name"
+        },
+        {
+          "id": "slug",
+          "label": "Slug",
+          "type": "text",
+          "required": true,
+          "placeholder": "kebab-case-slug",
+          "helpText": "Kebab-case only. Maintainers may adjust before merge."
+        },
+        {
+          "id": "category",
+          "label": "Category",
+          "type": "category",
+          "required": true
+        },
+        {
+          "id": "github_url",
+          "label": "GitHub URL",
+          "type": "url",
+          "required": false,
+          "placeholder": "https://github.com/owner/repo"
+        },
+        {
+          "id": "docs_url",
+          "label": "Docs URL",
+          "type": "url",
+          "required": false,
+          "placeholder": "https://..."
+        },
+        {
+          "id": "brand_name",
+          "label": "Brand name",
+          "type": "text",
+          "required": false,
+          "placeholder": "Asana, Anthropic, Linear",
+          "helpText": "Optional provider name for logo matching and contributor review."
+        },
+        {
+          "id": "brand_domain",
+          "label": "Brand domain",
+          "type": "text",
+          "required": false,
+          "placeholder": "asana.com",
+          "helpText": "Optional canonical provider domain. Do not use GitHub or docs hosting domains unless that is the brand."
+        },
+        {
+          "id": "author",
+          "label": "Author",
+          "type": "text",
+          "required": false,
+          "placeholder": "GitHub handle, company, or maintainer name"
+        },
+        {
+          "id": "contact_email",
+          "label": "Public contact",
+          "type": "text",
+          "required": false,
+          "placeholder": "@github-handle or email if you want it public",
+          "helpText": "Optional. This is copied into a public GitHub issue, so do not include private contact details."
+        },
+        {
+          "id": "tags",
+          "label": "Tags",
+          "type": "text",
+          "required": false,
+          "placeholder": "claude, mcp, automation",
+          "helpText": "Comma-separated."
+        },
+        {
+          "id": "description",
+          "label": "Description",
+          "type": "textarea",
+          "required": true,
+          "placeholder": "Explain what this does, why it matters, and when to use it."
+        },
+        {
+          "id": "card_description",
+          "label": "Card description",
+          "type": "textarea",
+          "required": true,
+          "placeholder": "Short browse-card preview text."
+        },
+        {
+          "id": "usage_snippet",
+          "label": "Usage snippet",
+          "type": "textarea",
+          "required": true,
+          "render": "markdown",
+          "placeholder": "Show how someone actually uses this."
+        },
+        {
+          "id": "skill_type",
+          "label": "Skill type",
+          "type": "select",
+          "required": true,
+          "options": [
+            "general",
+            "capability-pack"
+          ]
+        },
+        {
+          "id": "skill_level",
+          "label": "Skill level",
+          "type": "select",
+          "required": true,
+          "options": [
+            "foundational",
+            "advanced",
+            "expert"
+          ]
+        },
+        {
+          "id": "verification_status",
+          "label": "Verification status",
+          "type": "select",
+          "required": true,
+          "options": [
+            "draft",
+            "validated",
+            "production"
+          ]
+        },
+        {
+          "id": "download_url",
+          "label": "Download URL",
+          "type": "url",
+          "required": false,
+          "placeholder": "https://...",
+          "helpText": "Community submissions cannot request local /downloads hosting."
+        },
+        {
+          "id": "retrieval_sources",
+          "label": "Retrieval sources",
+          "type": "textarea",
+          "required": false,
+          "placeholder": "Official docs or source URLs used for verification."
+        },
+        {
+          "id": "tested_platforms",
+          "label": "Tested platforms",
+          "type": "text",
+          "required": false,
+          "placeholder": "Claude, Codex, Windsurf, Gemini, Cursor, Generic AGENTS"
+        }
+      ]
+    },
+    "hooks": {
+      "schemaVersion": 2,
+      "category": "hooks",
+      "label": "Hooks",
+      "description": "Claude Code hook configs and automation helpers.",
+      "template": "submit-hook.yml",
+      "fields": [
+        {
+          "id": "name",
+          "label": "Name",
+          "type": "text",
+          "required": true,
+          "placeholder": "Human-readable listing name"
+        },
+        {
+          "id": "slug",
+          "label": "Slug",
+          "type": "text",
+          "required": true,
+          "placeholder": "kebab-case-slug",
+          "helpText": "Kebab-case only. Maintainers may adjust before merge."
+        },
+        {
+          "id": "category",
+          "label": "Category",
+          "type": "category",
+          "required": true
+        },
+        {
+          "id": "github_url",
+          "label": "GitHub URL",
+          "type": "url",
+          "required": false,
+          "placeholder": "https://github.com/owner/repo"
+        },
+        {
+          "id": "docs_url",
+          "label": "Docs URL",
+          "type": "url",
+          "required": false,
+          "placeholder": "https://..."
+        },
+        {
+          "id": "brand_name",
+          "label": "Brand name",
+          "type": "text",
+          "required": false,
+          "placeholder": "Asana, Anthropic, Linear",
+          "helpText": "Optional provider name for logo matching and contributor review."
+        },
+        {
+          "id": "brand_domain",
+          "label": "Brand domain",
+          "type": "text",
+          "required": false,
+          "placeholder": "asana.com",
+          "helpText": "Optional canonical provider domain. Do not use GitHub or docs hosting domains unless that is the brand."
+        },
+        {
+          "id": "author",
+          "label": "Author",
+          "type": "text",
+          "required": false,
+          "placeholder": "GitHub handle, company, or maintainer name"
+        },
+        {
+          "id": "contact_email",
+          "label": "Public contact",
+          "type": "text",
+          "required": false,
+          "placeholder": "@github-handle or email if you want it public",
+          "helpText": "Optional. This is copied into a public GitHub issue, so do not include private contact details."
+        },
+        {
+          "id": "tags",
+          "label": "Tags",
+          "type": "text",
+          "required": false,
+          "placeholder": "claude, mcp, automation",
+          "helpText": "Comma-separated."
+        },
+        {
+          "id": "description",
+          "label": "Description",
+          "type": "textarea",
+          "required": true,
+          "placeholder": "Explain what this does, why it matters, and when to use it."
+        },
+        {
+          "id": "card_description",
+          "label": "Card description",
+          "type": "textarea",
+          "required": true,
+          "placeholder": "Short browse-card preview text."
+        },
+        {
+          "id": "trigger",
+          "label": "Trigger",
+          "type": "select",
+          "required": true,
+          "options": [
+            "PreToolUse",
+            "PostToolUse",
+            "UserPromptSubmit",
+            "Notification",
+            "Stop",
+            "SubagentStop",
+            "SessionStart"
+          ]
+        },
+        {
+          "id": "usage_snippet",
+          "label": "Usage snippet",
+          "type": "textarea",
+          "required": true,
+          "render": "markdown",
+          "placeholder": "Show how someone actually uses this."
+        },
+        {
+          "id": "full_copyable_content",
+          "label": "Full copyable content",
+          "type": "textarea",
+          "required": true,
+          "render": "markdown",
+          "placeholder": "Paste the complete usable prompt, config, script, or rule."
+        },
+        {
+          "id": "config_snippet",
+          "label": "Config snippet",
+          "type": "textarea",
+          "required": false,
+          "render": "markdown"
+        }
+      ]
+    },
+    "commands": {
+      "schemaVersion": 2,
+      "category": "commands",
+      "label": "Commands",
+      "description": "Slash commands and reusable command prompts.",
+      "template": "submit-command.yml",
+      "fields": [
+        {
+          "id": "name",
+          "label": "Name",
+          "type": "text",
+          "required": true,
+          "placeholder": "Human-readable listing name"
+        },
+        {
+          "id": "slug",
+          "label": "Slug",
+          "type": "text",
+          "required": true,
+          "placeholder": "kebab-case-slug",
+          "helpText": "Kebab-case only. Maintainers may adjust before merge."
+        },
+        {
+          "id": "category",
+          "label": "Category",
+          "type": "category",
+          "required": true
+        },
+        {
+          "id": "github_url",
+          "label": "GitHub URL",
+          "type": "url",
+          "required": false,
+          "placeholder": "https://github.com/owner/repo"
+        },
+        {
+          "id": "docs_url",
+          "label": "Docs URL",
+          "type": "url",
+          "required": false,
+          "placeholder": "https://..."
+        },
+        {
+          "id": "brand_name",
+          "label": "Brand name",
+          "type": "text",
+          "required": false,
+          "placeholder": "Asana, Anthropic, Linear",
+          "helpText": "Optional provider name for logo matching and contributor review."
+        },
+        {
+          "id": "brand_domain",
+          "label": "Brand domain",
+          "type": "text",
+          "required": false,
+          "placeholder": "asana.com",
+          "helpText": "Optional canonical provider domain. Do not use GitHub or docs hosting domains unless that is the brand."
+        },
+        {
+          "id": "author",
+          "label": "Author",
+          "type": "text",
+          "required": false,
+          "placeholder": "GitHub handle, company, or maintainer name"
+        },
+        {
+          "id": "contact_email",
+          "label": "Public contact",
+          "type": "text",
+          "required": false,
+          "placeholder": "@github-handle or email if you want it public",
+          "helpText": "Optional. This is copied into a public GitHub issue, so do not include private contact details."
+        },
+        {
+          "id": "tags",
+          "label": "Tags",
+          "type": "text",
+          "required": false,
+          "placeholder": "claude, mcp, automation",
+          "helpText": "Comma-separated."
+        },
+        {
+          "id": "description",
+          "label": "Description",
+          "type": "textarea",
+          "required": true,
+          "placeholder": "Explain what this does, why it matters, and when to use it."
+        },
+        {
+          "id": "card_description",
+          "label": "Card description",
+          "type": "textarea",
+          "required": true,
+          "placeholder": "Short browse-card preview text."
+        },
+        {
+          "id": "command_syntax",
+          "label": "Command syntax",
+          "type": "text",
+          "required": true,
+          "placeholder": "/command [path] [options]"
+        },
+        {
+          "id": "usage_snippet",
+          "label": "Usage snippet",
+          "type": "textarea",
+          "required": true,
+          "render": "markdown",
+          "placeholder": "Show how someone actually uses this."
+        },
+        {
+          "id": "full_copyable_content",
+          "label": "Full copyable content",
+          "type": "textarea",
+          "required": true,
+          "render": "markdown",
+          "placeholder": "Paste the complete usable prompt, config, script, or rule."
+        }
+      ]
+    },
+    "statuslines": {
+      "schemaVersion": 2,
+      "category": "statuslines",
+      "label": "Statuslines",
+      "description": "Statusline scripts and workflow telemetry.",
+      "template": "submit-statusline.yml",
+      "fields": [
+        {
+          "id": "name",
+          "label": "Name",
+          "type": "text",
+          "required": true,
+          "placeholder": "Human-readable listing name"
+        },
+        {
+          "id": "slug",
+          "label": "Slug",
+          "type": "text",
+          "required": true,
+          "placeholder": "kebab-case-slug",
+          "helpText": "Kebab-case only. Maintainers may adjust before merge."
+        },
+        {
+          "id": "category",
+          "label": "Category",
+          "type": "category",
+          "required": true
+        },
+        {
+          "id": "github_url",
+          "label": "GitHub URL",
+          "type": "url",
+          "required": false,
+          "placeholder": "https://github.com/owner/repo"
+        },
+        {
+          "id": "docs_url",
+          "label": "Docs URL",
+          "type": "url",
+          "required": false,
+          "placeholder": "https://..."
+        },
+        {
+          "id": "brand_name",
+          "label": "Brand name",
+          "type": "text",
+          "required": false,
+          "placeholder": "Asana, Anthropic, Linear",
+          "helpText": "Optional provider name for logo matching and contributor review."
+        },
+        {
+          "id": "brand_domain",
+          "label": "Brand domain",
+          "type": "text",
+          "required": false,
+          "placeholder": "asana.com",
+          "helpText": "Optional canonical provider domain. Do not use GitHub or docs hosting domains unless that is the brand."
+        },
+        {
+          "id": "author",
+          "label": "Author",
+          "type": "text",
+          "required": false,
+          "placeholder": "GitHub handle, company, or maintainer name"
+        },
+        {
+          "id": "contact_email",
+          "label": "Public contact",
+          "type": "text",
+          "required": false,
+          "placeholder": "@github-handle or email if you want it public",
+          "helpText": "Optional. This is copied into a public GitHub issue, so do not include private contact details."
+        },
+        {
+          "id": "tags",
+          "label": "Tags",
+          "type": "text",
+          "required": false,
+          "placeholder": "claude, mcp, automation",
+          "helpText": "Comma-separated."
+        },
+        {
+          "id": "description",
+          "label": "Description",
+          "type": "textarea",
+          "required": true,
+          "placeholder": "Explain what this does, why it matters, and when to use it."
+        },
+        {
+          "id": "card_description",
+          "label": "Card description",
+          "type": "textarea",
+          "required": true,
+          "placeholder": "Short browse-card preview text."
+        },
+        {
+          "id": "script_language",
+          "label": "Script language",
+          "type": "select",
+          "required": true,
+          "options": [
+            "bash",
+            "zsh",
+            "fish",
+            "python",
+            "javascript",
+            "other"
+          ]
+        },
+        {
+          "id": "usage_snippet",
+          "label": "Usage snippet",
+          "type": "textarea",
+          "required": true,
+          "render": "markdown",
+          "placeholder": "Show how someone actually uses this."
+        },
+        {
+          "id": "full_copyable_content",
+          "label": "Full copyable content",
+          "type": "textarea",
+          "required": true,
+          "render": "markdown",
+          "placeholder": "Paste the complete usable prompt, config, script, or rule."
+        },
+        {
+          "id": "config_snippet",
+          "label": "Config snippet",
+          "type": "textarea",
+          "required": false,
+          "render": "markdown"
+        }
+      ]
+    },
+    "collections": {
+      "schemaVersion": 2,
+      "category": "collections",
+      "label": "Collections",
+      "description": "Curated bundles of related assets.",
+      "template": "submit-collection.yml",
+      "fields": [
+        {
+          "id": "name",
+          "label": "Name",
+          "type": "text",
+          "required": true,
+          "placeholder": "Human-readable listing name"
+        },
+        {
+          "id": "slug",
+          "label": "Slug",
+          "type": "text",
+          "required": true,
+          "placeholder": "kebab-case-slug",
+          "helpText": "Kebab-case only. Maintainers may adjust before merge."
+        },
+        {
+          "id": "category",
+          "label": "Category",
+          "type": "category",
+          "required": true
+        },
+        {
+          "id": "github_url",
+          "label": "GitHub URL",
+          "type": "url",
+          "required": false,
+          "placeholder": "https://github.com/owner/repo"
+        },
+        {
+          "id": "docs_url",
+          "label": "Docs URL",
+          "type": "url",
+          "required": false,
+          "placeholder": "https://..."
+        },
+        {
+          "id": "brand_name",
+          "label": "Brand name",
+          "type": "text",
+          "required": false,
+          "placeholder": "Asana, Anthropic, Linear",
+          "helpText": "Optional provider name for logo matching and contributor review."
+        },
+        {
+          "id": "brand_domain",
+          "label": "Brand domain",
+          "type": "text",
+          "required": false,
+          "placeholder": "asana.com",
+          "helpText": "Optional canonical provider domain. Do not use GitHub or docs hosting domains unless that is the brand."
+        },
+        {
+          "id": "author",
+          "label": "Author",
+          "type": "text",
+          "required": false,
+          "placeholder": "GitHub handle, company, or maintainer name"
+        },
+        {
+          "id": "contact_email",
+          "label": "Public contact",
+          "type": "text",
+          "required": false,
+          "placeholder": "@github-handle or email if you want it public",
+          "helpText": "Optional. This is copied into a public GitHub issue, so do not include private contact details."
+        },
+        {
+          "id": "tags",
+          "label": "Tags",
+          "type": "text",
+          "required": false,
+          "placeholder": "claude, mcp, automation",
+          "helpText": "Comma-separated."
+        },
+        {
+          "id": "description",
+          "label": "Description",
+          "type": "textarea",
+          "required": true,
+          "placeholder": "Explain what this does, why it matters, and when to use it."
+        },
+        {
+          "id": "card_description",
+          "label": "Card description",
+          "type": "textarea",
+          "required": true,
+          "placeholder": "Short browse-card preview text."
+        },
+        {
+          "id": "items",
+          "label": "Items",
+          "type": "textarea",
+          "required": true,
+          "placeholder": "category/slug list, one per line."
+        }
+      ]
+    },
+    "guides": {
+      "schemaVersion": 2,
+      "category": "guides",
+      "label": "Guides",
+      "description": "Long-form guides and practical walkthroughs.",
+      "template": "submit-guide.yml",
+      "fields": [
+        {
+          "id": "name",
+          "label": "Name",
+          "type": "text",
+          "required": true,
+          "placeholder": "Human-readable listing name"
+        },
+        {
+          "id": "slug",
+          "label": "Slug",
+          "type": "text",
+          "required": true,
+          "placeholder": "kebab-case-slug",
+          "helpText": "Kebab-case only. Maintainers may adjust before merge."
+        },
+        {
+          "id": "category",
+          "label": "Category",
+          "type": "category",
+          "required": true
+        },
+        {
+          "id": "github_url",
+          "label": "GitHub URL",
+          "type": "url",
+          "required": false,
+          "placeholder": "https://github.com/owner/repo"
+        },
+        {
+          "id": "docs_url",
+          "label": "Docs URL",
+          "type": "url",
+          "required": false,
+          "placeholder": "https://..."
+        },
+        {
+          "id": "brand_name",
+          "label": "Brand name",
+          "type": "text",
+          "required": false,
+          "placeholder": "Asana, Anthropic, Linear",
+          "helpText": "Optional provider name for logo matching and contributor review."
+        },
+        {
+          "id": "brand_domain",
+          "label": "Brand domain",
+          "type": "text",
+          "required": false,
+          "placeholder": "asana.com",
+          "helpText": "Optional canonical provider domain. Do not use GitHub or docs hosting domains unless that is the brand."
+        },
+        {
+          "id": "author",
+          "label": "Author",
+          "type": "text",
+          "required": false,
+          "placeholder": "GitHub handle, company, or maintainer name"
+        },
+        {
+          "id": "contact_email",
+          "label": "Public contact",
+          "type": "text",
+          "required": false,
+          "placeholder": "@github-handle or email if you want it public",
+          "helpText": "Optional. This is copied into a public GitHub issue, so do not include private contact details."
+        },
+        {
+          "id": "tags",
+          "label": "Tags",
+          "type": "text",
+          "required": false,
+          "placeholder": "claude, mcp, automation",
+          "helpText": "Comma-separated."
+        },
+        {
+          "id": "description",
+          "label": "Description",
+          "type": "textarea",
+          "required": true,
+          "placeholder": "Explain what this does, why it matters, and when to use it."
+        },
+        {
+          "id": "card_description",
+          "label": "Card description",
+          "type": "textarea",
+          "required": true,
+          "placeholder": "Short browse-card preview text."
+        },
+        {
+          "id": "guide_content",
+          "label": "Guide content",
+          "type": "textarea",
+          "required": true,
+          "render": "markdown",
+          "placeholder": "Paste the full guide content."
+        }
+      ]
+    }
+  },
+  "issueTemplates": {
+    "agents": {
+      "schemaVersion": 2,
+      "category": "agents",
+      "template": "submit-agent.yml",
+      "labels": [
+        "content-submission",
+        "community-agents"
+      ],
+      "title": "Submit Agent: ",
+      "fields": [
+        {
+          "id": "name",
+          "label": "Name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "slug",
+          "label": "Slug",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "category",
+          "label": "Category",
+          "type": "category",
+          "required": true
+        },
+        {
+          "id": "github_url",
+          "label": "GitHub URL",
+          "type": "url",
+          "required": false
+        },
+        {
+          "id": "docs_url",
+          "label": "Docs URL",
+          "type": "url",
+          "required": false
+        },
+        {
+          "id": "brand_name",
+          "label": "Brand name",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "brand_domain",
+          "label": "Brand domain",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "author",
+          "label": "Author",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "contact_email",
+          "label": "Public contact",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "tags",
+          "label": "Tags",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "description",
+          "label": "Description",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "card_description",
+          "label": "Card description",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "full_copyable_content",
+          "label": "Full copyable content",
+          "type": "textarea",
+          "required": true,
+          "render": "markdown"
+        }
+      ]
+    },
+    "rules": {
+      "schemaVersion": 2,
+      "category": "rules",
+      "template": "submit-rule.yml",
+      "labels": [
+        "content-submission",
+        "community-rules"
+      ],
+      "title": "Submit Rule: ",
+      "fields": [
+        {
+          "id": "name",
+          "label": "Name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "slug",
+          "label": "Slug",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "category",
+          "label": "Category",
+          "type": "category",
+          "required": true
+        },
+        {
+          "id": "github_url",
+          "label": "GitHub URL",
+          "type": "url",
+          "required": false
+        },
+        {
+          "id": "docs_url",
+          "label": "Docs URL",
+          "type": "url",
+          "required": false
+        },
+        {
+          "id": "brand_name",
+          "label": "Brand name",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "brand_domain",
+          "label": "Brand domain",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "author",
+          "label": "Author",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "contact_email",
+          "label": "Public contact",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "tags",
+          "label": "Tags",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "description",
+          "label": "Description",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "card_description",
+          "label": "Card description",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "full_copyable_content",
+          "label": "Full copyable content",
+          "type": "textarea",
+          "required": true,
+          "render": "markdown"
+        }
+      ]
+    },
+    "mcp": {
+      "schemaVersion": 2,
+      "category": "mcp",
+      "template": "submit-mcp.yml",
+      "labels": [
+        "content-submission",
+        "community-mcp"
+      ],
+      "title": "Submit MCP Server: ",
+      "fields": [
+        {
+          "id": "name",
+          "label": "Name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "slug",
+          "label": "Slug",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "category",
+          "label": "Category",
+          "type": "category",
+          "required": true
+        },
+        {
+          "id": "github_url",
+          "label": "GitHub URL",
+          "type": "url",
+          "required": false
+        },
+        {
+          "id": "docs_url",
+          "label": "Docs URL",
+          "type": "url",
+          "required": false
+        },
+        {
+          "id": "brand_name",
+          "label": "Brand name",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "brand_domain",
+          "label": "Brand domain",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "author",
+          "label": "Author",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "contact_email",
+          "label": "Public contact",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "tags",
+          "label": "Tags",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "description",
+          "label": "Description",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "card_description",
+          "label": "Card description",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "install_command",
+          "label": "Install command",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "usage_snippet",
+          "label": "Usage snippet",
+          "type": "textarea",
+          "required": true,
+          "render": "markdown"
+        },
+        {
+          "id": "config_snippet",
+          "label": "Config snippet",
+          "type": "textarea",
+          "required": false,
+          "render": "markdown"
+        }
+      ]
+    },
+    "skills": {
+      "schemaVersion": 2,
+      "category": "skills",
+      "template": "submit-skill.yml",
+      "labels": [
+        "content-submission",
+        "skills"
+      ],
+      "title": "Submit Skill: ",
+      "fields": [
+        {
+          "id": "name",
+          "label": "Name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "slug",
+          "label": "Slug",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "category",
+          "label": "Category",
+          "type": "category",
+          "required": true
+        },
+        {
+          "id": "github_url",
+          "label": "GitHub URL",
+          "type": "url",
+          "required": false
+        },
+        {
+          "id": "docs_url",
+          "label": "Docs URL",
+          "type": "url",
+          "required": false
+        },
+        {
+          "id": "brand_name",
+          "label": "Brand name",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "brand_domain",
+          "label": "Brand domain",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "author",
+          "label": "Author",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "contact_email",
+          "label": "Public contact",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "tags",
+          "label": "Tags",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "description",
+          "label": "Description",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "card_description",
+          "label": "Card description",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "usage_snippet",
+          "label": "Usage snippet",
+          "type": "textarea",
+          "required": true,
+          "render": "markdown"
+        },
+        {
+          "id": "skill_type",
+          "label": "Skill type",
+          "type": "select",
+          "required": true,
+          "options": [
+            "general",
+            "capability-pack"
+          ]
+        },
+        {
+          "id": "skill_level",
+          "label": "Skill level",
+          "type": "select",
+          "required": true,
+          "options": [
+            "foundational",
+            "advanced",
+            "expert"
+          ]
+        },
+        {
+          "id": "verification_status",
+          "label": "Verification status",
+          "type": "select",
+          "required": true,
+          "options": [
+            "draft",
+            "validated",
+            "production"
+          ]
+        },
+        {
+          "id": "download_url",
+          "label": "Download URL",
+          "type": "url",
+          "required": false
+        },
+        {
+          "id": "retrieval_sources",
+          "label": "Retrieval sources",
+          "type": "textarea",
+          "required": false
+        },
+        {
+          "id": "tested_platforms",
+          "label": "Tested platforms",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    "hooks": {
+      "schemaVersion": 2,
+      "category": "hooks",
+      "template": "submit-hook.yml",
+      "labels": [
+        "content-submission",
+        "community-hooks"
+      ],
+      "title": "Submit Hook: ",
+      "fields": [
+        {
+          "id": "name",
+          "label": "Name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "slug",
+          "label": "Slug",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "category",
+          "label": "Category",
+          "type": "category",
+          "required": true
+        },
+        {
+          "id": "github_url",
+          "label": "GitHub URL",
+          "type": "url",
+          "required": false
+        },
+        {
+          "id": "docs_url",
+          "label": "Docs URL",
+          "type": "url",
+          "required": false
+        },
+        {
+          "id": "brand_name",
+          "label": "Brand name",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "brand_domain",
+          "label": "Brand domain",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "author",
+          "label": "Author",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "contact_email",
+          "label": "Public contact",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "tags",
+          "label": "Tags",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "description",
+          "label": "Description",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "card_description",
+          "label": "Card description",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "trigger",
+          "label": "Trigger",
+          "type": "select",
+          "required": true,
+          "options": [
+            "PreToolUse",
+            "PostToolUse",
+            "UserPromptSubmit",
+            "Notification",
+            "Stop",
+            "SubagentStop",
+            "SessionStart"
+          ]
+        },
+        {
+          "id": "usage_snippet",
+          "label": "Usage snippet",
+          "type": "textarea",
+          "required": true,
+          "render": "markdown"
+        },
+        {
+          "id": "full_copyable_content",
+          "label": "Full copyable content",
+          "type": "textarea",
+          "required": true,
+          "render": "markdown"
+        },
+        {
+          "id": "config_snippet",
+          "label": "Config snippet",
+          "type": "textarea",
+          "required": false,
+          "render": "markdown"
+        }
+      ]
+    },
+    "commands": {
+      "schemaVersion": 2,
+      "category": "commands",
+      "template": "submit-command.yml",
+      "labels": [
+        "content-submission",
+        "community-commands"
+      ],
+      "title": "Submit Command: ",
+      "fields": [
+        {
+          "id": "name",
+          "label": "Name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "slug",
+          "label": "Slug",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "category",
+          "label": "Category",
+          "type": "category",
+          "required": true
+        },
+        {
+          "id": "github_url",
+          "label": "GitHub URL",
+          "type": "url",
+          "required": false
+        },
+        {
+          "id": "docs_url",
+          "label": "Docs URL",
+          "type": "url",
+          "required": false
+        },
+        {
+          "id": "brand_name",
+          "label": "Brand name",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "brand_domain",
+          "label": "Brand domain",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "author",
+          "label": "Author",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "contact_email",
+          "label": "Public contact",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "tags",
+          "label": "Tags",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "description",
+          "label": "Description",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "card_description",
+          "label": "Card description",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "command_syntax",
+          "label": "Command syntax",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "usage_snippet",
+          "label": "Usage snippet",
+          "type": "textarea",
+          "required": true,
+          "render": "markdown"
+        },
+        {
+          "id": "full_copyable_content",
+          "label": "Full copyable content",
+          "type": "textarea",
+          "required": true,
+          "render": "markdown"
+        }
+      ]
+    },
+    "statuslines": {
+      "schemaVersion": 2,
+      "category": "statuslines",
+      "template": "submit-statusline.yml",
+      "labels": [
+        "content-submission",
+        "community-statuslines"
+      ],
+      "title": "Submit Statusline: ",
+      "fields": [
+        {
+          "id": "name",
+          "label": "Name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "slug",
+          "label": "Slug",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "category",
+          "label": "Category",
+          "type": "category",
+          "required": true
+        },
+        {
+          "id": "github_url",
+          "label": "GitHub URL",
+          "type": "url",
+          "required": false
+        },
+        {
+          "id": "docs_url",
+          "label": "Docs URL",
+          "type": "url",
+          "required": false
+        },
+        {
+          "id": "brand_name",
+          "label": "Brand name",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "brand_domain",
+          "label": "Brand domain",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "author",
+          "label": "Author",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "contact_email",
+          "label": "Public contact",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "tags",
+          "label": "Tags",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "description",
+          "label": "Description",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "card_description",
+          "label": "Card description",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "script_language",
+          "label": "Script language",
+          "type": "select",
+          "required": true,
+          "options": [
+            "bash",
+            "zsh",
+            "fish",
+            "python",
+            "javascript",
+            "other"
+          ]
+        },
+        {
+          "id": "usage_snippet",
+          "label": "Usage snippet",
+          "type": "textarea",
+          "required": true,
+          "render": "markdown"
+        },
+        {
+          "id": "full_copyable_content",
+          "label": "Full copyable content",
+          "type": "textarea",
+          "required": true,
+          "render": "markdown"
+        },
+        {
+          "id": "config_snippet",
+          "label": "Config snippet",
+          "type": "textarea",
+          "required": false,
+          "render": "markdown"
+        }
+      ]
+    },
+    "collections": {
+      "schemaVersion": 2,
+      "category": "collections",
+      "template": "submit-collection.yml",
+      "labels": [
+        "content-submission",
+        "community-collections"
+      ],
+      "title": "Submit Collection: ",
+      "fields": [
+        {
+          "id": "name",
+          "label": "Name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "slug",
+          "label": "Slug",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "category",
+          "label": "Category",
+          "type": "category",
+          "required": true
+        },
+        {
+          "id": "github_url",
+          "label": "GitHub URL",
+          "type": "url",
+          "required": false
+        },
+        {
+          "id": "docs_url",
+          "label": "Docs URL",
+          "type": "url",
+          "required": false
+        },
+        {
+          "id": "brand_name",
+          "label": "Brand name",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "brand_domain",
+          "label": "Brand domain",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "author",
+          "label": "Author",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "contact_email",
+          "label": "Public contact",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "tags",
+          "label": "Tags",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "description",
+          "label": "Description",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "card_description",
+          "label": "Card description",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "items",
+          "label": "Items",
+          "type": "textarea",
+          "required": true
+        }
+      ]
+    },
+    "guides": {
+      "schemaVersion": 2,
+      "category": "guides",
+      "template": "submit-guide.yml",
+      "labels": [
+        "content-submission",
+        "guide"
+      ],
+      "title": "Submit Guide: ",
+      "fields": [
+        {
+          "id": "name",
+          "label": "Name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "slug",
+          "label": "Slug",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "category",
+          "label": "Category",
+          "type": "category",
+          "required": true
+        },
+        {
+          "id": "github_url",
+          "label": "GitHub URL",
+          "type": "url",
+          "required": false
+        },
+        {
+          "id": "docs_url",
+          "label": "Docs URL",
+          "type": "url",
+          "required": false
+        },
+        {
+          "id": "brand_name",
+          "label": "Brand name",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "brand_domain",
+          "label": "Brand domain",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "author",
+          "label": "Author",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "contact_email",
+          "label": "Public contact",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "tags",
+          "label": "Tags",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "description",
+          "label": "Description",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "card_description",
+          "label": "Card description",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "guide_content",
+          "label": "Guide content",
+          "type": "textarea",
+          "required": true,
+          "render": "markdown"
+        }
+      ]
+    }
+  }
+}

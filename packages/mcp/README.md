@@ -4,8 +4,9 @@ Read-only Model Context Protocol server for the HeyClaude registry.
 
 It exposes the same public registry surface used by the website and Raycast:
 search, entry details, platform compatibility, install guidance, generated
-adapters, and feed discovery. It does not create submissions, open pull
-requests, write local files, publish content, or manage accounts.
+adapters, feed discovery, and safe submission-draft helpers. It does not create
+GitHub issues, open pull requests, write local files, publish content, or manage
+accounts.
 
 ## Tools
 
@@ -19,6 +20,15 @@ requests, write local files, publish content, or manage accounts.
   rule adapters for skill packages.
 - `list_distribution_feeds` - discover public JSON, RSS, Atom, and platform
   feeds.
+- `get_submission_schema` - fetch category submission fields and issue template
+  metadata.
+- `validate_submission_draft` - validate a content submission draft locally.
+- `search_duplicate_entries` - check generated registry artifacts for likely
+  duplicates before opening a submission.
+- `build_submission_urls` - build prefilled HeyClaude submit and GitHub issue
+  URLs for human review.
+- `get_category_submission_guidance` - fetch category-specific contribution
+  guidance and required fields.
 
 ## Local Stdio
 
@@ -79,6 +89,7 @@ Use a remote MCP adapter such as `mcp-remote` when a client only supports stdio:
 ## Security Boundary
 
 - Read-only registry artifacts only.
+- Submission helpers generate URLs and validation reports only.
 - No GitHub OAuth, tokens, issue creation, PR creation, or repo writes.
 - No local project-file writes or config mutations.
 - Remote endpoint uses route-level rate limits and Cloudflare rate-limit bindings

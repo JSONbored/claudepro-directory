@@ -65,6 +65,11 @@ describe("HeyClaude remote MCP route", () => {
       "get_install_guidance",
       "get_platform_adapter",
       "list_distribution_feeds",
+      "get_submission_schema",
+      "validate_submission_draft",
+      "search_duplicate_entries",
+      "build_submission_urls",
+      "get_category_submission_guidance",
     ]);
     expect(toolNames.join(" ")).not.toMatch(/create|publish|write|delete/i);
   });
@@ -117,5 +122,41 @@ describe("HeyClaude remote MCP route", () => {
         ]),
       },
     });
+  });
+
+  it("builds submission helper URLs without calling GitHub write APIs", async () => {
+    const response = await POST(
+      mcpRequest({
+        jsonrpc: "2.0",
+        id: 5,
+        method: "tools/call",
+        params: {
+          name: "build_submission_urls",
+          arguments: {
+            fields: {
+              category: "mcp",
+              name: "Example MCP Server",
+              docs_url: "https://example.com/docs",
+              description:
+                "Example MCP server submission used to verify the public helper flow.",
+              install_command: "npx -y example-mcp",
+              usage_snippet: "Add the MCP server to your Claude config.",
+            },
+          },
+        },
+      }),
+    );
+    expect(response.status).toBe(200);
+
+    const payload = await json(response);
+    expect(payload.result.isError).toBe(false);
+    const result = JSON.parse(payload.result.content[0].text);
+    expect(result).toMatchObject({
+      ok: true,
+      valid: true,
+      githubIssueUrl: expect.stringContaining("template=submit-mcp.yml"),
+      reviewModel: expect.stringContaining("Issue-first"),
+    });
+    expect(JSON.stringify(result)).not.toMatch(/token|secret|authorization/i);
   });
 });
