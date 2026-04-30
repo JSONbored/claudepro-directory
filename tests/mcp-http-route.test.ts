@@ -89,4 +89,33 @@ describe("HeyClaude remote MCP route", () => {
     expect(result.entries[0]).toHaveProperty("canonicalUrl");
     expect(JSON.stringify(result)).not.toMatch(/admin|token|secret/i);
   });
+
+  it("returns schema validation errors for malformed MCP tool arguments", async () => {
+    const response = await POST(
+      mcpRequest({
+        jsonrpc: "2.0",
+        id: 4,
+        method: "tools/call",
+        params: {
+          name: "search_registry",
+          arguments: { limit: 100, writePath: "/tmp/unsafe" },
+        },
+      }),
+    );
+    expect(response.status).toBe(200);
+
+    const payload = await json(response);
+    expect(payload.result.isError).toBe(true);
+    const result = JSON.parse(payload.result.content[0].text);
+    expect(result).toMatchObject({
+      ok: false,
+      error: {
+        code: "invalid_request",
+        details: expect.arrayContaining([
+          expect.objectContaining({ path: "limit", code: "too_big" }),
+          expect.objectContaining({ path: "", code: "unrecognized_keys" }),
+        ]),
+      },
+    });
+  });
 });

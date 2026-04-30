@@ -7,6 +7,11 @@ import {
   READ_ONLY_TOOL_NAMES,
   TOOL_DEFINITIONS,
 } from "../packages/mcp/src/registry.js";
+import {
+  jsonSchemaForTool,
+  parseToolArguments,
+  TOOL_INPUT_SCHEMAS,
+} from "../packages/mcp/src/schemas.js";
 import { repoRoot } from "./helpers/registry-fixtures";
 
 const dataDir = path.join(repoRoot, "apps/web/public/data");
@@ -40,6 +45,7 @@ describe("HeyClaude read-only MCP helpers", () => {
     expect(packageJson.private).not.toBe(true);
     expect(packageJson.bin).toHaveProperty("heyclaude-mcp", "./src/cli.js");
     expect(packageJson.dependencies).not.toHaveProperty("@heyclaude/registry");
+    expect(packageJson.dependencies).toHaveProperty("zod", "4.3.6");
     expect(Object.values(packageJson.dependencies ?? {})).not.toContain(
       "workspace:*",
     );
@@ -50,10 +56,69 @@ describe("HeyClaude read-only MCP helpers", () => {
     expect(TOOL_DEFINITIONS.map((tool) => tool.name)).toEqual(
       READ_ONLY_TOOL_NAMES,
     );
+    expect(Object.keys(TOOL_INPUT_SCHEMAS)).toEqual(READ_ONLY_TOOL_NAMES);
     for (const tool of TOOL_DEFINITIONS) {
       expect(tool.name).not.toMatch(/create|submit|publish|write|delete|pr/i);
       expect(tool.description).toMatch(/read-only|fetch|search|list/i);
+      expect(tool.inputSchema).toEqual(jsonSchemaForTool(tool.name));
+      expect(tool.inputSchema).toMatchObject({
+        type: "object",
+        additionalProperties: false,
+      });
+      expect(JSON.stringify(tool.inputSchema)).not.toContain("$schema");
     }
+  });
+
+  it("validates MCP tool arguments from shared Zod schemas", async () => {
+    expect(
+      parseToolArguments("search_registry", {
+        query: "discord",
+        category: "mcp",
+        platform: "cursor-rules",
+        limit: 3,
+      }),
+    ).toEqual({
+      query: "discord",
+      category: "mcp",
+      platform: "cursor-rules",
+      limit: 3,
+    });
+
+    await expect(
+      callRegistryTool(
+        "get_entry_detail",
+        { category: "../mcp", slug: "bad" },
+        { dataDir },
+      ),
+    ).resolves.toMatchObject({
+      ok: false,
+      error: {
+        code: "invalid_request",
+        details: [
+          expect.objectContaining({
+            path: "category",
+            code: "invalid_format",
+          }),
+        ],
+      },
+    });
+
+    await expect(
+      callRegistryTool(
+        "search_registry",
+        { limit: 100, unexpected: true },
+        { dataDir },
+      ),
+    ).resolves.toMatchObject({
+      ok: false,
+      error: {
+        code: "invalid_request",
+        details: expect.arrayContaining([
+          expect.objectContaining({ path: "limit", code: "too_big" }),
+          expect.objectContaining({ path: "", code: "unrecognized_keys" }),
+        ]),
+      },
+    });
   });
 
   it("searches registry artifacts with category and platform filters", async () => {
@@ -164,7 +229,7 @@ describe("HeyClaude read-only MCP helpers", () => {
     await expect(
       callRegistryTool(
         "get_entry_detail",
-        { category: "../mcp", slug: "bad" },
+        { category: "mcp", slug: "does-not-exist" },
         { dataDir },
       ),
     ).resolves.toMatchObject({ ok: false, error: { code: "not_found" } });

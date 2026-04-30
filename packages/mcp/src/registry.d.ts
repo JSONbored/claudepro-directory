@@ -51,3 +51,16 @@ export function callRegistryTool(
   args?: Record<string, unknown>,
   options?: RegistryArtifactLoaders,
 ): Promise<RegistryToolResult>;
+
+export {
+  SearchRegistryInputSchema,
+  EntryDetailInputSchema,
+  CompatibilityInputSchema,
+  InstallGuidanceInputSchema,
+  PlatformAdapterInputSchema,
+  ListDistributionFeedsInputSchema,
+  TOOL_INPUT_SCHEMAS,
+  jsonSchemaForTool,
+  parseToolArguments,
+  formatZodError,
+} from "./schemas.js";

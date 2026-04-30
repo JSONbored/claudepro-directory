@@ -7,6 +7,11 @@ import {
   platformFeedSlug,
   SITE_URL,
 } from "./platforms.js";
+import {
+  formatZodError,
+  jsonSchemaForTool,
+  parseToolArguments,
+} from "./schemas.js";
 
 const repoRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -43,83 +48,37 @@ export const TOOL_DEFINITIONS = [
     name: "search_registry",
     description:
       "Search read-only HeyClaude registry entries by query, category, and skill platform compatibility.",
-    inputSchema: {
-      type: "object",
-      additionalProperties: false,
-      properties: {
-        query: { type: "string" },
-        category: { type: "string" },
-        platform: { type: "string" },
-        limit: { type: "number", minimum: 1, maximum: 25 },
-      },
-    },
+    inputSchema: jsonSchemaForTool("search_registry"),
   },
   {
     name: "get_entry_detail",
     description:
       "Fetch a read-only HeyClaude registry entry detail payload by category and slug.",
-    inputSchema: {
-      type: "object",
-      additionalProperties: false,
-      required: ["category", "slug"],
-      properties: {
-        category: { type: "string" },
-        slug: { type: "string" },
-      },
-    },
+    inputSchema: jsonSchemaForTool("get_entry_detail"),
   },
   {
     name: "get_compatibility",
     description:
       "Fetch platform compatibility metadata for a HeyClaude skill entry.",
-    inputSchema: {
-      type: "object",
-      additionalProperties: false,
-      required: ["slug"],
-      properties: {
-        category: { type: "string" },
-        slug: { type: "string" },
-      },
-    },
+    inputSchema: jsonSchemaForTool("get_compatibility"),
   },
   {
     name: "get_install_guidance",
     description:
       "Fetch read-only install, config, usage, and package guidance for a HeyClaude entry.",
-    inputSchema: {
-      type: "object",
-      additionalProperties: false,
-      required: ["category", "slug"],
-      properties: {
-        category: { type: "string" },
-        slug: { type: "string" },
-        platform: { type: "string" },
-      },
-    },
+    inputSchema: jsonSchemaForTool("get_install_guidance"),
   },
   {
     name: "get_platform_adapter",
     description:
       "Fetch generated read-only platform adapter content, currently Cursor rule adapters for skill packages.",
-    inputSchema: {
-      type: "object",
-      additionalProperties: false,
-      required: ["slug"],
-      properties: {
-        slug: { type: "string" },
-        platform: { type: "string" },
-      },
-    },
+    inputSchema: jsonSchemaForTool("get_platform_adapter"),
   },
   {
     name: "list_distribution_feeds",
     description:
       "List read-only HeyClaude registry feeds, category feeds, platform feeds, and artifact locations.",
-    inputSchema: {
-      type: "object",
-      additionalProperties: false,
-      properties: {},
-    },
+    inputSchema: jsonSchemaForTool("list_distribution_feeds"),
   },
 ];
 
@@ -249,6 +208,10 @@ function notFound(message) {
 
 function invalid(message) {
   return { ok: false, error: { code: "invalid_request", message } };
+}
+
+function invalidWithDetails(message, details) {
+  return { ok: false, error: { code: "invalid_request", message, details } };
 }
 
 export async function searchRegistry(args = {}, options = {}) {
@@ -410,20 +373,36 @@ export async function listDistributionFeeds(args = {}, options = {}) {
 }
 
 export async function callRegistryTool(name, args = {}, options = {}) {
+  if (!READ_ONLY_TOOL_NAMES.includes(name)) {
+    return invalid(`Unknown read-only HeyClaude MCP tool: ${name}`);
+  }
+
+  let parsedArgs;
+  try {
+    parsedArgs = parseToolArguments(name, args);
+  } catch (error) {
+    const details = formatZodError(error);
+    if (details) {
+      return invalidWithDetails(
+        "Invalid HeyClaude MCP tool arguments.",
+        details,
+      );
+    }
+    throw error;
+  }
+
   switch (name) {
     case "search_registry":
-      return searchRegistry(args, options);
+      return searchRegistry(parsedArgs, options);
     case "get_entry_detail":
-      return getEntryDetail(args, options);
+      return getEntryDetail(parsedArgs, options);
     case "get_compatibility":
-      return getCompatibility(args, options);
+      return getCompatibility(parsedArgs, options);
     case "get_install_guidance":
-      return getInstallGuidance(args, options);
+      return getInstallGuidance(parsedArgs, options);
     case "get_platform_adapter":
-      return getPlatformAdapter(args, options);
+      return getPlatformAdapter(parsedArgs, options);
     case "list_distribution_feeds":
-      return listDistributionFeeds(args, options);
-    default:
-      return invalid(`Unknown read-only HeyClaude MCP tool: ${name}`);
+      return listDistributionFeeds(parsedArgs, options);
   }
 }

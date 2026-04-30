@@ -45,6 +45,10 @@
     "./platforms": {
       "types": "./src/platforms.d.ts",
       "default": "./src/platforms.js"
+    },
+    "./schemas": {
+      "types": "./src/schemas.d.ts",
+      "default": "./src/schemas.js"
     }
   },
   "bin": {
@@ -55,9 +59,10 @@
   },
   "scripts": {
     "start": "node src/cli.js",
-    "test": "vitest run ../../tests/mcp-server.test.ts"
+    "test": "pnpm --dir ../.. exec vitest run tests/mcp-server.test.ts"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "1.29.0"
+    "@modelcontextprotocol/sdk": "1.29.0",
+    "zod": "4.3.6"
   }
 }
