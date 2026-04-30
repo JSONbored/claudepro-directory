@@ -564,12 +564,33 @@ export function buildRegistryChangelogFeed(entries) {
 }
 
 export function platformFeedSlug(platform) {
-  return String(platform || "")
+  const text = String(platform || "")
     .trim()
-    .toLowerCase()
-    .replace(/&/g, " and ")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+    .toLowerCase();
+  let output = "";
+  let lastWasSeparator = false;
+
+  for (const char of text) {
+    const isAlphaNumeric =
+      (char >= "a" && char <= "z") || (char >= "0" && char <= "9");
+    if (isAlphaNumeric) {
+      output += char;
+      lastWasSeparator = false;
+      continue;
+    }
+    if (char === "&") {
+      if (output && !lastWasSeparator) output += "-";
+      output += "and";
+      lastWasSeparator = false;
+      continue;
+    }
+    if (output && !lastWasSeparator) {
+      output += "-";
+      lastWasSeparator = true;
+    }
+  }
+
+  return lastWasSeparator ? output.slice(0, -1) : output;
 }
 
 export function buildCategoryDistributionFeed(entries, category, params = {}) {

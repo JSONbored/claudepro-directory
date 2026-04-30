@@ -89,12 +89,24 @@ export const HEADING_KEY_MAP = {
 const CATEGORY_ALIASES = new Map(Object.entries(categorySpec.aliases));
 
 export function normalizeHeading(label) {
-  return String(label)
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, " ")
-    .replace(/\s+/g, "-")
-    .replace(/^-+|-+$/g, "");
+  let output = "";
+  let lastWasSeparator = false;
+
+  for (const char of String(label).trim().toLowerCase()) {
+    const isAlphaNumeric =
+      (char >= "a" && char <= "z") || (char >= "0" && char <= "9");
+    if (isAlphaNumeric) {
+      output += char;
+      lastWasSeparator = false;
+      continue;
+    }
+    if (output && !lastWasSeparator) {
+      output += "-";
+      lastWasSeparator = true;
+    }
+  }
+
+  return lastWasSeparator ? output.slice(0, -1) : output;
 }
 
 export function normalizeValue(value) {
@@ -103,20 +115,95 @@ export function normalizeValue(value) {
   return text;
 }
 
+function compactWhitespace(value) {
+  let output = "";
+  let lastWasWhitespace = false;
+  for (const char of String(value || "").trim()) {
+    if (char === " " || char === "\n" || char === "\t" || char === "\r") {
+      if (!lastWasWhitespace) output += " ";
+      lastWasWhitespace = true;
+      continue;
+    }
+    output += char;
+    lastWasWhitespace = false;
+  }
+  return output.trim();
+}
+
+function singularLabel(value) {
+  const label = normalizeValue(value);
+  return label.endsWith("s") ? label.slice(0, -1) : label;
+}
+
+function looksLikeSubmitTitle(value) {
+  const title = normalizeValue(value).toLowerCase();
+  const normalized = title.startsWith("[") ? title.slice(1) : title;
+  return normalized === "submit" || normalized.startsWith("submit ");
+}
+
+function isIsoDate(value) {
+  const text = normalizeValue(value);
+  if (text.length !== 10) return false;
+  return [...text].every((char, index) => {
+    if (index === 4 || index === 7) return char === "-";
+    return char >= "0" && char <= "9";
+  });
+}
+
+function splitList(value) {
+  const items = [];
+  let current = "";
+  for (const char of String(value || "")) {
+    if (char === "\n" || char === ",") {
+      const next = current.trim();
+      if (next) items.push(next);
+      current = "";
+      continue;
+    }
+    current += char;
+  }
+  const next = current.trim();
+  if (next) items.push(next);
+  return items;
+}
+
+function containsForbiddenCounter(value) {
+  const text = String(value || "").toLowerCase();
+  return (
+    text.includes("viewcount") ||
+    text.includes("copycount") ||
+    text.includes("popularityscore")
+  );
+}
+
 export function slugify(value) {
-  return String(value || "")
+  let output = "";
+  let lastWasSeparator = false;
+
+  for (const char of String(value || "")
     .trim()
-    .toLowerCase()
-    .replace(/['"]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .replace(/-{2,}/g, "-");
+    .toLowerCase()) {
+    const isAlphaNumeric =
+      (char >= "a" && char <= "z") || (char >= "0" && char <= "9");
+    if (isAlphaNumeric) {
+      output += char;
+      lastWasSeparator = false;
+      continue;
+    }
+    if (char === "'" || char === '"') continue;
+    if (output && !lastWasSeparator) {
+      output += "-";
+      lastWasSeparator = true;
+    }
+  }
+
+  return lastWasSeparator ? output.slice(0, -1) : output;
 }
 
 export function normalizeCategory(value) {
   const normalized = normalizeHeading(value);
   if (CATEGORY_ALIASES.has(normalized)) return CATEGORY_ALIASES.get(normalized);
-  if (/\bmcp\b/.test(normalized)) return "mcp";
+  if (normalized.split("-").includes("mcp")) return "mcp";
   return "";
 }
 
@@ -130,7 +217,14 @@ function fieldKey(label) {
 
 function parseJsonCodeBlock(value) {
   const raw = String(value || "").trim();
-  const code = raw.match(/```(?:json)?\n([\s\S]*?)```/i)?.[1] ?? raw;
+  let code = raw;
+  if (raw.startsWith("```")) {
+    const firstLineEnd = raw.indexOf("\n");
+    const closingFence = raw.lastIndexOf("```");
+    if (firstLineEnd >= 0 && closingFence > firstLineEnd) {
+      code = raw.slice(firstLineEnd + 1, closingFence).trim();
+    }
+  }
   try {
     const parsed = JSON.parse(code);
     return parsed && typeof parsed === "object" && !Array.isArray(parsed)
@@ -174,40 +268,73 @@ function mapJsonData(data) {
   return mapped;
 }
 
+function parseBulletLine(line) {
+  const trimmed = String(line || "").trimStart();
+  if (!trimmed.startsWith("- ")) return null;
+  const withoutMarker = trimmed.slice(2);
+  const colonIndex = withoutMarker.indexOf(":");
+  if (colonIndex <= 0) return null;
+  return {
+    label: withoutMarker.slice(0, colonIndex),
+    value: withoutMarker.slice(colonIndex + 1).trimStart(),
+  };
+}
+
+function parseBoldFieldLine(line) {
+  const trimmed = String(line || "").trim();
+  if (!trimmed.startsWith("**")) return null;
+  const labelEnd = trimmed.indexOf(":**");
+  if (labelEnd <= 2) return null;
+  return {
+    label: trimmed.slice(2, labelEnd),
+    value: trimmed.slice(labelEnd + 3).trimStart(),
+  };
+}
+
 export function parseIssueFormBody(body) {
   const sections = {};
   const text = String(body || "");
-  const chunks = text
-    .split(/\n(?=###\s+)/g)
-    .filter((chunk) => chunk.trim().startsWith("### "));
+  let currentLabel = "";
+  let currentLines = [];
 
-  for (const chunk of chunks) {
-    const lines = chunk.split("\n");
-    const firstLine = lines.shift() ?? "";
-    const rawLabel = firstLine.replace(/^###\s+/, "").trim();
-    sections[fieldKey(rawLabel)] = normalizeValue(lines.join("\n"));
+  const commitSection = () => {
+    if (!currentLabel) return;
+    sections[fieldKey(currentLabel)] = normalizeValue(currentLines.join("\n"));
+  };
+
+  for (const line of text.split("\n")) {
+    const trimmedStart = line.trimStart();
+    if (trimmedStart.startsWith("### ")) {
+      commitSection();
+      currentLabel = trimmedStart.slice(4).trim();
+      currentLines = [];
+      continue;
+    }
+    if (currentLabel) currentLines.push(line);
   }
+  commitSection();
 
   if (Object.keys(sections).length === 0) {
     const lines = text.split("\n");
     for (let i = 0; i < lines.length; i += 1) {
-      const line = lines[i];
-      const match = line.match(/^\s*-\s*([^:]+):\s*(.*)$/);
+      const match = parseBulletLine(lines[i]);
       if (!match) continue;
-      const valueLines = [match[2] ?? ""];
+      const valueLines = [match.value];
       for (let j = i + 1; j < lines.length; j += 1) {
         const nextLine = lines[j];
-        if (/^\s*-\s*[^:]+:/.test(nextLine)) break;
-        valueLines.push(nextLine.replace(/^\s{2,}/, ""));
+        if (parseBulletLine(nextLine)) break;
+        valueLines.push(nextLine.trimStart());
         i = j;
       }
-      sections[fieldKey(match[1])] = normalizeValue(valueLines.join("\n"));
+      sections[fieldKey(match.label)] = normalizeValue(valueLines.join("\n"));
     }
   }
 
-  for (const match of text.matchAll(/^\*\*([^*]+):\*\*\s*(.+)$/gm)) {
-    const key = fieldKey(match[1]);
-    if (!sections[key]) sections[key] = normalizeValue(match[2]);
+  for (const line of text.split("\n")) {
+    const match = parseBoldFieldLine(line);
+    if (!match) continue;
+    const key = fieldKey(match.label);
+    if (!sections[key]) sections[key] = normalizeValue(match.value);
   }
 
   const jsonData = parseJsonCodeBlock(sections["json-data"]);
@@ -228,7 +355,7 @@ export function normalizeParsedFields(fields) {
   if (nextSlug) normalized.slug = nextSlug;
 
   if (!normalized.card_description && normalized.description) {
-    const oneLine = String(normalized.description).replace(/\s+/g, " ").trim();
+    const oneLine = compactWhitespace(normalized.description);
     normalized.card_description =
       oneLine.length <= 140 ? oneLine : `${oneLine.slice(0, 137).trimEnd()}...`;
   }
@@ -266,7 +393,7 @@ export function normalizeSubmissionPayloadFields(fields = {}) {
 export function buildSubmissionIssueTitle(fields = {}) {
   const normalized = normalizeSubmissionPayloadFields(fields);
   const category = normalizeCategory(normalized.category);
-  const label = categorySpec.categories[category]?.label?.replace(/s$/, "");
+  const label = singularLabel(categorySpec.categories[category]?.label || "");
   return `Submit ${label || "Entry"}: ${normalizeValue(normalized.name) || "New directory entry"}`;
 }
 
@@ -338,14 +465,7 @@ export function looksLikeSubmissionIssue(issue = {}) {
 
   const title = String(issue.title || "").trim();
   const body = String(issue.body || "");
-  if (/^\[?submit\b/i.test(title)) return true;
-  if (
-    /^submit\s+(agent|command|collection|guide|hook|mcp|rule|skill|statusline)/i.test(
-      title,
-    )
-  ) {
-    return true;
-  }
+  if (looksLikeSubmitTitle(title)) return true;
 
   const normalizedBody = body.toLowerCase();
   return (
@@ -403,8 +523,26 @@ function isHttpsUrl(value) {
 function isValidPublicContact(value) {
   const normalized = normalizeValue(value);
   if (!normalized) return true;
-  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) return true;
-  if (/^@?[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?$/.test(normalized)) {
+  if (normalized.includes("@")) {
+    const [local, domain] = normalized.split("@");
+    if (local && domain && domain.includes(".") && !normalized.includes(" ")) {
+      return true;
+    }
+  }
+  const handle = normalized.startsWith("@") ? normalized.slice(1) : normalized;
+  if (
+    handle.length >= 1 &&
+    handle.length <= 39 &&
+    !handle.startsWith("-") &&
+    !handle.endsWith("-") &&
+    [...handle].every(
+      (char) =>
+        (char >= "A" && char <= "Z") ||
+        (char >= "a" && char <= "z") ||
+        (char >= "0" && char <= "9") ||
+        char === "-",
+    )
+  ) {
     return true;
   }
 
@@ -541,7 +679,7 @@ export function validateSubmission(issue) {
     }
   }
 
-  if (fields.slug && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(fields.slug)) {
+  if (fields.slug && slugify(fields.slug) !== fields.slug) {
     errors.push("Invalid slug format: expected kebab-case");
   }
 
@@ -630,7 +768,7 @@ export function validateSubmission(issue) {
     if (verificationStatus && !validStatuses.has(verificationStatus)) {
       errors.push(`Invalid verification_status: ${verificationStatus}`);
     }
-    if (verifiedAt && !/^\d{4}-\d{2}-\d{2}$/.test(verifiedAt)) {
+    if (verifiedAt && !isIsoDate(verifiedAt)) {
       errors.push("verified_at must use YYYY-MM-DD format");
     }
     if (skillType === "capability-pack") {
@@ -643,12 +781,9 @@ export function validateSubmission(issue) {
       }
     }
     if (retrievalSources) {
-      const urls = retrievalSources
-        .split(/[\n,]+/)
-        .map((value) => value.trim())
-        .filter(Boolean);
+      const urls = splitList(retrievalSources);
       for (const url of urls) {
-        if (!/^https:\/\//i.test(url)) {
+        if (!isHttpsUrl(url)) {
           errors.push(`retrieval_sources must use https URLs: ${url}`);
         }
       }
@@ -659,8 +794,7 @@ export function validateSubmission(issue) {
   }
 
   const fullCopyable = String(fields.full_copyable_content ?? "");
-  const forbiddenCounterPattern = /\b(viewCount|copyCount|popularityScore)\b/;
-  if (forbiddenCounterPattern.test(fullCopyable)) {
+  if (containsForbiddenCounter(fullCopyable)) {
     errors.push("Forbidden counters detected in full_copyable_content");
   }
 

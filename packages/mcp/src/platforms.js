@@ -1,12 +1,37 @@
 export const SITE_URL = "https://heyclau.de";
 
-export function platformFeedSlug(platform) {
-  return String(platform || "")
+function slugPart(value, options = {}) {
+  const text = String(value || "")
     .trim()
-    .toLowerCase()
-    .replace(/&/g, "and")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+    .toLowerCase();
+  let output = "";
+  let lastWasSeparator = false;
+
+  for (const char of text) {
+    const isAlphaNumeric =
+      (char >= "a" && char <= "z") || (char >= "0" && char <= "9");
+    if (isAlphaNumeric) {
+      output += char;
+      lastWasSeparator = false;
+      continue;
+    }
+    if (char === "&" && options.expandAmpersand) {
+      if (output && !lastWasSeparator) output += "-";
+      output += "and";
+      lastWasSeparator = false;
+      continue;
+    }
+    if (output && !lastWasSeparator) {
+      output += "-";
+      lastWasSeparator = true;
+    }
+  }
+
+  return lastWasSeparator ? output.slice(0, -1) : output;
+}
+
+export function platformFeedSlug(platform) {
+  return slugPart(platform, { expandAmpersand: true });
 }
 
 export function buildSkillPlatformCompatibility(entry) {

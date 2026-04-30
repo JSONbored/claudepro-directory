@@ -1,12 +1,32 @@
 import { marked } from "marked";
+import sanitizeHtml from "sanitize-html";
 
 import type { ContentEntry, DirectoryEntry } from "@/lib/content";
 
 export function stripCodeBlocks(markdown: string) {
-  return String(markdown || "")
-    .replace(/```[\w-]*\n[\s\S]*?```/g, "")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
+  const lines = String(markdown || "").split("\n");
+  const output: string[] = [];
+  let inCodeBlock = false;
+  let blankCount = 0;
+
+  for (const line of lines) {
+    if (line.trim().startsWith("```")) {
+      inCodeBlock = !inCodeBlock;
+      continue;
+    }
+    if (inCodeBlock) continue;
+
+    if (!line.trim()) {
+      blankCount += 1;
+      if (blankCount <= 2) output.push("");
+      continue;
+    }
+
+    blankCount = 0;
+    output.push(line);
+  }
+
+  return output.join("\n").trim();
 }
 
 export async function renderMarkdown(markdown: string) {
@@ -25,47 +45,78 @@ function escapeHtml(value: string) {
 }
 
 function sanitizeRenderedHtml(html: string) {
-  return html
-    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, (match) => {
-      return `<pre><code>${escapeHtml(match)}</code></pre>`;
-    })
-    .replace(/<script\b[^>]*>/gi, (match) => `<pre><code>${escapeHtml(match)}`)
-    .replace(/<\/script>/gi, (match) => `${escapeHtml(match)}</code></pre>`)
-    .replace(/<\/?([a-z][\w:-]*)(?:\s[^>]*)?>/gi, (match, tagName) => {
-      const allowedTags = new Set([
-        "a",
-        "blockquote",
-        "br",
-        "code",
-        "em",
-        "h1",
-        "h2",
-        "h3",
-        "h4",
-        "h5",
-        "h6",
-        "hr",
-        "img",
-        "li",
-        "ol",
-        "p",
-        "pre",
-        "strong",
-        "table",
-        "tbody",
-        "td",
-        "th",
-        "thead",
-        "tr",
-        "ul",
-      ]);
-      return allowedTags.has(String(tagName).toLowerCase())
-        ? match
-        : escapeHtml(match);
-    })
-    .replace(/\s+on[a-z]+\s*=\s*"[^"]*"/gi, "")
-    .replace(/\s+on[a-z]+\s*=\s*'[^']*'/gi, "")
-    .replace(/javascript:/gi, "");
+  return sanitizeHtml(html, {
+    allowedTags: [
+      "a",
+      "blockquote",
+      "br",
+      "code",
+      "em",
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h5",
+      "h6",
+      "hr",
+      "img",
+      "li",
+      "ol",
+      "p",
+      "pre",
+      "strong",
+      "table",
+      "tbody",
+      "td",
+      "th",
+      "thead",
+      "tr",
+      "ul",
+    ],
+    allowedAttributes: {
+      "*": ["id"],
+      a: ["href", "title", "target", "rel"],
+      code: ["class"],
+      img: ["alt", "height", "src", "title", "width"],
+      th: ["align"],
+      td: ["align"],
+    },
+    allowedSchemes: ["http", "https", "mailto"],
+    allowedSchemesByTag: {
+      img: ["https"],
+    },
+    transformTags: {
+      a: (_tagName, attribs) => ({
+        tagName: "a",
+        attribs: {
+          ...attribs,
+          rel: "nofollow noopener noreferrer",
+          target: "_blank",
+        },
+      }),
+    },
+  });
+}
+
+export function htmlToPlainText(html: string) {
+  const text = sanitizeHtml(String(html || ""), {
+    allowedTags: [],
+    allowedAttributes: {},
+  });
+
+  let output = "";
+  let lastWasWhitespace = false;
+  for (const char of text.trim()) {
+    if (char === " " || char === "\n" || char === "\t" || char === "\r") {
+      if (!lastWasWhitespace) output += " ";
+      lastWasWhitespace = true;
+      continue;
+    }
+    output += char;
+    lastWasWhitespace = false;
+  }
+
+  return output.trim();
 }
 
 export function getPrimarySnippet(entry: ContentEntry) {

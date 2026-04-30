@@ -38,10 +38,23 @@ export function formatJobSourceCheckSummary(report) {
 }
 
 function escapeTableCell(value) {
-  return String(value ?? "")
-    .replace(/\|/g, "\\|")
-    .replace(/\s+/g, " ")
-    .trim();
+  const escaped = String(value ?? "")
+    .replaceAll("\\", "\\\\")
+    .replaceAll("|", "\\|");
+
+  let output = "";
+  let lastWasWhitespace = false;
+  for (const char of escaped.trim()) {
+    if (char === " " || char === "\n" || char === "\t" || char === "\r") {
+      if (!lastWasWhitespace) output += " ";
+      lastWasWhitespace = true;
+      continue;
+    }
+    output += char;
+    lastWasWhitespace = false;
+  }
+
+  return output.trim();
 }
 
 export function main(argv = process.argv.slice(2)) {

@@ -43,7 +43,9 @@ function readEntries(category) {
 }
 
 function escapeTableCell(value) {
-  return String(value || "").replace(/\|/g, "\\|");
+  return String(value || "")
+    .replaceAll("\\", "\\\\")
+    .replaceAll("|", "\\|");
 }
 
 function escapeRegExp(value) {

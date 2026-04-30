@@ -95,7 +95,14 @@ export function validateListingLeadPayload(payload = {}) {
   const message = String(payload.message || "").trim();
 
   if (!contactName) errors.push("contactName is required");
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)) {
+  const emailParts = contactEmail.split("@");
+  const emailDomain = emailParts[1] || "";
+  if (
+    emailParts.length !== 2 ||
+    !emailParts[0] ||
+    !emailDomain.includes(".") ||
+    contactEmail.includes(" ")
+  ) {
     errors.push("valid contactEmail is required");
   }
   if (!companyName) errors.push("companyName is required");

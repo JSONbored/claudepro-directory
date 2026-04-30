@@ -13,11 +13,25 @@ function normalizeLower(value) {
 }
 
 export function slugify(value) {
-  return normalizeLower(value)
-    .replace(/['"]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .replace(/-{2,}/g, "-");
+  let output = "";
+  let lastWasSeparator = false;
+
+  for (const char of normalizeLower(value)) {
+    const isAlphaNumeric =
+      (char >= "a" && char <= "z") || (char >= "0" && char <= "9");
+    if (isAlphaNumeric) {
+      output += char;
+      lastWasSeparator = false;
+      continue;
+    }
+    if (char === "'" || char === '"') continue;
+    if (output && !lastWasSeparator) {
+      output += "-";
+      lastWasSeparator = true;
+    }
+  }
+
+  return lastWasSeparator ? output.slice(0, -1) : output;
 }
 
 function normalizeDomain(value) {
@@ -27,17 +41,31 @@ function normalizeDomain(value) {
     const url = new URL(
       trimmed.includes("://") ? trimmed : `https://${trimmed}`,
     );
-    return url.hostname.replace(/^www\./i, "").toLowerCase();
+    return stripWww(url.hostname).toLowerCase();
   } catch {
-    return trimmed.replace(/^www\./i, "").toLowerCase();
+    return stripWww(trimmed).toLowerCase();
   }
+}
+
+function stripWww(value) {
+  const text = normalizeText(value);
+  return text.toLowerCase().startsWith("www.") ? text.slice(4) : text;
 }
 
 function isCanonicalDomain(value) {
   const domain = normalizeDomain(value);
-  return /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$/i.test(
-    domain,
-  );
+  const labels = domain.split(".");
+  if (labels.length < 2) return false;
+  return labels.every((label) => {
+    if (!label || label.length > 63) return false;
+    if (label.startsWith("-") || label.endsWith("-")) return false;
+    return [...label].every(
+      (char) =>
+        (char >= "a" && char <= "z") ||
+        (char >= "0" && char <= "9") ||
+        char === "-",
+    );
+  });
 }
 
 function isHttpsUrl(value) {
@@ -82,10 +110,8 @@ function isLikelyAffiliateUrl(value) {
 function isPublicContact(value) {
   const contact = normalizeText(value);
   if (!contact) return true;
-  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact)) return true;
-  if (/^@?[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?$/.test(contact)) {
-    return true;
-  }
+  if (isEmailLike(contact)) return true;
+  if (isGitHubHandle(contact)) return true;
   try {
     const url = new URL(contact);
     return (
@@ -96,6 +122,48 @@ function isPublicContact(value) {
   } catch {
     return false;
   }
+}
+
+function isEmailLike(value) {
+  const contact = normalizeText(value);
+  const parts = contact.split("@");
+  if (parts.length !== 2 || !parts[0] || !parts[1]) return false;
+  if (
+    [...contact].some((char) => char === " " || char === "\n" || char === "\t")
+  ) {
+    return false;
+  }
+  return parts[1].includes(".");
+}
+
+function isGitHubHandle(value) {
+  const handle = normalizeText(value).startsWith("@")
+    ? normalizeText(value).slice(1)
+    : normalizeText(value);
+  if (!handle || handle.length > 39) return false;
+  if (handle.startsWith("-") || handle.endsWith("-")) return false;
+  return [...handle].every(
+    (char) =>
+      (char >= "a" && char <= "z") ||
+      (char >= "A" && char <= "Z") ||
+      (char >= "0" && char <= "9") ||
+      char === "-",
+  );
+}
+
+function compactWhitespace(value) {
+  let output = "";
+  let lastWasWhitespace = false;
+  for (const char of String(value || "").trim()) {
+    if (char === " " || char === "\n" || char === "\t" || char === "\r") {
+      if (!lastWasWhitespace) output += " ";
+      lastWasWhitespace = true;
+      continue;
+    }
+    output += char;
+    lastWasWhitespace = false;
+  }
+  return output.trim();
 }
 
 function tagsToText(value) {
@@ -133,7 +201,7 @@ export function normalizeSubmissionFields(fields = {}) {
   }
 
   if (!normalized.card_description && normalized.description) {
-    const oneLine = normalized.description.replace(/\s+/g, " ").trim();
+    const oneLine = compactWhitespace(normalized.description);
     normalized.card_description =
       oneLine.length <= 140 ? oneLine : `${oneLine.slice(0, 137).trimEnd()}...`;
   }
@@ -198,7 +266,7 @@ function validateAgainstSpec(spec, fields = {}) {
     errors.push(`Missing required field: ${field}`);
   }
 
-  if (normalized.slug && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(normalized.slug)) {
+  if (normalized.slug && slugify(normalized.slug) !== normalized.slug) {
     errors.push("Invalid slug format: expected kebab-case.");
   }
   if (normalized.description && normalized.description.length < 12) {
@@ -290,7 +358,8 @@ export function buildIssueDraftFromSpec(spec, fields = {}) {
     .filter(Boolean)
     .join("\n")
     .trimEnd();
-  const label = model?.label?.replace(/s$/, "") || "Entry";
+  const modelLabel = model?.label || "Entry";
+  const label = modelLabel.endsWith("s") ? modelLabel.slice(0, -1) : modelLabel;
 
   return {
     title: `Submit ${label}: ${validation.normalized.name || "New directory entry"}`,

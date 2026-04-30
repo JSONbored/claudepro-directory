@@ -338,10 +338,8 @@ describe("Raycast feed helpers", () => {
     assert.equal(draftUrl.searchParams.get("template"), "submit-mcp.yml");
     assert.equal(draftUrl.searchParams.get("name"), "Asana MCP Server");
     assert.equal(draftUrl.searchParams.get("brand_domain"), "asana.com");
-    assert.equal(
-      draftUrl.searchParams.get("docs_url")?.includes("asana.com"),
-      true,
-    );
+    const docsUrl = new URL(String(draftUrl.searchParams.get("docs_url")));
+    assert.equal(docsUrl.hostname, "developers.asana.com");
   });
 
   it("normalizes Raycast submission drafts and growth links", () => {

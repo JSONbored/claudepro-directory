@@ -35,6 +35,7 @@ import {
   getRelatedEntries,
   getSourceSignals,
   getTopFacts,
+  htmlToPlainText,
   renderMarkdown,
   stripCodeBlocks,
 } from "@/lib/detail-assembly";
@@ -184,8 +185,7 @@ export default async function DetailPage({ params }: DetailPageProps) {
     })),
   );
   const visibleSections = renderedSections.filter((section) => {
-    const hasProse =
-      section.proseHtml.replace(/<[^>]+>/g, "").trim().length > 0;
+    const hasProse = htmlToPlainText(section.proseHtml).length > 0;
     const hasCode = section.codeBlocks.some(
       (block) => !omittedCode.includes(block.code.trim()),
     );

@@ -31,11 +31,38 @@ export const VERIFICATION_STATUS_VALUES = categorySpec.verificationStatusValues;
 const DEFAULT_TESTED_PLATFORMS = categorySpec.defaultTestedPlatforms;
 
 export function headingId(text) {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "")
+  let cleaned = "";
+
+  for (const char of String(text || "")
     .trim()
-    .replace(/\s+/g, "-");
+    .toLowerCase()) {
+    const isAlphaNumeric =
+      (char >= "a" && char <= "z") || (char >= "0" && char <= "9");
+    const isWhitespace =
+      char === " " ||
+      char === "\n" ||
+      char === "\t" ||
+      char === "\r" ||
+      char === "-";
+    if (isAlphaNumeric || char === "-") cleaned += char;
+    if (isWhitespace && char !== "-") cleaned += " ";
+  }
+
+  let output = "";
+  let lastWasWhitespace = false;
+  for (const char of cleaned.trim()) {
+    const isWhitespace =
+      char === " " || char === "\n" || char === "\t" || char === "\r";
+    if (isWhitespace) {
+      if (!lastWasWhitespace) output += "-";
+      lastWasWhitespace = true;
+      continue;
+    }
+    output += char;
+    lastWasWhitespace = false;
+  }
+
+  return output;
 }
 
 function uniqueHeadingId(text, counts) {
@@ -167,13 +194,17 @@ export function extractHeadings(body) {
 
     if (inCodeBlock) continue;
 
-    const match = line.match(/^(##+)\s+(.*)$/);
-    if (!match) continue;
+    const trimmed = line.trimStart();
+    if (!trimmed.startsWith("##")) continue;
+    const markerLength = [...trimmed].findIndex((char) => char !== "#");
+    if (markerLength < 2 || trimmed[markerLength] !== " ") continue;
+    const headingText = trimmed.slice(markerLength + 1).trim();
+    if (!headingText) continue;
 
     headings.push({
-      depth: match[1].length,
-      text: match[2].trim(),
-      id: uniqueHeadingId(match[2].trim(), idCounts),
+      depth: markerLength,
+      text: headingText,
+      id: uniqueHeadingId(headingText, idCounts),
     });
   }
 
@@ -181,34 +212,79 @@ export function extractHeadings(body) {
 }
 
 export function stripCodeBlocks(markdown) {
-  return String(markdown || "")
-    .replace(/```[\w-]*\n[\s\S]*?```/g, "")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
+  const lines = String(markdown || "").split("\n");
+  const output = [];
+  let inCodeBlock = false;
+  let blankCount = 0;
+
+  for (const line of lines) {
+    if (line.trim().startsWith("```")) {
+      inCodeBlock = !inCodeBlock;
+      continue;
+    }
+    if (inCodeBlock) continue;
+
+    if (!line.trim()) {
+      blankCount += 1;
+      if (blankCount <= 2) output.push("");
+      continue;
+    }
+
+    blankCount = 0;
+    output.push(line);
+  }
+
+  return output.join("\n").trim();
 }
 
 function extractLeadParagraph(markdown) {
-  const prose = stripCodeBlocks(markdown)
-    .replace(/^#.*$/gm, "")
-    .replace(/\r\n/g, "\n")
-    .trim();
+  const prose = stripCodeBlocks(markdown).replaceAll("\r\n", "\n").trim();
 
   if (!prose) return "";
 
-  const blocks = prose
-    .split(/\n\s*\n/)
-    .map((block) => block.replace(/\n+/g, " ").trim())
-    .filter(Boolean);
+  const blocks = [];
+  let current = [];
+
+  for (const line of prose.split("\n")) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith("#")) continue;
+    if (!trimmed) {
+      if (current.length) {
+        blocks.push(current.join(" ").trim());
+        current = [];
+      }
+      continue;
+    }
+    current.push(trimmed);
+  }
+
+  if (current.length) blocks.push(current.join(" ").trim());
 
   return blocks[0] || "";
 }
 
 function extractUsageCodeBlock(markdown) {
-  const usageMatch = String(markdown || "").match(
-    /##\s+Usage[\s\S]*?```[\w-]*\n([\s\S]*?)```/i,
-  );
+  const lines = String(markdown || "").split("\n");
+  let inUsage = false;
+  let inCodeBlock = false;
+  const code = [];
 
-  return usageMatch?.[1]?.trim() || "";
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!inUsage) {
+      inUsage = trimmed.toLowerCase() === "## usage";
+      continue;
+    }
+    if (trimmed.startsWith("## ") && !inCodeBlock) return "";
+    if (trimmed.startsWith("```")) {
+      if (inCodeBlock) return code.join("\n").trim();
+      inCodeBlock = true;
+      continue;
+    }
+    if (inCodeBlock) code.push(line);
+  }
+
+  return "";
 }
 
 export function extractSections(body) {
@@ -240,11 +316,11 @@ export function extractSections(body) {
       continue;
     }
 
-    const headingMatch = line.match(/^##\s+(.*)$/);
-    if (headingMatch) {
+    const trimmed = line.trimStart();
+    if (trimmed.startsWith("## ")) {
       pushCurrent();
       current = {
-        title: headingMatch[1].trim(),
+        title: trimmed.slice(3).trim(),
         markdown: "",
       };
       continue;

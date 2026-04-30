@@ -24,8 +24,8 @@
     "deploy:prod": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
   },
   "dependencies": {
-    "@heyclaude/registry": "workspace:*",
     "@heyclaude/mcp": "workspace:*",
+    "@heyclaude/registry": "workspace:*",
     "@modelcontextprotocol/sdk": "1.29.0",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
@@ -37,6 +37,7 @@
     "radix-ui": "1.4.3",
     "react": "19.2.5",
     "react-dom": "19.2.5",
+    "sanitize-html": "2.17.0",
     "server-only": "0.0.1",
     "svix": "1.92.2",
     "tailwind-merge": "3.5.0"
@@ -47,6 +48,7 @@
     "@types/node": "25.6.0",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
+    "@types/sanitize-html": "2.16.0",
     "postcss": "8.5.12",
     "tailwindcss": "4.2.2",
     "typescript": "6.0.2",

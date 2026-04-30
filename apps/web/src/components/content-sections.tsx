@@ -1,4 +1,5 @@
 import { SnippetCard } from "@/components/snippet-card";
+import { htmlToPlainText } from "@/lib/detail-assembly";
 
 type ContentSection = {
   title: string;
@@ -48,7 +49,7 @@ function getSectionVariant(title: string) {
 }
 
 function stripTags(value: string) {
-  return value.replace(/<[^>]+>/g, "").trim();
+  return htmlToPlainText(value);
 }
 
 function getEmbeddedSectionType(html: string) {
@@ -94,8 +95,7 @@ export function ContentSections({
         const embeddedType = getEmbeddedSectionType(section.html);
         const cleanHtml = stripSectionTypeComments(section.html);
         const cleanProseHtml = stripSectionTypeComments(section.proseHtml);
-        const hasProse =
-          cleanProseHtml.replace(/<[^>]+>/g, "").trim().length > 0;
+        const hasProse = htmlToPlainText(cleanProseHtml).length > 0;
         const variant = embeddedType ?? getSectionVariant(section.title);
         const sectionSubitems = cleanHtml.includes("<h3")
           ? extractSectionSubitems(cleanHtml, section.id)
@@ -110,8 +110,7 @@ export function ContentSections({
           sectionSubitems.length > 0
             ? cleanProseHtml.split(/(?=<h3\b)/)[0].trim()
             : cleanProseHtml;
-        const hasProseAfterSplit =
-          proseHtml.replace(/<[^>]+>/g, "").trim().length > 0;
+        const hasProseAfterSplit = htmlToPlainText(proseHtml).length > 0;
 
         if (
           !hasProse &&

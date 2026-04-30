@@ -368,27 +368,49 @@ function jobBenefitsFromJob(job) {
 function parseJobCompensation(value) {
   const text = String(value || "").trim();
   if (!text) return undefined;
-  const match = text.match(
-    /([$€£])\s*([\d,.]+)\s*([kK])?\s*[–-]\s*(?:[$€£]\s*)?([\d,.]+)\s*([kK])?/,
-  );
-  if (!match) return undefined;
-
   const currencyBySymbol = {
     $: "USD",
     "€": "EUR",
     "£": "GBP",
   };
-  const currency = currencyBySymbol[match[1]];
+  const symbol = [...text].find((char) => currencyBySymbol[char]);
+  const currency = currencyBySymbol[symbol];
   if (!currency) return undefined;
 
-  const parseAmount = (amount, suffix) => {
-    const numeric = Number(String(amount).replace(/,/g, ""));
+  const amounts = [];
+  let current = "";
+  for (const char of text) {
+    const isNumeric =
+      (char >= "0" && char <= "9") ||
+      char === "," ||
+      char === "." ||
+      char === "k" ||
+      char === "K";
+    if (isNumeric) {
+      current += char;
+      continue;
+    }
+    if (current) {
+      amounts.push(current);
+      current = "";
+    }
+  }
+  if (current) amounts.push(current);
+  if (amounts.length < 2) return undefined;
+
+  const parseAmount = (amount, fallbackSuffix = "") => {
+    const hasK = amount.toLowerCase().endsWith("k");
+    const numericText = hasK ? amount.slice(0, -1) : amount;
+    const numeric = Number(String(numericText).replaceAll(",", ""));
     if (!Number.isFinite(numeric)) return null;
-    return Math.round(numeric * (suffix?.toLowerCase() === "k" ? 1000 : 1));
+    return Math.round(
+      numeric * (hasK || fallbackSuffix.toLowerCase() === "k" ? 1000 : 1),
+    );
   };
 
-  const minValue = parseAmount(match[2], match[3]);
-  const maxValue = parseAmount(match[4], match[5] || match[3]);
+  const minSuffix = amounts[0].toLowerCase().endsWith("k") ? "k" : "";
+  const minValue = parseAmount(amounts[0]);
+  const maxValue = parseAmount(amounts[1], minSuffix);
   if (!minValue || !maxValue) return undefined;
 
   return {
