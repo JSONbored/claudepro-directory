@@ -662,7 +662,7 @@
       "canonicalUrl": "https://heyclau.de/mcp/prompt-to-asset",
       "llmsUrl": "https://heyclau.de/data/llms/mcp/prompt-to-asset.txt",
       "apiUrl": "https://heyclau.de/api/registry/entries/mcp/prompt-to-asset",
-      "artifactHash": "512173cf2271334f981805966a7cbb8d18aa4c5c193640f2574317437f53913b"
+      "artifactHash": "672b697f4c2fcefbb51235559f61d98c1687ac5c614e32823449eb7f41344cd0"
     },
     {
       "key": "mcp:contrastapi-mcp-server",
@@ -674,7 +674,7 @@
       "canonicalUrl": "https://heyclau.de/mcp/contrastapi-mcp-server",
       "llmsUrl": "https://heyclau.de/data/llms/mcp/contrastapi-mcp-server.txt",
       "apiUrl": "https://heyclau.de/api/registry/entries/mcp/contrastapi-mcp-server",
-      "artifactHash": "ccb550fc7ebe20496d521f95c9a6766896ca76f3829e6b6cd8b0e05b8cb9e00d"
+      "artifactHash": "d8e03b3c7890bdda51170a2ff051ef6c0c3de13c9be2e638f37e426208b7d1d8"
     },
     {
       "key": "collections:agent-operator-growth-master-pack",
@@ -4566,5 +4566,5 @@
     }
   ],
   "signatureAlgorithm": "sha256",
-  "signature": "f2ce5e597f91c9620d13c3f0a6f22333f1209ee6f2671427802c670202167ad3"
+  "signature": "9673da140e9d069ffe62c2438c25fc56bbd024e88e037cf2779847e495742bdf"
 }

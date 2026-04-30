@@ -9,8 +9,9 @@
     "seoTitle": "ContrastAPI MCP Server for Claude Security Research",
     "seoDescription": "Use ContrastAPI with Claude for 41 MCP security tools covering CVE, KEV, CWE, EPSS, MITRE ATLAS, D3FEND, domain audit, and IOC enrichment.",
     "author": "UPinar",
+    "authorProfileUrl": "https://github.com/UPinar",
     "dateAdded": "2026-04-20",
-    "contentUpdatedAt": "2026-04-29T21:38:46-06:00",
+    "contentUpdatedAt": "2026-04-30T04:13:44-06:00",
     "tags": [
       "security",
       "mcp-server",
@@ -125,7 +126,7 @@
       "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/contrastapi-mcp-server.mdx"
     ],
     "sourceStatus": "available",
-    "lastVerifiedAt": "2026-04-29T21:38:46-06:00",
+    "lastVerifiedAt": "2026-04-30T04:13:44-06:00",
     "adapterGenerated": false,
     "platforms": [],
     "supportLevels": []

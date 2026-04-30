@@ -10,7 +10,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/mcp/prompt-to-asset
 - Source URLs: https://github.com/MohamedAbdallah-14/prompt-to-asset#readme, https://github.com/MohamedAbdallah-14/prompt-to-asset, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/prompt-to-asset.mdx
 - Author: MohamedAbdallah-14
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T04:13:44-06:00
 - Robots: indexable
 ## Summary
 MCP server that generates production-ready visual assets by routing requests across 30+ image generation models. Handles app icons, favicons, OG images, logos, and wordmarks. Validates output for WCAG contrast and palette consistency. Zero API key required for first run via Pollinations and Stable Horde free tiers.

@@ -67,6 +67,25 @@ function normalizeCommand(value) {
   return `${lowerCommand}${normalized.slice(command.length)}`;
 }
 
+function normalizeHttpsUrl(value) {
+  const normalized = normalizeValue(value);
+  if (!normalized) return "";
+  try {
+    const url = new URL(normalized);
+    return url.protocol === "https:" ? url.toString() : "";
+  } catch {
+    return "";
+  }
+}
+
+function issueAuthorProfileUrl(issue) {
+  return normalizeHttpsUrl(
+    issue.user?.html_url ||
+      issue.author?.url ||
+      (issue.author?.login ? `https://github.com/${issue.author.login}` : ""),
+  );
+}
+
 function yamlScalar(value) {
   const normalized = normalizeValue(value);
   if (/^\d{4}-\d{2}-\d{2}$/.test(normalized)) {
@@ -186,6 +205,7 @@ function buildContent(issue, report) {
     seoTitle: seo.seoTitle,
     seoDescription: seo.seoDescription,
     author: fields.author,
+    authorProfileUrl: issueAuthorProfileUrl(issue),
     dateAdded,
     brandName: fields.brand_name,
     brandDomain: fields.brand_domain,

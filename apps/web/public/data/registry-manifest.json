@@ -3132,12 +3132,12 @@
     "directory-index.json": {
       "path": "/data/directory-index.json",
       "type": "json",
-      "sha256": "c34bad11e860e5b2849abb6e9c3ada6e337dd1d063916f1a7a88f0a5fd2fcfde"
+      "sha256": "3663e6dfb356d4223d675957af6a411ec574a2dd46249b0cbb183fd66847ea1d"
     },
     "search-index.json": {
       "path": "/data/search-index.json",
       "type": "json",
-      "sha256": "c8dae497623c5e1c80febabd0adf37de4660dc9feb44e163ba9767d6f1fa8332"
+      "sha256": "3437dd0b69516b889c46b2ff9abeb57a10fa6a8ccfe3f3a29c302cb8c5ba4947"
     },
     "raycast-index.json": {
       "path": "/data/raycast-index.json",
@@ -3147,7 +3147,7 @@
     "ecosystem-feed.json": {
       "path": "/data/ecosystem-feed.json",
       "type": "json",
-      "sha256": "f213a0248c4789c659d6d017f5b1c3c8c77bc44ec8a24042023a65d932c83387"
+      "sha256": "a8d1c7a90ee0dbe42bf0ec9a0b993624095035f8fb95abe6081ecbe24c5f9e69"
     },
     "mcp-registry-feed.json": {
       "path": "/data/mcp-registry-feed.json",
@@ -3162,7 +3162,7 @@
     "registry-changelog.json": {
       "path": "/data/registry-changelog.json",
       "type": "json",
-      "sha256": "932b7bcdf2b997ca62d1635be43bfc6de19744cd5d91ffd28c657ec86e879da7"
+      "sha256": "93c330ac4adfeb068159ac4488b846209a0c6207737d303e62f1bd8831820bcc"
     },
     "feeds/index.json": {
       "path": "/data/feeds%2Findex.json",
@@ -3187,12 +3187,12 @@
     "jsonld-snapshots.json": {
       "path": "/data/jsonld-snapshots.json",
       "type": "json",
-      "sha256": "738174226226d85bb4c8dd7386c8055dfe7c492e4b69c2dd196efc5f63da881d"
+      "sha256": "28b187a69505473b2372352a6a6d9b73653d123383f775683852ce41447f3a1f"
     },
     "llms-full.txt": {
       "path": "/data/llms-full.txt",
       "type": "text",
-      "sha256": "b82d1c15c975f13e9ed1ca6e3179f5d10015011a447d33d4d7ee16a5caf1340d"
+      "sha256": "404b949f3f0d4db2610af4763563699ee418c0c7926eb4505523db5ddf894624"
     },
     "entries/commands/cursor-rules.json": {
       "path": "/data/entries%2Fcommands%2Fcursor-rules.json",
@@ -4917,12 +4917,12 @@
     "entries/mcp/contrastapi-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fcontrastapi-mcp-server.json",
       "type": "json",
-      "sha256": "ccb550fc7ebe20496d521f95c9a6766896ca76f3829e6b6cd8b0e05b8cb9e00d"
+      "sha256": "d8e03b3c7890bdda51170a2ff051ef6c0c3de13c9be2e638f37e426208b7d1d8"
     },
     "llms/mcp/contrastapi-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Fcontrastapi-mcp-server.txt",
       "type": "text",
-      "sha256": "2c795d28e4182892553cd00e30c1be359f9643ea5cdbdf85a606bf6f68ffafff"
+      "sha256": "986bdbe21ba24d6e21989b147e450754db892e977e55fc2724a2076461b26b40"
     },
     "raycast/mcp/contrastapi-mcp-server.json": {
       "path": "/data/raycast%2Fmcp%2Fcontrastapi-mcp-server.json",
@@ -7677,12 +7677,12 @@
     "entries/mcp/prompt-to-asset.json": {
       "path": "/data/entries%2Fmcp%2Fprompt-to-asset.json",
       "type": "json",
-      "sha256": "512173cf2271334f981805966a7cbb8d18aa4c5c193640f2574317437f53913b"
+      "sha256": "672b697f4c2fcefbb51235559f61d98c1687ac5c614e32823449eb7f41344cd0"
     },
     "llms/mcp/prompt-to-asset.txt": {
       "path": "/data/llms%2Fmcp%2Fprompt-to-asset.txt",
       "type": "text",
-      "sha256": "dacf45b6a14e15a700bd4aa04f5dda4a9f19a5f9ca54a6c85d7d3cf02004edb9"
+      "sha256": "7596ea0d83191cfb22c8a5922913adb02d0a18117d9b9e5f8aebb6fb86b7a512"
     },
     "raycast/mcp/prompt-to-asset.json": {
       "path": "/data/raycast%2Fmcp%2Fprompt-to-asset.json",
@@ -9242,7 +9242,7 @@
     "feeds/categories/mcp.json": {
       "path": "/data/feeds%2Fcategories%2Fmcp.json",
       "type": "json",
-      "sha256": "d0d83fdff3f6998f09a80104493f2d975f4a1661c9c289844c4c95ae61b223e1"
+      "sha256": "aa29fa71690c3a1cb7581af0d3841eeab5d7d5a4ea677c15c7b4a81407d9251e"
     },
     "feeds/categories/tools.json": {
       "path": "/data/feeds%2Fcategories%2Ftools.json",

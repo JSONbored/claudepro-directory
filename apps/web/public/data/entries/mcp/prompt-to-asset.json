@@ -9,8 +9,9 @@
     "seoTitle": "Prompt-to-asset MCP Server for Claude Visual Assets",
     "seoDescription": "Generate app icons, favicons, OG images, logos, and wordmarks from Claude with the Prompt-to-asset MCP server and 30+ image models.",
     "author": "MohamedAbdallah-14",
+    "authorProfileUrl": "https://github.com/MohamedAbdallah-14",
     "dateAdded": "2026-04-25",
-    "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+    "contentUpdatedAt": "2026-04-30T04:13:44-06:00",
     "tags": [
       "mcp",
       "image-generation",
@@ -94,7 +95,7 @@
       "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/prompt-to-asset.mdx"
     ],
     "sourceStatus": "available",
-    "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+    "lastVerifiedAt": "2026-04-30T04:13:44-06:00",
     "adapterGenerated": false,
     "platforms": [],
     "supportLevels": []

@@ -37,6 +37,9 @@ describe("submission automation workflows", () => {
     expect(source).toContain("peter-evans/create-pull-request@");
     expect(source).toContain("branch=automation/submission-");
     expect(source).toContain("pr_title=feat(content): add");
+    expect(source).toContain("issue_author=");
+    expect(source).toContain("issue_author_id=");
+    expect(source).toContain("Co-authored-by:");
     expect(source).toContain("content/**");
     expect(source).toContain("apps/web/public/data/**");
     expect(source).toContain("README.md");

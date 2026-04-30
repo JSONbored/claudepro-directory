@@ -96,7 +96,11 @@ jobs:
           const category = report.category || "content";
           const slug = report.fields?.slug || `issue-${issue.number}`;
           const title = report.fields?.name || slug;
+          const issueAuthor = issue.user?.login || "";
+          const issueAuthorId = issue.user?.id || "";
           console.log(`issue_number=${issue.number}`);
+          console.log(`issue_author=${issueAuthor}`);
+          console.log(`issue_author_id=${issueAuthorId}`);
           console.log(`category=${category}`);
           console.log(`slug=${slug}`);
           console.log(`entry_title=${title}`);
@@ -111,7 +115,10 @@ jobs:
         with:
           branch: ${{ steps.metadata.outputs.branch }}
           title: ${{ steps.metadata.outputs.pr_title }}
-          commit-message: ${{ steps.metadata.outputs.commit_title }}
+          commit-message: |
+            ${{ steps.metadata.outputs.commit_title }}
+
+            Co-authored-by: ${{ steps.metadata.outputs.issue_author }} <${{ steps.metadata.outputs.issue_author_id }}+${{ steps.metadata.outputs.issue_author }}@users.noreply.github.com>
           delete-branch: true
           add-paths: |
             content/**

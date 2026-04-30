@@ -8572,12 +8572,13 @@
           "description": "Use ContrastAPI with Claude for 41 MCP security tools covering CVE, KEV, CWE, EPSS, MITRE ATLAS, D3FEND, domain audit, and IOC enrichment.",
           "url": "https://heyclau.de/mcp/contrastapi-mcp-server",
           "datePublished": "2026-04-20",
-          "dateModified": "2026-04-29T21:38:46-06:00",
+          "dateModified": "2026-04-30T04:13:44-06:00",
           "keywords": "contrastapi mcp, claude security mcp, cve lookup, kev lookup, cwe lookup, mitre atlas, d3fend, threat intelligence, dependency scanner, security, mcp-server, cve, security, mcp-server, cve, kev, cwe, osint, threat-intelligence, ip-reputation, domain-audit, dependency-scanner, mitre-atlas, d3fend",
           "genre": "MCP Servers",
           "author": {
             "@type": "Person",
-            "name": "UPinar"
+            "name": "UPinar",
+            "url": "https://github.com/UPinar"
           },
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -22154,12 +22155,13 @@
           "description": "Generate app icons, favicons, OG images, logos, and wordmarks from Claude with the Prompt-to-asset MCP server and 30+ image models.",
           "url": "https://heyclau.de/mcp/prompt-to-asset",
           "datePublished": "2026-04-25",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-30T04:13:44-06:00",
           "keywords": "prompt to asset mcp, claude image generation, app icon generator, og image generator, design tools mcp, mcp, image-generation, design-tools, visual-assets, icons, favicons, og-images, mcp, image-generation, design-tools, visual-assets, icons, favicons, og-images",
           "genre": "MCP Servers",
           "author": {
             "@type": "Person",
-            "name": "MohamedAbdallah-14"
+            "name": "MohamedAbdallah-14",
+            "url": "https://github.com/MohamedAbdallah-14"
           },
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
