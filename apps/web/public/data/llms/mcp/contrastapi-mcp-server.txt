@@ -2,6 +2,9 @@
 URL: https://heyclau.de/mcp/contrastapi-mcp-server
 Category: mcp
 Author: UPinar
+Submitted by: UPinar
+Submission issue: https://github.com/JSONbored/claudepro-directory/issues/304
+Import PR: https://github.com/JSONbored/claudepro-directory/pull/311
 Date added: 2026-04-20
 Documentation: https://api.contrastcyber.com
 Repository: https://github.com/UPinar/contrastapi
@@ -13,6 +16,11 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Brand domain: contrastcyber.com
 - Brand asset source: brandfetch
 - Author: UPinar
+- Submitted by: UPinar
+- Submission issue: https://github.com/JSONbored/claudepro-directory/issues/304
+- Import PR: https://github.com/JSONbored/claudepro-directory/pull/311
+- Reviewed by: JSONbored
+- Claim status: unclaimed
 - Last verified: 2026-04-30T04:13:44-06:00
 - Robots: indexable
 ## Summary

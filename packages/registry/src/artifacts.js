@@ -81,6 +81,31 @@ function buildEntryBrandFields(entry) {
   return fields;
 }
 
+function buildEntryProvenanceFields(entry) {
+  const fields = {};
+  for (const field of [
+    "submittedBy",
+    "submittedByUrl",
+    "submittedAt",
+    "submissionIssueNumber",
+    "submissionIssueUrl",
+    "importPrNumber",
+    "importPrUrl",
+    "reviewedBy",
+    "reviewedAt",
+    "claimStatus",
+    "claimedBy",
+    "claimedByUrl",
+    "claimedAt",
+  ]) {
+    const value = entry[field];
+    if (value !== undefined && value !== null && value !== "") {
+      fields[field] = value;
+    }
+  }
+  return fields;
+}
+
 export function buildRaycastDetailMarkdown(entry) {
   const lines = [`# ${entry.title}`, "", entry.description];
 
@@ -162,6 +187,7 @@ export function buildSearchEntries(entries) {
     tags: entry.tags ?? [],
     keywords: entry.keywords ?? [],
     author: entry.author || "",
+    ...buildEntryProvenanceFields(entry),
     ...buildEntryBrandFields(entry),
     dateAdded: entry.dateAdded || "",
     installable: Boolean(
@@ -336,6 +362,7 @@ export function buildRaycastEntries(entries) {
       description: entry.cardDescription || entry.description,
       tags: entry.tags,
       author: entry.author || "",
+      ...buildEntryProvenanceFields(entry),
       ...buildEntryBrandFields(entry),
       installCommand: entry.installCommand || "",
       configSnippet: entry.configSnippet || "",
@@ -376,6 +403,7 @@ export function buildRaycastDetail(entry) {
     slug: entry.slug,
     title: entry.title,
     author: entry.author || "",
+    ...buildEntryProvenanceFields(entry),
     ...buildEntryBrandFields(entry),
     copyText: getCopyText(entry),
     detailMarkdown: buildRaycastDetailMarkdown(entry),
@@ -436,6 +464,7 @@ export function buildReadOnlyEcosystemFeed(entries, params = {}) {
         title: entry.title,
         description: entry.cardDescription || entry.description,
         url: `${siteUrl.replace(/\/$/, "")}/${entry.category}/${entry.slug}`,
+        ...buildEntryProvenanceFields(entry),
         ...buildEntryBrandFields(entry),
         websiteUrl: entry.websiteUrl || "",
         documentationUrl: entry.documentationUrl || "",
@@ -487,6 +516,7 @@ export function buildMcpRegistryFeed(entries) {
       title: entry.title,
       description: entry.description,
       websiteUrl: entry.websiteUrl || entry.documentationUrl || "",
+      ...buildEntryProvenanceFields(entry),
       ...buildEntryBrandFields(entry),
       repository: entry.repoUrl
         ? {
@@ -510,6 +540,7 @@ export function buildPluginExportFeed(entries) {
     title: entry.title,
     description: entry.cardDescription || entry.description,
     category: entry.category,
+    ...buildEntryProvenanceFields(entry),
     ...buildEntryBrandFields(entry),
     sourceUrl: entry.repoUrl || entry.documentationUrl || entry.githubUrl,
     installCommand: entry.installCommand || entry.commandSyntax || "",

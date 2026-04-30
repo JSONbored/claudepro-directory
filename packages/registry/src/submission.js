@@ -34,6 +34,8 @@ export const HEADING_KEY_MAP = {
   "brand-domain": "brand_domain",
   "provider-domain": "brand_domain",
   author: "author",
+  "author-profile-url": "author_profile_url",
+  "submitted-via": "submitted_via",
   "contact-email": "contact_email",
   email: "contact_email",
   tags: "tags",

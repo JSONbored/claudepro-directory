@@ -2,6 +2,9 @@
 URL: https://heyclau.de/mcp/zyntra-mail
 Category: mcp
 Author: dd77ss
+Submitted by: dd77ss
+Submission issue: https://github.com/JSONbored/claudepro-directory/issues/310
+Import PR: https://github.com/JSONbored/claudepro-directory/pull/314
 Date added: 2026-04-30
 Documentation: https://docs.zyntra.app/mcp
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/zyntra-mail.mdx
@@ -12,6 +15,11 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Brand domain: zyntra.app
 - Brand asset source: brandfetch
 - Author: dd77ss
+- Submitted by: dd77ss
+- Submission issue: https://github.com/JSONbored/claudepro-directory/issues/310
+- Import PR: https://github.com/JSONbored/claudepro-directory/pull/314
+- Reviewed by: JSONbored
+- Claim status: unclaimed
 - Last verified: 2026-04-30
 - Robots: indexable
 ## Summary

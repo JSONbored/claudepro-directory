@@ -175,6 +175,73 @@ describe("registry artifacts", () => {
     expect(isAllowedBrandAssetUrl("https://example.com/logo.png")).toBe(false);
   });
 
+  it("preserves UGC provenance across registry surfaces", () => {
+    const key = "mcp:contrastapi-mcp-server";
+    const directoryEntry = directoryEntries.find(
+      (entry) => `${entry.category}:${entry.slug}` === key,
+    );
+    const searchEntry = searchEntries.find(
+      (entry) => `${entry.category}:${entry.slug}` === key,
+    );
+    const raycastEntry = raycastPayload.entries.find(
+      (entry) => `${entry.category}:${entry.slug}` === key,
+    );
+    const raycastDetail = readDataJson<Record<string, unknown>>(
+      "raycast/mcp/contrastapi-mcp-server.json",
+    );
+    const entryDetail = readDataJson<{ entry: Record<string, unknown> }>(
+      "entries/mcp/contrastapi-mcp-server.json",
+    );
+    const llmsText = fs.readFileSync(
+      path.join(dataRoot, "llms", "mcp", "contrastapi-mcp-server.txt"),
+      "utf8",
+    );
+
+    for (const surface of [
+      directoryEntry,
+      searchEntry,
+      raycastEntry,
+      raycastDetail,
+      entryDetail.entry,
+    ]) {
+      expect(surface).toMatchObject({
+        submittedBy: "UPinar",
+        submittedByUrl: "https://github.com/UPinar",
+        submissionIssueNumber: 304,
+        submissionIssueUrl:
+          "https://github.com/JSONbored/claudepro-directory/issues/304",
+        importPrNumber: 311,
+        importPrUrl:
+          "https://github.com/JSONbored/claudepro-directory/pull/311",
+        reviewedBy: "JSONbored",
+        claimStatus: "unclaimed",
+      });
+    }
+
+    expect(llmsText).toContain("- Submitted by: UPinar");
+    expect(llmsText).toContain(
+      "- Submission issue: https://github.com/JSONbored/claudepro-directory/issues/304",
+    );
+    expect(llmsText).toContain(
+      "- Import PR: https://github.com/JSONbored/claudepro-directory/pull/311",
+    );
+
+    const zyntraEntry = directoryEntries.find(
+      (entry) => `${entry.category}:${entry.slug}` === "mcp:zyntra-mail",
+    );
+    expect(zyntraEntry).toMatchObject({
+      submittedBy: "dd77ss",
+      submittedByUrl: "https://github.com/dd77ss",
+      submissionIssueNumber: 310,
+      submissionIssueUrl:
+        "https://github.com/JSONbored/claudepro-directory/issues/310",
+      importPrNumber: 314,
+      importPrUrl: "https://github.com/JSONbored/claudepro-directory/pull/314",
+      reviewedBy: "JSONbored",
+      claimStatus: "unclaimed",
+    });
+  });
+
   it("derives known first-party brand icons without unsafe generic fallbacks", () => {
     expect(
       detectKnownBrand({

@@ -61,6 +61,52 @@ export function normalizeDateAdded(value) {
   return isoMatch?.[0] ?? normalized;
 }
 
+function normalizeTextField(value) {
+  const normalized = String(value ?? "").trim();
+  return normalized || undefined;
+}
+
+function normalizeDateTimeField(value) {
+  const normalized = normalizeTextField(value);
+  if (!normalized) return undefined;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(normalized)) return normalized;
+  const parsed = Date.parse(normalized);
+  return Number.isNaN(parsed) ? normalized : new Date(parsed).toISOString();
+}
+
+function normalizePositiveInteger(value) {
+  if (value === undefined || value === null || value === "") return undefined;
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
+}
+
+function normalizeClaimStatus(value) {
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase();
+  return ["unclaimed", "pending", "verified"].includes(normalized)
+    ? normalized
+    : undefined;
+}
+
+function buildProvenanceFields(data = {}) {
+  return {
+    submittedBy: normalizeTextField(data.submittedBy),
+    submittedByUrl: normalizeTextField(data.submittedByUrl),
+    submittedAt: normalizeDateTimeField(data.submittedAt),
+    submissionIssueNumber: normalizePositiveInteger(data.submissionIssueNumber),
+    submissionIssueUrl: normalizeTextField(data.submissionIssueUrl),
+    importPrNumber: normalizePositiveInteger(data.importPrNumber),
+    importPrUrl: normalizeTextField(data.importPrUrl),
+    reviewedBy: normalizeTextField(data.reviewedBy),
+    reviewedAt: normalizeDateTimeField(data.reviewedAt),
+    claimStatus: normalizeClaimStatus(data.claimStatus),
+    claimedBy: normalizeTextField(data.claimedBy),
+    claimedByUrl: normalizeTextField(data.claimedByUrl),
+    claimedAt: normalizeDateTimeField(data.claimedAt),
+  };
+}
+
 export function isFirstPartyPackage(data = {}) {
   return data.packageVerified === true;
 }
@@ -220,6 +266,7 @@ export function buildContentEntryFromMdx(params) {
       : undefined,
     dateAdded: normalizeDateAdded(data.dateAdded),
     contentUpdatedAt: contentUpdatedAt ? String(contentUpdatedAt) : undefined,
+    ...buildProvenanceFields(data),
     tags,
     keywords: seo.keywords,
     readingTime:

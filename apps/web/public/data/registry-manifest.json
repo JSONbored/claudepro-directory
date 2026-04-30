@@ -3140,37 +3140,37 @@
     "directory-index.json": {
       "path": "/data/directory-index.json",
       "type": "json",
-      "sha256": "0dec2e7f41ac322eefd23594a669816f8a4a88dc880f4b52ea775a7fdd0a20ee"
+      "sha256": "6e98862fb536e115a7882b541ee902589001050c7cc074efa2c69e7cd43ce715"
     },
     "search-index.json": {
       "path": "/data/search-index.json",
       "type": "json",
-      "sha256": "90773e3d664171f7a39f6873fddfc34d1ed22cbb3e8629fa022c1bd5661e29bb"
+      "sha256": "f983ff88a40c2bdd3570e9e49fc46502710e6a1ee888246fab01d7164f50e659"
     },
     "raycast-index.json": {
       "path": "/data/raycast-index.json",
       "type": "json",
-      "sha256": "223bf5a19eeb4fa602b35def8d0fc646df4476c7922520978d0e545955c8e11a"
+      "sha256": "577cfceb051259112d81daff8814ed36d677d24acaf56966b4891376f626c64c"
     },
     "ecosystem-feed.json": {
       "path": "/data/ecosystem-feed.json",
       "type": "json",
-      "sha256": "947f4abcb7faf96164b8f7ed8ad9b02d53a24d639e9019b40ae24ef8fb25d9c6"
+      "sha256": "58f0cbc7038b4a1ad59fb7af4ba68632a451560756bfc916e35be77e55f03079"
     },
     "mcp-registry-feed.json": {
       "path": "/data/mcp-registry-feed.json",
       "type": "json",
-      "sha256": "339d3577eb52cec160facb105b35697f23329ffd77ceee30b2f8d00902086492"
+      "sha256": "37472c35a6c94a56faa32da8b7663a1f7f6cc255d2148dedf0a03a525c21d448"
     },
     "plugin-export-feed.json": {
       "path": "/data/plugin-export-feed.json",
       "type": "json",
-      "sha256": "49ff578ed338bb7f47e5e3c5329aa9e8feebcdbdfa45d92252167421cb985228"
+      "sha256": "354e9bc72ab6548d5cbb584b54bcb7b60a6627c1959c72a3feccbb84179a3ec4"
     },
     "registry-changelog.json": {
       "path": "/data/registry-changelog.json",
       "type": "json",
-      "sha256": "4e2c9c01f8f03db3917760ea6b229a4216e45e849b81cd293c062c5864f37e16"
+      "sha256": "2daf877806fd4c52557e78faa9322a4a1100488664438d68de740d5a97585914"
     },
     "feeds/index.json": {
       "path": "/data/feeds%2Findex.json",
@@ -3200,7 +3200,7 @@
     "llms-full.txt": {
       "path": "/data/llms-full.txt",
       "type": "text",
-      "sha256": "d8e79e6fdb3468851aad336deb54c92e5e77751d79136ac02f4de60ceeed9bf2"
+      "sha256": "194ce679b84135aa399b95bdc4652ceeb7d0c45a1f0be2c9d0ae2a5973cae1ce"
     },
     "entries/commands/cursor-rules.json": {
       "path": "/data/entries%2Fcommands%2Fcursor-rules.json",
@@ -4925,17 +4925,17 @@
     "entries/mcp/contrastapi-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fcontrastapi-mcp-server.json",
       "type": "json",
-      "sha256": "d8e03b3c7890bdda51170a2ff051ef6c0c3de13c9be2e638f37e426208b7d1d8"
+      "sha256": "5af5129bcb2f5fbca90dab6cd1fd926325193674e6586415202ce1276eb164e9"
     },
     "llms/mcp/contrastapi-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Fcontrastapi-mcp-server.txt",
       "type": "text",
-      "sha256": "986bdbe21ba24d6e21989b147e450754db892e977e55fc2724a2076461b26b40"
+      "sha256": "db93eefb2e2d00db9ae395f79c6f9e4974faf2d9f546cb55273fd93d65524739"
     },
     "raycast/mcp/contrastapi-mcp-server.json": {
       "path": "/data/raycast%2Fmcp%2Fcontrastapi-mcp-server.json",
       "type": "json",
-      "sha256": "ba006d063df14a20137865c8b12bc0b1d498e99dbc5d28196c9b8691fcc6863c"
+      "sha256": "8be2b87c843dcd5591da427e9a85be98ffe00820feaf16a8e683ecf3e804de47"
     },
     "entries/tools/crewai.json": {
       "path": "/data/entries%2Ftools%2Fcrewai.json",
@@ -7685,17 +7685,17 @@
     "entries/mcp/prompt-to-asset.json": {
       "path": "/data/entries%2Fmcp%2Fprompt-to-asset.json",
       "type": "json",
-      "sha256": "672b697f4c2fcefbb51235559f61d98c1687ac5c614e32823449eb7f41344cd0"
+      "sha256": "08812f2f2c5f5d1cee6eb0a678ca5320982efbe14be596b05c7e2dc49b89fd32"
     },
     "llms/mcp/prompt-to-asset.txt": {
       "path": "/data/llms%2Fmcp%2Fprompt-to-asset.txt",
       "type": "text",
-      "sha256": "7596ea0d83191cfb22c8a5922913adb02d0a18117d9b9e5f8aebb6fb86b7a512"
+      "sha256": "eb95dbeadd34f9af35b7bf25699305e6d6f3f4df44fe95d4b6689f3f182086fb"
     },
     "raycast/mcp/prompt-to-asset.json": {
       "path": "/data/raycast%2Fmcp%2Fprompt-to-asset.json",
       "type": "json",
-      "sha256": "6a5c07b3bb5b2801bce0a83c14cdfaf4a9b7c29cccfe99908b1b80ded503880c"
+      "sha256": "4aac8ba850cbb74dfffe74025f35baa2614dcc50474020f4e41855674ad98ba6"
     },
     "entries/tools/promptfoo.json": {
       "path": "/data/entries%2Ftools%2Fpromptfoo.json",
@@ -9245,17 +9245,17 @@
     "entries/mcp/zyntra-mail.json": {
       "path": "/data/entries%2Fmcp%2Fzyntra-mail.json",
       "type": "json",
-      "sha256": "997c14d0aa355ef878108f55eb203da085d9eee8c7d37138a643a70ec1a203c2"
+      "sha256": "7cfa78d6f265b4d6251987e3a5f3e38cbda4658056394a2d73c7103e48fbb549"
     },
     "llms/mcp/zyntra-mail.txt": {
       "path": "/data/llms%2Fmcp%2Fzyntra-mail.txt",
       "type": "text",
-      "sha256": "19e65b28936f258f5094def6bc3cdb4f0a053212b23a16695091988fc5ba5c9b"
+      "sha256": "03217fd3da05214390b09fa0e9efeaab4fc0849208dc0396fb2d3606a3d94ba7"
     },
     "raycast/mcp/zyntra-mail.json": {
       "path": "/data/raycast%2Fmcp%2Fzyntra-mail.json",
       "type": "json",
-      "sha256": "3f0c7972d833958d7bca454c9757668a6d049e6fcc8e242c83c0deaca1d0136e"
+      "sha256": "4f138373a0a126e049645641e6002fe88817526aa038f0adc6190a5a0b606876"
     },
     "feeds/categories/agents.json": {
       "path": "/data/feeds%2Fcategories%2Fagents.json",
@@ -9265,7 +9265,7 @@
     "feeds/categories/mcp.json": {
       "path": "/data/feeds%2Fcategories%2Fmcp.json",
       "type": "json",
-      "sha256": "83753e22492fbf09c7cdcb9b164b9169f56f49ec3a3715d2a35143e448a55a08"
+      "sha256": "a7526fd0e78394cafe3d453eea2ee5367fa21f34b6b8e06e9fd6eb239d1cfc74"
     },
     "feeds/categories/tools.json": {
       "path": "/data/feeds%2Fcategories%2Ftools.json",

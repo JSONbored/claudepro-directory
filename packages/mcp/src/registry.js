@@ -195,6 +195,7 @@ function entryMatchesQuery(entry, query) {
     entry.category,
     entry.slug,
     entry.author,
+    entry.submittedBy,
     entry.brandName,
     entry.brandDomain,
     ...(entry.tags || []),
@@ -221,6 +222,8 @@ function toSearchResult(entry) {
     platforms: entry.platforms || [],
     brandName: entry.brandName || "",
     brandDomain: entry.brandDomain || "",
+    submittedBy: entry.submittedBy || "",
+    claimStatus: entry.claimStatus || "",
     url: entry.url || `${SITE_URL}/${entry.category}/${entry.slug}`,
     canonicalUrl:
       entry.canonicalUrl ||

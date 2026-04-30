@@ -26,20 +26,23 @@ export const getContributors = cache(async () => {
   const grouped = new Map<string, ContributorSummary>();
 
   for (const entry of entries) {
-    const name = String(entry.author || "JSONbored").trim();
+    const name = String(
+      entry.submittedBy || entry.author || "JSONbored",
+    ).trim();
     if (!name) continue;
     const slug = contributorSlug(name);
     if (!slug) continue;
+    const profileUrl = entry.submittedByUrl || entry.authorProfileUrl;
     const existing = grouped.get(slug) ?? {
       slug,
       name,
-      profileUrl: entry.authorProfileUrl,
+      profileUrl,
       entryCount: 0,
       entries: [],
     };
     existing.entries.push(entry);
     existing.entryCount = existing.entries.length;
-    existing.profileUrl ||= entry.authorProfileUrl;
+    existing.profileUrl ||= profileUrl;
     grouped.set(slug, existing);
   }
 

@@ -2,6 +2,9 @@
 URL: https://heyclau.de/mcp/prompt-to-asset
 Category: mcp
 Author: MohamedAbdallah-14
+Submitted by: MohamedAbdallah-14
+Submission issue: https://github.com/JSONbored/claudepro-directory/issues/305
+Import PR: https://github.com/JSONbored/claudepro-directory/pull/311
 Date added: 2026-04-25
 Documentation: https://github.com/MohamedAbdallah-14/prompt-to-asset#readme
 Repository: https://github.com/MohamedAbdallah-14/prompt-to-asset
@@ -10,6 +13,11 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/mcp/prompt-to-asset
 - Source URLs: https://github.com/MohamedAbdallah-14/prompt-to-asset#readme, https://github.com/MohamedAbdallah-14/prompt-to-asset, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/prompt-to-asset.mdx
 - Author: MohamedAbdallah-14
+- Submitted by: MohamedAbdallah-14
+- Submission issue: https://github.com/JSONbored/claudepro-directory/issues/305
+- Import PR: https://github.com/JSONbored/claudepro-directory/pull/311
+- Reviewed by: JSONbored
+- Claim status: unclaimed
 - Last verified: 2026-04-30T04:13:44-06:00
 - Robots: indexable
 ## Summary

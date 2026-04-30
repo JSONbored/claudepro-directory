@@ -26,7 +26,7 @@
       "canonicalUrl": "https://heyclau.de/mcp/zyntra-mail",
       "llmsUrl": "https://heyclau.de/data/llms/mcp/zyntra-mail.txt",
       "apiUrl": "https://heyclau.de/api/registry/entries/mcp/zyntra-mail",
-      "artifactHash": "997c14d0aa355ef878108f55eb203da085d9eee8c7d37138a643a70ec1a203c2"
+      "artifactHash": "7cfa78d6f265b4d6251987e3a5f3e38cbda4658056394a2d73c7103e48fbb549"
     },
     {
       "key": "tools:aider",
@@ -674,7 +674,7 @@
       "canonicalUrl": "https://heyclau.de/mcp/prompt-to-asset",
       "llmsUrl": "https://heyclau.de/data/llms/mcp/prompt-to-asset.txt",
       "apiUrl": "https://heyclau.de/api/registry/entries/mcp/prompt-to-asset",
-      "artifactHash": "672b697f4c2fcefbb51235559f61d98c1687ac5c614e32823449eb7f41344cd0"
+      "artifactHash": "08812f2f2c5f5d1cee6eb0a678ca5320982efbe14be596b05c7e2dc49b89fd32"
     },
     {
       "key": "mcp:contrastapi-mcp-server",
@@ -686,7 +686,7 @@
       "canonicalUrl": "https://heyclau.de/mcp/contrastapi-mcp-server",
       "llmsUrl": "https://heyclau.de/data/llms/mcp/contrastapi-mcp-server.txt",
       "apiUrl": "https://heyclau.de/api/registry/entries/mcp/contrastapi-mcp-server",
-      "artifactHash": "d8e03b3c7890bdda51170a2ff051ef6c0c3de13c9be2e638f37e426208b7d1d8"
+      "artifactHash": "5af5129bcb2f5fbca90dab6cd1fd926325193674e6586415202ce1276eb164e9"
     },
     {
       "key": "collections:agent-operator-growth-master-pack",
@@ -4578,5 +4578,5 @@
     }
   ],
   "signatureAlgorithm": "sha256",
-  "signature": "a7c84652188631d0cd38009a18138f84735f796a64227b970c5c341bbbed972b"
+  "signature": "e9918d091664f3230e894fefd347cd9478f15e07109d8fa2a5394359b71c93d9"
 }
