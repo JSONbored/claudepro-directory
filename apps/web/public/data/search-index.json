@@ -24569,6 +24569,10 @@
         "zyntra - temp e-mails mcp"
       ],
       "author": "dd77ss",
+      "brandName": "Zyntra",
+      "brandDomain": "zyntra.app",
+      "brandIconUrl": "/api/brand-assets/icon/zyntra.app",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-30",
       "installable": true,
       "downloadTrust": null,
@@ -24593,7 +24597,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/zyntra-mail.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30",
+        "lastVerifiedAt": "2026-04-30T12:14:15Z",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []

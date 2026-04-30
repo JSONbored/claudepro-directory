@@ -3140,37 +3140,37 @@
     "directory-index.json": {
       "path": "/data/directory-index.json",
       "type": "json",
-      "sha256": "9ca0df8ae1ac5eff6d26f11d21a83ce08b817c4d5d8d7ced2a5940add5800c37"
+      "sha256": "7cf064ba128a723b5e8797c884849e93f9a197aecae4b4875af14eb4e38c0d0e"
     },
     "search-index.json": {
       "path": "/data/search-index.json",
       "type": "json",
-      "sha256": "42d842ec45fecc2dcdc0816f8a17f9be3a81c5c94f415c071ffb03a02440cd69"
+      "sha256": "d8847fab897c380d94229e03f81f0cf4f8dcc4e05d392af3ae5f98cd92495765"
     },
     "raycast-index.json": {
       "path": "/data/raycast-index.json",
       "type": "json",
-      "sha256": "fc8be90b737da1f49922dc34adc51685ff571fc0867bad0a73f20c22b05658af"
+      "sha256": "223bf5a19eeb4fa602b35def8d0fc646df4476c7922520978d0e545955c8e11a"
     },
     "ecosystem-feed.json": {
       "path": "/data/ecosystem-feed.json",
       "type": "json",
-      "sha256": "6af0876b5693081ccfda7f639cfd67fbd53fa6f83f41110a48555d71e8193aff"
+      "sha256": "8abef66e249d53b5145bd174ecda4b25bbb15eaf4dafc0b515c3ac52a56aa654"
     },
     "mcp-registry-feed.json": {
       "path": "/data/mcp-registry-feed.json",
       "type": "json",
-      "sha256": "511610a5a2d4a2c4452e9f0396304130084335bc83f84583a0a61b402ef338f6"
+      "sha256": "339d3577eb52cec160facb105b35697f23329ffd77ceee30b2f8d00902086492"
     },
     "plugin-export-feed.json": {
       "path": "/data/plugin-export-feed.json",
       "type": "json",
-      "sha256": "93b8a41ae090d6cd1348fc4709d80e35e6199fa6e0224127aafd94ce7354b947"
+      "sha256": "49ff578ed338bb7f47e5e3c5329aa9e8feebcdbdfa45d92252167421cb985228"
     },
     "registry-changelog.json": {
       "path": "/data/registry-changelog.json",
       "type": "json",
-      "sha256": "bffab59d870e8e4d59481a6e87c30ca21aad20d8484eafb99e9674579d1bade1"
+      "sha256": "92d3c8a22982f799801ecd13cb91754cb2e0b315114a47d163589ac2509145c0"
     },
     "feeds/index.json": {
       "path": "/data/feeds%2Findex.json",
@@ -3195,12 +3195,12 @@
     "jsonld-snapshots.json": {
       "path": "/data/jsonld-snapshots.json",
       "type": "json",
-      "sha256": "b39e7145a5c9eaa5316ef11b4d202cf70462ef947a9bad5738b1940cc8751f62"
+      "sha256": "3f66cd280ee399b0dcaa70fdd7453fe8f1d1c9d7751eacabd252ea019c7036c7"
     },
     "llms-full.txt": {
       "path": "/data/llms-full.txt",
       "type": "text",
-      "sha256": "de190c1e4f1c3b1800b14402e4a3b3317e318c71110b72a37dad400ee0fb2075"
+      "sha256": "e64c4157cb7bcf701fce8ba11939fa1583845bdf0dc378f47e78a6929e433ae3"
     },
     "entries/commands/cursor-rules.json": {
       "path": "/data/entries%2Fcommands%2Fcursor-rules.json",
@@ -9245,17 +9245,17 @@
     "entries/mcp/zyntra-mail.json": {
       "path": "/data/entries%2Fmcp%2Fzyntra-mail.json",
       "type": "json",
-      "sha256": "7d0faeb55f4ef7c92e18bee467c82191dd57de26bac0cf970cdd48a57666a561"
+      "sha256": "74b9849dedf4d2a00807ddb669979609620287d21c0262ff329ee3730f1f9986"
     },
     "llms/mcp/zyntra-mail.txt": {
       "path": "/data/llms%2Fmcp%2Fzyntra-mail.txt",
       "type": "text",
-      "sha256": "715200456ced1a274739c235253e1d6209c000c256c551bfd5fdb0d4437d075d"
+      "sha256": "b6254b5557d2a1bc935356e9a32ed5de5cae26bbcaffcf49535da77eff6bd15f"
     },
     "raycast/mcp/zyntra-mail.json": {
       "path": "/data/raycast%2Fmcp%2Fzyntra-mail.json",
       "type": "json",
-      "sha256": "9769fe62b8f0f3c9c7181fc1d19230284cae8581e6a932a9b57c93714bd88e1e"
+      "sha256": "3f0c7972d833958d7bca454c9757668a6d049e6fcc8e242c83c0deaca1d0136e"
     },
     "feeds/categories/agents.json": {
       "path": "/data/feeds%2Fcategories%2Fagents.json",
@@ -9265,7 +9265,7 @@
     "feeds/categories/mcp.json": {
       "path": "/data/feeds%2Fcategories%2Fmcp.json",
       "type": "json",
-      "sha256": "80ef59a3414c62ac6e77154808b8d9cd4ba745962f3f824a6b71b7ecd876920f"
+      "sha256": "02c4b72badda8e1f6ba561bd6248a7673f482bd3f6b4c5639c5c15804665509d"
     },
     "feeds/categories/tools.json": {
       "path": "/data/feeds%2Fcategories%2Ftools.json",

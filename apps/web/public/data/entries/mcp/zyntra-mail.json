@@ -11,6 +11,7 @@
     "author": "dd77ss",
     "authorProfileUrl": "https://github.com/dd77ss",
     "dateAdded": "2026-04-30",
+    "contentUpdatedAt": "2026-04-30T12:14:15Z",
     "tags": [
       "email",
       "testing",
@@ -31,6 +32,10 @@
       "zyntra - temp e-mails mcp"
     ],
     "documentationUrl": "https://docs.zyntra.app/mcp",
+    "brandName": "Zyntra",
+    "brandDomain": "zyntra.app",
+    "brandIconUrl": "/api/brand-assets/icon/zyntra.app",
+    "brandAssetSource": "brandfetch",
     "cardDescription": "Disposable email inboxes for AI agents and test automation.",
     "installable": true,
     "installCommand": "claude mcp add zyntra-mail --transport http https://mcp.zyntra.app/mcp",
@@ -44,7 +49,7 @@
     "downloadUrl": "",
     "downloadTrust": null,
     "downloadSha256": null,
-    "body": "## Overview\n\nMCP server for e-mail testing: create disposable inboxes, wait for delivery, and extract e-mail content or links - all from your AI agent or test automation workflow.\n\nGet a free API key on https://app.zyntra.app/\n\n## Usage\n\nclaude mcp add zyntra-mail --transport http https://mcp.zyntra.app/mcp\n\nThen add your API key in Claude settings (see config snippet below).\n\n## Auth Requirements\n\nX-API-Key header — get a free API key at https://app.zyntra.app/\n\n## Verification\n\nAfter adding, run: claude mcp list\nYou should see zyntra-mail listed as connected.",
+    "body": "## Overview\n\nMCP server for e-mail testing: create disposable inboxes, wait for delivery, and extract e-mail content or links - all from your AI agent or test automation workflow.\n\nGet a free API key on https://app.zyntra.app/\n\n## Usage\n\nclaude mcp add zyntra-mail --transport http https://mcp.zyntra.app/mcp\n\nThen add your API key in Claude settings (see config snippet below).\n\n## Auth Requirements\n\nRequires a Zyntra API key in the `X-API-Key` header. Use a test-only key from https://app.zyntra.app/ and avoid connecting production inboxes. The MCP can read email contents and delete messages in configured Zyntra inboxes.\n\n## Security Notes\n\n- Treat the Zyntra API key as a secret.\n- Prefer dedicated test inboxes and scoped test credentials.\n- Review the available MCP tools before use; Zyntra documents `delete_email` as a destructive action.\n\n## Verification\n\nAfter adding, run: claude mcp list\nYou should see zyntra-mail listed as connected.",
     "sections": [
       {
         "title": "Overview",
@@ -61,7 +66,13 @@
       {
         "title": "Auth Requirements",
         "id": "auth-requirements",
-        "markdown": "X-API-Key header — get a free API key at https://app.zyntra.app/",
+        "markdown": "Requires a Zyntra API key in the `X-API-Key` header. Use a test-only key from https://app.zyntra.app/ and avoid connecting production inboxes. The MCP can read email contents and delete messages in configured Zyntra inboxes.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Security Notes",
+        "id": "security-notes",
+        "markdown": "- Treat the Zyntra API key as a secret.\n- Prefer dedicated test inboxes and scoped test credentials.\n- Review the available MCP tools before use; Zyntra documents `delete_email` as a destructive action.",
         "codeBlocks": []
       },
       {
@@ -89,6 +100,11 @@
       },
       {
         "depth": 2,
+        "text": "Security Notes",
+        "id": "security-notes"
+      },
+      {
+        "depth": 2,
         "text": "Verification",
         "id": "verification"
       }
@@ -113,7 +129,7 @@
       "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/zyntra-mail.mdx"
     ],
     "sourceStatus": "available",
-    "lastVerifiedAt": "2026-04-30",
+    "lastVerifiedAt": "2026-04-30T12:14:15Z",
     "adapterGenerated": false,
     "platforms": [],
     "supportLevels": []

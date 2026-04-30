@@ -35360,6 +35360,7 @@
       "author": "dd77ss",
       "authorProfileUrl": "https://github.com/dd77ss",
       "dateAdded": "2026-04-30",
+      "contentUpdatedAt": "2026-04-30T12:14:15Z",
       "tags": [
         "email",
         "testing",
@@ -35380,6 +35381,10 @@
         "zyntra - temp e-mails mcp"
       ],
       "documentationUrl": "https://docs.zyntra.app/mcp",
+      "brandName": "Zyntra",
+      "brandDomain": "zyntra.app",
+      "brandIconUrl": "/api/brand-assets/icon/zyntra.app",
+      "brandAssetSource": "brandfetch",
       "cardDescription": "Disposable email inboxes for AI agents and test automation.",
       "installable": true,
       "installCommand": "claude mcp add zyntra-mail --transport http https://mcp.zyntra.app/mcp",
@@ -35414,7 +35419,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/zyntra-mail.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30",
+        "lastVerifiedAt": "2026-04-30T12:14:15Z",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []

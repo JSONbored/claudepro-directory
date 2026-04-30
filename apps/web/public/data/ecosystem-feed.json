@@ -21056,6 +21056,10 @@
       "title": "Zyntra - Temp e-mails MCP",
       "description": "Disposable email inboxes for AI agents and test automation.",
       "url": "https://heyclau.de/mcp/zyntra-mail",
+      "brandName": "Zyntra",
+      "brandDomain": "zyntra.app",
+      "brandIconUrl": "/api/brand-assets/icon/zyntra.app",
+      "brandAssetSource": "brandfetch",
       "websiteUrl": "",
       "documentationUrl": "https://docs.zyntra.app/mcp",
       "repoUrl": "",
@@ -21095,7 +21099,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/zyntra-mail.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30",
+        "lastVerifiedAt": "2026-04-30T12:14:15Z",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -21103,5 +21107,5 @@
     }
   ],
   "signatureAlgorithm": "sha256",
-  "signature": "759e6c40a17bd74240f94cd9cb372445916e237c6912e9854e3e172d17ad86df"
+  "signature": "47deb0b53a0d3a210cacc59e0dc378136da7c58edcbb8a8224a35cf1eceae1f8"
 }

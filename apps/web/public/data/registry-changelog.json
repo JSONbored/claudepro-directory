@@ -26,7 +26,7 @@
       "canonicalUrl": "https://heyclau.de/mcp/zyntra-mail",
       "llmsUrl": "https://heyclau.de/data/llms/mcp/zyntra-mail.txt",
       "apiUrl": "https://heyclau.de/api/registry/entries/mcp/zyntra-mail",
-      "artifactHash": "7d0faeb55f4ef7c92e18bee467c82191dd57de26bac0cf970cdd48a57666a561"
+      "artifactHash": "74b9849dedf4d2a00807ddb669979609620287d21c0262ff329ee3730f1f9986"
     },
     {
       "key": "tools:aider",
@@ -4578,5 +4578,5 @@
     }
   ],
   "signatureAlgorithm": "sha256",
-  "signature": "3e495dc607f866bfa8cbfeb27ad2535e8212446b63f911ae4d313eee7515d41d"
+  "signature": "95859f94de8072bccd177e578959abf43d0bf862a3b288828bec66646e79e90e"
 }
