@@ -75,6 +75,42 @@ components:
           items:
             type: string
           maxItems: 6
+        submittedBy:
+          type: string
+        submittedByUrl:
+          type: string
+          format: uri
+        submittedAt:
+          type: string
+        submissionIssueNumber:
+          type: integer
+          exclusiveMinimum: 0
+        submissionIssueUrl:
+          type: string
+          format: uri
+        importPrNumber:
+          type: integer
+          exclusiveMinimum: 0
+        importPrUrl:
+          type: string
+          format: uri
+        reviewedBy:
+          type: string
+        reviewedAt:
+          type: string
+        claimStatus:
+          type: string
+          enum:
+            - unclaimed
+            - pending
+            - verified
+        claimedBy:
+          type: string
+        claimedByUrl:
+          type: string
+          format: uri
+        claimedAt:
+          type: string
         category:
           type: string
         slug:
@@ -834,6 +870,42 @@ paths:
                           items:
                             type: string
                           maxItems: 6
+                        submittedBy:
+                          type: string
+                        submittedByUrl:
+                          type: string
+                          format: uri
+                        submittedAt:
+                          type: string
+                        submissionIssueNumber:
+                          type: integer
+                          exclusiveMinimum: 0
+                        submissionIssueUrl:
+                          type: string
+                          format: uri
+                        importPrNumber:
+                          type: integer
+                          exclusiveMinimum: 0
+                        importPrUrl:
+                          type: string
+                          format: uri
+                        reviewedBy:
+                          type: string
+                        reviewedAt:
+                          type: string
+                        claimStatus:
+                          type: string
+                          enum:
+                            - unclaimed
+                            - pending
+                            - verified
+                        claimedBy:
+                          type: string
+                        claimedByUrl:
+                          type: string
+                          format: uri
+                        claimedAt:
+                          type: string
                         category:
                           type: string
                         slug:

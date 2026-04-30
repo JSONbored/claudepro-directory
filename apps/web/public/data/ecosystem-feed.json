@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kind": "ecosystem-feed",
   "generatedAt": "2026-04-30T00:00:00.000Z",
-  "count": 380,
+  "count": 381,
   "entries": [
     {
       "key": "commands:cursor-rules",
@@ -6019,6 +6019,16 @@
       "title": "ContrastAPI Security Tools",
       "description": "41 remote security tools for CVE, KEV, CWE, MITRE ATLAS, D3FEND, domain audit, IP threat intel, and dependency scanning.",
       "url": "https://heyclau.de/mcp/contrastapi-mcp-server",
+      "submittedBy": "UPinar",
+      "submittedByUrl": "https://github.com/UPinar",
+      "submittedAt": "2026-04-20T15:29:10.000Z",
+      "submissionIssueNumber": 304,
+      "submissionIssueUrl": "https://github.com/JSONbored/claudepro-directory/issues/304",
+      "importPrNumber": 311,
+      "importPrUrl": "https://github.com/JSONbored/claudepro-directory/pull/311",
+      "reviewedBy": "JSONbored",
+      "reviewedAt": "2026-04-30T11:16:21.000Z",
+      "claimStatus": "unclaimed",
       "brandName": "ContrastAPI",
       "brandDomain": "contrastcyber.com",
       "brandIconUrl": "/api/brand-assets/icon/contrastcyber.com",
@@ -15633,6 +15643,16 @@
       "title": "Prompt-to-asset",
       "description": "Generate app icons, favicons, OG images, and logos via 30+ image models. No API key required for first run.",
       "url": "https://heyclau.de/mcp/prompt-to-asset",
+      "submittedBy": "MohamedAbdallah-14",
+      "submittedByUrl": "https://github.com/MohamedAbdallah-14",
+      "submittedAt": "2026-04-25T15:44:14.000Z",
+      "submissionIssueNumber": 305,
+      "submissionIssueUrl": "https://github.com/JSONbored/claudepro-directory/issues/305",
+      "importPrNumber": 311,
+      "importPrUrl": "https://github.com/JSONbored/claudepro-directory/pull/311",
+      "reviewedBy": "JSONbored",
+      "reviewedAt": "2026-04-30T11:16:21.000Z",
+      "claimStatus": "unclaimed",
       "websiteUrl": "",
       "documentationUrl": "https://github.com/MohamedAbdallah-14/prompt-to-asset#readme",
       "repoUrl": "https://github.com/MohamedAbdallah-14/prompt-to-asset",
@@ -21048,8 +21068,74 @@
           "manual-context"
         ]
       }
+    },
+    {
+      "key": "mcp:zyntra-mail",
+      "category": "mcp",
+      "slug": "zyntra-mail",
+      "title": "Zyntra - Temp e-mails MCP",
+      "description": "Disposable email inboxes for AI agents and test automation.",
+      "url": "https://heyclau.de/mcp/zyntra-mail",
+      "submittedBy": "dd77ss",
+      "submittedByUrl": "https://github.com/dd77ss",
+      "submittedAt": "2026-04-28T18:34:47.000Z",
+      "submissionIssueNumber": 310,
+      "submissionIssueUrl": "https://github.com/JSONbored/claudepro-directory/issues/310",
+      "importPrNumber": 314,
+      "importPrUrl": "https://github.com/JSONbored/claudepro-directory/pull/314",
+      "reviewedBy": "JSONbored",
+      "reviewedAt": "2026-04-30T12:14:24.000Z",
+      "claimStatus": "unclaimed",
+      "brandName": "Zyntra",
+      "brandDomain": "zyntra.app",
+      "brandIconUrl": "/api/brand-assets/icon/zyntra.app",
+      "brandAssetSource": "brandfetch",
+      "websiteUrl": "",
+      "documentationUrl": "https://docs.zyntra.app/mcp",
+      "repoUrl": "",
+      "pricingModel": "",
+      "disclosure": "editorial",
+      "tags": [
+        "email",
+        "testing",
+        "disposable",
+        "temp-mail",
+        "automation"
+      ],
+      "qualityScore": 86,
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://docs.zyntra.app/mcp",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/zyntra-mail.mdx"
+        ],
+        "externalSourceUrls": [
+          "https://docs.zyntra.app/mcp"
+        ]
+      },
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.zyntra.app/mcp",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/zyntra-mail.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-30",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      }
     }
   ],
   "signatureAlgorithm": "sha256",
-  "signature": "1f646b664aa20a0107babb12fa8814103bcede39a65349db859e891a1b633cf0"
+  "signature": "0a8f06dbfe0e3835c9853d56362c891ee4eb62ada3e6196de7fe495206a915ca"
 }

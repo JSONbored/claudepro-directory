@@ -1,7 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
-import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 import { categorySpec, buildRegistryArtifactSet } from "@heyclaude/registry";
@@ -145,24 +144,6 @@ function sha256File(filePath) {
   return hash.digest("hex");
 }
 
-function gitContentUpdatedAt(filePath) {
-  try {
-    const relativePath = path.relative(repoRoot, filePath);
-    const output = execFileSync(
-      "git",
-      ["log", "--no-merges", "-1", "--format=%aI", "--", relativePath],
-      {
-        cwd: repoRoot,
-        encoding: "utf8",
-        stdio: ["ignore", "pipe", "ignore"],
-      },
-    ).trim();
-    return output || undefined;
-  } catch {
-    return undefined;
-  }
-}
-
 function ensureDir(dir) {
   fs.mkdirSync(dir, { recursive: true });
 }
@@ -195,6 +176,38 @@ function writeTextFile(filePath, value) {
     filePath,
     value.endsWith("\n") ? value : `${value}\n`,
   );
+}
+
+function loadExistingContentUpdatedAt() {
+  const values = new Map();
+  if (!fs.existsSync(entryDataDir)) return values;
+
+  for (const category of fs.readdirSync(entryDataDir)) {
+    const categoryDir = path.join(entryDataDir, category);
+    if (!fs.statSync(categoryDir).isDirectory()) continue;
+
+    for (const fileName of fs.readdirSync(categoryDir)) {
+      if (!fileName.endsWith(".json")) continue;
+
+      try {
+        const payload = JSON.parse(
+          fs.readFileSync(path.join(categoryDir, fileName), "utf8"),
+        );
+        const entry = payload?.entry;
+        if (!entry?.category || !entry?.slug || !entry?.contentUpdatedAt) {
+          continue;
+        }
+        values.set(
+          `${entry.category}:${entry.slug}`,
+          String(entry.contentUpdatedAt),
+        );
+      } catch {
+        // Regeneration should not fail just because a stale artifact is invalid.
+      }
+    }
+  }
+
+  return values;
 }
 
 function copyFileIfChanged(sourcePath, destPath) {
@@ -234,6 +247,7 @@ async function main() {
   const repoStats = new Map();
   const reposToFetch = new Map();
   const directoryRepo = parseGitHubRepo(DEFAULT_DIRECTORY_REPO_URL);
+  const existingContentUpdatedAt = loadExistingContentUpdatedAt();
 
   if (directoryRepo) {
     reposToFetch.set(directoryRepo.key, directoryRepo);
@@ -256,13 +270,16 @@ async function main() {
         source,
         repoRoot,
         contentRoot,
-        contentUpdatedAt: gitContentUpdatedAt(filePath),
         getLocalDownloadSha256(localDownloadPath) {
           return fs.existsSync(localDownloadPath)
             ? sha256File(localDownloadPath)
             : null;
         },
       });
+      const existingUpdatedAt = existingContentUpdatedAt.get(
+        `${entry.category}:${entry.slug}`,
+      );
+      entry.contentUpdatedAt = existingUpdatedAt || entry.dateAdded;
       const githubRepo = parseGitHubRepo(entry.repoUrl);
 
       if (githubRepo) {

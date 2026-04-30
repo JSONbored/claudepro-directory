@@ -13,7 +13,7 @@
     {
       "category": "mcp",
       "label": "MCP Servers",
-      "count": 44,
+      "count": 45,
       "feedUrl": "/data/feeds/categories/mcp.json",
       "canonicalUrl": "https://heyclau.de/mcp"
     },

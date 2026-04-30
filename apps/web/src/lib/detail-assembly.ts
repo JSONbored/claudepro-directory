@@ -375,6 +375,27 @@ export function getSourceSignals(entry: ContentEntry) {
     entry.downloadSha256
       ? { label: "Package checksum", value: entry.downloadSha256 }
       : null,
+    entry.submissionIssueUrl
+      ? { label: "Submission issue", value: entry.submissionIssueUrl }
+      : null,
+    entry.importPrUrl ? { label: "Import PR", value: entry.importPrUrl } : null,
+    entry.reviewedBy
+      ? {
+          label: "Reviewed by",
+          value: entry.reviewedAt
+            ? `${entry.reviewedBy} on ${entry.reviewedAt.slice(0, 10)}`
+            : entry.reviewedBy,
+        }
+      : null,
+    entry.claimStatus
+      ? { label: "Claim status", value: entry.claimStatus }
+      : null,
+    entry.claimedBy
+      ? {
+          label: "Claimed by",
+          value: entry.claimedByUrl || entry.claimedBy,
+        }
+      : null,
     entry.repoUrl ? { label: "Repository", value: entry.repoUrl } : null,
     entry.documentationUrl
       ? { label: "Documentation", value: entry.documentationUrl }

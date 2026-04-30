@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 
 import {
@@ -31,6 +33,29 @@ function issue(body: string, labels = ["content-submission"]) {
     author: { login: "contributor" },
     updatedAt: "2026-04-26T00:00:00Z",
   };
+}
+
+function importSubmissionDryRun(
+  issuePayload: Record<string, unknown>,
+  env: Record<string, string> = {},
+) {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "heyclaude-issue-"));
+  const issuePath = path.join(tmpDir, "issue.json");
+  fs.writeFileSync(issuePath, `${JSON.stringify(issuePayload, null, 2)}\n`);
+  return execFileSync(
+    process.execPath,
+    [
+      "scripts/import-submission-issue.mjs",
+      "--issue-json",
+      issuePath,
+      "--dry-run",
+    ],
+    {
+      cwd: repoRoot,
+      env: { ...process.env, ...env },
+      encoding: "utf8",
+    },
+  );
 }
 
 describe("submission intake", () => {
@@ -100,6 +125,86 @@ describe("submission intake", () => {
       "community-mcp",
     ]);
     expect(validateSubmission(draft).ok).toBe(true);
+  });
+
+  it("imports direct GitHub submissions with content-level provenance", () => {
+    const output = importSubmissionDryRun(
+      {
+        number: 777,
+        html_url: "https://github.com/JSONbored/claudepro-directory/issues/777",
+        created_at: "2026-04-28T12:34:56Z",
+        user: {
+          login: "content-author",
+          html_url: "https://github.com/content-author",
+        },
+        body: buildSubmissionIssueDraft({
+          name: "Provenance MCP",
+          slug: "provenance-mcp",
+          category: "mcp",
+          author: "Example Team",
+          docs_url: "https://example.com/docs",
+          description:
+            "MCP server submitted through a direct GitHub issue with provenance.",
+          card_description: "Direct GitHub issue provenance coverage.",
+          install_command: "npx -y provenance-mcp",
+          usage_snippet:
+            "claude mcp add provenance-mcp -- npx -y provenance-mcp",
+        }).body,
+        labels: [{ name: "content-submission" }, { name: "community-mcp" }],
+      },
+      {
+        SUBMISSION_REVIEWED_BY: "JSONbored",
+        SUBMISSION_REVIEWED_AT: "2026-04-29T00:00:00Z",
+      },
+    );
+
+    expect(output).toContain("submittedBy: content-author");
+    expect(output).toContain(
+      'submittedByUrl: "https://github.com/content-author"',
+    );
+    expect(output).toContain('submittedAt: "2026-04-28T12:34:56Z"');
+    expect(output).toContain("submissionIssueNumber: 777");
+    expect(output).toContain(
+      'submissionIssueUrl: "https://github.com/JSONbored/claudepro-directory/issues/777"',
+    );
+    expect(output).toContain("reviewedBy: JSONbored");
+    expect(output).toContain("claimStatus: unclaimed");
+  });
+
+  it("does not publish website token owners as submitters", () => {
+    const output = importSubmissionDryRun({
+      number: 778,
+      html_url: "https://github.com/JSONbored/claudepro-directory/issues/778",
+      created_at: "2026-04-28T12:34:56Z",
+      user: {
+        login: "JSONbored",
+        html_url: "https://github.com/JSONbored",
+      },
+      body: buildSubmissionIssueDraft({
+        name: "Website Token MCP",
+        slug: "website-token-mcp",
+        category: "mcp",
+        author: "Example Team",
+        contact_email: "maintainer@example.com",
+        submitted_via: "website",
+        docs_url: "https://example.com/docs",
+        description:
+          "MCP server submitted through the website with private contact details.",
+        card_description: "Website token provenance privacy coverage.",
+        install_command: "npx -y website-token-mcp",
+        usage_snippet:
+          "claude mcp add website-token-mcp -- npx -y website-token-mcp",
+      }).body,
+      labels: [{ name: "content-submission" }, { name: "community-mcp" }],
+    });
+
+    expect(output).not.toContain("submittedBy:");
+    expect(output).not.toContain("submittedByUrl:");
+    expect(output).not.toContain("submittedBy: JSONbored");
+    expect(output).not.toContain(
+      "submittedByUrl: https://github.com/JSONbored",
+    );
+    expect(output).not.toContain("maintainer@example.com");
   });
 
   it("normalizes brand domains and rejects unsafe brand values", () => {

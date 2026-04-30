@@ -34,7 +34,7 @@ export async function generateMetadata({
 
   return buildPageMetadata({
     title: `${contributor.name} on HeyClaude`,
-    description: `${contributor.entryCount} accepted HeyClaude entries attributed to ${contributor.name}.`,
+    description: `${contributor.entryCount} accepted HeyClaude entries submitted or attributed to ${contributor.name}.`,
     path: `/contributors/${contributor.slug}`,
   });
 }
@@ -59,7 +59,7 @@ export default async function ContributorPage({
       siteUrl: siteConfig.url,
       path: `/contributors/${contributor.slug}`,
       name: `${contributor.name} on HeyClaude`,
-      description: `${contributor.entryCount} accepted directory entries.`,
+      description: `${contributor.entryCount} accepted submitted or attributed directory entries.`,
       breadcrumbId: `${siteConfig.url}/contributors/${contributor.slug}#breadcrumb`,
     }),
   ];

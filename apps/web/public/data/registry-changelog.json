@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kind": "registry-changelog",
   "generatedAt": "2026-04-30T00:00:00.000Z",
-  "count": 380,
+  "count": 381,
   "entries": [
     {
       "key": "skills:heyclaude-content-submission-factory",
@@ -15,6 +15,18 @@
       "llmsUrl": "https://heyclau.de/data/llms/skills/heyclaude-content-submission-factory.txt",
       "apiUrl": "https://heyclau.de/api/registry/entries/skills/heyclaude-content-submission-factory",
       "artifactHash": "3d655a202fc9775766f03c9cfec6b83b3f92971dc5e8ead151cecad72ede2557"
+    },
+    {
+      "key": "mcp:zyntra-mail",
+      "type": "added",
+      "category": "mcp",
+      "slug": "zyntra-mail",
+      "title": "Zyntra - Temp e-mails MCP",
+      "dateAdded": "2026-04-30",
+      "canonicalUrl": "https://heyclau.de/mcp/zyntra-mail",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/zyntra-mail.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/zyntra-mail",
+      "artifactHash": "7cfa78d6f265b4d6251987e3a5f3e38cbda4658056394a2d73c7103e48fbb549"
     },
     {
       "key": "tools:aider",
@@ -662,7 +674,7 @@
       "canonicalUrl": "https://heyclau.de/mcp/prompt-to-asset",
       "llmsUrl": "https://heyclau.de/data/llms/mcp/prompt-to-asset.txt",
       "apiUrl": "https://heyclau.de/api/registry/entries/mcp/prompt-to-asset",
-      "artifactHash": "672b697f4c2fcefbb51235559f61d98c1687ac5c614e32823449eb7f41344cd0"
+      "artifactHash": "08812f2f2c5f5d1cee6eb0a678ca5320982efbe14be596b05c7e2dc49b89fd32"
     },
     {
       "key": "mcp:contrastapi-mcp-server",
@@ -674,7 +686,7 @@
       "canonicalUrl": "https://heyclau.de/mcp/contrastapi-mcp-server",
       "llmsUrl": "https://heyclau.de/data/llms/mcp/contrastapi-mcp-server.txt",
       "apiUrl": "https://heyclau.de/api/registry/entries/mcp/contrastapi-mcp-server",
-      "artifactHash": "d8e03b3c7890bdda51170a2ff051ef6c0c3de13c9be2e638f37e426208b7d1d8"
+      "artifactHash": "5af5129bcb2f5fbca90dab6cd1fd926325193674e6586415202ce1276eb164e9"
     },
     {
       "key": "collections:agent-operator-growth-master-pack",
@@ -4566,5 +4578,5 @@
     }
   ],
   "signatureAlgorithm": "sha256",
-  "signature": "9673da140e9d069ffe62c2438c25fc56bbd024e88e037cf2779847e495742bdf"
+  "signature": "e9918d091664f3230e894fefd347cd9478f15e07109d8fa2a5394359b71c93d9"
 }

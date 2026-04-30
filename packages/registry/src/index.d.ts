@@ -27,6 +27,7 @@ export type SkillType = "general" | "capability-pack";
 export type SkillLevel = "foundational" | "advanced" | "expert";
 export type VerificationStatus = "draft" | "validated" | "production";
 export type SkillSupportLevel = "native-skill" | "adapter" | "manual-context";
+export type ClaimStatus = "unclaimed" | "pending" | "verified";
 export type BrandAssetSource =
   | "brandfetch"
   | "manual"
@@ -75,6 +76,19 @@ export type ContentEntry = {
   authorProfileUrl?: string;
   dateAdded?: string;
   contentUpdatedAt?: string;
+  submittedBy?: string;
+  submittedByUrl?: string;
+  submittedAt?: string;
+  submissionIssueNumber?: number;
+  submissionIssueUrl?: string;
+  importPrNumber?: number;
+  importPrUrl?: string;
+  reviewedBy?: string;
+  reviewedAt?: string;
+  claimStatus?: ClaimStatus;
+  claimedBy?: string;
+  claimedByUrl?: string;
+  claimedAt?: string;
   tags: string[];
   keywords: string[];
   readingTime?: number;
@@ -481,6 +495,19 @@ export type SearchDocument = {
   tags: string[];
   keywords: string[];
   author: string;
+  submittedBy?: string;
+  submittedByUrl?: string;
+  submittedAt?: string;
+  submissionIssueNumber?: number;
+  submissionIssueUrl?: string;
+  importPrNumber?: number;
+  importPrUrl?: string;
+  reviewedBy?: string;
+  reviewedAt?: string;
+  claimStatus?: ClaimStatus;
+  claimedBy?: string;
+  claimedByUrl?: string;
+  claimedAt?: string;
   brandName?: string;
   brandDomain?: string;
   brandIconUrl?: string;
