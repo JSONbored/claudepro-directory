@@ -123,6 +123,7 @@ jobs:
           add-paths: |
             content/**
             apps/web/public/data/**
+            apps/web/src/generated/**
             README.md
           body: |
             ## Summary

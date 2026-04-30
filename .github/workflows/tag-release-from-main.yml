@@ -89,6 +89,7 @@ jobs:
 
       - name: Submit production URLs to IndexNow
         if: ${{ vars.INDEXNOW_SUBMIT == '1' }}
+        continue-on-error: true
         env:
           INDEXNOW_SUBMIT: "1"
           INDEXNOW_BASE_URL: https://heyclau.de

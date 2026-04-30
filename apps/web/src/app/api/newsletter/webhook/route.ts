@@ -80,9 +80,7 @@ function verifyWebhookSignature(params: {
 
 export const POST = createApiHandler(
   "newsletter.webhook",
-  async ({ request, requestId }) => {
-    const rawBody = await request.text();
-
+  async ({ request, requestId, rawBody = "" }) => {
     const { env } = getCloudflareContext();
     const envRecord = env as unknown as Record<string, unknown>;
     const discordWebhookUrl = String(envRecord["DISCORD_WEBHOOK_URL"] ?? "");
@@ -120,8 +118,9 @@ export const POST = createApiHandler(
       return apiJson({ ok: true, forwarded: false });
     }
 
+    let notificationResponse: Response;
     try {
-      await fetch(discordWebhookUrl, {
+      notificationResponse = await fetch(discordWebhookUrl, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -132,6 +131,14 @@ export const POST = createApiHandler(
     } catch {
       logApiError(request, "newsletter.webhook.notification_failed", {
         eventType: String(payload.type ?? "unknown"),
+        email: redactEmail(getEventEmail(payload.data)),
+      });
+      return apiError("notification_failed", 502, { requestId });
+    }
+    if (!notificationResponse.ok) {
+      logApiError(request, "newsletter.webhook.notification_failed", {
+        eventType: String(payload.type ?? "unknown"),
+        status: notificationResponse.status,
         email: redactEmail(getEventEmail(payload.data)),
       });
       return apiError("notification_failed", 502, { requestId });

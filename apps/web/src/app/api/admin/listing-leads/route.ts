@@ -16,6 +16,7 @@ import {
 } from "@/lib/api/router";
 import { isAdminAuthorized } from "@/lib/admin-auth";
 import { logApiError, logApiInfo, logApiWarn } from "@/lib/api-logs";
+import { csvEscape } from "@/lib/csv";
 import { getSiteDb } from "@/lib/db";
 
 const ALLOWED_KINDS = new Set(["job", "tool", "claim"]);
@@ -41,13 +42,6 @@ function normalizeKind(value: string | null) {
     .trim()
     .toLowerCase();
   return ALLOWED_KINDS.has(normalized) ? normalized : "";
-}
-
-function csvEscape(value: unknown) {
-  const normalized = String(value ?? "");
-  return /[",\n\r]/.test(normalized)
-    ? `"${normalized.replaceAll('"', '""')}"`
-    : normalized;
 }
 
 function leadsToCsv(rows: Record<string, unknown>[]) {

@@ -27,6 +27,15 @@ const jobSourceKindSchema = z.enum([
   "employer_careers",
   "employer_submitted",
 ]);
+const listingLeadStatusSchema = z.enum([
+  "new",
+  "pending_review",
+  "approved",
+  "active",
+  "rejected",
+  "expired",
+  "archived",
+]);
 
 function isAsciiEmail(value: string) {
   if (value.length < 3 || value.length > 320) return false;
@@ -263,7 +272,10 @@ export const listingLeadBodySchema = z
 
 export const adminListingLeadsQuerySchema = z.object({
   kind: z.string().trim().toLowerCase().optional().default(""),
-  status: z.string().trim().toLowerCase().optional().default(""),
+  status: z
+    .union([listingLeadStatusSchema, z.literal("")])
+    .optional()
+    .default(""),
   limit: z.coerce.number().int().min(1).max(100).optional().default(50),
   format: z.string().trim().toLowerCase().optional().default(""),
 });
@@ -291,6 +303,7 @@ export const adminJobsQuerySchema = z.object({
     .optional()
     .default(""),
   limit: z.coerce.number().int().min(1).max(100).optional().default(50),
+  offset: z.coerce.number().int().min(0).max(10_000).optional().default(0),
 });
 
 export const adminJobsUpsertBodySchema = z

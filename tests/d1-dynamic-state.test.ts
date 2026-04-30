@@ -104,6 +104,55 @@ class FakeD1 implements D1DatabaseLike {
       );
       return { success: true, meta: { changes: 1 } };
     }
+    if (query.includes("INSERT INTO jobs_listings")) {
+      const slug = String(values[0]);
+      if (!this.jobRows.some((row) => row.slug === slug)) {
+        this.jobRows.push({
+          slug,
+          title: values[1],
+          company_name: values[2],
+          company_url: values[3],
+          location_text: values[4],
+          summary: values[5],
+          description_md: values[6],
+          employment_type: values[7],
+          compensation_summary: values[8],
+          equity_summary: values[9],
+          bonus_summary: values[10],
+          benefits_json: values[11],
+          responsibilities_json: values[12],
+          requirements_json: values[13],
+          apply_url: values[14],
+          tier: values[15],
+          status: values[16],
+          source: values[17],
+          source_kind: values[18],
+          source_url: values[19],
+          first_seen_at: values[20],
+          last_checked_at: values[21],
+          source_checked_at: values[22],
+          stale_check_count: values[23],
+          curation_note: values[24],
+          paid_placement_expires_at: values[25],
+          claimed_employer: values[26],
+          posted_by_email: values[27],
+          posted_at: values[28],
+          expires_at: values[29],
+          is_remote: values[30],
+          is_worldwide: values[31],
+        });
+      }
+      return { success: true, meta: { changes: 1 } };
+    }
+    if (query.includes("UPDATE jobs_listings")) {
+      const slug = String(values.at(-1));
+      return {
+        success: true,
+        meta: {
+          changes: this.jobRows.some((row) => row.slug === slug) ? 1 : 0,
+        },
+      };
+    }
     return { success: true, meta: { changes: 0 } };
   }
 
@@ -120,7 +169,12 @@ class FakeD1 implements D1DatabaseLike {
       return [...counts].map(([status, count]) => ({ status, count })) as T[];
     }
     if (query.includes("FROM jobs_listings")) {
-      return this.jobRows as T[];
+      const hasOffset = query.includes("OFFSET ?");
+      const limit = Number(
+        values.at(hasOffset ? -2 : -1) ?? this.jobRows.length,
+      );
+      const offset = hasOffset ? Number(values.at(-1) ?? 0) : 0;
+      return this.jobRows.slice(offset, offset + limit) as T[];
     }
     if (query.includes("FROM votes_entries")) {
       const keys = values.map(String);
@@ -402,6 +456,13 @@ describe("D1 dynamic state helpers", () => {
       checkedAt: "2026-04-29T00:00:00.000Z",
     });
     expect(db.runCalls.at(-1)?.query).toContain("stale_pending_review");
+
+    await expect(
+      updateAdminJobState(db, {
+        slug: "missing-role",
+        action: "close",
+      }),
+    ).rejects.toMatchObject({ name: "JobNotFoundError" });
   });
 
   it("blocks paid job activation until reviewed rows meet publication quality", async () => {

@@ -12,9 +12,10 @@ import {
   getApiRequestId,
 } from "@/lib/api/router";
 import {
-  hasBodyWithinLimit,
+  BodyTooLargeError,
   hasJsonContentType,
   isAllowedOrigin,
+  readRequestTextWithinLimit,
 } from "@/lib/api-security";
 import { logApiError, logApiWarn } from "@/lib/api-logs";
 import { applySecurityHeaders } from "@/lib/security-headers";
@@ -107,30 +108,44 @@ async function validateMcpRequest(request: Request) {
     return mcpError(request, "forbidden_origin", 403, requestId);
   }
 
-  if (
-    route.bodyLimitBytes &&
-    !hasBodyWithinLimit(request, route.bodyLimitBytes)
-  ) {
-    return mcpError(request, "payload_too_large", 413, requestId);
-  }
-
   if (request.method === "POST" && !hasJsonContentType(request)) {
     return mcpError(request, "invalid_content_type", 415, requestId);
+  }
+
+  let checkedRequest = request;
+  if (request.method === "POST" && route.bodyLimitBytes) {
+    try {
+      const body = await readRequestTextWithinLimit(
+        request,
+        route.bodyLimitBytes,
+      );
+      checkedRequest = new Request(request.url, {
+        method: request.method,
+        headers: request.headers,
+        body,
+      });
+    } catch (error) {
+      if (error instanceof BodyTooLargeError) {
+        return mcpError(request, "payload_too_large", 413, requestId);
+      }
+      throw error;
+    }
   }
 
   if (await enforceApiRateLimit(route, request)) {
     return mcpError(request, "rate_limited", 429, requestId);
   }
 
-  return null;
+  return { request: checkedRequest };
 }
 
 async function handleMcpRequest(request: Request) {
-  const validationError = await validateMcpRequest(request);
-  if (validationError) return validationError;
+  const validationResult = await validateMcpRequest(request);
+  if (validationResult instanceof Response) return validationResult;
+  const checkedRequest = validationResult.request;
 
   try {
-    const host = new URL(request.url).host;
+    const host = new URL(checkedRequest.url).host;
     const transport = new WebStandardStreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
       enableJsonResponse: true,
@@ -143,7 +158,7 @@ async function handleMcpRequest(request: Request) {
     });
 
     await server.connect(transport);
-    return applyMcpHeaders(await transport.handleRequest(request));
+    return applyMcpHeaders(await transport.handleRequest(checkedRequest));
   } catch (error) {
     logApiError(request, `${route.id}.unhandled_error`, {
       error: error instanceof Error ? error.message : "unknown",

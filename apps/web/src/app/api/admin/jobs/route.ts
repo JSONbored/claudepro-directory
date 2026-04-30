@@ -15,6 +15,7 @@ import { logApiError, logApiInfo, logApiWarn } from "@/lib/api-logs";
 import { getSiteDb } from "@/lib/db";
 import {
   checkJobsSchema,
+  JobNotFoundError,
   JobPublicationQualityError,
   queryAdminJobs,
   updateAdminJobState,
@@ -65,6 +66,8 @@ export const GET = createApiHandler(
       {
         schemaVersion: 1,
         count: jobs.length,
+        limit: filters.limit,
+        offset: filters.offset,
         entries: jobs,
       },
       { headers: { "cache-control": "no-store" } },
@@ -142,6 +145,13 @@ export const PATCH = createApiHandler(
           requestId,
           details: caught.errors,
         });
+      }
+      if (caught instanceof JobNotFoundError) {
+        logApiWarn(request, "admin.jobs.not_found", {
+          slug: payload.slug,
+          action: payload.action,
+        });
+        return apiError("job_not_found", 404, { requestId });
       }
       throw caught;
     }

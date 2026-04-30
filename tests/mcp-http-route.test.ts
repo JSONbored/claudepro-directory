@@ -124,6 +124,26 @@ describe("HeyClaude remote MCP route", () => {
     });
   });
 
+  it("rejects oversized MCP bodies without relying on content-length", async () => {
+    const response = await POST(
+      mcpRequest({
+        jsonrpc: "2.0",
+        id: 99,
+        method: "tools/call",
+        params: {
+          name: "search_registry",
+          arguments: { query: "x".repeat(70 * 1024) },
+        },
+      }),
+    );
+
+    expect(response.status).toBe(413);
+    expect(await json(response)).toMatchObject({
+      ok: false,
+      error: { code: "payload_too_large" },
+    });
+  });
+
   it("builds submission helper URLs without calling GitHub write APIs", async () => {
     const response = await POST(
       mcpRequest({

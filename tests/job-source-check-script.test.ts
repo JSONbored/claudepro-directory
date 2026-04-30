@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   evaluateCheckedJob,
+  fetchJobs,
   summarizeResults,
 } from "../scripts/check-d1-job-sources.mjs";
 import { formatJobSourceCheckSummary } from "../scripts/summarize-job-source-check.mjs";
@@ -115,5 +116,40 @@ describe("jobs source checker planning", () => {
     ).toContain(
       "| verified-claude-role | active | revalidate | active | ok | source_available |",
     );
+  });
+
+  it("paginates admin job source fetches", async () => {
+    const previousToken = process.env.ADMIN_API_TOKEN;
+    const previousFetch = globalThis.fetch;
+    process.env.ADMIN_API_TOKEN = "test-token";
+    const requestedOffsets: string[] = [];
+    globalThis.fetch = (async (input: RequestInfo | URL) => {
+      const url = new URL(String(input));
+      requestedOffsets.push(url.searchParams.get("offset") || "0");
+      const offset = Number(url.searchParams.get("offset") || 0);
+      const count = offset === 0 ? 100 : offset === 100 ? 2 : 0;
+      return new Response(
+        JSON.stringify({
+          entries: Array.from({ length: count }, (_, index) => ({
+            slug: `job-${offset + index}`,
+          })),
+        }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      );
+    }) as typeof fetch;
+
+    try {
+      await expect(
+        fetchJobs("https://heyclau.de", "active"),
+      ).resolves.toHaveLength(102);
+      expect(requestedOffsets).toEqual(["0", "100"]);
+    } finally {
+      if (previousToken === undefined) {
+        delete process.env.ADMIN_API_TOKEN;
+      } else {
+        process.env.ADMIN_API_TOKEN = previousToken;
+      }
+      globalThis.fetch = previousFetch;
+    }
   });
 });

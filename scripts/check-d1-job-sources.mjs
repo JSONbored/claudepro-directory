@@ -174,12 +174,20 @@ export async function checkJob(job) {
   }
 }
 
-async function fetchJobs(baseUrl, status) {
-  const url = new URL(`${baseUrl}/api/admin/jobs`);
-  url.searchParams.set("status", status);
-  url.searchParams.set("limit", "100");
-  const payload = await adminFetch(url.toString());
-  return Array.isArray(payload.entries) ? payload.entries : [];
+export async function fetchJobs(baseUrl, status) {
+  const pageSize = 100;
+  const entries = [];
+  for (let offset = 0; ; offset += pageSize) {
+    const url = new URL(`${baseUrl}/api/admin/jobs`);
+    url.searchParams.set("status", status);
+    url.searchParams.set("limit", String(pageSize));
+    url.searchParams.set("offset", String(offset));
+    const payload = await adminFetch(url.toString());
+    const page = Array.isArray(payload.entries) ? payload.entries : [];
+    entries.push(...page);
+    if (page.length < pageSize) break;
+  }
+  return entries;
 }
 
 export function summarizeResults(results) {

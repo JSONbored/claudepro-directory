@@ -61,7 +61,13 @@ jobs:
             const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
             if (report.skipped) return;
 
-            const labels = new Set(report.recommendedLabels || []);
+            const currentLabels = (context.payload.issue.labels || [])
+              .map((label) => typeof label === "string" ? label : label.name)
+              .filter(Boolean);
+            const labels = new Set(currentLabels);
+            for (const label of report.recommendedLabels || []) {
+              if (label) labels.add(label);
+            }
             const nextLabels = [...labels].filter(Boolean);
             try {
               await github.rest.issues.setLabels({

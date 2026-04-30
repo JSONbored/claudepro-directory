@@ -1,4 +1,5 @@
 import { normalizeBrandDomain } from "@heyclaude/registry";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 import { brandAssetParamsSchema } from "@/lib/api/contracts";
 import {
@@ -11,6 +12,15 @@ import { applySecurityHeaders } from "@/lib/security-headers";
 const CACHE_CONTROL = "public, max-age=86400, stale-while-revalidate=604800";
 
 function brandfetchClientId() {
+  try {
+    const { env } = getCloudflareContext();
+    const envRecord = env as unknown as Record<string, unknown>;
+    const bindingValue = String(envRecord["BRANDFETCH_CLIENT_ID"] ?? "").trim();
+    if (bindingValue) return bindingValue;
+  } catch {
+    // Local tests and static analysis may run without an OpenNext context.
+  }
+
   return (
     process.env.BRANDFETCH_CLIENT_ID ||
     process.env.NEXT_PUBLIC_BRANDFETCH_CLIENT_ID ||

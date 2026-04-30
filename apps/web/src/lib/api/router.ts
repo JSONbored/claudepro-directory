@@ -8,11 +8,12 @@ import {
   type ApiRouteId,
 } from "@/lib/api/contracts";
 import {
+  BodyTooLargeError,
   getClientIp,
-  hasBodyWithinLimit,
   hasJsonContentType,
   isAllowedOrigin,
   isRateLimited,
+  readRequestTextWithinLimit,
 } from "@/lib/api-security";
 import { logApiError, logApiWarn } from "@/lib/api-logs";
 import { applySecurityHeaders } from "@/lib/security-headers";
@@ -28,6 +29,7 @@ type ParsedApiContext<TDefinition extends ApiRouteDefinition> = {
   params: unknown;
   query: unknown;
   body: unknown;
+  rawBody?: string;
 };
 
 type RateLimitBinding = {
@@ -175,15 +177,21 @@ async function parseRequest(
     : {};
 
   let parsedBody: unknown = undefined;
-  if (definition.bodySchema) {
-    const rawBody = await request.json();
-    parsedBody = definition.bodySchema.parse(rawBody);
+  let rawBody: string | undefined = undefined;
+  if (definition.bodySchema || definition.requiresJsonBody) {
+    rawBody = definition.bodyLimitBytes
+      ? await readRequestTextWithinLimit(request, definition.bodyLimitBytes)
+      : await request.text();
+    if (definition.bodySchema) {
+      parsedBody = definition.bodySchema.parse(JSON.parse(rawBody));
+    }
   }
 
   return {
     params: parsedParams,
     query: parsedQuery,
     body: parsedBody,
+    rawBody,
   };
 }
 
@@ -199,14 +207,6 @@ export function createApiHandler<TDefinition extends ApiRouteDefinition>(
     if (route.originCheck && !isAllowedOrigin(request)) {
       logApiWarn(request, `${route.id}.forbidden_origin`);
       return apiError("forbidden_origin", 403, { requestId });
-    }
-
-    if (
-      route.bodyLimitBytes &&
-      !hasBodyWithinLimit(request, route.bodyLimitBytes)
-    ) {
-      logApiWarn(request, `${route.id}.payload_too_large`);
-      return apiError("payload_too_large", 413, { requestId });
     }
 
     if (
@@ -226,6 +226,10 @@ export function createApiHandler<TDefinition extends ApiRouteDefinition>(
     try {
       parsed = await parseRequest(route, request, context);
     } catch (error) {
+      if (error instanceof BodyTooLargeError) {
+        logApiWarn(request, `${route.id}.payload_too_large`);
+        return apiError("payload_too_large", 413, { requestId });
+      }
       if (error instanceof SyntaxError) {
         logApiWarn(request, `${route.id}.invalid_json`);
         return apiError("invalid_json", 400, { requestId });

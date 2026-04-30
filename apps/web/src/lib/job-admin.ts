@@ -6,7 +6,6 @@ import {
   type JobStatus,
   type JobTier,
   mapJobListingRow,
-  sortJobs,
 } from "@/lib/jobs";
 import { validateJobPublicExposure } from "@heyclaude/registry/commercial";
 
@@ -99,6 +98,7 @@ export type JobAdminListFilters = {
   source?: JobSource | "";
   sourceKind?: JobSourceKind | "";
   limit?: number;
+  offset?: number;
 };
 
 export type JobAdminUpsertInput = {
@@ -153,6 +153,13 @@ export class JobPublicationQualityError extends Error {
     super("Job listing does not meet publication quality requirements");
     this.name = "JobPublicationQualityError";
     this.errors = errors;
+  }
+}
+
+export class JobNotFoundError extends Error {
+  constructor(slug: string) {
+    super(`Job listing not found: ${slug}`);
+    this.name = "JobNotFoundError";
   }
 }
 
@@ -247,6 +254,7 @@ export async function queryAdminJobs(
 
   const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
   const limit = Math.max(1, Math.min(100, Math.trunc(filters.limit ?? 50)));
+  const offset = Math.max(0, Math.min(10_000, Math.trunc(filters.offset ?? 0)));
   const { results } = await db
     .prepare(
       `SELECT
@@ -254,19 +262,14 @@ export async function queryAdminJobs(
       FROM jobs_listings
       ${whereSql}
       ORDER BY
-        CASE tier
-          WHEN 'sponsored' THEN 3
-          WHEN 'featured' THEN 2
-          ELSE 1
-        END DESC,
         datetime(updated_at) DESC,
         datetime(created_at) DESC
-      LIMIT ?`,
+      LIMIT ? OFFSET ?`,
     )
-    .bind(...values, limit)
+    .bind(...values, limit, offset)
     .all<JobAdminRow>();
 
-  return sortJobs(results.map((row) => mapJobListingRow(row)));
+  return results.map((row) => mapJobListingRow(row));
 }
 
 export async function queryAdminJobBySlug(
@@ -416,16 +419,15 @@ export async function updateAdminJobState(
 
   if (input.action === "activate" || input.action === "reactivate") {
     const existing = await queryAdminJobBySlug(db, input.slug);
-    if (existing) {
-      assertJobPublicationQuality({
-        ...existing,
-        status: "active",
-      } as Record<string, unknown>);
-    }
+    if (!existing) throw new JobNotFoundError(input.slug);
+    assertJobPublicationQuality({
+      ...existing,
+      status: "active",
+    } as Record<string, unknown>);
   }
 
   if (input.action === "revalidate") {
-    await db
+    const result = await db
       .prepare(
         `UPDATE jobs_listings
         SET
@@ -437,11 +439,14 @@ export async function updateAdminJobState(
       )
       .bind(checkedAt, checkedAt, input.slug)
       .run();
+    if (Number(result.meta?.changes ?? 0) === 0) {
+      throw new JobNotFoundError(input.slug);
+    }
     return;
   }
 
   if (input.action === "stale") {
-    await db
+    const result = await db
       .prepare(
         `UPDATE jobs_listings
         SET
@@ -454,6 +459,9 @@ export async function updateAdminJobState(
       )
       .bind(checkedAt, checkedAt, input.slug)
       .run();
+    if (Number(result.meta?.changes ?? 0) === 0) {
+      throw new JobNotFoundError(input.slug);
+    }
     return;
   }
 
@@ -470,7 +478,7 @@ export async function updateAdminJobState(
   };
   const nextStatus = nextStatusByAction[input.action];
 
-  await db
+  const result = await db
     .prepare(
       `UPDATE jobs_listings
       SET
@@ -493,4 +501,7 @@ export async function updateAdminJobState(
       input.slug,
     )
     .run();
+  if (Number(result.meta?.changes ?? 0) === 0) {
+    throw new JobNotFoundError(input.slug);
+  }
 }

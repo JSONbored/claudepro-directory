@@ -27,10 +27,7 @@ export const GET = createApiHandler(
       since && since === currentSignature
         ? []
         : sinceDate
-          ? changelog.entries.filter((entry) => {
-              const entryDate = Date.parse(entry.dateAdded);
-              return Number.isFinite(entryDate) && entryDate > sinceDate;
-            })
+          ? changelog.entries
           : changelog.entries;
 
     return cachedJsonResponse(
@@ -47,7 +44,9 @@ export const GET = createApiHandler(
         note:
           since && looksLikeHash(since) && since !== currentSignature
             ? "Unknown hash for this static registry snapshot; returning latest available changes."
-            : undefined,
+            : sinceDate
+              ? "Date cursors return the latest static snapshot so edited entries are not missed; use currentSignature for precise polling."
+              : undefined,
         entries: entries.slice(0, limit),
       },
       {

@@ -19,6 +19,7 @@ import { categoryDescriptions, categoryLabels, siteConfig } from "@/lib/site";
 export type { CategorySummary, ContentEntry, DirectoryEntry };
 
 const DATA_ORIGIN = "https://heyclau.de";
+const MAX_ENTRY_DETAIL_CACHE_SIZE = 512;
 let directoryIndexPromise: Promise<DirectoryEntry[]> | null = null;
 const entryDetailPromises = new Map<string, Promise<ContentEntry | null>>();
 
@@ -132,8 +133,19 @@ async function loadEntryDetail(category: string, slug: string) {
       schemaVersion?: number;
       entry?: ContentEntry;
     }>(`entries/${category}/${slug}.json`)
-      .then((payload) => payload.entry ?? null)
-      .catch(() => null);
+      .then((payload) => {
+        const entry = payload.entry ?? null;
+        if (!entry) entryDetailPromises.delete(key);
+        return entry;
+      })
+      .catch(() => {
+        entryDetailPromises.delete(key);
+        return null;
+      });
+    if (entryDetailPromises.size >= MAX_ENTRY_DETAIL_CACHE_SIZE) {
+      const oldestKey = entryDetailPromises.keys().next().value;
+      if (oldestKey) entryDetailPromises.delete(oldestKey);
+    }
     entryDetailPromises.set(key, promise);
   }
 

@@ -5056,7 +5056,19 @@ paths:
           name: kind
           in: query
         - schema:
-            type: string
+            anyOf:
+              - type: string
+                enum:
+                  - new
+                  - pending_review
+                  - approved
+                  - active
+                  - rejected
+                  - expired
+                  - archived
+              - type: string
+                enum:
+                  - ""
             default: ""
           required: false
           name: status
@@ -5674,6 +5686,16 @@ paths:
             default: 50
           required: false
           name: limit
+          in: query
+        - schema:
+            type:
+              - integer
+              - "null"
+            minimum: 0
+            maximum: 10000
+            default: 0
+          required: false
+          name: offset
           in: query
       responses:
         "200":

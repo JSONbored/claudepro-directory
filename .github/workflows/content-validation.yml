@@ -193,12 +193,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           PREVIEW_DEPLOYMENT_URL: ${{ steps.deploy-preview.outputs.base-url || env.CLOUDFLARE_DEV_WORKER_URL }}
-        run: node scripts/resolve-pr-preview-url.mjs
+        run: node scripts/resolve-pr-preview-url.mjs --allow-missing
 
       - name: Validate deployed artifact contract
+        if: ${{ steps.preview-url.outputs.base-url != '' }}
         run: pnpm validate:deployment-artifacts -- --base-url "${{ steps.preview-url.outputs.base-url }}"
 
       - name: Validate deployed MCP endpoint contract
+        if: ${{ steps.preview-url.outputs.base-url != '' }}
         env:
           MCP_ENDPOINT_URL: ${{ steps.preview-url.outputs.base-url }}/api/mcp
         run: pnpm validate:mcp-endpoint
