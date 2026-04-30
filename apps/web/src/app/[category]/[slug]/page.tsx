@@ -59,11 +59,29 @@ function getGitHubEditUrl(githubUrl?: string) {
   try {
     const parsed = new URL(githubUrl);
     if (parsed.hostname !== "github.com") return githubUrl;
-    parsed.pathname = parsed.pathname.replace("/blob/", "/edit/");
+    const blobPathIndex = parsed.pathname.indexOf("/blob/");
+    if (blobPathIndex >= 0) {
+      const pathAfterBlob = parsed.pathname.slice(
+        blobPathIndex + "/blob/".length,
+      );
+      parsed.pathname = `${parsed.pathname.slice(0, blobPathIndex)}/edit/${pathAfterBlob}`;
+    }
     return parsed.toString();
   } catch {
     return githubUrl;
   }
+}
+
+function isHttpUrl(value: string) {
+  const lowerValue = value.toLowerCase();
+  return lowerValue.startsWith("https://") || lowerValue.startsWith("http://");
+}
+
+function displayUrlWithoutProtocol(value: string) {
+  const lowerValue = value.toLowerCase();
+  if (lowerValue.startsWith("https://")) return value.slice("https://".length);
+  if (lowerValue.startsWith("http://")) return value.slice("http://".length);
+  return value;
 }
 
 function getSuggestChangeUrl(entry: {
@@ -860,7 +878,7 @@ export default async function DetailPage({ params }: DetailPageProps) {
                 </div>
               ) : null}
               {sourceSignals.map((signal) => {
-                const isUrl = /^https?:\/\//i.test(signal.value);
+                const isUrl = isHttpUrl(signal.value);
                 return (
                   <div
                     key={signal.label}
@@ -876,7 +894,7 @@ export default async function DetailPage({ params }: DetailPageProps) {
                         rel="noreferrer"
                         className="mt-1 block truncate text-foreground transition hover:text-primary"
                       >
-                        {signal.value.replace(/^https?:\/\//i, "")}
+                        {displayUrlWithoutProtocol(signal.value)}
                       </a>
                     ) : (
                       <p className="mt-1 text-foreground">{signal.value}</p>

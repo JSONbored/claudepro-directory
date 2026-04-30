@@ -27,11 +27,80 @@ const jobSourceKindSchema = z.enum([
   "employer_careers",
   "employer_submitted",
 ]);
+
+function isAsciiEmail(value: string) {
+  if (value.length < 3 || value.length > 320) return false;
+
+  const atIndex = value.indexOf("@");
+  if (atIndex <= 0 || atIndex !== value.lastIndexOf("@")) return false;
+
+  const local = value.slice(0, atIndex);
+  const domain = value.slice(atIndex + 1);
+  if (local.length > 64 || domain.length < 3 || domain.length > 255) {
+    return false;
+  }
+  if (
+    local.startsWith(".") ||
+    local.endsWith(".") ||
+    domain.startsWith(".") ||
+    domain.endsWith(".")
+  ) {
+    return false;
+  }
+
+  let previousLocalChar = "";
+  for (const char of local) {
+    const code = char.charCodeAt(0);
+    const isLowerAlpha = code >= 97 && code <= 122;
+    const isDigit = code >= 48 && code <= 57;
+    const isAllowedSymbol = "!#$%&'*+-/=?^_`{|}~.".includes(char);
+    if (!isLowerAlpha && !isDigit && !isAllowedSymbol) return false;
+    if (char === "." && previousLocalChar === ".") return false;
+    previousLocalChar = char;
+  }
+
+  let labelLength = 0;
+  let previousDomainChar = "";
+  let dotCount = 0;
+  for (const char of domain) {
+    const code = char.charCodeAt(0);
+    const isLowerAlpha = code >= 97 && code <= 122;
+    const isDigit = code >= 48 && code <= 57;
+    if (char === ".") {
+      if (
+        labelLength === 0 ||
+        previousDomainChar === "-" ||
+        previousDomainChar === "."
+      ) {
+        return false;
+      }
+      dotCount += 1;
+      labelLength = 0;
+      previousDomainChar = char;
+      continue;
+    }
+    if (!isLowerAlpha && !isDigit && char !== "-") return false;
+    if (labelLength === 0 && char === "-") return false;
+    labelLength += 1;
+    if (labelLength > 63) return false;
+    previousDomainChar = char;
+  }
+
+  return dotCount > 0 && labelLength >= 2 && previousDomainChar !== "-";
+}
+
+const safeEmailSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .max(320)
+  .refine(isAsciiEmail, { message: "Invalid email address" });
+
 const optionalHttpsUrlSchema = z
   .string()
   .trim()
   .max(2048)
-  .refine((value) => !value || /^https:\/\//i.test(value), {
+  .refine((value) => !value || value.toLowerCase().startsWith("https://"), {
     message: "URL must be HTTPS",
   })
   .optional()
@@ -147,7 +216,7 @@ export const votesToggleBodySchema = z.object({
 });
 
 export const newsletterSubscribeBodySchema = z.object({
-  email: z.string().trim().toLowerCase().email().max(320),
+  email: safeEmailSchema,
   source: z.string().trim().max(64).optional().default("site"),
 });
 
@@ -183,7 +252,7 @@ export const listingLeadBodySchema = z
       .optional()
       .default("free"),
     contactName: z.string().trim().min(1).max(120),
-    contactEmail: z.string().trim().toLowerCase().email().max(320),
+    contactEmail: safeEmailSchema,
     companyName: z.string().trim().min(1).max(160),
     listingTitle: z.string().trim().min(1).max(180),
     websiteUrl: z.string().trim().max(2048).optional().default(""),

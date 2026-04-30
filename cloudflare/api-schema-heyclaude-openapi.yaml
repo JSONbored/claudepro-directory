@@ -3374,7 +3374,6 @@ paths:
                 email:
                   type: string
                   maxLength: 320
-                  format: email
                 source:
                   type: string
                   maxLength: 64
@@ -4461,7 +4460,6 @@ paths:
                 contactEmail:
                   type: string
                   maxLength: 320
-                  format: email
                 companyName:
                   type: string
                   minLength: 1
