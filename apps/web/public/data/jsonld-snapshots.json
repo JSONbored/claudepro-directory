@@ -14811,7 +14811,7 @@
           "description": "Reusable skill for creating Agent Skills, Cursor adapters, compatibility metadata, and issue-first HeyClaude registry submissions.",
           "url": "https://heyclau.de/skills/heyclaude-skill-submission-factory",
           "datePublished": "2026-04-27",
-          "dateModified": "2026-04-27T02:57:15-06:00",
+          "dateModified": "2026-04-29T22:22:06-06:00",
           "keywords": "create agent skill, submit skill to heyclaude, cursor rule adapter, skill md package validation, heyclaude, skill-authoring, agent-skills, registry, submissions, skills, claude, heyclaude skill submission factory, heyclaude, skill-authoring, agent-skills, registry, submissions",
           "genre": "Skills",
           "author": {
