@@ -3124,12 +3124,12 @@
     "directory-index.json": {
       "path": "/data/directory-index.json",
       "type": "json",
-      "sha256": "12691d9400f96b8027a6aacbf35b2cc1b3b0c7d28bc13b340530c846112dc165"
+      "sha256": "257dbcaf5f9b0e071513fec7039599861f278af8930b1486b691c0249e1b39af"
     },
     "search-index.json": {
       "path": "/data/search-index.json",
       "type": "json",
-      "sha256": "33936e0bbada2a48d71a86fc7adf9226e2f5162bd0116d6becd7afd59e862743"
+      "sha256": "9ea68f0cf0c706ad48b4a4935ff532e8aa8d928a685b9d58bf097e16285572d7"
     },
     "raycast-index.json": {
       "path": "/data/raycast-index.json",
@@ -3139,7 +3139,7 @@
     "ecosystem-feed.json": {
       "path": "/data/ecosystem-feed.json",
       "type": "json",
-      "sha256": "00870748e9b8e46a6069857c03f753cdb74acc3b0b7a55ff12823f682e9c8fdc"
+      "sha256": "ecb6275b714728ca8055289dd70e856cc9b0cdd02d69e82b17f07a2b2d001ad8"
     },
     "mcp-registry-feed.json": {
       "path": "/data/mcp-registry-feed.json",
@@ -3154,7 +3154,7 @@
     "registry-changelog.json": {
       "path": "/data/registry-changelog.json",
       "type": "json",
-      "sha256": "292abe425d69168b3473893af92376701ca3d11520cbcebca7cb2378a9ba4c6c"
+      "sha256": "655daa6a152920a4dacb3ec982449f309a676c4e2ee234a0b7105fcebc35f692"
     },
     "feeds/index.json": {
       "path": "/data/feeds%2Findex.json",
@@ -3174,12 +3174,12 @@
     "jsonld-snapshots.json": {
       "path": "/data/jsonld-snapshots.json",
       "type": "json",
-      "sha256": "3b8317926f269a8554f3f0e53b44681ba102767a82e53f82ab4072a038655db7"
+      "sha256": "317352d637ecdf89a7657e5cc50df34937208c04504940ab6b612391ac0fd369"
     },
     "llms-full.txt": {
       "path": "/data/llms-full.txt",
       "type": "text",
-      "sha256": "a8dc275e6d27b4319cb4acd738e99a570461208692f574846046c955f3f29b70"
+      "sha256": "680aa4c3f01633a68e57374d47e40be95e19fb5c7f015a568364885547793ffe"
     },
     "entries/commands/cursor-rules.json": {
       "path": "/data/entries%2Fcommands%2Fcursor-rules.json",
@@ -6159,12 +6159,12 @@
     "entries/skills/heyclaude-skill-submission-factory.json": {
       "path": "/data/entries%2Fskills%2Fheyclaude-skill-submission-factory.json",
       "type": "json",
-      "sha256": "cae9251cd599bd6cbdbd00887c6dc83112bd126462646283385300dafdac5400"
+      "sha256": "a2d36038ad893cc9a139e33b1136a67d422d67d38559a3496a5e9e6edbccacaf"
     },
     "llms/skills/heyclaude-skill-submission-factory.txt": {
       "path": "/data/llms%2Fskills%2Fheyclaude-skill-submission-factory.txt",
       "type": "text",
-      "sha256": "1743829e3ee2d497cae6467884ddacc69222d374a28b3bb403ef76ff690f0254"
+      "sha256": "6b987859732f540366816b6a1f6be37dff6c534369f0da7ed13de56c3fdf832c"
     },
     "raycast/skills/heyclaude-skill-submission-factory.json": {
       "path": "/data/raycast%2Fskills%2Fheyclaude-skill-submission-factory.json",
@@ -9219,7 +9219,7 @@
     "feeds/categories/skills.json": {
       "path": "/data/feeds%2Fcategories%2Fskills.json",
       "type": "json",
-      "sha256": "276557809a7de63681216c82e77b8cb1c6cec1a4688eb871ae9a8a267e22670e"
+      "sha256": "9f59870c27c7eca112125c337ae3a11d17710937ebfdc710e2e84905157aab48"
     },
     "feeds/categories/rules.json": {
       "path": "/data/feeds%2Fcategories%2Frules.json",
@@ -9254,32 +9254,32 @@
     "feeds/platforms/claude.json": {
       "path": "/data/feeds%2Fplatforms%2Fclaude.json",
       "type": "json",
-      "sha256": "735b57d273c2285837dd031c3d3b908dd9cc61efadd7eb4fb6e38ae4213bef04"
+      "sha256": "b4ac0a87d323ee2320b4fc043b509f7813179f2390690b388c95c798b70c737f"
     },
     "feeds/platforms/codex.json": {
       "path": "/data/feeds%2Fplatforms%2Fcodex.json",
       "type": "json",
-      "sha256": "01790f00e860c6b4c30d8783ff089fb89800cb8cd2b2a38a8f33aab29ef7171a"
+      "sha256": "70675b84297c05c6f392b5874cc85d6b07dcaef4b53914ff0032bec718b19456"
     },
     "feeds/platforms/windsurf.json": {
       "path": "/data/feeds%2Fplatforms%2Fwindsurf.json",
       "type": "json",
-      "sha256": "d0e950cbfda135ae3cc0f785bfa4b8e9e23b503f5a1435d75daa59820f58af58"
+      "sha256": "6386304b20da33d36ada34cb7838195fc74804ac50ec01615133fdb6a9253ac3"
     },
     "feeds/platforms/gemini.json": {
       "path": "/data/feeds%2Fplatforms%2Fgemini.json",
       "type": "json",
-      "sha256": "37590c2e00d85b09c589d46a3243325a1b6f77f5448a4548fba1cdb6a1bdf3d8"
+      "sha256": "fb918d3bce7150ba86a5f3ce5fbed3ea8dafce5960e12b9c0adba6624beb78ed"
     },
     "feeds/platforms/cursor.json": {
       "path": "/data/feeds%2Fplatforms%2Fcursor.json",
       "type": "json",
-      "sha256": "aad41a994d5440bd1692e2a0b3e1dd9e25aa5f51bb908ee74cb037c4c7a27299"
+      "sha256": "f6777673b0f119eee59a9d6f2b8c6edd0a77a1de66499887ec0ad74f8813d7a2"
     },
     "feeds/platforms/generic-agents.json": {
       "path": "/data/feeds%2Fplatforms%2Fgeneric-agents.json",
       "type": "json",
-      "sha256": "2974c12c08e5c5d4d56232010cd980e6a73dfc8d65c9bb45d68920a72420d722"
+      "sha256": "9b41cabe82a92d3b3f6344959086450257a15b27bf83c9126bace62f95453e83"
     }
   }
 }

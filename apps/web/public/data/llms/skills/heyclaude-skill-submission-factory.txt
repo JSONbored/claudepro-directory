@@ -10,7 +10,7 @@ Download: /downloads/skills/heyclaude-skill-submission-factory.zip
 - Canonical URL: https://heyclau.de/skills/heyclaude-skill-submission-factory
 - Source URLs: https://heyclau.de/submit, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/heyclaude-skill-submission-factory.mdx
 - Package URL: /downloads/skills/heyclaude-skill-submission-factory.zip
-- Package SHA256: 112d0382e993335d17b7ecddf335e7f8a0273e9f5139e9d1653b551a4023ee8c
+- Package SHA256: 1f3d7c549807e8381d01b97ef34a13d570342d402fb0a16e5637d59093c3751f
 - Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
 - Author: JSONbored
 - Last verified: 2026-04-27
@@ -56,11 +56,11 @@ This skill is pinned to Agent Skills and HeyClaude submission behavior verified 
 - Claude
 - Codex/OpenAI
 - Windsurf
+- Gemini
 
 ### Adapter Targets
 
 - Cursor via `.cursor/rules/<skill-name>.mdc`
-- Gemini CLI via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md`
 - Generic AGENTS or tool-specific context files
 
 ## Production Rules

@@ -4033,7 +4033,7 @@
         "format": "agent-skill",
         "entrypoint": "SKILL.md",
         "downloadUrl": "/downloads/skills/heyclaude-skill-submission-factory.zip",
-        "sha256": "112d0382e993335d17b7ecddf335e7f8a0273e9f5139e9d1653b551a4023ee8c"
+        "sha256": "1f3d7c549807e8381d01b97ef34a13d570342d402fb0a16e5637d59093c3751f"
       },
       "platformCompatibility": [
         {
@@ -4075,7 +4075,7 @@
         }
       ],
       "downloadTrust": "first-party",
-      "downloadSha256": "112d0382e993335d17b7ecddf335e7f8a0273e9f5139e9d1653b551a4023ee8c",
+      "downloadSha256": "1f3d7c549807e8381d01b97ef34a13d570342d402fb0a16e5637d59093c3751f",
       "filePath": "content/skills/heyclaude-skill-submission-factory.mdx",
       "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/heyclaude-skill-submission-factory.mdx",
       "repoUrl": null,
@@ -4089,7 +4089,7 @@
         "firstPartyEditorial": false,
         "packageVerified": true,
         "packageTrust": "first-party",
-        "packageChecksum": "112d0382e993335d17b7ecddf335e7f8a0273e9f5139e9d1653b551a4023ee8c",
+        "packageChecksum": "1f3d7c549807e8381d01b97ef34a13d570342d402fb0a16e5637d59093c3751f",
         "checksumPresent": true,
         "sourceUrlCount": 2,
         "sourceUrls": [
