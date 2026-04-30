@@ -65,6 +65,8 @@
     "NEXT_PUBLIC_POLAR_JOB_BOARD_URL": "/jobs/post?tier=standard",
     "NEXT_PUBLIC_POLAR_FEATURED_JOB_90_URL": "/jobs/post?tier=featured",
     "NEXT_PUBLIC_POLAR_SPONSORED_JOB_90_URL": "/jobs/post?tier=sponsored",
+    "NEXT_PUBLIC_TURNSTILE_SITE_KEY": "0x4AAAAAADGCrKA_ziDGt-xB",
+    "SUBMISSIONS_REQUIRE_TURNSTILE": "1",
   },
   "d1_databases": [
     {
@@ -86,6 +88,8 @@
         "NEXT_PUBLIC_POLAR_JOB_BOARD_URL": "/jobs/post?tier=standard",
         "NEXT_PUBLIC_POLAR_FEATURED_JOB_90_URL": "/jobs/post?tier=featured",
         "NEXT_PUBLIC_POLAR_SPONSORED_JOB_90_URL": "/jobs/post?tier=sponsored",
+        "NEXT_PUBLIC_TURNSTILE_SITE_KEY": "0x4AAAAAADGCrKA_ziDGt-xB",
+        "SUBMISSIONS_REQUIRE_TURNSTILE": "1",
       },
       "services": [
         {
