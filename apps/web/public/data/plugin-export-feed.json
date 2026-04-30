@@ -2288,7 +2288,7 @@
     {
       "name": "heyclaude-content-submission-factory",
       "title": "HeyClaude Content Submission Factory",
-      "description": "Create validated HeyClaude submission drafts with category fit, brand metadata, source URLs, SEO fields, and issue-first review notes.",
+      "description": "Create validated HeyClaude submission drafts with MCP-assisted schema checks, brand metadata, source URLs, SEO fields, and issue-first review notes.",
       "category": "skills",
       "sourceUrl": "https://heyclau.de/submit",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/heyclaude-content-submission-factory.zip -o heyclaude-content-submission-factory.zip && unzip -o heyclaude-content-submission-factory.zip -d ./heyclaude-content-submission-factory",

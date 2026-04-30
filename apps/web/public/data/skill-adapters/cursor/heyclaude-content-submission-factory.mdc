@@ -1,5 +1,5 @@
 ---
-description: "Create validated HeyClaude submission drafts with category fit, brand metadata, source URLs, SEO fields, and issue-first review notes."
+description: "Create validated HeyClaude submission drafts with MCP-assisted schema checks, brand metadata, source URLs, SEO fields, and issue-first review notes."
 globs:
 alwaysApply: false
 ---

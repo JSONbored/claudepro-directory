@@ -40,10 +40,17 @@ describe("HeyClaude read-only MCP helpers", () => {
       bin?: Record<string, string>;
       dependencies?: Record<string, string>;
       exports?: Record<string, unknown>;
+      files?: string[];
+      scripts?: Record<string, string>;
     };
 
     expect(packageJson.private).not.toBe(true);
     expect(packageJson.bin).toHaveProperty("heyclaude-mcp", "./src/cli.js");
+    expect(packageJson.files).toContain("scripts/**/*.mjs");
+    expect(packageJson.scripts).toHaveProperty(
+      "validate:endpoint",
+      "node scripts/validate-endpoint.mjs",
+    );
     expect(packageJson.dependencies).not.toHaveProperty("@heyclaude/registry");
     expect(packageJson.dependencies).toHaveProperty("zod", "4.3.6");
     expect(Object.values(packageJson.dependencies ?? {})).not.toContain(

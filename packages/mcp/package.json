@@ -26,6 +26,7 @@
   ],
   "files": [
     "README.md",
+    "scripts/**/*.mjs",
     "src/**/*.d.ts",
     "src/**/*.js"
   ],
@@ -63,6 +64,7 @@
   },
   "scripts": {
     "start": "node src/cli.js",
+    "validate:endpoint": "node scripts/validate-endpoint.mjs",
     "test": "pnpm --dir ../.. exec vitest run tests/mcp-server.test.ts"
   },
   "dependencies": {

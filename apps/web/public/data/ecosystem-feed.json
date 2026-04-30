@@ -10340,7 +10340,7 @@
       "category": "skills",
       "slug": "heyclaude-content-submission-factory",
       "title": "HeyClaude Content Submission Factory",
-      "description": "Create validated HeyClaude submission drafts with category fit, brand metadata, source URLs, SEO fields, and issue-first review notes.",
+      "description": "Create validated HeyClaude submission drafts with MCP-assisted schema checks, brand metadata, source URLs, SEO fields, and issue-first review notes.",
       "url": "https://heyclau.de/skills/heyclaude-content-submission-factory",
       "websiteUrl": "",
       "documentationUrl": "https://heyclau.de/submit",
@@ -10373,7 +10373,7 @@
         "firstPartyEditorial": false,
         "packageVerified": true,
         "packageTrust": "first-party",
-        "packageChecksum": "8b3afae3b4346e9af7876114988d890ff277c1d15eaf8dcb545b1073b761db0f",
+        "packageChecksum": "88d6c896b5b0ddee6e77f15448c0d9a42e91541f1915f31d4c7327303fd50b6c",
         "checksumPresent": true,
         "sourceUrlCount": 2,
         "sourceUrls": [
@@ -21051,5 +21051,5 @@
     }
   ],
   "signatureAlgorithm": "sha256",
-  "signature": "8d5f10d6859aeb1a5825d5df965983459276a5bc12c733d1eaf0ff80baf4f0b2"
+  "signature": "69971035dd89a0b34109c95f77c9f46428158fa905da8768e61db2a7e673e586"
 }

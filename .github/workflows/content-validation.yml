@@ -197,3 +197,8 @@ jobs:
 
       - name: Validate deployed artifact contract
         run: pnpm validate:deployment-artifacts -- --base-url "${{ steps.preview-url.outputs.base-url }}"
+
+      - name: Validate deployed MCP endpoint contract
+        env:
+          MCP_ENDPOINT_URL: ${{ steps.preview-url.outputs.base-url }}/api/mcp
+        run: pnpm validate:mcp-endpoint

@@ -33,6 +33,7 @@
     "validate:emails": "tsx scripts/render-email-templates.ts --check",
     "resend:sync-templates": "tsx scripts/sync-resend-templates.ts",
     "mcp:start": "pnpm --filter @heyclaude/mcp start",
+    "validate:mcp-endpoint": "pnpm --filter @heyclaude/mcp validate:endpoint",
     "test:mcp": "vitest run tests/mcp-server.test.ts",
     "submission:queue": "node scripts/build-submission-queue.mjs",
     "test": "vitest run",

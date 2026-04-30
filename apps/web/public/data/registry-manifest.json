@@ -3132,22 +3132,22 @@
     "directory-index.json": {
       "path": "/data/directory-index.json",
       "type": "json",
-      "sha256": "40403059db8eb1d12d3b926f6d8a4dca09d47758836f14259e420701fd807d21"
+      "sha256": "c34bad11e860e5b2849abb6e9c3ada6e337dd1d063916f1a7a88f0a5fd2fcfde"
     },
     "search-index.json": {
       "path": "/data/search-index.json",
       "type": "json",
-      "sha256": "6ba79806c880097ef08634b9c611a223cc25b872c3d8d29fbb06ebda2af3786f"
+      "sha256": "c8dae497623c5e1c80febabd0adf37de4660dc9feb44e163ba9767d6f1fa8332"
     },
     "raycast-index.json": {
       "path": "/data/raycast-index.json",
       "type": "json",
-      "sha256": "432d472779e645cdad2a0957b234e656198e4cb20b714c9e98e22b0e5f3cb3dc"
+      "sha256": "6e44ebd89fd532c7f6560d27b4ea0e666d739fd55614e9e9b5fa1df66e7e6ba0"
     },
     "ecosystem-feed.json": {
       "path": "/data/ecosystem-feed.json",
       "type": "json",
-      "sha256": "151741e2c0cda6c783dd765ae812feb27f0f00aebda2d10f5c941e8b78c45471"
+      "sha256": "f213a0248c4789c659d6d017f5b1c3c8c77bc44ec8a24042023a65d932c83387"
     },
     "mcp-registry-feed.json": {
       "path": "/data/mcp-registry-feed.json",
@@ -3157,12 +3157,12 @@
     "plugin-export-feed.json": {
       "path": "/data/plugin-export-feed.json",
       "type": "json",
-      "sha256": "7c421c539e1d1a4bc1311f77d95a4e9f4b8f1c6f9cd5eaa516e6a82ecd212738"
+      "sha256": "b94fc12bf9a1ed0755cf824c97f8aa013c09633fbdd317a399b7c1de26ef822c"
     },
     "registry-changelog.json": {
       "path": "/data/registry-changelog.json",
       "type": "json",
-      "sha256": "798eb456c32b2ad0326f3e522488b54010f40b01636b2bfdfeba31ec2acf80ec"
+      "sha256": "932b7bcdf2b997ca62d1635be43bfc6de19744cd5d91ffd28c657ec86e879da7"
     },
     "feeds/index.json": {
       "path": "/data/feeds%2Findex.json",
@@ -3187,12 +3187,12 @@
     "jsonld-snapshots.json": {
       "path": "/data/jsonld-snapshots.json",
       "type": "json",
-      "sha256": "43d3f4966ed1151192018451daf188de7a94e4146c92ac00818a2d6ccddfe9d2"
+      "sha256": "738174226226d85bb4c8dd7386c8055dfe7c492e4b69c2dd196efc5f63da881d"
     },
     "llms-full.txt": {
       "path": "/data/llms-full.txt",
       "type": "text",
-      "sha256": "4122d802179dbf7b07e22df54a3a854297ae5eb67a812b0517e80855c1d476bb"
+      "sha256": "b82d1c15c975f13e9ed1ca6e3179f5d10015011a447d33d4d7ee16a5caf1340d"
     },
     "entries/commands/cursor-rules.json": {
       "path": "/data/entries%2Fcommands%2Fcursor-rules.json",
@@ -6157,22 +6157,22 @@
     "entries/skills/heyclaude-content-submission-factory.json": {
       "path": "/data/entries%2Fskills%2Fheyclaude-content-submission-factory.json",
       "type": "json",
-      "sha256": "b402eced4f6051e3db791763089b5fc9b9d8d0a1fe296a17ab5d3f03247cbd33"
+      "sha256": "3d655a202fc9775766f03c9cfec6b83b3f92971dc5e8ead151cecad72ede2557"
     },
     "llms/skills/heyclaude-content-submission-factory.txt": {
       "path": "/data/llms%2Fskills%2Fheyclaude-content-submission-factory.txt",
       "type": "text",
-      "sha256": "522bd201f143c2793643d8cdd9b0a247abd3dbaca56f3602c0087277020cd80e"
+      "sha256": "0d6f99ba0a61270912b401ef9b966dece38f6597ebeacfad6008da94d6cc771b"
     },
     "raycast/skills/heyclaude-content-submission-factory.json": {
       "path": "/data/raycast%2Fskills%2Fheyclaude-content-submission-factory.json",
       "type": "json",
-      "sha256": "b78bd310ad08c2b58169e2b482762a33ac9579888ff34b135045a78cf7e56fa1"
+      "sha256": "29f07d60d60a9f9b3b33184c47625fd7ba1c381ff6818fa5a58f0412c2d38dd3"
     },
     "skill-adapters/cursor/heyclaude-content-submission-factory.mdc": {
       "path": "/data/skill-adapters%2Fcursor%2Fheyclaude-content-submission-factory.mdc",
       "type": "text",
-      "sha256": "6ddef3d0597ac7fd6350d8d2a3ae2d26bdce09857f4ebc03ed4d8f376a7dbfe3"
+      "sha256": "5fb7cca67462cea50bd2f64aa35f547c41309e2219e6a94140b1b2aecdb49089"
     },
     "entries/mcp/heyclaude-mcp.json": {
       "path": "/data/entries%2Fmcp%2Fheyclaude-mcp.json",
@@ -9252,7 +9252,7 @@
     "feeds/categories/skills.json": {
       "path": "/data/feeds%2Fcategories%2Fskills.json",
       "type": "json",
-      "sha256": "c8c41f20826554d3c2b34181c25c95eb9971771b3dc035039a9c2f21f75f179b"
+      "sha256": "fd059a2f88eaa460c33a33130d2f19323f2d364d0ef1ff79343b42e2e3f06a05"
     },
     "feeds/categories/rules.json": {
       "path": "/data/feeds%2Fcategories%2Frules.json",
@@ -9287,32 +9287,32 @@
     "feeds/platforms/claude.json": {
       "path": "/data/feeds%2Fplatforms%2Fclaude.json",
       "type": "json",
-      "sha256": "a9d018e55340de8f525e948b3595932cba0c6d36ecd31699c0f791cfcbecf754"
+      "sha256": "49585110c5c9b92c83c0abeecf7eaf85034d4c386da3f984e1309b780061526e"
     },
     "feeds/platforms/codex.json": {
       "path": "/data/feeds%2Fplatforms%2Fcodex.json",
       "type": "json",
-      "sha256": "12c94f7fab62c0d181607f99f9ba07a286d8cbb728ebbe4a05266be4f4fa3bd6"
+      "sha256": "fcab567cb0e4fd924cb02f2a23432326463dcc620921332202190d8b43abff65"
     },
     "feeds/platforms/windsurf.json": {
       "path": "/data/feeds%2Fplatforms%2Fwindsurf.json",
       "type": "json",
-      "sha256": "f8a0147c92470de8362fa764e730142a4a010c3a059c76b327bf9e271e4a38c1"
+      "sha256": "c5cadf3f9a25b7015f69c9dd29f20fd9c607713c37bed9bd70d4c8b8e2c5dab1"
     },
     "feeds/platforms/gemini.json": {
       "path": "/data/feeds%2Fplatforms%2Fgemini.json",
       "type": "json",
-      "sha256": "0bb0f46ee30a52b80ebd784c26529807958ccfad72c17057f66b86c3dca1fc5d"
+      "sha256": "a7793dc00e7deedce05102ebe16250a5059beb4fa1599680932c743274c1f4ad"
     },
     "feeds/platforms/cursor.json": {
       "path": "/data/feeds%2Fplatforms%2Fcursor.json",
       "type": "json",
-      "sha256": "7c848e16ea7eef7820455e2d35f3dd5a8135a33f4fbdb1982ae8d51cedbf2f0d"
+      "sha256": "7fe878528bbcc162009b2c4ffe9d1a524deac7fbdabb54264cf215ee16f374b8"
     },
     "feeds/platforms/generic-agents.json": {
       "path": "/data/feeds%2Fplatforms%2Fgeneric-agents.json",
       "type": "json",
-      "sha256": "b0d6088d2baa191fd4ee841570963b915322f91932fc211cfdc90e2f04357e64"
+      "sha256": "3b1cb6261d216bb77603b3c0c5002142960eca5081f3c59f5316d6c305e34d38"
     }
   }
 }

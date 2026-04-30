@@ -14,7 +14,7 @@
       "canonicalUrl": "https://heyclau.de/skills/heyclaude-content-submission-factory",
       "llmsUrl": "https://heyclau.de/data/llms/skills/heyclaude-content-submission-factory.txt",
       "apiUrl": "https://heyclau.de/api/registry/entries/skills/heyclaude-content-submission-factory",
-      "artifactHash": "b402eced4f6051e3db791763089b5fc9b9d8d0a1fe296a17ab5d3f03247cbd33"
+      "artifactHash": "3d655a202fc9775766f03c9cfec6b83b3f92971dc5e8ead151cecad72ede2557"
     },
     {
       "key": "tools:aider",
@@ -4566,5 +4566,5 @@
     }
   ],
   "signatureAlgorithm": "sha256",
-  "signature": "a73e3769da67617ae67f0cf4f68a1ac1c1755e87f169462d6d2713a9a7f784c2"
+  "signature": "f2ce5e597f91c9620d13c3f0a6f22333f1209ee6f2671427802c670202167ad3"
 }

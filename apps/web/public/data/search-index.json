@@ -11980,8 +11980,8 @@
       "slug": "heyclaude-content-submission-factory",
       "title": "HeyClaude Content Submission Factory",
       "seoTitle": "HeyClaude Content Submission Factory Skill",
-      "description": "Create validated HeyClaude submission drafts with category fit, brand metadata, source URLs, SEO fields, and issue-first review notes.",
-      "seoDescription": "Reusable skill for preparing high-quality HeyClaude registry submissions with category fields, brand metadata, sources, SEO, and review-ready issue content.",
+      "description": "Create validated HeyClaude submission drafts with MCP-assisted schema checks, brand metadata, source URLs, SEO fields, and issue-first review notes.",
+      "seoDescription": "Reusable skill for preparing high-quality HeyClaude registry submissions with MCP schema checks, brand metadata, sources, SEO, and review-ready issue content.",
       "tags": [
         "heyclaude",
         "submissions",
@@ -12034,7 +12034,7 @@
         "firstPartyEditorial": false,
         "packageVerified": true,
         "packageTrust": "first-party",
-        "packageChecksum": "8b3afae3b4346e9af7876114988d890ff277c1d15eaf8dcb545b1073b761db0f",
+        "packageChecksum": "88d6c896b5b0ddee6e77f15448c0d9a42e91541f1915f31d4c7327303fd50b6c",
         "checksumPresent": true,
         "sourceUrlCount": 2,
         "sourceUrls": [

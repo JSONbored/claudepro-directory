@@ -14709,7 +14709,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/skills/heyclaude-content-submission-factory#webpage",
           "name": "HeyClaude Content Submission Factory",
-          "description": "Reusable skill for preparing high-quality HeyClaude registry submissions with category fields, brand metadata, sources, SEO, and review-ready issue content.",
+          "description": "Reusable skill for preparing high-quality HeyClaude registry submissions with MCP schema checks, brand metadata, sources, SEO, and review-ready issue content.",
           "url": "https://heyclau.de/skills/heyclaude-content-submission-factory",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -14724,10 +14724,10 @@
           "@id": "https://heyclau.de/skills/heyclaude-content-submission-factory#entry",
           "name": "HeyClaude Content Submission Factory",
           "headline": "HeyClaude Content Submission Factory",
-          "description": "Reusable skill for preparing high-quality HeyClaude registry submissions with category fields, brand metadata, sources, SEO, and review-ready issue content.",
+          "description": "Reusable skill for preparing high-quality HeyClaude registry submissions with MCP schema checks, brand metadata, sources, SEO, and review-ready issue content.",
           "url": "https://heyclau.de/skills/heyclaude-content-submission-factory",
           "datePublished": "2026-04-30",
-          "dateModified": "2026-04-29T23:49:58-06:00",
+          "dateModified": "2026-04-30T03:53:43-06:00",
           "keywords": "submit content to heyclaude, heyclaude registry submission, ai directory content fields, github issue submission, registry seo metadata, heyclaude, submissions, registry, content-workflow, seo, skills, claude, heyclaude, submissions, registry, content-workflow, seo",
           "genre": "Skills",
           "author": {
@@ -14749,7 +14749,7 @@
             {
               "@type": "PropertyValue",
               "name": "Package SHA256",
-              "value": "8b3afae3b4346e9af7876114988d890ff277c1d15eaf8dcb545b1073b761db0f"
+              "value": "88d6c896b5b0ddee6e77f15448c0d9a42e91541f1915f31d4c7327303fd50b6c"
             },
             {
               "@type": "PropertyValue",

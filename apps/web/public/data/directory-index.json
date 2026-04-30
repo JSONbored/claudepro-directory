@@ -16909,11 +16909,11 @@
       "title": "HeyClaude Content Submission Factory",
       "description": "Prepare complete, source-backed HeyClaude content submissions for agents, MCP servers, tools, skills, rules, commands, hooks, guides, collections, and statuslines.",
       "seoTitle": "HeyClaude Content Submission Factory Skill",
-      "seoDescription": "Reusable skill for preparing high-quality HeyClaude registry submissions with category fields, brand metadata, sources, SEO, and review-ready issue content.",
+      "seoDescription": "Reusable skill for preparing high-quality HeyClaude registry submissions with MCP schema checks, brand metadata, sources, SEO, and review-ready issue content.",
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-30",
-      "contentUpdatedAt": "2026-04-29T23:49:58-06:00",
+      "contentUpdatedAt": "2026-04-30T03:53:43-06:00",
       "tags": [
         "heyclaude",
         "submissions",
@@ -16938,11 +16938,11 @@
       "readingTime": 6,
       "difficultyScore": 52,
       "documentationUrl": "https://heyclau.de/submit",
-      "cardDescription": "Create validated HeyClaude submission drafts with category fit, brand metadata, source URLs, SEO fields, and issue-first review notes.",
+      "cardDescription": "Create validated HeyClaude submission drafts with MCP-assisted schema checks, brand metadata, source URLs, SEO fields, and issue-first review notes.",
       "installable": true,
       "installCommand": "curl -L https://heyclau.de/downloads/skills/heyclaude-content-submission-factory.zip -o heyclaude-content-submission-factory.zip && unzip -o heyclaude-content-submission-factory.zip -d ./heyclaude-content-submission-factory",
       "usageSnippet": "Use this skill when preparing a new HeyClaude content submission or improving an existing registry entry.",
-      "copySnippet": "# Trigger\n\"Prepare a complete HeyClaude content submission for this resource.\"\n\n# Required output\n1) Recommended category and category-fit rationale\n2) Review-ready HeyClaude submission fields\n3) Source and brand metadata\n4) SEO and citation notes\n5) GitHub issue-first submission URL",
+      "copySnippet": "# Trigger\n\"Prepare a complete HeyClaude content submission for this resource.\"\n\n# Required output\n1) Recommended category and category-fit rationale\n2) Review-ready HeyClaude submission fields\n3) MCP validation and duplicate-search notes when available\n4) Source and brand metadata\n5) SEO and citation notes\n6) GitHub issue-first submission URL",
       "skillType": "general",
       "skillLevel": "advanced",
       "verificationStatus": "validated",
@@ -16976,7 +16976,7 @@
         "format": "agent-skill",
         "entrypoint": "SKILL.md",
         "downloadUrl": "/downloads/skills/heyclaude-content-submission-factory.zip",
-        "sha256": "8b3afae3b4346e9af7876114988d890ff277c1d15eaf8dcb545b1073b761db0f"
+        "sha256": "88d6c896b5b0ddee6e77f15448c0d9a42e91541f1915f31d4c7327303fd50b6c"
       },
       "platformCompatibility": [
         {
@@ -17018,7 +17018,7 @@
         }
       ],
       "downloadTrust": "first-party",
-      "downloadSha256": "8b3afae3b4346e9af7876114988d890ff277c1d15eaf8dcb545b1073b761db0f",
+      "downloadSha256": "88d6c896b5b0ddee6e77f15448c0d9a42e91541f1915f31d4c7327303fd50b6c",
       "filePath": "content/skills/heyclaude-content-submission-factory.mdx",
       "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/heyclaude-content-submission-factory.mdx",
       "repoUrl": null,
@@ -17032,7 +17032,7 @@
         "firstPartyEditorial": false,
         "packageVerified": true,
         "packageTrust": "first-party",
-        "packageChecksum": "8b3afae3b4346e9af7876114988d890ff277c1d15eaf8dcb545b1073b761db0f",
+        "packageChecksum": "88d6c896b5b0ddee6e77f15448c0d9a42e91541f1915f31d4c7327303fd50b6c",
         "checksumPresent": true,
         "sourceUrlCount": 2,
         "sourceUrls": [

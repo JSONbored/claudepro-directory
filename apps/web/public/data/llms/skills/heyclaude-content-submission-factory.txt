@@ -10,7 +10,7 @@ Download: /downloads/skills/heyclaude-content-submission-factory.zip
 - Canonical URL: https://heyclau.de/skills/heyclaude-content-submission-factory
 - Source URLs: https://heyclau.de/submit, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/heyclaude-content-submission-factory.mdx
 - Package URL: /downloads/skills/heyclaude-content-submission-factory.zip
-- Package SHA256: 8b3afae3b4346e9af7876114988d890ff277c1d15eaf8dcb545b1073b761db0f
+- Package SHA256: 88d6c896b5b0ddee6e77f15448c0d9a42e91541f1915f31d4c7327303fd50b6c
 - Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
 - Author: JSONbored
 - Last verified: 2026-04-30
@@ -36,10 +36,11 @@ This skill is pinned to HeyClaude issue-first submission behavior verified on **
 1. Identify the best HeyClaude category from the evidence, not from the submitter's guess.
 2. Collect a canonical source URL and any official docs, repo, package, or demo URLs.
 3. Extract only public, non-secret facts.
-4. Add brand metadata when safe: `brandName`, `brandDomain`, and official source links.
-5. Write a concise original description and card description.
-6. Draft SEO metadata from the resource title, category, tags, and source-backed value.
-7. Produce issue-first submission fields and a prefilled HeyClaude or GitHub submission URL.
+4. If the HeyClaude MCP server is available, call `get_submission_schema`, `search_duplicate_entries`, `validate_submission_draft`, and `build_submission_urls` instead of guessing field shape.
+5. Add brand metadata when safe: `brandName`, `brandDomain`, and official source links.
+6. Write a concise original description and card description.
+7. Draft SEO metadata from the resource title, category, tags, and source-backed value.
+8. Produce issue-first submission fields and a prefilled HeyClaude or GitHub submission URL.
 
 ## Category Scope
 - Agents
@@ -55,9 +56,19 @@ This skill is pinned to HeyClaude issue-first submission behavior verified on **
 
 Jobs are intentionally out of scope. Job listings use HeyClaude's jobs lead and review workflow.
 
+## MCP-Assisted Path
+When an MCP client has the HeyClaude MCP server configured, use it as the source of truth for registry submission structure:
+
+- `get_submission_schema` for required and optional fields by category.
+- `search_duplicate_entries` before drafting a new listing.
+- `validate_submission_draft` to catch malformed fields before handoff.
+- `build_submission_urls` to generate review URLs without creating GitHub issues directly.
+
+If the MCP server is unavailable, continue with the issue-first draft packet and explicitly mark validation as manual.
+
 ## Review Rules
 - Do not auto-publish registry content.
-- Do not create PRs, write files, or mutate local project config.
+- Do not create PRs, create GitHub issues, write files, or mutate local project config.
 - Do not include private repo names, credentials, tokens, internal URLs, or unpublished customer information.
 - Do not mirror full third-party pages. Use original summaries and canonical source links.
 - Do not claim platform compatibility, validation, package checksums, or first-party status unless source evidence supports it.
@@ -81,6 +92,11 @@ tags:
   - automation
 seoTitle: Example MCP Server for Claude
 seoDescription: Source-backed description suitable for search previews.
+mcpValidation:
+  schemaChecked: true
+  duplicateSearch: "No likely duplicate found."
+  submitUrl: https://heyclau.de/submit?...
+  githubIssueUrl: https://github.com/JSONbored/claudepro-directory/issues/new?...
 maintainerNotes: Why this belongs in HeyClaude and what still needs review.
 ```
 ```yaml
@@ -99,6 +115,11 @@ tags:
   - automation
 seoTitle: Example MCP Server for Claude
 seoDescription: Source-backed description suitable for search previews.
+mcpValidation:
+  schemaChecked: true
+  duplicateSearch: "No likely duplicate found."
+  submitUrl: https://heyclau.de/submit?...
+  githubIssueUrl: https://github.com/JSONbored/claudepro-directory/issues/new?...
 maintainerNotes: Why this belongs in HeyClaude and what still needs review.
 ```
 

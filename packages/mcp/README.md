@@ -86,6 +86,16 @@ Use a remote MCP adapter such as `mcp-remote` when a client only supports stdio:
 }
 ```
 
+Validate a deployed endpoint with the SDK-level contract check:
+
+```bash
+MCP_ENDPOINT_URL=https://heyclaude-dev.zeronode.workers.dev/api/mcp pnpm validate:mcp-endpoint
+```
+
+This check connects with an MCP client, lists tools, calls representative
+registry and submission-helper tools, verifies strict argument validation, and
+checks the HTTP guards used by the remote route.
+
 ## Security Boundary
 
 - Read-only registry artifacts only.
@@ -94,3 +104,20 @@ Use a remote MCP adapter such as `mcp-remote` when a client only supports stdio:
 - No local project-file writes or config mutations.
 - Remote endpoint uses route-level rate limits and Cloudflare rate-limit bindings
   when available.
+
+## npm Release Prep
+
+Do not publish until the web branch has shipped and the production endpoint has
+been verified. The release checklist is:
+
+```bash
+pnpm validate:mcp-endpoint -- --url https://heyclau.de/api/mcp
+pnpm --filter @heyclaude/mcp test
+pnpm --filter @heyclaude/mcp pack --dry-run
+```
+
+Then publish from `packages/mcp` with npm credentials:
+
+```bash
+npm publish --access public
+```
