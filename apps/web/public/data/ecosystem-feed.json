@@ -6017,7 +6017,7 @@
       "category": "mcp",
       "slug": "contrastapi-mcp-server",
       "title": "ContrastAPI Security Tools",
-      "description": "31 remote security tools: CVE+EPSS/KEV, domain audit, IP threat intel, dep scan. Free tier 100/hr, no key.",
+      "description": "41 remote security tools for CVE, KEV, CWE, MITRE ATLAS, D3FEND, domain audit, IP threat intel, and dependency scanning.",
       "url": "https://heyclau.de/mcp/contrastapi-mcp-server",
       "brandName": "ContrastAPI",
       "brandDomain": "contrastcyber.com",
@@ -6030,12 +6030,17 @@
       "disclosure": "editorial",
       "tags": [
         "security",
+        "mcp-server",
         "cve",
+        "kev",
+        "cwe",
         "osint",
         "threat-intelligence",
         "ip-reputation",
         "domain-audit",
-        "dependency-scanner"
+        "dependency-scanner",
+        "mitre-atlas",
+        "d3fend"
       ],
       "qualityScore": 93,
       "provenance": {
@@ -20983,5 +20988,5 @@
     }
   ],
   "signatureAlgorithm": "sha256",
-  "signature": "66baac9ef5b6f77d99f4914bf38bbbc6257a2c6262cedc34ec4202e83021ecea"
+  "signature": "e83dd7a1784b036ae56edbdbe298fd4c605a590571d89a9f59b2439cbf45edd6"
 }

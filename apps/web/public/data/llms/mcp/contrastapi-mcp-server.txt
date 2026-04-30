@@ -16,18 +16,23 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
-31 security research tools over remote MCP: CVE lookup with EPSS + CISA KEV enrichment, domain audit (SSL/DNS/SPF/DMARC), IP threat intel (Shodan + AbuseIPDB + ASN), dependency vulnerability scanner, IOC enrichment, and more. Free tier: 100 credits/hour, no API key required. Streamable-HTTP transport.
+41 security intelligence tools over remote MCP: CVE, KEV, CWE, EPSS, domain audit, IP threat reports, IOC enrichment, dependency scanning, MITRE ATLAS AI/ML attacks, and MITRE D3FEND defenses. Free tier: 100 credits/hour, no API key required. Streamable-HTTP transport.
 ## Tags
 - security
+- mcp-server
 - cve
+- kev
+- cwe
 - osint
 - threat-intelligence
 - ip-reputation
 - domain-audit
 - dependency-scanner
+- mitre-atlas
+- d3fend
 ## Content
 ## Overview
-31 security research tools over remote MCP: CVE lookup with EPSS + CISA KEV enrichment, domain audit (SSL/DNS/SPF/DMARC), IP threat intel (Shodan + AbuseIPDB + ASN), dependency vulnerability scanner, IOC enrichment, and more. Free tier: 100 credits/hour, no API key required. Streamable-HTTP transport.
+41 security intelligence tools over remote MCP: CVE, KEV, CWE, EPSS, domain audit, IP threat reports, IOC enrichment, dependency scanning, MITRE ATLAS AI/ML attack knowledge, and MITRE D3FEND defensive techniques. Free tier: 100 credits/hour, no API key required. Streamable-HTTP transport.
 
 ## Usage
 claude mcp add --transport http contrastapi https://api.contrastcyber.com/mcp/

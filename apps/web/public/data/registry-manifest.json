@@ -3124,37 +3124,37 @@
     "directory-index.json": {
       "path": "/data/directory-index.json",
       "type": "json",
-      "sha256": "d120dca8086c0960e8e0ddefd06eff7d8de3b66fd52f2fae5b4f7e45d743b22c"
+      "sha256": "e9670c8a6530ca2266af5e30bbae51d70f5c509cb00289e2284687ad9c1a8b98"
     },
     "search-index.json": {
       "path": "/data/search-index.json",
       "type": "json",
-      "sha256": "382b1bd656c20c9394725835789eca6ae32840630bd06d37848c29b555f8ee8f"
+      "sha256": "fe5e0e48a5f67efbee3adb63ac664673e70fbc3ab4ce349e56357bef8c742fad"
     },
     "raycast-index.json": {
       "path": "/data/raycast-index.json",
       "type": "json",
-      "sha256": "fcf4e32bc10715a68ee524ab4cd6dfb6067b7e5f5c729658b89077c11da1c54d"
+      "sha256": "7239d343dd5c5d944777d895dc2198ce62d489dbd7839c7b0a0c8015cae7bff7"
     },
     "ecosystem-feed.json": {
       "path": "/data/ecosystem-feed.json",
       "type": "json",
-      "sha256": "80e9a103929fca078c50b5c3d9bc95b183a085ec034c8c2a8a05927562cd5344"
+      "sha256": "2b022001c2aa3ed9b0022ffef11e72f91f00183c8686e1a9c7f56597a32637b5"
     },
     "mcp-registry-feed.json": {
       "path": "/data/mcp-registry-feed.json",
       "type": "json",
-      "sha256": "28fc959eacd5e93b1250712df33e741233bf0d1d714e7a11891214b83451523a"
+      "sha256": "8e5579a500d96eabdd5078375f66a94938d5f4d24833265c31919b973847196b"
     },
     "plugin-export-feed.json": {
       "path": "/data/plugin-export-feed.json",
       "type": "json",
-      "sha256": "c90e7c5b2bd95b6ffed3d0530755a90ca9edae112baad0e994785aa42a26cd62"
+      "sha256": "afd99b55586ed9966bed6a6a7f13cc5074770fde35f2add053ef2093b967cefb"
     },
     "registry-changelog.json": {
       "path": "/data/registry-changelog.json",
       "type": "json",
-      "sha256": "3597fbb381c566f6765760b5d89fd46c0557908d67777c94f574ec70cb7edacf"
+      "sha256": "e9c21cfa21957826d475dfc16883089d68d7180b04e4a2939e4f357cb290e0a6"
     },
     "feeds/index.json": {
       "path": "/data/feeds%2Findex.json",
@@ -3174,12 +3174,12 @@
     "jsonld-snapshots.json": {
       "path": "/data/jsonld-snapshots.json",
       "type": "json",
-      "sha256": "2e127964e6e31305d38058f284bef21217b83576fb4e1c8e697f1181b5100d49"
+      "sha256": "531141c71eca500ae649025edd9e5a320cd2aefefa4bc8da4c2072ad6a104056"
     },
     "llms-full.txt": {
       "path": "/data/llms-full.txt",
       "type": "text",
-      "sha256": "ffed21fddb79714a13ac08bf7188bbe53ee19947574a551a99c1be4a7728fbf6"
+      "sha256": "2383271b513d9da98a1c82a61bf8e3e0c88c1849cfde9df3d048f0b6b477b7f7"
     },
     "entries/commands/cursor-rules.json": {
       "path": "/data/entries%2Fcommands%2Fcursor-rules.json",
@@ -4904,17 +4904,17 @@
     "entries/mcp/contrastapi-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fcontrastapi-mcp-server.json",
       "type": "json",
-      "sha256": "94603ca5860fa021f6781f0f5a5cfcf57ef2c3db4524957d8ee890c130708c9e"
+      "sha256": "490f22c44e9fa2f29af158bdcd77560d22d4152137887225e838a18cd7174005"
     },
     "llms/mcp/contrastapi-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Fcontrastapi-mcp-server.txt",
       "type": "text",
-      "sha256": "946ffe3d5141a3cfe7e63ee1835d27a760eb7be299b269e3fc942c86f4d6a176"
+      "sha256": "beb4754acbdb9529cb69086833c74dc80cd539a3d3ed7197ffd061b32f734197"
     },
     "raycast/mcp/contrastapi-mcp-server.json": {
       "path": "/data/raycast%2Fmcp%2Fcontrastapi-mcp-server.json",
       "type": "json",
-      "sha256": "bce66e253db815c3385cd239166bc63dad03a7eb5cf23f17e8aedcadfc47d498"
+      "sha256": "ba006d063df14a20137865c8b12bc0b1d498e99dbc5d28196c9b8691fcc6863c"
     },
     "entries/tools/crewai.json": {
       "path": "/data/entries%2Ftools%2Fcrewai.json",
@@ -9209,7 +9209,7 @@
     "feeds/categories/mcp.json": {
       "path": "/data/feeds%2Fcategories%2Fmcp.json",
       "type": "json",
-      "sha256": "89ef5b685a496d441fcba49e36684f977eccad695a8e7824fe3aa13e0a6c27c2"
+      "sha256": "187817b5ab34e69e304322383b11d14f07205c5c9d12919ed0674aac2356b450"
     },
     "feeds/categories/tools.json": {
       "path": "/data/feeds%2Fcategories%2Ftools.json",

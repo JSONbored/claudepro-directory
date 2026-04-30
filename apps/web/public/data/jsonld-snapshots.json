@@ -8554,7 +8554,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/mcp/contrastapi-mcp-server#webpage",
           "name": "ContrastAPI Security Tools",
-          "description": "Add ContrastAPI to Claude as a remote MCP server for CVE lookup, EPSS, KEV enrichment, domain audits, IP reputation, and dependency vulnerability scanning.",
+          "description": "Use ContrastAPI with Claude for 41 MCP security tools covering CVE, KEV, CWE, EPSS, MITRE ATLAS, D3FEND, domain audit, and IOC enrichment.",
           "url": "https://heyclau.de/mcp/contrastapi-mcp-server",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -8569,11 +8569,11 @@
           "@id": "https://heyclau.de/mcp/contrastapi-mcp-server#entry",
           "name": "ContrastAPI Security Tools",
           "headline": "ContrastAPI Security Tools",
-          "description": "Add ContrastAPI to Claude as a remote MCP server for CVE lookup, EPSS, KEV enrichment, domain audits, IP reputation, and dependency vulnerability scanning.",
+          "description": "Use ContrastAPI with Claude for 41 MCP security tools covering CVE, KEV, CWE, EPSS, MITRE ATLAS, D3FEND, domain audit, and IOC enrichment.",
           "url": "https://heyclau.de/mcp/contrastapi-mcp-server",
           "datePublished": "2026-04-20",
           "dateModified": "2026-04-26T18:18:28-06:00",
-          "keywords": "contrastapi mcp, claude security mcp, cve lookup, threat intelligence, dependency scanner, security, cve, osint, ip-reputation, domain-audit, mcp servers, mcp, security, cve, osint, threat-intelligence, ip-reputation, domain-audit, dependency-scanner",
+          "keywords": "contrastapi mcp, claude security mcp, cve lookup, kev lookup, cwe lookup, mitre atlas, d3fend, threat intelligence, dependency scanner, security, mcp-server, cve, security, mcp-server, cve, kev, cwe, osint, threat-intelligence, ip-reputation, domain-audit, dependency-scanner, mitre-atlas, d3fend",
           "genre": "MCP Servers",
           "author": {
             "@type": "Person",

@@ -662,7 +662,7 @@
       "canonicalUrl": "https://heyclau.de/mcp/contrastapi-mcp-server",
       "llmsUrl": "https://heyclau.de/data/llms/mcp/contrastapi-mcp-server.txt",
       "apiUrl": "https://heyclau.de/api/registry/entries/mcp/contrastapi-mcp-server",
-      "artifactHash": "94603ca5860fa021f6781f0f5a5cfcf57ef2c3db4524957d8ee890c130708c9e"
+      "artifactHash": "490f22c44e9fa2f29af158bdcd77560d22d4152137887225e838a18cd7174005"
     },
     {
       "key": "collections:agent-operator-growth-master-pack",
@@ -4554,5 +4554,5 @@
     }
   ],
   "signatureAlgorithm": "sha256",
-  "signature": "35064d7152430bbd869db46f9cc53ffe2865d7c43dc69f4e2675004722040466"
+  "signature": "5472f94ba544651c87914e9c6d23c6f5c19a2c65757402dd8c1cdbfe073925ab"
 }
