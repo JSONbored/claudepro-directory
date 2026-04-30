@@ -15,7 +15,7 @@ Download: /downloads/mcp/intercom-mcp-server.mcpb
 - Package URL: /downloads/mcp/intercom-mcp-server.mcpb
 - Package SHA256: 90c46cda2f6c8aab07b4c1deae865e9820fc86227772eb369b5365021ca11e5d
 - Author: Intercom
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 Access customer conversations, tickets, and user data in real-time

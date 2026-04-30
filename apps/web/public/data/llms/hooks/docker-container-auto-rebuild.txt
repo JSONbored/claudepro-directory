@@ -12,7 +12,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Brand domain: docker.com
 - Brand asset source: brandfetch
 - Author: JSONbored
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 Automatically rebuilds Docker containers when Dockerfile or docker-compose.yml files are modified. This PostToolUse hook triggers automatic Docker image rebuilding when Docker-related files (Dockerfile, docker-compose.yml, .dockerignore) are modified, providing real-time container synchronization during development.

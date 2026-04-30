@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/hooks/test-runner-hook
 - Source URLs: https://jestjs.io/docs/getting-started, https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/test-runner-hook.mdx
 - Author: JSONbored
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 Automatically run relevant tests when code changes are detected, with intelligent test selection and parallel execution.

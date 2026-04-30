@@ -8,7 +8,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/collections/data-engineering-suite
 - Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/data-engineering-suite.mdx
 - Author: JSONbored
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 Comprehensive toolkit for data engineers working with databases, ETL pipelines, and data infrastructure. Includes database design, optimization, and cloud services integration.

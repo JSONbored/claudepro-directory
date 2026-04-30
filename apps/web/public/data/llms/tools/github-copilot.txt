@@ -12,7 +12,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Brand domain: github.com
 - Brand asset source: brandfetch
 - Author: GitHub
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T23:21:14-06:00
 - Robots: indexable
 ## Summary
 AI developer assistant across GitHub, editors, pull requests, chat, code review, and agentic coding workflows.

@@ -15,7 +15,7 @@ Download: /downloads/mcp/netlify-mcp-server.mcpb
 - Package URL: /downloads/mcp/netlify-mcp-server.mcpb
 - Package SHA256: 33ce412d63829a6e891ae2a245fc84bb83eab8af8c1f4f01e80b1489fd9da641
 - Author: Netlify
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 Create, deploy, and manage websites on Netlify platform

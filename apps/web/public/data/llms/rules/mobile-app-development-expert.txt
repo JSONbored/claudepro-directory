@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/rules/mobile-app-development-expert
 - Source URLs: https://developer.apple.com/documentation/, https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/mobile-app-development-expert.mdx
 - Author: JSONbored
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T23:21:14-06:00
 - Robots: indexable
 ## Summary
 Expert in iOS, Android, and cross-platform mobile development with React Native, Flutter, and native frameworks

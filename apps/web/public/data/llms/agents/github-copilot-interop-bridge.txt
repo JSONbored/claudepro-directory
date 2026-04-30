@@ -11,7 +11,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Brand domain: github.com
 - Brand asset source: brandfetch
 - Author: JSONbored
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 Bridge Claude Code and GitHub Copilot workflows with Haiku 4.5 integration. Enables cross-platform agent coordination, model switching, and hybrid enterprise workflows.

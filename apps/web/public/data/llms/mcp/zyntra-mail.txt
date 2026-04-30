@@ -12,7 +12,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Brand domain: zyntra.app
 - Brand asset source: brandfetch
 - Author: dd77ss
-- Last verified: 2026-04-30T12:14:15Z
+- Last verified: 2026-04-30
 - Robots: indexable
 ## Summary
 MCP server for e-mail testing: create disposable inboxes, wait for delivery, and extract e-mail content or links - all from your AI agent or test automation workflow.

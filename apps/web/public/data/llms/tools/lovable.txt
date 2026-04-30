@@ -12,7 +12,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Brand domain: lovable.dev
 - Brand asset source: brandfetch
 - Author: Lovable
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T23:21:14-06:00
 - Robots: indexable
 ## Summary
 AI app builder for generating and iterating on web applications from natural language product requests.

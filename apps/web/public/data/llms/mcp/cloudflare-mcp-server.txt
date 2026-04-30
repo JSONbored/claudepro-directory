@@ -15,7 +15,7 @@ Download: /downloads/mcp/cloudflare-mcp-server.mcpb
 - Package URL: /downloads/mcp/cloudflare-mcp-server.mcpb
 - Package SHA256: 06a4d88be66de572abcbfe34634a8ce927597249e591ec5717ef6b9c6a520212
 - Author: Cloudflare
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 Build applications, analyze traffic, and manage security settings through Cloudflare

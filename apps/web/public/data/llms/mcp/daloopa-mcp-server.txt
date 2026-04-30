@@ -15,7 +15,7 @@ Download: /downloads/mcp/daloopa-mcp-server.mcpb
 - Package URL: /downloads/mcp/daloopa-mcp-server.mcpb
 - Package SHA256: 3862b42d9655eff41883b09966e5f1007b51271479fb8d423b3c2c8f44876d98
 - Author: Daloopa
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 Access high-quality fundamental financial data from SEC filings and investor presentations

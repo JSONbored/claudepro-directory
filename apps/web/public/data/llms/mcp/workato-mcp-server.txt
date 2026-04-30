@@ -15,7 +15,7 @@ Download: /downloads/mcp/workato-mcp-server.mcpb
 - Package URL: /downloads/mcp/workato-mcp-server.mcpb
 - Package SHA256: c69f27e627ef47cea43d72c64d4c1425ad1e7e07481aa656188d08ab0af611dc
 - Author: Workato
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 Access any application, workflows, or data via Workato's integration platform

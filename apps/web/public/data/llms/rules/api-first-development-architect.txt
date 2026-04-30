@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/rules/api-first-development-architect
 - Source URLs: https://swagger.io/specification/, https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/api-first-development-architect.mdx
 - Author: JSONbored
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 API-first development expert with OpenAPI/Swagger schema design, tRPC type-safe procedures, REST best practices, GraphQL federation, and contract-driven development for scalable backend architectures.

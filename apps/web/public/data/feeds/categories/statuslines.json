@@ -15,7 +15,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-23",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "accessibility",
         "wcag",
@@ -84,7 +84,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/accessibility-first-statusline.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -100,7 +100,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-23",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "dashboard",
         "performance",
@@ -170,7 +170,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/ai-model-performance-dashboard.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -186,7 +186,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "api-latency",
         "performance",
@@ -254,7 +254,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/api-latency-breakdown.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -270,7 +270,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-23",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "timer",
         "session-block",
@@ -339,7 +339,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/block-timer-tracker.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -355,7 +355,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "burn-rate",
         "cost-tracking",
@@ -423,7 +423,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/burn-rate-monitor.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -439,7 +439,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "prompt-caching",
         "cache-efficiency",
@@ -507,7 +507,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/cache-efficiency-monitor.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -523,7 +523,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-23",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "catppuccin",
         "mocha",
@@ -592,7 +592,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/catppuccin-mocha-theme.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -608,7 +608,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-19",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "docker",
         "statusline",
@@ -683,7 +683,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/docker-health-statusline.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -699,7 +699,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "daily-limit",
         "quota-tracking",
@@ -767,7 +767,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/daily-usage-percentage-tracker.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -783,7 +783,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "5-hour-window",
         "session-tracking",
@@ -851,7 +851,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/five-hour-window-tracker.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -867,7 +867,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-01",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "git",
         "version-control",
@@ -936,7 +936,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/git-status-statusline.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -952,7 +952,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "productivity",
         "velocity",
@@ -1020,7 +1020,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/lines-per-minute-tracker.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1036,7 +1036,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "mcp",
         "monitoring",
@@ -1102,7 +1102,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/mcp-server-status-monitor.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1118,7 +1118,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-01",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "powerline",
         "minimal",
@@ -1185,7 +1185,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/minimal-powerline.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1201,7 +1201,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "model-switching",
         "opus-sonnet-haiku",
@@ -1269,7 +1269,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/model-switch-history-tracker.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1285,7 +1285,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-01",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "multi-line",
         "comprehensive",
@@ -1352,7 +1352,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/multi-line-statusline.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1368,7 +1368,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "tokens",
         "multi-provider",
@@ -1436,7 +1436,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/multi-provider-token-counter.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1452,7 +1452,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "multi-session",
         "parallel-sessions",
@@ -1520,7 +1520,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/multi-session-overlap-indicator.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1536,7 +1536,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-23",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "oh-my-zsh",
         "robbyrussell",
@@ -1605,7 +1605,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/oh-my-zsh-robbyrussell.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1621,7 +1621,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-01",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "python",
         "rich",
@@ -1690,7 +1690,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/python-rich-statusline.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1706,7 +1706,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "cost",
         "pricing",
@@ -1772,7 +1772,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/real-time-cost-tracker.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1788,7 +1788,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "health-score",
         "session-grade",
@@ -1856,7 +1856,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/session-health-score.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1872,7 +1872,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-01",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "timer",
         "productivity",
@@ -1939,7 +1939,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/session-timer-statusline.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1955,7 +1955,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-01",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "simple",
         "plain-text",
@@ -2022,7 +2022,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/simple-text-statusline.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2038,7 +2038,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "starship",
         "powerline",
@@ -2103,7 +2103,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/starship-powerline-theme.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2119,7 +2119,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "workspace-depth",
         "monorepo-navigation",
@@ -2187,7 +2187,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/workspace-project-depth-indicator.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []

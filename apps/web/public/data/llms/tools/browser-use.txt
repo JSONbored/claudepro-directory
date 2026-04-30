@@ -13,7 +13,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Brand domain: browser-use.com
 - Brand asset source: brandfetch
 - Author: Browser Use
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T23:21:14-06:00
 - Robots: indexable
 ## Summary
 Open-source browser automation library for building AI agents that can navigate, click, type, and inspect websites.

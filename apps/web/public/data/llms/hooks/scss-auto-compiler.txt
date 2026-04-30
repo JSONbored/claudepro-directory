@@ -8,7 +8,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/hooks/scss-auto-compiler
 - Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/scss-auto-compiler.mdx
 - Author: JSONbored
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 Automatically compiles SCSS/Sass files to CSS when they are modified.

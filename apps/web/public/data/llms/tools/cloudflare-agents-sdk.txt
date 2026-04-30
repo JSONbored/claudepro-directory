@@ -13,7 +13,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Brand domain: developers.cloudflare.com
 - Brand asset source: brandfetch
 - Author: Cloudflare
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T23:21:14-06:00
 - Robots: indexable
 ## Summary
 Cloudflare framework for building, deploying, and running AI agents on Workers with durable platform primitives.

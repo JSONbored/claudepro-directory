@@ -15,7 +15,7 @@ Download: /downloads/mcp/fireflies-mcp-server.mcpb
 - Package URL: /downloads/mcp/fireflies-mcp-server.mcpb
 - Package SHA256: 21b16bcef6c23c95d81241c4937bf0c89f4582fb57748f12da8da13a01ba7038
 - Author: Fireflies
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 Extract valuable insights from meeting transcripts and summaries

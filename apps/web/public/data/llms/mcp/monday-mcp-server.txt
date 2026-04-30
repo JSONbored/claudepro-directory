@@ -15,7 +15,7 @@ Download: /downloads/mcp/monday-mcp-server.mcpb
 - Package URL: /downloads/mcp/monday-mcp-server.mcpb
 - Package SHA256: 188b737c7620ced286f4fcc8ba38e46bb49f98a62729dfe8af6ce3cfe9b13ec4
 - Author: Monday.com
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 Manage monday.com boards, items, and CRM activities

@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/hooks/dependency-update-checker
 - Source URLs: https://docs.npmjs.com/cli/v8/commands/npm-audit, https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/dependency-update-checker.mdx
 - Author: JSONbored
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 Automatically checks for outdated dependencies and suggests updates with security analysis. This PostToolUse hook triggers when dependency manifest files (package.json, requirements.txt, Gemfile, go.mod, Cargo.toml, pyproject.toml) are modified, providing real-time dependency health monitoring.

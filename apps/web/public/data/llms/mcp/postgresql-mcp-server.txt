@@ -15,7 +15,7 @@ Download: /downloads/mcp/postgresql-mcp-server.mcpb
 - Package URL: /downloads/mcp/postgresql-mcp-server.mcpb
 - Package SHA256: 2935644e5353e573faf8b78d11f376a7f99e6662b4687ae8f40d2ad39d1fde83
 - Author: Anthropic
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 Official MCP server providing read-only access to PostgreSQL databases with schema inspection and query capabilities

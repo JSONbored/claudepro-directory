@@ -12,7 +12,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Brand domain: github.com
 - Brand asset source: brandfetch
 - Author: JSONbored
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 Expert in AI prompt engineering for Claude Code and Claude Desktop, focusing on coding tasks, test-driven development patterns, iterative refinement, and context management for optimal AI assistance

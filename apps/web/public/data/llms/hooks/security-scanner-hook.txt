@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/hooks/security-scanner-hook
 - Source URLs: https://owasp.org/www-project-top-ten/, https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/security-scanner-hook.mdx
 - Author: JSONbored
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 Automated security vulnerability scanning that integrates with development workflow to detect and prevent security issues before deployment.

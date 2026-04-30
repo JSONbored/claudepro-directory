@@ -8,7 +8,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/guides/fix-environment-variables
 - Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/fix-environment-variables.mdx
 - Author: JSONbored
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 Debug Claude Code authentication failures, OAuth errors, and API key configuration issues with platform-specific solutions and automated management tools.

@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/rules/react-19-concurrent-features-specialist
 - Source URLs: https://react.dev/reference/react, https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/react-19-concurrent-features-specialist.mdx
 - Author: JSONbored
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 React 19 concurrent features specialist with useTransition, useDeferredValue, Suspense boundaries, streaming SSR, and selective hydration patterns

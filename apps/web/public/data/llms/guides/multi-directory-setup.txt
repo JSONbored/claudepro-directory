@@ -8,7 +8,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/guides/multi-directory-setup
 - Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/multi-directory-setup.mdx
 - Author: JSONbored
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 Master Claude Code multi-directory enterprise workflow. Step-by-step setup, automation hooks, and proven enterprise strategies for 30-100x productivity boost.

@@ -8,7 +8,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/guides/claude-4-extended-thinking-tutorial
 - Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/claude-4-extended-thinking-tutorial.mdx
 - Author: JSONbored
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 Implement Claude 4 Extended Thinking API in 25 minutes. Master 500K token reasoning chains, thinking budget optimization, and industry-leading 74.5% accuracy.

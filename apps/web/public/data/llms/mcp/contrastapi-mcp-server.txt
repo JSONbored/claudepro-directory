@@ -13,7 +13,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Brand domain: contrastcyber.com
 - Brand asset source: brandfetch
 - Author: UPinar
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-30T04:13:44-06:00
 - Robots: indexable
 ## Summary
 41 security intelligence tools over remote MCP: CVE, KEV, CWE, EPSS, domain audit, IP threat reports, IOC enrichment, dependency scanning, MITRE ATLAS AI/ML attacks, and MITRE D3FEND defenses. Free tier: 100 credits/hour, no API key required. Streamable-HTTP transport.

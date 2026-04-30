@@ -15,7 +15,7 @@ Download: /downloads/mcp/square-mcp-server.mcpb
 - Package URL: /downloads/mcp/square-mcp-server.mcpb
 - Package SHA256: d641dab1566fd2d5550a21872559701a301470bcfdedd9565a77d8090b301316
 - Author: Square
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 Build on Square APIs for payments, inventory, and order management

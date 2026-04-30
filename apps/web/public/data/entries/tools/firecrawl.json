@@ -10,7 +10,7 @@
     "seoDescription": "Firecrawl turns websites into clean markdown, structured data, and LLM-ready content for AI applications. HeyClaude adds source links, install steps,...",
     "author": "Firecrawl",
     "dateAdded": "2026-04-27",
-    "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
     "tags": [
       "web-crawling",
       "data-extraction"
@@ -91,7 +91,7 @@
       "https://www.firecrawl.dev"
     ],
     "sourceStatus": "available",
-    "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
     "adapterGenerated": false,
     "platforms": [],
     "supportLevels": []

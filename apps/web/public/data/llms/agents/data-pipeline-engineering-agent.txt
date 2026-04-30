@@ -8,7 +8,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/agents/data-pipeline-engineering-agent
 - Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/data-pipeline-engineering-agent.mdx
 - Author: JSONbored
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 Modern data pipeline specialist focused on real-time streaming, ETL/ELT orchestration, data quality validation, and scalable data infrastructure with Apache Airflow, dbt, and cloud-native tools

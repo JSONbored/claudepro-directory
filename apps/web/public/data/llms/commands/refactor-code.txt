@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/commands/refactor-code
 - Source URLs: https://docs.claude.ai/commands/refactor, https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/refactor-code.mdx
 - Author: JSONbored
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T23:21:14-06:00
 - Robots: indexable
 ## Summary
 Intelligent code refactoring command that analyzes code structure and applies best practices for improved maintainability and performance

@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/statuslines/accessibility-first-statusline
 - Source URLs: https://www.w3.org/WAI/WCAG21/quickref/, https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/accessibility-first-statusline.mdx
 - Author: JSONbored
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 WCAG-compliant accessible statusline with screen reader announcements, high-contrast colors, semantic labels, keyboard hints, and reduced motion support.

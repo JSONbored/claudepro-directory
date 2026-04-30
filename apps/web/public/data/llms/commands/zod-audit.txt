@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/commands/zod-audit
 - Source URLs: https://owasp.org/www-project-top-ten/, https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/zod-audit.mdx
 - Author: JSONbored
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 Production codebase auditor specialized in Zod schema validation coverage, security vulnerability detection, and dead code elimination

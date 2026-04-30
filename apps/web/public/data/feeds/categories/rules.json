@@ -15,7 +15,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "ai",
         "prompt-engineering",
@@ -77,7 +77,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/ai-prompt-engineering-expert.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -93,7 +93,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "api",
         "rest",
@@ -152,7 +152,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/api-design-expert.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -168,7 +168,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "api-design",
         "openapi",
@@ -229,7 +229,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/api-first-development-architect.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -245,7 +245,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "aws",
         "cloud",
@@ -307,7 +307,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/aws-cloud-architect.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -323,7 +323,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-19",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "biome",
         "linting",
@@ -383,7 +383,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/biome-strict-linting-rules.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -399,7 +399,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "code-review",
         "best-practices",
@@ -456,7 +456,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/code-review-expert.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -472,7 +472,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "golang",
         "go",
@@ -530,7 +530,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/go-golang-expert.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -546,7 +546,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "golang",
         "go",
@@ -606,7 +606,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/golang-expert.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -622,7 +622,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "graphql",
         "federation",
@@ -680,7 +680,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/graphql-federation-specialist.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -696,7 +696,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "kubernetes",
         "devsecops",
@@ -758,7 +758,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/kubernetes-devsecops-engineer.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -774,7 +774,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "mobile",
         "ios",
@@ -834,7 +834,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/mobile-app-developer.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -850,7 +850,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "mobile",
         "ios",
@@ -910,7 +910,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/mobile-app-development-expert.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -926,7 +926,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "monorepo",
         "turborepo",
@@ -985,7 +985,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/monorepo-workspace-manager.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1001,7 +1001,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "next-js",
         "performance",
@@ -1060,7 +1060,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/nextjs-15-performance-architect.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1076,7 +1076,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-26",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "zod",
         "validation",
@@ -1138,7 +1138,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/production-codebase-auditor.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1154,7 +1154,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-15",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "python",
         "data-science",
@@ -1213,7 +1213,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/python-data-science.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1229,7 +1229,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-15",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "python",
         "data-science",
@@ -1288,7 +1288,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/python-data-science-expert.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1304,7 +1304,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "react-19",
         "concurrent",
@@ -1363,7 +1363,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/react-19-concurrent-features-specialist.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1379,7 +1379,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-15",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "react",
         "nextjs",
@@ -1437,7 +1437,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/react-expert.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1453,7 +1453,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-15",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "react",
         "nextjs",
@@ -1511,7 +1511,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/react-next-js-expert.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1527,7 +1527,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "react",
         "rsc",
@@ -1586,7 +1586,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/react-server-components-expert.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1602,7 +1602,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-15",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "security",
         "penetration-testing",
@@ -1660,7 +1660,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/security-auditor.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1676,7 +1676,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-15",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "security",
         "penetration-testing",
@@ -1734,7 +1734,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/security-auditor-penetration-tester.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1750,7 +1750,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "security",
         "react",
@@ -1809,7 +1809,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/security-first-react-components.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1825,7 +1825,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "terraform",
         "iac",
@@ -1883,7 +1883,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/terraform-infrastructure-architect.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1899,7 +1899,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "tdd",
         "testing",
@@ -1959,7 +1959,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/test-driven-development-enforcer.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1975,7 +1975,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "typescript",
         "strict-mode",
@@ -2033,7 +2033,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/typescript-5x-strict-mode-expert.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2049,7 +2049,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "accessibility",
         "wcag",
@@ -2107,7 +2107,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/wcag-accessibility-auditor.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2123,7 +2123,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "windsurf",
         "ai-ide",
@@ -2186,7 +2186,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/windsurf-ai-native-ide-patterns.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []

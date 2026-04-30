@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/agents/frontend-specialist-agent
 - Source URLs: https://react.dev/, https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/frontend-specialist-agent.mdx
 - Author: JSONbored
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 Expert frontend developer specializing in modern JavaScript frameworks, UI/UX implementation, and performance optimization

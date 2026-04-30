@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/hooks/accessibility-checker
 - Source URLs: https://www.w3.org/WAI/WCAG21/quickref/, https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/accessibility-checker.mdx
 - Author: JSONbored
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 Automated accessibility testing and compliance checking for web applications following WCAG 2.1 and WCAG 2.2 guidelines. This hook automatically runs accessibility scans on HTML files after they are written or edited, using axe-core for comprehensive WCAG compliance testing.

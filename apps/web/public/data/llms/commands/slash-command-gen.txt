@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/commands/slash-command-gen
 - Source URLs: https://docs.claude.com/en/docs/claude-code/slash-commands, https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/slash-command-gen.mdx
 - Author: JSONbored
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-27T01:30:00-06:00
 - Robots: indexable
 ## Summary
 Create custom slash commands for Claude Code with templates, arguments, frontmatter metadata, and team-shared workflows stored in .claude/commands directory

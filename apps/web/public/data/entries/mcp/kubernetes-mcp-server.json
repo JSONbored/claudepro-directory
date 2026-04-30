@@ -10,7 +10,7 @@
     "seoDescription": "Kubernetes cluster management and container orchestration through MCP integration Discover tools for AI development. HeyClaude adds source links, install...",
     "author": "feiskyer",
     "dateAdded": "2025-09-20",
-    "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+    "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
     "tags": [
       "kubernetes",
       "k8s",
@@ -323,7 +323,7 @@
       "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/kubernetes-mcp-server.mdx"
     ],
     "sourceStatus": "available",
-    "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+    "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
     "adapterGenerated": false,
     "platforms": [],
     "supportLevels": []

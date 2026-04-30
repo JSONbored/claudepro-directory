@@ -10,7 +10,7 @@
     "seoDescription": "LangSmith provides tracing, observability, evaluation, and testing workflows for LLM applications and agents. HeyClaude adds source links, install steps,...",
     "author": "LangChain",
     "dateAdded": "2026-04-27",
-    "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
     "tags": [
       "observability",
       "evaluation"
@@ -90,7 +90,7 @@
       "https://www.langchain.com/langsmith"
     ],
     "sourceStatus": "available",
-    "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
     "adapterGenerated": false,
     "platforms": [],
     "supportLevels": []

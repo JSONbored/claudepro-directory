@@ -8,7 +8,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/hooks/workflow-completion-report
 - Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/workflow-completion-report.mdx
 - Author: JSONbored
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 Generates a comprehensive report when Claude Code workflow stops, including files modified, tests run, and git status.

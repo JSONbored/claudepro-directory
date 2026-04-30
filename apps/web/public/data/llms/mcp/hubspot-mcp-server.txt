@@ -15,7 +15,7 @@ Download: /downloads/mcp/hubspot-mcp-server.mcpb
 - Package URL: /downloads/mcp/hubspot-mcp-server.mcpb
 - Package SHA256: a3d5e18765768e67f645b91f89c67d7163ebb763932652f693d85d1a260949c8
 - Author: HubSpot
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 Access and manage HubSpot CRM data including contacts, companies, and deals

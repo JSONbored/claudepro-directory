@@ -12,7 +12,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Brand domain: heyclau.de
 - Brand asset source: manual
 - Author: HeyClaude Team
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-30T02:43:14-06:00
 - Robots: indexable
 ## Summary
 Search the public HeyClaude registry, fetch entry details, inspect compatibility, and build issue-first submission URLs through MCP.

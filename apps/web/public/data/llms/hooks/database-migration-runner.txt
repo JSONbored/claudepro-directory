@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/hooks/database-migration-runner
 - Source URLs: https://knexjs.org/guide/migrations.html, https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/database-migration-runner.mdx
 - Author: JSONbored
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 Automated database migration management with rollback capabilities, validation, and multi-environment support using Knex 3.x, Sequelize 6.x/7.x, TypeORM 0.3.x, Django 5.x, and Rails 7.x.

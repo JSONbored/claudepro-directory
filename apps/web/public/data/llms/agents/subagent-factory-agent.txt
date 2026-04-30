@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/agents/subagent-factory-agent
 - Source URLs: https://docs.claude.com/en/docs/claude-code/sub-agents, https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/subagent-factory-agent.mdx
 - Author: JSONbored
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 Subagent architecture specialist creating specialized agents for delegation, parallel execution, and modular task decomposition in Claude Code workflows.

@@ -15,7 +15,7 @@ Download: /downloads/mcp/github-mcp-server.mcpb
 - Package URL: /downloads/mcp/github-mcp-server.mcpb
 - Package SHA256: 0cbf34c03e258fe4bae54d619073caa8277f026af7103ee92323be2a97e7a923
 - Author: GitHub
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 Official GitHub MCP server providing comprehensive GitHub API access for repository management, file operations, and search functionality

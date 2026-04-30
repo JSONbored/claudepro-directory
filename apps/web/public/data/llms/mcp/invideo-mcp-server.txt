@@ -15,7 +15,7 @@ Download: /downloads/mcp/invideo-mcp-server.mcpb
 - Package URL: /downloads/mcp/invideo-mcp-server.mcpb
 - Package SHA256: ab826be403e238e55b55783ad32320578f6fa1f1010d07493d9a2469588b355e
 - Author: invideo
-- Last verified: 2026-04-30T05:16:20-06:00
+- Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable
 ## Summary
 Build video creation capabilities into your applications

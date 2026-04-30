@@ -10,7 +10,7 @@
     "seoDescription": "Braintrust supports AI evaluation, prompt experiments, logging, and data workflows for production AI applications. HeyClaude adds source links, install...",
     "author": "Braintrust",
     "dateAdded": "2026-04-27",
-    "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
+    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
     "tags": [
       "evaluation",
       "prompt-testing"
@@ -90,7 +90,7 @@
       "https://www.braintrust.dev"
     ],
     "sourceStatus": "available",
-    "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
     "adapterGenerated": false,
     "platforms": [],
     "supportLevels": []
