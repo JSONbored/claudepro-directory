@@ -182,6 +182,7 @@ content issues.
 - Registry package: [packages/registry](packages/registry)
 - Read-only MCP server: [packages/mcp](packages/mcp)
 - Issue forms: [.github/ISSUE_TEMPLATE](.github/ISSUE_TEMPLATE)
+- Submission queue ops: [docs/submission-queue-ops.md](docs/submission-queue-ops.md)
 - Package trust model: [docs/package-security-policy.md](docs/package-security-policy.md)
 
 ---

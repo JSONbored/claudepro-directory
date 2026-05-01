@@ -521,7 +521,18 @@ export type SubmissionQueueEntry = {
   updatedAt: string;
   labels: string[];
   recommendedLabels: string[];
-  status: "import_ready" | "needs_changes" | "skipped";
+  status:
+    | "import_ready"
+    | "maintainer_review"
+    | "needs_author_input"
+    | "source_needs_verification"
+    | "stale_reminder_due"
+    | "close_eligible"
+    | "skipped";
+  staleState: "not_applicable" | "fresh" | "reminder_due" | "close_eligible";
+  ageDays: number;
+  sourceNeedsVerification: boolean;
+  actionDue: "" | "author_input" | "verify_source" | "remind" | "close";
   category: string;
   slug: string;
   name: string;
@@ -537,6 +548,11 @@ export type SubmissionQueue = {
   count: number;
   summary: {
     importReady: number;
+    maintainerReview: number;
+    needsAuthorInput: number;
+    sourceNeedsVerification: number;
+    staleReminderDue: number;
+    closeEligible: number;
     needsChanges: number;
     skipped: number;
   };
@@ -942,15 +958,46 @@ export function recommendedSubmissionLabels(
   issue: Record<string, unknown>,
   report?: SubmissionValidationReport,
 ): string[];
+export function hasProtectedSubmissionLabel(
+  issue?: Record<string, unknown>,
+): boolean;
+export function submissionSourceNeedsVerification(
+  report: SubmissionValidationReport,
+  issue?: Record<string, unknown>,
+): boolean;
+export function submissionAgeDays(
+  issue?: Record<string, unknown>,
+  options?: { now?: string },
+): number;
+export function submissionStaleState(
+  issue?: Record<string, unknown>,
+  report?: SubmissionValidationReport,
+  options?: { now?: string },
+): "not_applicable" | "fresh" | "reminder_due" | "close_eligible";
 export function submissionQueueStatus(
   report: SubmissionValidationReport,
+  issue?: Record<string, unknown>,
+  options?: { now?: string },
 ): string;
 export const SUBMISSION_BASE_LABELS: string[];
 export const COMMUNITY_CATEGORY_LABELS: Record<string, string>;
+export const SUBMISSION_NEEDS_AUTHOR_INPUT_LABEL: string;
+export const SUBMISSION_SOURCE_NEEDS_VERIFICATION_LABEL: string;
+export const SUBMISSION_STALE_LABEL: string;
+export const SUBMISSION_PROTECTED_REVIEW_LABELS: string[];
+export const SUBMISSION_STALE_LABEL_DEFINITIONS: Record<
+  string,
+  { color: string; description: string }
+>;
+export const SUBMISSION_STALE_POLICY: {
+  reminderDays: number;
+  closeDays: number;
+};
 export function submissionLabelsForCategory(category: string): string[];
 export function recommendedLabelsForCategory(category: string): string[];
 export function buildSubmissionQueue(
   issues: Array<Record<string, unknown>>,
+  options?: { now?: string },
 ): SubmissionQueue;
 export function validateSubmission(
   issue: Record<string, unknown>,

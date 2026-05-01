@@ -84,7 +84,11 @@ async function getSubmissionQueue() {
 
 function statusLabel(status: string) {
   if (status === "import_ready") return "Import ready";
-  if (status === "needs_changes") return "Needs changes";
+  if (status === "maintainer_review") return "Maintainer review";
+  if (status === "needs_author_input") return "Needs author input";
+  if (status === "source_needs_verification") return "Source verification";
+  if (status === "stale_reminder_due") return "Reminder due";
+  if (status === "close_eligible") return "Close eligible";
   return "Skipped";
 }
 
@@ -141,7 +145,8 @@ export default async function SubmissionsPage() {
       <section className="grid gap-4 md:grid-cols-3">
         {[
           ["Import ready", queue.summary.importReady],
-          ["Needs changes", queue.summary.needsChanges],
+          ["Needs author input", queue.summary.needsAuthorInput],
+          ["Source verification", queue.summary.sourceNeedsVerification],
           ["Tracked issues", queue.count],
         ].map(([label, value]) => (
           <div key={label} className="surface-panel p-5">
@@ -183,6 +188,7 @@ export default async function SubmissionsPage() {
                   </h2>
                   <p className="text-sm text-muted-foreground">
                     {entry.category || "unknown"} / {entry.slug || "no slug"}
+                    {entry.ageDays ? ` / ${entry.ageDays}d waiting` : ""}
                   </p>
                 </div>
                 {entry.importPath ? (
@@ -197,6 +203,11 @@ export default async function SubmissionsPage() {
                     <li key={issue}>{issue}</li>
                   ))}
                 </ul>
+              ) : null}
+              {entry.actionDue ? (
+                <p className="mt-4 text-sm leading-7 text-muted-foreground">
+                  Next action: {entry.actionDue.replaceAll("_", " ")}
+                </p>
               ) : null}
             </article>
           ))
