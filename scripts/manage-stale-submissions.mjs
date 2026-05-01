@@ -1,6 +1,5 @@
 import {
   buildSubmissionQueue,
-  issueLabels,
   looksLikeSubmissionIssue,
   validateSubmission,
 } from "@heyclaude/registry/submission";
@@ -10,6 +9,7 @@ import {
   SUBMISSION_STALE_LABEL,
   SUBMISSION_STALE_LABEL_DEFINITIONS,
 } from "@heyclaude/registry/submission-labels";
+import { pathToFileURL } from "node:url";
 
 const apiBaseUrl = "https://api.github.com";
 const marker = "<!-- heyclaude-stale-submission -->";
@@ -169,6 +169,29 @@ function closeBody(entry) {
   return lines.join("\n");
 }
 
+export function planStaleSubmissionAction(entry, sourceCheckLabels = []) {
+  const existingLabels = new Set(entry.labels);
+  const labels = new Set([...entry.recommendedLabels, ...sourceCheckLabels]);
+  const nextLabels = [...labels].filter(
+    (label) => managedLabels.has(label) && !existingLabels.has(label),
+  );
+  const shouldRemind =
+    (entry.status === "stale_reminder_due" ||
+      entry.status === "close_eligible") &&
+    !existingLabels.has(SUBMISSION_STALE_LABEL);
+  const shouldClose =
+    entry.status === "close_eligible" &&
+    existingLabels.has(SUBMISSION_STALE_LABEL);
+
+  return {
+    issue: entry.number,
+    status: entry.status,
+    labels: nextLabels,
+    remind: shouldRemind,
+    close: shouldClose,
+  };
+}
+
 function normalizeIssue(issue) {
   return {
     number: issue.number,
@@ -241,35 +264,18 @@ async function main() {
 
   const actions = [];
   for (const entry of queue.entries) {
-    const existingLabels = new Set(entry.labels);
     const sourceCheckLabels = entry.number
       ? await submissionSourceCheckLabels(issuesByNumber.get(entry.number))
       : [];
-    const labels = new Set([...entry.recommendedLabels, ...sourceCheckLabels]);
-    const nextLabels = [...labels].filter(
-      (label) => managedLabels.has(label) && !existingLabels.has(label),
-    );
-    const staleDue =
-      entry.status === "stale_reminder_due" ||
-      entry.status === "close_eligible";
-    const shouldRemind =
-      staleDue && !existingLabels.has(SUBMISSION_STALE_LABEL);
-    const shouldClose = staleDue && existingLabels.has(SUBMISSION_STALE_LABEL);
-
-    actions.push({
-      issue: entry.number,
-      status: entry.status,
-      labels: nextLabels,
-      remind: shouldRemind,
-      close: shouldClose,
-    });
+    const action = planStaleSubmissionAction(entry, sourceCheckLabels);
+    actions.push(action);
 
     if (!apply || !entry.number) continue;
-    await addLabels(owner, repo, entry.number, nextLabels);
-    if (shouldRemind) {
+    await addLabels(owner, repo, entry.number, action.labels);
+    if (action.remind) {
       await upsertReminder(owner, repo, entry.number, reminderBody(entry));
     }
-    if (shouldClose) {
+    if (action.close) {
       await upsertReminder(owner, repo, entry.number, closeBody(entry));
       await closeIssue(owner, repo, entry.number);
     }
@@ -291,7 +297,12 @@ async function main() {
   );
 }
 
-main().catch((error) => {
-  console.error(error instanceof Error ? error.message : error);
-  process.exit(1);
-});
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
+  main().catch((error) => {
+    console.error(error instanceof Error ? error.message : error);
+    process.exit(1);
+  });
+}
