@@ -1,0 +1,51 @@
+name: Submission Stale Manager
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "Apply labels/comments/closures. Leave false for dry-run."
+        required: false
+        default: "false"
+  schedule:
+    - cron: "17 11 * * 1"
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  manage-stale-submissions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: submission-stale-manager
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@4f4305e1fe60ad818b8ae6fc4a697cc47eab0b2d
+
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Dry-run stale submission policy
+        if: github.event_name == 'workflow_dispatch' && inputs.apply != 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: pnpm submission:stale
+
+      - name: Apply stale submission policy
+        if: github.event_name == 'schedule' || inputs.apply == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: pnpm submission:stale -- --apply

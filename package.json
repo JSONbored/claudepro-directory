@@ -36,6 +36,7 @@
     "validate:mcp-endpoint": "pnpm --filter @heyclaude/mcp validate:endpoint",
     "test:mcp": "vitest run tests/mcp-server.test.ts",
     "submission:queue": "node scripts/build-submission-queue.mjs",
+    "submission:stale": "node scripts/manage-stale-submissions.mjs",
     "test": "vitest run",
     "test:e2e": "node scripts/run-playwright.mjs",
     "test:seo-jsonld": "vitest run tests/seo-jsonld.test.ts",

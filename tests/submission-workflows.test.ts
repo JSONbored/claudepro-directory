@@ -63,4 +63,44 @@ describe("submission automation workflows", () => {
     expect(source).toContain("Dry-run Resend template sync");
     expect(source).toContain("pnpm resend:sync-templates -- --dry-run");
   });
+
+  it("keeps stale submission automation review-only and label-scoped", () => {
+    const source = fs.readFileSync(
+      path.join(repoRoot, ".github/workflows/submission-stale.yml"),
+      "utf8",
+    );
+
+    expect(source).toContain("Submission Stale Manager");
+    expect(source).toContain("issues: write");
+    expect(source).toContain("pnpm submission:stale");
+    expect(source).toContain("--apply");
+    expect(source).not.toContain("import-approved");
+    expect(source).not.toContain("scripts/import-submission-issue.mjs");
+    expect(source).not.toContain("peter-evans/create-pull-request");
+  });
+
+  it("prevents Renovate from pinning package engine ranges", () => {
+    const renovate = JSON.parse(
+      fs.readFileSync(path.join(repoRoot, "renovate.json"), "utf8"),
+    );
+    const packageJson = JSON.parse(
+      fs.readFileSync(path.join(repoRoot, "packages/mcp/package.json"), "utf8"),
+    );
+
+    expect(packageJson.engines.node).toBe(">=20");
+    expect(renovate.packageRules).toContainEqual(
+      expect.objectContaining({
+        matchManagers: ["npm"],
+        matchDepTypes: ["engines"],
+        enabled: false,
+      }),
+    );
+    expect(renovate.packageRules).toContainEqual(
+      expect.objectContaining({
+        matchManagers: ["github-actions"],
+        matchDepNames: ["node"],
+        allowedVersions: "24.x",
+      }),
+    );
+  });
 });
