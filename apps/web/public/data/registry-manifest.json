@@ -3115,6 +3115,24 @@
     "missingSeoCount": 0,
     "duplicateBodyGroupCount": 0
   },
+  "trustSummary": {
+    "brandedCount": 138,
+    "brandedPercent": 36,
+    "brandfetchCount": 137,
+    "sourceAvailableCount": 381,
+    "sourceAvailablePercent": 100,
+    "missingSourceCount": 0,
+    "checksumPresentCount": 109,
+    "checksumPresentPercent": 29,
+    "adapterGeneratedCount": 68,
+    "recentlyVerifiedCount": 355,
+    "staleVerificationCount": 0,
+    "provenanceCount": 3,
+    "provenancePercent": 1,
+    "claimedOrReviewedCount": 3,
+    "recommendedFixCount": 1,
+    "entriesNeedingAttention": 1
+  },
   "artifacts": {
     "directory": "/data/directory-index.json",
     "search": "/data/search-index.json",
@@ -3124,6 +3142,7 @@
     "pluginExportFeed": "/data/plugin-export-feed.json",
     "registryChangelog": "/data/registry-changelog.json",
     "registryManifest": "/data/registry-manifest.json",
+    "registryTrust": "/data/registry-trust-report.json",
     "contentQuality": "/data/content-quality-report.json",
     "contentQualityPrompts": "/data/content-quality-prompts.json",
     "jsonLdSnapshots": "/data/jsonld-snapshots.json",
@@ -3171,6 +3190,11 @@
       "path": "/data/registry-changelog.json",
       "type": "json",
       "sha256": "2daf877806fd4c52557e78faa9322a4a1100488664438d68de740d5a97585914"
+    },
+    "registry-trust-report.json": {
+      "path": "/data/registry-trust-report.json",
+      "type": "json",
+      "sha256": "868d2e46eadeb556dae379724b97f6113cc9c4f900ed074072f9789ecff9dd4f"
     },
     "feeds/index.json": {
       "path": "/data/feeds%2Findex.json",

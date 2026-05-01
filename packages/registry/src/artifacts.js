@@ -315,6 +315,227 @@ export function buildEntryTrustSignals(entry) {
   };
 }
 
+function verificationAgeDays(entry, generatedAt) {
+  const verifiedAt = lastVerifiedForEntry(entry);
+  const verifiedTime = Date.parse(String(verifiedAt || ""));
+  const generatedTime = Date.parse(String(generatedAt || ""));
+  if (!Number.isFinite(verifiedTime) || !Number.isFinite(generatedTime)) {
+    return null;
+  }
+  return Math.max(0, Math.floor((generatedTime - verifiedTime) / 86_400_000));
+}
+
+function booleanCount(entries, predicate) {
+  return entries.filter(predicate).length;
+}
+
+function percentage(count, total) {
+  return total > 0 ? Math.round((count / total) * 100) : 0;
+}
+
+function entryTrustReportRow(entry, generatedAt) {
+  const trustSignals = buildEntryTrustSignals(entry);
+  const ageDays = verificationAgeDays(entry, generatedAt);
+  const hasBrand = Boolean(entry.brandDomain || entry.brandIconUrl);
+  const hasProvenance = Boolean(
+    entry.submittedBy ||
+    entry.reviewedBy ||
+    entry.submissionIssueUrl ||
+    entry.importPrUrl,
+  );
+  const recommendations = [];
+
+  if (!hasBrand && ["mcp", "tools"].includes(entry.category)) {
+    recommendations.push("Add brandDomain or reviewed brand asset metadata.");
+  }
+  if (trustSignals.sourceStatus === "missing") {
+    recommendations.push(
+      "Add source, docs, repository, or editorial provenance.",
+    );
+  }
+  if (entry.category === "skills" && !trustSignals.checksumPresent) {
+    recommendations.push(
+      "Add package checksum or validate the downloadable package.",
+    );
+  }
+  if (ageDays !== null && ageDays > 365) {
+    recommendations.push(
+      "Refresh verification date from current source facts.",
+    );
+  }
+  if (entry.category === "skills" && !trustSignals.adapterGenerated) {
+    recommendations.push(
+      "Confirm platform compatibility or generated adapter coverage.",
+    );
+  }
+
+  return {
+    key: `${entry.category}:${entry.slug}`,
+    category: entry.category,
+    slug: entry.slug,
+    title: entry.title,
+    brandName: entry.brandName || "",
+    brandDomain: entry.brandDomain || "",
+    brandAssetSource: entry.brandAssetSource || "",
+    sourceStatus: trustSignals.sourceStatus,
+    sourceUrlCount: trustSignals.sourceUrlCount,
+    checksumPresent: trustSignals.checksumPresent,
+    adapterGenerated: trustSignals.adapterGenerated,
+    firstPartyEditorial: trustSignals.firstPartyEditorial,
+    packageVerified: trustSignals.packageVerified,
+    lastVerifiedAt: trustSignals.lastVerifiedAt,
+    verificationAgeDays: ageDays,
+    hasProvenance,
+    submittedBy: entry.submittedBy || "",
+    reviewedBy: entry.reviewedBy || "",
+    claimStatus: entry.claimStatus || "unclaimed",
+    recommendations,
+  };
+}
+
+function buildTrustCategoryBreakdown(entries, rows) {
+  return Object.fromEntries(
+    categorySpec.categoryOrder.map((category) => {
+      const categoryRows = rows.filter((entry) => entry.category === category);
+      const count = categoryRows.length;
+      return [
+        category,
+        {
+          count,
+          brandCoverage: booleanCount(categoryRows, (entry) =>
+            Boolean(entry.brandDomain),
+          ),
+          sourceAvailable: booleanCount(
+            categoryRows,
+            (entry) => entry.sourceStatus === "available",
+          ),
+          checksumPresent: booleanCount(
+            categoryRows,
+            (entry) => entry.checksumPresent,
+          ),
+          adapterGenerated: booleanCount(
+            categoryRows,
+            (entry) => entry.adapterGenerated,
+          ),
+          provenancePresent: booleanCount(
+            categoryRows,
+            (entry) => entry.hasProvenance,
+          ),
+          recommendedFixes: categoryRows.reduce(
+            (sum, entry) => sum + entry.recommendations.length,
+            0,
+          ),
+        },
+      ];
+    }),
+  );
+}
+
+export function buildRegistryTrustReport(entries) {
+  const generatedAt = generatedAtForEntries(entries);
+  const rows = entries.map((entry) => entryTrustReportRow(entry, generatedAt));
+  const total = rows.length;
+  const brandedCount = booleanCount(rows, (entry) =>
+    Boolean(entry.brandDomain),
+  );
+  const brandfetchCount = booleanCount(
+    rows,
+    (entry) => entry.brandAssetSource === "brandfetch",
+  );
+  const sourceAvailableCount = booleanCount(
+    rows,
+    (entry) => entry.sourceStatus === "available",
+  );
+  const checksumPresentCount = booleanCount(
+    rows,
+    (entry) => entry.checksumPresent,
+  );
+  const adapterGeneratedCount = booleanCount(
+    rows,
+    (entry) => entry.adapterGenerated,
+  );
+  const recentlyVerifiedCount = booleanCount(
+    rows,
+    (entry) =>
+      entry.verificationAgeDays !== null && entry.verificationAgeDays <= 180,
+  );
+  const staleVerificationCount = booleanCount(
+    rows,
+    (entry) =>
+      entry.verificationAgeDays !== null && entry.verificationAgeDays > 365,
+  );
+  const provenanceCount = booleanCount(rows, (entry) => entry.hasProvenance);
+  const claimedOrReviewedCount = booleanCount(
+    rows,
+    (entry) => entry.claimStatus === "verified" || Boolean(entry.reviewedBy),
+  );
+
+  const needsAttention = rows
+    .filter((entry) => entry.recommendations.length)
+    .sort(
+      (left, right) =>
+        right.recommendations.length - left.recommendations.length ||
+        left.category.localeCompare(right.category) ||
+        left.title.localeCompare(right.title),
+    );
+
+  return {
+    schemaVersion: REGISTRY_ARTIFACT_SCHEMA_VERSION,
+    kind: "registry-trust-report",
+    generatedAt,
+    count: total,
+    thresholds: {
+      recentlyVerifiedDays: 180,
+      staleVerificationDays: 365,
+    },
+    summary: {
+      brandedCount,
+      brandedPercent: percentage(brandedCount, total),
+      brandfetchCount,
+      sourceAvailableCount,
+      sourceAvailablePercent: percentage(sourceAvailableCount, total),
+      missingSourceCount: total - sourceAvailableCount,
+      checksumPresentCount,
+      checksumPresentPercent: percentage(checksumPresentCount, total),
+      adapterGeneratedCount,
+      recentlyVerifiedCount,
+      staleVerificationCount,
+      provenanceCount,
+      provenancePercent: percentage(provenanceCount, total),
+      claimedOrReviewedCount,
+      recommendedFixCount: rows.reduce(
+        (sum, entry) => sum + entry.recommendations.length,
+        0,
+      ),
+      entriesNeedingAttention: needsAttention.length,
+    },
+    categoryBreakdown: buildTrustCategoryBreakdown(entries, rows),
+    queues: {
+      missingBrand: needsAttention
+        .filter((entry) =>
+          entry.recommendations.some((item) => item.includes("brandDomain")),
+        )
+        .slice(0, 50),
+      missingSource: needsAttention
+        .filter((entry) =>
+          entry.recommendations.some((item) => item.includes("source")),
+        )
+        .slice(0, 50),
+      missingChecksum: needsAttention
+        .filter((entry) =>
+          entry.recommendations.some((item) => item.includes("checksum")),
+        )
+        .slice(0, 50),
+      staleVerification: needsAttention
+        .filter((entry) =>
+          entry.recommendations.some((item) => item.includes("verification")),
+        )
+        .slice(0, 50),
+    },
+    entries: rows,
+  };
+}
+
 export function buildCursorSkillAdapter(entry) {
   const description = truncateText(
     entry.cardDescription || entry.description,
@@ -735,6 +956,7 @@ export function buildRegistryManifest(entries, extra = {}) {
       apiUrl: entryApiUrl(entry),
     })),
     qualitySummary: buildContentQualityReport(entries).summary,
+    trustSummary: buildRegistryTrustReport(entries).summary,
     artifacts: {
       directory: dataUrl("directory-index.json"),
       search: dataUrl("search-index.json"),
@@ -744,6 +966,7 @@ export function buildRegistryManifest(entries, extra = {}) {
       pluginExportFeed: dataUrl("plugin-export-feed.json"),
       registryChangelog: dataUrl("registry-changelog.json"),
       registryManifest: dataUrl("registry-manifest.json"),
+      registryTrust: dataUrl("registry-trust-report.json"),
       contentQuality: dataUrl("content-quality-report.json"),
       contentQualityPrompts: dataUrl("content-quality-prompts.json"),
       jsonLdSnapshots: dataUrl("jsonld-snapshots.json"),
@@ -834,6 +1057,11 @@ export function buildRegistryArtifactSet(entries, params = {}) {
       path: "registry-changelog.json",
       type: "json",
       value: buildRegistryChangelogFeed(entries),
+    },
+    {
+      path: "registry-trust-report.json",
+      type: "json",
+      value: buildRegistryTrustReport(entries),
     },
     {
       path: "feeds/index.json",

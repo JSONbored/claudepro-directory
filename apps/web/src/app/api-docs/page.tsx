@@ -85,6 +85,11 @@ const examples = [
     code: "curl https://heyclau.de/data/content-quality-report.json",
   },
   {
+    title: "Registry Trust Report",
+    href: "/data/registry-trust-report.json",
+    code: "curl https://heyclau.de/data/registry-trust-report.json",
+  },
+  {
     title: "Ecosystem Feed",
     href: "/data/ecosystem-feed.json",
     code: "curl https://heyclau.de/data/ecosystem-feed.json",

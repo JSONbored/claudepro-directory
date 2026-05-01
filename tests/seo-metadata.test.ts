@@ -31,6 +31,7 @@ const staticMetadataPages = [
   "quality",
   "trending",
   "jobs/post",
+  "tools/mcp-config-validator",
   "about",
 ];
 

@@ -65,6 +65,72 @@ export type EntryTrustSignals = {
   supportLevels: string[];
 };
 
+export type RegistryTrustReportEntry = {
+  key: string;
+  category: string;
+  slug: string;
+  title: string;
+  brandName: string;
+  brandDomain: string;
+  brandAssetSource: string;
+  sourceStatus: string;
+  sourceUrlCount: number;
+  checksumPresent: boolean;
+  adapterGenerated: boolean;
+  firstPartyEditorial: boolean;
+  packageVerified: boolean;
+  lastVerifiedAt: string;
+  verificationAgeDays: number | null;
+  hasProvenance: boolean;
+  submittedBy: string;
+  reviewedBy: string;
+  claimStatus: string;
+  recommendations: string[];
+};
+
+export type RegistryTrustReport = {
+  schemaVersion: number;
+  kind: "registry-trust-report";
+  generatedAt: string;
+  count: number;
+  thresholds: {
+    recentlyVerifiedDays: number;
+    staleVerificationDays: number;
+  };
+  summary: {
+    brandedCount: number;
+    brandedPercent: number;
+    brandfetchCount: number;
+    sourceAvailableCount: number;
+    sourceAvailablePercent: number;
+    missingSourceCount: number;
+    checksumPresentCount: number;
+    checksumPresentPercent: number;
+    adapterGeneratedCount: number;
+    recentlyVerifiedCount: number;
+    staleVerificationCount: number;
+    provenanceCount: number;
+    provenancePercent: number;
+    claimedOrReviewedCount: number;
+    recommendedFixCount: number;
+    entriesNeedingAttention: number;
+  };
+  categoryBreakdown: Record<
+    string,
+    {
+      count: number;
+      brandCoverage: number;
+      sourceAvailable: number;
+      checksumPresent: number;
+      adapterGenerated: number;
+      provenancePresent: number;
+      recommendedFixes: number;
+    }
+  >;
+  queues: Record<string, RegistryTrustReportEntry[]>;
+  entries: RegistryTrustReportEntry[];
+};
+
 export type ContentEntry = {
   category: string;
   slug: string;
@@ -545,6 +611,7 @@ export type ArtifactManifestV2 = {
     apiUrl?: string;
   }>;
   qualitySummary?: Record<string, unknown>;
+  trustSummary?: Record<string, unknown>;
   artifactContracts?: Record<
     string,
     { path: string; type: string; sha256: string }
@@ -608,6 +675,9 @@ export function buildSkillPlatformCompatibility(
 export function buildEntryTrustSignals(
   entry: Partial<ContentEntry>,
 ): EntryTrustSignals;
+export function buildRegistryTrustReport(
+  entries: ContentEntry[],
+): RegistryTrustReport;
 export function buildCursorSkillAdapter(entry: ContentEntry): string;
 export function summarizePlacementExpiry(
   placements: Array<Record<string, unknown>>,
