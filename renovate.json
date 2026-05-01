@@ -36,6 +36,12 @@
       "matchDepNames": ["node"],
       "allowedVersions": "24.x",
       "automerge": false
+    },
+    {
+      "description": "Keep package engines as compatibility ranges; setup-node pins CI/runtime versions separately",
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["engines"],
+      "enabled": false
     }
   ]
 }

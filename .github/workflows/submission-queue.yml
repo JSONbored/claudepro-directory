@@ -66,16 +66,19 @@ jobs:
             "# Submission Queue",
             "",
             `- Import ready: ${queue.summary.importReady}`,
-            `- Needs changes: ${queue.summary.needsChanges}`,
+            `- Needs author input: ${queue.summary.needsAuthorInput}`,
+            `- Source needs verification: ${queue.summary.sourceNeedsVerification}`,
+            `- Stale reminder due: ${queue.summary.staleReminderDue}`,
+            `- Close eligible: ${queue.summary.closeEligible}`,
             `- Skipped: ${queue.summary.skipped}`,
             "",
-            "| Issue | Status | Category | Slug | Notes |",
-            "| --- | --- | --- | --- | --- |",
+            "| Issue | Status | Age | Category | Slug | Action | Notes |",
+            "| --- | --- | ---: | --- | --- | --- | --- |",
           ];
           for (const entry of queue.entries) {
             const issue = entry.url ? `[#${entry.number}](${entry.url})` : `#${entry.number}`;
             const notes = entry.errors.length ? entry.errors.join("<br>") : entry.importPath;
-            lines.push(`| ${issue} | ${entry.status} | ${entry.category || "-"} | ${entry.slug || "-"} | ${notes || "-"} |`);
+            lines.push(`| ${issue} | ${entry.status} | ${entry.ageDays ?? 0}d | ${entry.category || "-"} | ${entry.slug || "-"} | ${entry.actionDue || "-"} | ${notes || "-"} |`);
           }
           fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join("\n")}\n`);
           NODE

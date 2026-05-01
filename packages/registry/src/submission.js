@@ -1,6 +1,12 @@
 import categorySpec from "./category-spec.json" with { type: "json" };
 import { normalizeBrandDomain } from "./brand-assets.js";
-import { recommendedLabelsForCategory } from "./submission-labels.js";
+import {
+  recommendedLabelsForCategory,
+  SUBMISSION_NEEDS_AUTHOR_INPUT_LABEL,
+  SUBMISSION_PROTECTED_REVIEW_LABELS,
+  SUBMISSION_SOURCE_NEEDS_VERIFICATION_LABEL,
+  SUBMISSION_STALE_LABEL,
+} from "./submission-labels.js";
 import { buildSubmissionFieldModel } from "./submission-spec.js";
 
 export const CORE_CATEGORIES = categorySpec.categoryOrder;
@@ -13,6 +19,12 @@ export const CATEGORY_REQUIREMENTS = Object.fromEntries(
 );
 
 export const COMMON_REQUIRED_FIELDS = categorySpec.commonIssueRequiredFields;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+export const SUBMISSION_STALE_POLICY = {
+  reminderDays: 7,
+  closeDays: 14,
+};
 
 export const HEADING_KEY_MAP = {
   name: "name",
@@ -574,20 +586,99 @@ export function recommendedSubmissionLabels(
     labels.add("content-submission");
     labels.add("needs-review");
   }
+  if (!report?.skipped && report && !report.ok) {
+    labels.add(SUBMISSION_NEEDS_AUTHOR_INPUT_LABEL);
+  }
+  if (submissionSourceNeedsVerification(report, issue)) {
+    labels.add(SUBMISSION_SOURCE_NEEDS_VERIFICATION_LABEL);
+  }
+  const staleState = submissionStaleState(issue, report);
+  if (staleState === "reminder_due" || staleState === "close_eligible") {
+    labels.add(SUBMISSION_STALE_LABEL);
+  }
   return [...labels].sort();
 }
 
-export function submissionQueueStatus(report) {
-  if (report?.skipped) return "skipped";
-  return report?.ok ? "import_ready" : "needs_changes";
+export function hasProtectedSubmissionLabel(issue = {}) {
+  const labels = new Set(issueLabels(issue));
+  return SUBMISSION_PROTECTED_REVIEW_LABELS.some((label) => labels.has(label));
 }
 
-export function buildSubmissionQueue(issues = []) {
+export function submissionSourceNeedsVerification(report, issue = {}) {
+  if (!report || report.skipped) return false;
+  const labels = new Set(issueLabels(issue));
+  if (labels.has(SUBMISSION_SOURCE_NEEDS_VERIFICATION_LABEL)) return true;
+  if (
+    report.warnings?.some((warning) =>
+      String(warning).includes("No github_url/docs_url provided"),
+    )
+  ) {
+    return true;
+  }
+  return Boolean(
+    report.errors?.some((error) =>
+      /must be a valid https URL|affiliate\/referral URLs|local \/downloads hosting/.test(
+        String(error),
+      ),
+    ),
+  );
+}
+
+function parseTimestamp(value) {
+  const timestamp = Date.parse(String(value || ""));
+  return Number.isFinite(timestamp) ? timestamp : 0;
+}
+
+export function submissionAgeDays(issue = {}, options = {}) {
+  const updatedAt = parseTimestamp(issue.updatedAt || issue.updated_at);
+  const createdAt = parseTimestamp(issue.createdAt || issue.created_at);
+  const reference = updatedAt || createdAt;
+  if (!reference) return 0;
+  const now = options.now ? parseTimestamp(options.now) : Date.now();
+  if (!Number.isFinite(now) || now <= reference) return 0;
+  return Math.floor((now - reference) / DAY_MS);
+}
+
+export function submissionStaleState(
+  issue = {},
+  report = validateSubmission(issue),
+  options = {},
+) {
+  if (report?.skipped || hasProtectedSubmissionLabel(issue)) {
+    return "not_applicable";
+  }
+  if (report?.ok) return "not_applicable";
+
+  const ageDays = submissionAgeDays(issue, options);
+  if (ageDays >= SUBMISSION_STALE_POLICY.closeDays) {
+    return "close_eligible";
+  }
+  if (ageDays >= SUBMISSION_STALE_POLICY.reminderDays) {
+    return "reminder_due";
+  }
+  return "fresh";
+}
+
+export function submissionQueueStatus(report, issue = {}, options = {}) {
+  if (report?.skipped) return "skipped";
+  if (hasProtectedSubmissionLabel(issue)) return "maintainer_review";
+  const staleState = submissionStaleState(issue, report, options);
+  if (staleState === "close_eligible") return "close_eligible";
+  if (staleState === "reminder_due") return "stale_reminder_due";
+  if (!report?.ok) return "needs_author_input";
+  if (submissionSourceNeedsVerification(report, issue)) {
+    return "source_needs_verification";
+  }
+  return "import_ready";
+}
+
+export function buildSubmissionQueue(issues = [], options = {}) {
   const entries = issues
     .filter(looksLikeSubmissionIssue)
     .map((issue) => {
       const report = validateSubmission(issue);
-      const status = submissionQueueStatus(report);
+      const status = submissionQueueStatus(report, issue, options);
+      const staleState = submissionStaleState(issue, report, options);
       return {
         number: issue.number ?? null,
         title: String(issue.title || ""),
@@ -600,6 +691,22 @@ export function buildSubmissionQueue(issues = []) {
         labels: issueLabels(issue),
         recommendedLabels: recommendedSubmissionLabels(issue, report),
         status,
+        staleState,
+        ageDays: submissionAgeDays(issue, options),
+        sourceNeedsVerification: submissionSourceNeedsVerification(
+          report,
+          issue,
+        ),
+        actionDue:
+          status === "close_eligible"
+            ? "close"
+            : status === "stale_reminder_due"
+              ? "remind"
+              : status === "needs_author_input"
+                ? "author_input"
+                : status === "source_needs_verification"
+                  ? "verify_source"
+                  : "",
         category: report.category || "",
         slug: report.fields?.slug || "",
         name: report.fields?.name || "",
@@ -614,8 +721,12 @@ export function buildSubmissionQueue(issues = []) {
     .sort((left, right) => {
       const statusOrder = {
         import_ready: 0,
-        needs_changes: 1,
-        skipped: 2,
+        maintainer_review: 1,
+        close_eligible: 2,
+        stale_reminder_due: 3,
+        needs_author_input: 4,
+        source_needs_verification: 5,
+        skipped: 6,
       };
       return (
         (statusOrder[left.status] ?? 99) - (statusOrder[right.status] ?? 99) ||
@@ -632,8 +743,29 @@ export function buildSubmissionQueue(issues = []) {
     summary: {
       importReady: entries.filter((entry) => entry.status === "import_ready")
         .length,
-      needsChanges: entries.filter((entry) => entry.status === "needs_changes")
-        .length,
+      maintainerReview: entries.filter(
+        (entry) => entry.status === "maintainer_review",
+      ).length,
+      needsAuthorInput: entries.filter(
+        (entry) => entry.status === "needs_author_input",
+      ).length,
+      sourceNeedsVerification: entries.filter(
+        (entry) => entry.sourceNeedsVerification,
+      ).length,
+      staleReminderDue: entries.filter(
+        (entry) => entry.status === "stale_reminder_due",
+      ).length,
+      closeEligible: entries.filter(
+        (entry) => entry.status === "close_eligible",
+      ).length,
+      needsChanges: entries.filter((entry) =>
+        [
+          "needs_author_input",
+          "source_needs_verification",
+          "stale_reminder_due",
+          "close_eligible",
+        ].includes(entry.status),
+      ).length,
       skipped: entries.filter((entry) => entry.status === "skipped").length,
     },
     entries,

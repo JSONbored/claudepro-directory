@@ -11,6 +11,8 @@ import {
   looksLikeSubmissionIssue,
   parseIssueFormBody,
   recommendedSubmissionLabels,
+  submissionQueueStatus,
+  submissionStaleState,
   validateSubmission,
 } from "@heyclaude/registry/submission";
 import { categorySpec } from "@heyclaude/registry";
@@ -395,6 +397,7 @@ claude mcp add prompt-to-asset -- npx -y prompt-to-asset`,
       "community-mcp",
       "content-submission",
       "needs-review",
+      "source-needs-verification",
     ]);
   });
 
@@ -410,6 +413,9 @@ mcp
 
 ### Public contact
 dev@example.com
+
+### GitHub URL
+https://github.com/example/contrastapi
 
 ### Description
 Security MCP.
@@ -442,12 +448,116 @@ Writing cleanup.
 
 ### Usage snippet
 npx unslop --help`);
-    const queue = buildSubmissionQueue([valid, invalid, { title: "Question" }]);
+    const queue = buildSubmissionQueue(
+      [valid, invalid, { title: "Question" }],
+      { now: "2026-04-30T00:00:00Z" },
+    );
     expect(queue.count).toBe(2);
     expect(queue.summary.importReady).toBe(1);
     expect(queue.summary.needsChanges).toBe(1);
     expect(queue.entries[0].status).toBe("import_ready");
     expect(queue.entries[0].importPath).toBe("content/mcp/contrastapi.mdx");
+    expect(queue.entries[1].status).toBe("needs_author_input");
+    expect(queue.entries[1].actionDue).toBe("author_input");
+  });
+
+  it("tracks stale author-input states without touching maintainer-approved issues", () => {
+    const invalidBody = `### Name
+Unslop
+
+### Slug
+unslop
+
+### Category
+skills
+
+### Public contact
+dev@example.com
+
+### Description
+Writing cleanup.
+
+### Card description
+Writing cleanup.
+
+### Usage snippet
+npx unslop --help`;
+    const fresh = issue(invalidBody, ["content-submission"]);
+    const reminderDue = {
+      ...issue(invalidBody, ["content-submission"]),
+      updatedAt: "2026-04-20T00:00:00Z",
+    };
+    const closeEligible = {
+      ...issue(invalidBody, ["content-submission", "stale-submission"]),
+      updatedAt: "2026-04-10T00:00:00Z",
+    };
+    const approved = {
+      ...issue(invalidBody, ["content-submission", "import-approved"]),
+      updatedAt: "2026-04-10T00:00:00Z",
+    };
+
+    const report = validateSubmission(fresh);
+    expect(report.ok).toBe(false);
+    expect(
+      submissionQueueStatus(report, fresh, { now: "2026-04-30T00:00:00Z" }),
+    ).toBe("needs_author_input");
+    expect(
+      submissionStaleState(reminderDue, validateSubmission(reminderDue), {
+        now: "2026-04-30T00:00:00Z",
+      }),
+    ).toBe("reminder_due");
+    expect(
+      submissionQueueStatus(validateSubmission(closeEligible), closeEligible, {
+        now: "2026-04-30T00:00:00Z",
+      }),
+    ).toBe("close_eligible");
+    expect(
+      submissionQueueStatus(validateSubmission(approved), approved, {
+        now: "2026-04-30T00:00:00Z",
+      }),
+    ).toBe("maintainer_review");
+  });
+
+  it("separates source verification from author-input failures", () => {
+    const sourceProblem = issue(
+      `### Name
+Source Review MCP
+
+### Slug
+source-review-mcp
+
+### Category
+mcp
+
+### Public contact
+dev@example.com
+
+### GitHub URL
+https://github.com/example/source-review-mcp
+
+### Description
+MCP server with a source that maintainers marked for verification.
+
+### Card description
+Source verification coverage.
+
+### Install command
+npx -y source-review-mcp
+
+### Usage snippet
+claude mcp add source-review-mcp -- npx -y source-review-mcp`,
+      ["content-submission", "source-needs-verification"],
+    );
+    const report = validateSubmission(sourceProblem);
+    expect(report.ok).toBe(true);
+    expect(
+      submissionQueueStatus(report, sourceProblem, {
+        now: "2026-04-30T00:00:00Z",
+      }),
+    ).toBe("source_needs_verification");
+    expect(recommendedSubmissionLabels(sourceProblem)).toContain(
+      "source-needs-verification",
+    );
   });
 
   it("rejects missing required category fields", () => {
