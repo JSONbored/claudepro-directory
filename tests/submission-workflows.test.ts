@@ -73,6 +73,9 @@ describe("submission automation workflows", () => {
 
     expect(source).toContain("Submission Stale Manager");
     expect(source).toContain("issues: write");
+    expect(source).toContain("workflow_dispatch:");
+    expect(source).not.toContain("inputs:");
+    expect(source).not.toContain("inputs.");
     expect(source).toContain("pnpm submission:stale");
     expect(source).toContain("--apply");
     expect(source).not.toContain("import-approved");

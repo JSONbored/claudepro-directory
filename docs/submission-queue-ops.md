@@ -33,8 +33,8 @@ stale; it does not publish content directly.
 - `Submission Queue` runs weekly and on demand. It writes a GitHub Actions
   summary from `pnpm submission:queue`.
 - `Submission Stale Manager` runs weekly and on demand. Manual dispatch defaults
-  to dry-run. Scheduled runs and `apply=true` can add labels, upsert one reminder
-  comment, and close only eligible stale submissions.
+  to dry-run and does not accept runtime inputs. Scheduled runs can add labels,
+  upsert one reminder comment, and close only eligible stale submissions.
 - Stale automation never imports content, creates PRs, or touches issues with
   `accepted`, `import-approved`, or `import-pr-open`.
 
