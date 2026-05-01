@@ -54,7 +54,7 @@ HeyClaude is a fast, GitHub-native directory for Claude assets.
 - Full LLM export: [`/llms-full.txt`](https://heyclau.de/llms-full.txt)
 - RSS updates: [`/feed.xml`](https://heyclau.de/feed.xml)
 - Atom updates: [`/atom.xml`](https://heyclau.de/atom.xml)
-- Package validator: [Agent Skill package validator](https://heyclau.de/tools/skill-validator)
+- Package validator: [Agent Skill package validator](https://heyclau.de/validators/skill-package)
 
 ## Quick Start
 

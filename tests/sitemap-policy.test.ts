@@ -48,7 +48,9 @@ describe("sitemap policy", () => {
     expect(source).toContain('"/llms-full.txt"');
     expect(source).toContain('"/feed.xml"');
     expect(source).toContain('"/atom.xml"');
-    expect(source).toContain('"/tools/mcp-config-validator"');
+    expect(source).toContain('"/validators"');
+    expect(source).toContain('"/validators/mcp-config"');
+    expect(source).toContain('"/validators/skill-package"');
     expect(source).not.toContain("lastModified: new Date()");
     expect(source).toContain("siteLastModified");
   });

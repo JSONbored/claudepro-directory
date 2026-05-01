@@ -14,7 +14,7 @@ export const metadata: Metadata = buildPageMetadata({
   title: "MCP config validator",
   description:
     "Validate MCP server configuration JSON for Claude Desktop, Claude Code, Cursor, VS Code, Windsurf, and other AI tools with safe redacted output.",
-  path: "/tools/mcp-config-validator",
+  path: "/validators/mcp-config",
   keywords: [
     "mcp config validator",
     "claude desktop mcp",
@@ -27,19 +27,19 @@ export default function McpConfigValidatorPage() {
   const jsonLd = [
     buildBreadcrumbJsonLd([
       { name: "Home", url: siteConfig.url },
-      { name: "Tools", url: `${siteConfig.url}/tools` },
+      { name: "Validators", url: `${siteConfig.url}/validators` },
       {
         name: "MCP config validator",
-        url: `${siteConfig.url}/tools/mcp-config-validator`,
+        url: `${siteConfig.url}/validators/mcp-config`,
       },
     ]),
     buildWebPageJsonLd({
       siteUrl: siteConfig.url,
-      path: "/tools/mcp-config-validator",
+      path: "/validators/mcp-config",
       name: "MCP config validator",
       description:
         "Browser-side MCP JSON validation with redacted output and copyable fixed snippets.",
-      breadcrumbId: `${siteConfig.url}/tools/mcp-config-validator#breadcrumb`,
+      breadcrumbId: `${siteConfig.url}/validators/mcp-config#breadcrumb`,
     }),
   ];
 
@@ -50,11 +50,11 @@ export default function McpConfigValidatorPage() {
         <Breadcrumbs
           items={[
             { label: "Home", href: "/" },
-            { label: "Tools", href: "/tools" },
+            { label: "Validators", href: "/validators" },
             { label: "MCP config validator" },
           ]}
         />
-        <span className="eyebrow">Free tool</span>
+        <span className="eyebrow">Validator</span>
         <h1 className="section-title">MCP config validator</h1>
         <p className="max-w-3xl text-base leading-8 text-muted-foreground">
           Paste MCP configuration JSON for Claude Desktop, Claude Code, Cursor,
