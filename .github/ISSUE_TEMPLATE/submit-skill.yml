@@ -143,6 +143,13 @@ body:
     validations:
       required: true
   - type: input
+    id: install_command
+    attributes:
+      label: "Install command"
+      placeholder: "npx -y @org/package"
+    validations:
+      required: false
+  - type: input
     id: download_url
     attributes:
       label: "Download URL"

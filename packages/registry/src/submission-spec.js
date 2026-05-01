@@ -230,7 +230,7 @@ function fieldFor(id, required = false) {
 
   return {
     ...field,
-    required: field.required || required,
+    required,
   };
 }
 
@@ -247,7 +247,12 @@ export function buildSubmissionFieldModel(category) {
   ];
 
   if (category === "skills") {
-    fieldIds.push("download_url", "retrieval_sources", "tested_platforms");
+    fieldIds.push(
+      "install_command",
+      "download_url",
+      "retrieval_sources",
+      "tested_platforms",
+    );
   }
   if (
     category === "mcp" ||

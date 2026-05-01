@@ -117,6 +117,29 @@ function hasText(value: string) {
   return value.trim().length > 0;
 }
 
+const prefilledFieldSetters: Record<
+  string,
+  (value: string, setters: Record<string, (value: string) => void>) => void
+> = {
+  author: (value, setters) => setters.author(value),
+  contact_email: (value, setters) => setters.publicContact(value),
+  download_url: (value, setters) => setters.downloadUrl(value),
+  install_command: (value, setters) => setters.installCommand(value),
+  usage_snippet: (value, setters) => setters.usageSnippet(value),
+  skill_type: (value, setters) => setters.skillType(value),
+  skill_level: (value, setters) => setters.skillLevel(value),
+  verification_status: (value, setters) => setters.verificationStatus(value),
+  verified_at: (value, setters) => setters.verifiedAt(value),
+  retrieval_sources: (value, setters) => setters.retrievalSources(value),
+  tested_platforms: (value, setters) => setters.testedPlatforms(value),
+  command_syntax: (value, setters) => setters.commandSyntax(value),
+  trigger: (value, setters) => setters.trigger(value),
+  script_language: (value, setters) => setters.scriptLanguage(value),
+  full_copyable_content: (value, setters) => setters.assetContent(value),
+  guide_content: (value, setters) => setters.assetContent(value),
+  items: (value, setters) => setters.items(value),
+};
+
 export function SubmitForm() {
   const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
   const [toolName, setToolName] = useState("");
@@ -170,6 +193,24 @@ export function SubmitForm() {
     const descriptionParam = params.get("description") ?? "";
     const cardDescriptionParam = params.get("card_description") ?? "";
     const tagsParam = params.get("tags") ?? "";
+    const setters: Record<string, (value: string) => void> = {
+      author: setAuthor,
+      publicContact: setPublicContact,
+      downloadUrl: setDownloadUrl,
+      installCommand: setInstallCommand,
+      usageSnippet: setUsageSnippet,
+      skillType: setSkillType,
+      skillLevel: setSkillLevel,
+      verificationStatus: setVerificationStatus,
+      verifiedAt: setVerifiedAt,
+      retrievalSources: setRetrievalSources,
+      testedPlatforms: setTestedPlatforms,
+      commandSyntax: setCommandSyntax,
+      trigger: setTrigger,
+      scriptLanguage: setScriptLanguage,
+      assetContent: setAssetContent,
+      items: setItems,
+    };
 
     if (nameParam) setToolName(nameParam);
     if (siteConfig.categoryOrder.includes(categoryParam)) {
@@ -186,6 +227,10 @@ export function SubmitForm() {
     if (descriptionParam) setDescription(descriptionParam);
     if (cardDescriptionParam) setCardDescription(cardDescriptionParam);
     if (tagsParam) setTags(tagsParam);
+    for (const [field, hydrate] of Object.entries(prefilledFieldSetters)) {
+      const value = params.get(field) ?? "";
+      if (value) hydrate(value, setters);
+    }
   }, []);
 
   useEffect(() => {

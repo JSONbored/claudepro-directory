@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import {
   AlertTriangle,
   CheckCircle2,
+  Copy,
+  ExternalLink,
   FileArchive,
   ShieldCheck,
   Upload,
@@ -41,6 +43,7 @@ function isLikelyText(path: string) {
 
 export function SkillValidatorClient() {
   const [state, setState] = useState<ValidatorState>({ status: "idle" });
+  const [copied, setCopied] = useState(false);
   const facts = state.status === "ready" ? state.result.facts : [];
   const verdict = useMemo(() => {
     if (state.status !== "ready") return null;
@@ -95,6 +98,8 @@ export function SkillValidatorClient() {
         result: validateSkillPackageFiles({
           files,
           githubUrl: siteConfig.githubUrl,
+          siteUrl: siteConfig.url,
+          packageSha256: checksum,
         }),
       });
     } catch (error) {
@@ -105,6 +110,17 @@ export function SkillValidatorClient() {
             ? error.message
             : "Could not read this package.",
       });
+    }
+  }
+
+  async function copySubmissionDraft() {
+    if (state.status !== "ready") return;
+    try {
+      await navigator.clipboard.writeText(state.result.issueBody);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1400);
+    } catch {
+      setCopied(false);
     }
   }
 
@@ -221,8 +237,9 @@ export function SkillValidatorClient() {
           Review-ready packages
         </h2>
         <p className="mt-3 text-sm leading-7 text-muted-foreground">
-          Valid packages can open a prefilled skill submission issue.
-          Maintainers still review before anything is published.
+          Valid packages can continue into the normal HeyClaude skill submission
+          flow with the package metadata already filled in. Maintainers still
+          review before anything is published.
         </p>
         {state.status === "ready" ? (
           <div className="mt-4 space-y-3">
@@ -233,7 +250,7 @@ export function SkillValidatorClient() {
               <p className="mt-1 truncate text-foreground">{state.fileName}</p>
             </div>
             <a
-              href={state.result.issueUrl}
+              href={state.result.submissionUrl}
               target="_blank"
               rel="noreferrer"
               className={`inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition ${
@@ -246,9 +263,34 @@ export function SkillValidatorClient() {
                 if (!state.result.ok) event.preventDefault();
               }}
             >
-              <GitHubMark className="size-4" />
-              Open submission issue
+              <ExternalLink className="size-4" />
+              Continue in submit flow
             </a>
+            <a
+              href={state.result.issueUrl}
+              target="_blank"
+              rel="noreferrer"
+              className={`inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-3 text-sm font-semibold text-foreground transition hover:border-primary/50 ${
+                state.result.ok ? "" : "pointer-events-none opacity-50"
+              }`}
+              aria-disabled={!state.result.ok}
+            >
+              <GitHubMark className="size-4" />
+              Open GitHub fallback
+            </a>
+            <button
+              type="button"
+              onClick={copySubmissionDraft}
+              disabled={!state.result.ok}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-3 text-sm font-semibold text-foreground transition hover:border-primary/50 disabled:pointer-events-none disabled:opacity-50"
+            >
+              {copied ? (
+                <CheckCircle2 className="size-4 text-primary" />
+              ) : (
+                <Copy className="size-4" />
+              )}
+              Copy submission draft
+            </button>
           </div>
         ) : (
           <div className="mt-4 rounded-xl border border-border bg-background px-4 py-3 text-sm text-muted-foreground">
@@ -259,7 +301,8 @@ export function SkillValidatorClient() {
           <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />
           <span>
             HeyClaude uses the same package shape for Claude, Codex, Windsurf,
-            Gemini, Cursor adapters, and generic AGENTS context.
+            Gemini, Cursor adapters, and generic AGENTS context. The generated
+            draft uses the canonical skills submission schema.
           </span>
         </div>
       </aside>

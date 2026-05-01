@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import { validateSkillPackageFiles } from "@/lib/skill-package-validator";
+import { validateSubmission } from "@heyclaude/registry/submission";
 
 describe("skill package validator", () => {
   it("accepts a review-ready Agent Skill package shape", () => {
     const result = validateSkillPackageFiles({
       githubUrl: "https://github.com/JSONbored/claudepro-directory",
+      siteUrl: "https://heyclau.de",
+      packageSha256: "a".repeat(64),
       files: [
         {
           path: "sample-skill/SKILL.md",
@@ -31,8 +34,26 @@ Use the helper in \`scripts/check.sh\` before submitting.
     expect(result.ok).toBe(true);
     expect(result.entrypoint).toBe("sample-skill/SKILL.md");
     expect(result.slug).toBe("sample-skill");
+    expect(result.submissionUrl).toContain("https://heyclau.de/submit?");
     expect(result.issueUrl).toContain("template=submit-skill.yml");
+    expect(result.issueUrl).toContain("install_command=");
+    expect(result.issueUrl).toContain("usage_snippet=");
     expect(result.issueUrl).toContain("verification_status=validated");
+    expect(result.submissionFields).toMatchObject({
+      category: "skills",
+      install_command:
+        "Install the zip package into your AI client skill directory.",
+      usage_snippet: expect.stringContaining("sample-skill/SKILL.md"),
+    });
+    expect(result.issueTitle).toBe("Submit Skill: Sample Skill");
+    expect(result.issueBody).toContain("### Usage snippet");
+    expect(result.issueBody).toContain("Package SHA256");
+    expect(
+      validateSubmission({
+        body: result.issueBody,
+        labels: ["content-submission", "skills"],
+      }).ok,
+    ).toBe(true);
   });
 
   it("rejects missing frontmatter and missing referenced resources", () => {
