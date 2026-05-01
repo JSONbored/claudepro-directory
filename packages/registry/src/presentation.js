@@ -257,5 +257,36 @@ export function getDistributionBadges(entry) {
     });
   }
 
+  if (entry.brandDomain || entry.brandIconUrl) {
+    badges.push({
+      label: "brand",
+      title: "Reviewed brand metadata or logo available",
+    });
+  }
+
+  if (entry.trustSignals?.checksumPresent) {
+    badges.push({
+      label: "checksum",
+      title: "Package checksum available",
+    });
+  }
+
+  if (entry.trustSignals?.adapterGenerated) {
+    badges.push({
+      label: "adapter",
+      title: "Generated platform adapter available",
+    });
+  }
+
+  if (entry.reviewedBy || entry.claimStatus === "verified") {
+    badges.push({
+      label: entry.claimStatus === "verified" ? "claimed" : "reviewed",
+      title:
+        entry.claimStatus === "verified"
+          ? "Maintainer claim verified"
+          : "Imported or reviewed by a HeyClaude maintainer",
+    });
+  }
+
   return badges;
 }

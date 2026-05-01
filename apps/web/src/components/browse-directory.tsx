@@ -36,6 +36,11 @@ const utilityFilterOptions = [
   { value: "all", label: "All Utility" },
   { value: "installable", label: "Installable" },
   { value: "trusted-package", label: "Trusted Package" },
+  { value: "source-backed", label: "Source-backed" },
+  { value: "brand-metadata", label: "Brand Metadata" },
+  { value: "checksum", label: "Checksum" },
+  { value: "adapter", label: "Adapter" },
+  { value: "reviewed", label: "Reviewed" },
   { value: "verified", label: "Verified/Prod" },
   { value: "draft", label: "Draft" },
   { value: "hook-trigger", label: "Hook Trigger" },
@@ -107,6 +112,16 @@ function matchesUtilityFilter(entry: DirectoryEntry, filter: string) {
       return (
         entry.downloadTrust === "first-party" || entry.packageVerified === true
       );
+    case "source-backed":
+      return entry.trustSignals?.sourceStatus === "available";
+    case "brand-metadata":
+      return Boolean(entry.brandDomain || entry.brandIconUrl);
+    case "checksum":
+      return entry.trustSignals?.checksumPresent === true;
+    case "adapter":
+      return entry.trustSignals?.adapterGenerated === true;
+    case "reviewed":
+      return Boolean(entry.reviewedBy || entry.claimStatus === "verified");
     case "verified":
       return (
         entry.verificationStatus === "validated" ||

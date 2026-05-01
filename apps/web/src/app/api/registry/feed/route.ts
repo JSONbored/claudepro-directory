@@ -31,6 +31,7 @@ export const GET = createApiHandler("registry.feed", async ({ request }) => {
       mcpRegistryFeed: "/data/mcp-registry-feed.json",
       pluginExportFeed: "/data/plugin-export-feed.json",
       changelogFeed: "/data/registry-changelog.json",
+      registryTrust: "/data/registry-trust-report.json",
       rssFeed: "/feed.xml",
       atomFeed: "/atom.xml",
       distributionFeedIndex: "/data/feeds/index.json",
@@ -48,6 +49,7 @@ export const GET = createApiHandler("registry.feed", async ({ request }) => {
     artifacts: manifest.artifacts,
     artifactContracts: manifest.artifactContracts,
     qualitySummary: manifest.qualitySummary,
+    trustSummary: manifest.trustSummary,
     categories,
   });
 });

@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { JsonLd } from "@/components/json-ld";
-import { getContentQualityReport } from "@/lib/content";
+import { getContentQualityReport, getRegistryTrustReport } from "@/lib/content";
 import { buildPageMetadata } from "@/lib/seo";
 import { categoryLabels, siteConfig } from "@/lib/site";
 import {
@@ -24,7 +24,10 @@ export const metadata: Metadata = buildPageMetadata({
 });
 
 export default async function QualityPage() {
-  const report = await getContentQualityReport();
+  const [report, trustReport] = await Promise.all([
+    getContentQualityReport(),
+    getRegistryTrustReport(),
+  ]);
   const categories = Object.entries(report.categoryBreakdown).sort(
     ([left], [right]) =>
       (categoryLabels[left] ?? left).localeCompare(
@@ -81,6 +84,64 @@ export default async function QualityPage() {
             </p>
           </div>
         ))}
+      </section>
+
+      <section className="surface-panel p-5">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 className="text-lg font-semibold tracking-tight text-foreground">
+              Registry trust coverage
+            </h2>
+            <p className="mt-2 max-w-3xl text-sm leading-7 text-muted-foreground">
+              Brand metadata, source links, checksums, adapters, provenance, and
+              verification freshness generated from the same public registry
+              artifacts.
+            </p>
+          </div>
+          <Link
+            href="/data/registry-trust-report.json"
+            className="text-sm font-medium text-primary underline underline-offset-4"
+          >
+            Raw trust report
+          </Link>
+        </div>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            [
+              "Brand coverage",
+              `${trustReport.summary.brandedCount}/${trustReport.count}`,
+              `${trustReport.summary.brandedPercent}%`,
+            ],
+            [
+              "Source-backed",
+              `${trustReport.summary.sourceAvailableCount}/${trustReport.count}`,
+              `${trustReport.summary.sourceAvailablePercent}%`,
+            ],
+            [
+              "Checksums",
+              trustReport.summary.checksumPresentCount,
+              `${trustReport.summary.checksumPresentPercent}%`,
+            ],
+            [
+              "Needs attention",
+              trustReport.summary.entriesNeedingAttention,
+              `${trustReport.summary.recommendedFixCount} fixes`,
+            ],
+          ].map(([label, value, note]) => (
+            <div
+              key={label}
+              className="rounded-xl border border-border bg-background p-4"
+            >
+              <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+                {label}
+              </p>
+              <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
+                {value}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">{note}</p>
+            </div>
+          ))}
+        </div>
       </section>
 
       <section className="grid gap-4 md:grid-cols-2">
@@ -150,6 +211,45 @@ export default async function QualityPage() {
               </span>
             </Link>
           ))}
+        </div>
+      </section>
+
+      <section className="surface-panel p-5">
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">
+            Trust improvement queue
+          </h2>
+          <Link
+            href="/browse?utility=brand-metadata"
+            className="text-sm font-medium text-primary underline underline-offset-4"
+          >
+            Browse branded entries
+          </Link>
+        </div>
+        <div className="mt-4 space-y-2">
+          {trustReport.entries
+            .filter((entry) => entry.recommendations.length)
+            .slice(0, 12)
+            .map((entry) => (
+              <Link
+                key={entry.key}
+                href={`/${entry.category}/${entry.slug}`}
+                className="flex items-center justify-between gap-4 rounded-xl border border-border bg-background px-4 py-3 text-sm transition hover:border-primary/50"
+              >
+                <span className="min-w-0">
+                  <span className="block truncate font-medium text-foreground">
+                    {entry.title}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {categoryLabels[entry.category] ?? entry.category} -{" "}
+                    {entry.recommendations[0]}
+                  </span>
+                </span>
+                <span className="shrink-0 text-muted-foreground">
+                  {entry.recommendations.length}
+                </span>
+              </Link>
+            ))}
         </div>
       </section>
     </div>

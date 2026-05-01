@@ -466,6 +466,13 @@
           ]
         },
         {
+          "id": "install_command",
+          "label": "Install command",
+          "type": "text",
+          "required": false,
+          "placeholder": "npx -y @org/package"
+        },
+        {
           "id": "download_url",
           "label": "Download URL",
           "type": "url",
@@ -1495,6 +1502,12 @@
             "validated",
             "production"
           ]
+        },
+        {
+          "id": "install_command",
+          "label": "Install command",
+          "type": "text",
+          "required": false
         },
         {
           "id": "download_url",

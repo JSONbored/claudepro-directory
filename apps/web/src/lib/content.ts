@@ -10,6 +10,7 @@ import type {
   CategorySummary,
   ContentEntry,
   DirectoryEntry,
+  RegistryTrustReport,
   RegistryEnvelope,
   SearchDocument,
 } from "@heyclaude/registry";
@@ -235,6 +236,10 @@ export const getContentQualityReport = cache(async () => {
       warnings: string[];
     }>;
   }>("content-quality-report.json");
+});
+
+export const getRegistryTrustReport = cache(async () => {
+  return loadJsonDataFile<RegistryTrustReport>("registry-trust-report.json");
 });
 
 export const getSearchIndex = cache(async () => {

@@ -15,6 +15,7 @@ import {
   buildCursorSkillAdapter,
   buildJsonLdSnapshots,
   buildRegistryChangelogFeed,
+  buildRegistryTrustReport,
   buildReadOnlyEcosystemFeed,
   buildRaycastEnvelope,
   RAYCAST_COPY_PREVIEW_LIMIT,
@@ -53,6 +54,7 @@ describe("registry artifacts", () => {
     artifacts: Record<string, string>;
     routes: Array<{ key: string; canonicalUrl: string; llmsUrl: string }>;
     qualitySummary: Record<string, unknown>;
+    trustSummary: Record<string, unknown>;
     artifactContracts: Record<
       string,
       { path: string; type: "json" | "text"; sha256: string }
@@ -69,6 +71,19 @@ describe("registry artifacts", () => {
     schemaVersion: number;
     count: number;
   }>("jsonld-snapshots.json");
+  const trustReportPayload = readDataJson<{
+    schemaVersion: number;
+    kind: string;
+    count: number;
+    summary: {
+      brandedCount: number;
+      sourceAvailableCount: number;
+      checksumPresentCount: number;
+      entriesNeedingAttention: number;
+    };
+    queues: Record<string, any[]>;
+    entries: any[];
+  }>("registry-trust-report.json");
 
   it("does not publish the retired full content corpus JSON", () => {
     expect(fs.existsSync(path.join(dataRoot, "content-index.json"))).toBe(
@@ -173,6 +188,29 @@ describe("registry artifacts", () => {
     );
     expect(isAllowedBrandAssetUrl(brandAssetProxyUrl("asana.com"))).toBe(true);
     expect(isAllowedBrandAssetUrl("https://example.com/logo.png")).toBe(false);
+  });
+
+  it("generates a registry trust report for brand, source, checksum, adapter, and provenance coverage", () => {
+    const rebuilt = buildRegistryTrustReport(contentEntries);
+
+    expect(trustReportPayload).toMatchObject({
+      schemaVersion: 2,
+      kind: "registry-trust-report",
+      count: contentEntries.length,
+    });
+    expect(rebuilt.summary.brandedCount).toBe(
+      trustReportPayload.summary.brandedCount,
+    );
+    expect(trustReportPayload.summary.sourceAvailableCount).toBeGreaterThan(0);
+    expect(trustReportPayload.summary.checksumPresentCount).toBeGreaterThan(0);
+    expect(trustReportPayload.entries).toHaveLength(contentEntries.length);
+    expect(trustReportPayload.entries[0]).toHaveProperty("recommendations");
+    expect(Array.isArray(trustReportPayload.queues.missingBrand)).toBe(true);
+    expect(Array.isArray(trustReportPayload.queues.missingSource)).toBe(true);
+    expect(manifest.artifacts.registryTrust).toBe(
+      "/data/registry-trust-report.json",
+    );
+    expect(manifest.trustSummary).toMatchObject(trustReportPayload.summary);
   });
 
   it("preserves UGC provenance across registry surfaces", () => {
