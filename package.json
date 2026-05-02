@@ -7,7 +7,7 @@
     "@heyclaude/registry": "workspace:*",
     "gray-matter": "4.0.3",
     "yaml": "2.8.3",
-    "zod": "4.3.6"
+    "zod": "4.4.1"
   },
   "scripts": {
     "dev": "pnpm --filter web dev",
@@ -60,8 +60,8 @@
     "prepare": "husky"
   },
   "devDependencies": {
-    "@commitlint/cli": "20.5.2",
-    "@commitlint/config-conventional": "20.5.0",
+    "@commitlint/cli": "20.5.3",
+    "@commitlint/config-conventional": "20.5.3",
     "@playwright/test": "1.59.1",
     "husky": "9.1.7",
     "prettier": "3.8.3",
@@ -74,7 +74,7 @@
   "pnpm": {
     "overrides": {
       "fast-xml-parser": "5.7.2",
-      "postcss": "8.5.12"
+      "postcss": "8.5.13"
     }
   }
 }
