@@ -43,15 +43,15 @@
     "tailwind-merge": "3.5.0"
   },
   "devDependencies": {
-    "@opennextjs/cloudflare": "1.19.4",
+    "@opennextjs/cloudflare": "1.19.5",
     "@tailwindcss/postcss": "4.2.4",
     "@types/node": "25.6.0",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "@types/sanitize-html": "2.16.1",
-    "postcss": "8.5.12",
+    "postcss": "8.5.13",
     "tailwindcss": "4.2.4",
     "typescript": "6.0.3",
-    "wrangler": "4.86.0"
+    "wrangler": "4.87.0"
   }
 }
