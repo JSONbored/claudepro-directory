@@ -63,12 +63,13 @@ prerequisites:
   - Running Coolify instance with API access enabled.
   - Coolify API access token scoped to the resources Claude may inspect or manage.
   - Node.js 20 or newer for the published npm server.
+  - For remote (Streamable HTTP) mode, a public HTTPS URL; the server is its own OAuth 2.1 authorization server.
   - Review of which servers, projects, applications, databases, services, deployments, env vars, private keys, teams, cloud tokens, and scheduled tasks the token can access.
   - Optional auth-proxy headers only when required by trusted Cloudflare Access or similar middleware.
 safetyNotes:
   - Coolify MCP Server can start, stop, restart, redeploy, cancel deployments, update env vars, create or delete projects, environments, applications, databases, services, backups, storages, scheduled tasks, private keys, GitHub apps, and cloud tokens depending on API permissions.
   - Batch tools such as `restart_project_apps`, `bulk_env_update`, `stop_all_apps`, and `redeploy_project` can affect multiple production services at once.
-  - Deployment, control, backup, storage, private key, cloud token, GitHub app, and scheduled-task operations should require explicit confirmation.
+  - Destructive operations prompt for confirmation in the client before running, on clients that support MCP elicitation; in HTTP mode the guard fails closed instead. On a stdio client without elicitation support they run unconfirmed, so allowlist deliberately.
   - Custom `--header` values may carry auth-proxy secrets; never let an agent invent, log, or modify them casually.
   - Test on non-production projects or staging resources before allowing Claude to operate live Coolify infrastructure.
 privacyNotes:
@@ -85,8 +86,10 @@ sourceUrls:
   - "https://raw.githubusercontent.com/StuMason/coolify-mcp/main/LICENSE"
   - "https://raw.githubusercontent.com/StuMason/coolify-mcp/main/package.json"
   - "https://raw.githubusercontent.com/StuMason/coolify-mcp/main/server.json"
-  - "https://raw.githubusercontent.com/StuMason/coolify-mcp/main/site/guide/quickstart.md"
-  - "https://raw.githubusercontent.com/StuMason/coolify-mcp/main/site/concepts/security.md"
+  - "https://raw.githubusercontent.com/StuMason/coolify-mcp/main/docs/tools.md"
+  - "https://raw.githubusercontent.com/StuMason/coolify-mcp/main/docs/security.md"
+  - "https://raw.githubusercontent.com/StuMason/coolify-mcp/main/docs/fleet.md"
+  - "https://raw.githubusercontent.com/StuMason/coolify-mcp/main/docs/http-mode.md"
   - "https://raw.githubusercontent.com/StuMason/coolify-mcp/main/src/index.ts"
   - "https://raw.githubusercontent.com/StuMason/coolify-mcp/main/src/lib/mcp-server.ts"
 tags:
@@ -113,6 +116,9 @@ diagnostics, servers, projects, environments, applications, databases, services,
 deployments, logs, env vars, storage, scheduled tasks, private keys, GitHub
 apps, teams, cloud tokens, Hetzner helpers, and Coolify documentation search.
 
+It runs over stdio or Streamable HTTP, and a single server can address several
+Coolify instances at once, with every tool taking an `instance` argument.
+
 Use it when Claude needs supervised access to inspect, troubleshoot, deploy, or
 manage self-hosted Coolify infrastructure.
 
@@ -124,15 +130,17 @@ manage self-hosted Coolify infrastructure.
 - https://raw.githubusercontent.com/StuMason/coolify-mcp/main/LICENSE
 - https://raw.githubusercontent.com/StuMason/coolify-mcp/main/package.json
 - https://raw.githubusercontent.com/StuMason/coolify-mcp/main/server.json
-- https://raw.githubusercontent.com/StuMason/coolify-mcp/main/site/guide/quickstart.md
-- https://raw.githubusercontent.com/StuMason/coolify-mcp/main/site/concepts/security.md
+- https://raw.githubusercontent.com/StuMason/coolify-mcp/main/docs/tools.md
+- https://raw.githubusercontent.com/StuMason/coolify-mcp/main/docs/security.md
+- https://raw.githubusercontent.com/StuMason/coolify-mcp/main/docs/fleet.md
+- https://raw.githubusercontent.com/StuMason/coolify-mcp/main/docs/http-mode.md
 - https://raw.githubusercontent.com/StuMason/coolify-mcp/main/src/index.ts
 - https://raw.githubusercontent.com/StuMason/coolify-mcp/main/src/lib/mcp-server.ts
 
-These sources were reviewed on **2026-06-06**. Prefer the live repository,
-README, npm metadata, license, package metadata, server manifest, quickstart,
-security guide, server entrypoint, and MCP server implementation for current
-setup and behavior details.
+These sources were reviewed on **2026-09-10**. Prefer the live repository,
+README, npm metadata, license, package metadata, server manifest, tool
+reference, security guide, fleet guide, remote-mode guide, server entrypoint,
+and MCP server implementation for current setup and behavior details.
 
 ## Features
 
